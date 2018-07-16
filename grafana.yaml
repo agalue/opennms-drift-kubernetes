@@ -1,0 +1,52 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# TODO
+# - What if we include this as a container of the onms-web Pod ?
+# - Provide a custom grafana.yaml to connect to PostgreSQL
+# - Add an initContainer to make sure that the Grafana database exist and it is initialized
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+spec:
+  clusterIP: None
+  ports:
+  - port: 3000
+  selector:
+    app: grafana
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  labels:
+    app: grafana
+spec:
+  serviceName: grafana
+  replicas: 2
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:5.2.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          timeoutSeconds: 5

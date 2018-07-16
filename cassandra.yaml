@@ -1,0 +1,98 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# A simple cluster with 3 nodes
+# MAX_HEAP_SIZE should be consistent with resources.requests.memory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cassandra
+  name: cassandra
+spec:
+  clusterIP: None
+  ports:
+  - port: 9042
+  selector:
+    app: cassandra
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cassandra
+  labels:
+    app: cassandra
+spec:
+  serviceName: cassandra
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cassandra
+  template:
+    metadata:
+      labels:
+        app: cassandra
+    spec:
+      terminationGracePeriodSeconds: 1800
+      containers:
+      - name: cassandra
+        image: cassandra:3.11.2
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MAX_HEAP_SIZE
+          value: 2G
+        - name: HEAP_NEWSIZE
+          value: 2G
+        - name: CASSANDRA_SEEDS
+          value: cassandra-0.cassandra.default.svc.cluster.local
+        - name: CASSANDRA_CLUSTER_NAME
+          value: OpenNMS
+        - name: POD_IP
+          valueFrom: { fieldRef: { fieldPath: status.podIP } }
+        ports:
+        - containerPort: 7000
+          name: intra-node
+        - containerPort: 7001
+          name: tls-intra-node
+        - containerPort: 7199
+          name: jmx
+        - containerPort: 9042
+          name: cql
+        volumeMounts:
+        - name: cassandra-data
+          mountPath: /cassandra_data
+        resources:
+          limits:
+            cpu: 4
+            memory: 4Gi
+          requests:
+            cpu: 2
+            memory: 2Gi
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - nodetool drain
+        readinessProbe:
+          exec:
+            command:
+            - bash
+            - -c
+            - 'if [[ $(nodetool status | grep $POD_IP) == *"UN"* ]]; then exit 0; else exit 1; fi'
+          initialDelaySeconds: 15
+        livenessProbe:
+          tcpSocket:
+            port: cql
+          initialDelaySeconds: 90
+          periodSeconds: 60
+  volumeClaimTemplates:
+  - metadata:
+      name: cassandra-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: aws-ebs
+      resources:
+        requests:
+          storage: 20Gi

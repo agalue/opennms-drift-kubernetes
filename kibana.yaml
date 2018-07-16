@@ -1,0 +1,60 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# TODO
+# - What if we include this as a container of the onms-web Pod ?
+# - Add an initContainer to wait for Elasticsearch
+# - Add an ingress to work as LoadBalancer
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kibana
+  name: kibana
+spec:
+  clusterIP: None
+  ports:
+  - port: 5601
+  selector:
+    app: kibana
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  labels:
+    app: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:6.2.4
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: ELASTICSEARCH_URL
+          value: http://elasticsearch.default.svc.cluster.local:9200
+        ports:
+        - containerPort: 5601
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 60

@@ -1,0 +1,80 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# A single broker server (no cluster)
+#
+# TODO
+# - Create a network of clusters using ConfigMap
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: amq
+  name: activemq
+spec:
+  clusterIP: None
+  ports:
+  - port: 61616
+  selector:
+    app: amq
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: amq
+  labels:
+    app: amq
+spec:
+  serviceName: activemq
+  replicas: 1
+  selector:
+    matchLabels:
+      app: amq
+  template:
+    metadata:
+      labels:
+        app: amq
+    spec:
+      containers:
+      - name: amq
+        image: webcenter/activemq:5.14.3
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: ACTIVEMQ_CONFIG_MAXMEMORY
+          value: 1024M
+        - name: ACTIVEMQ_CONFIG_MINMEMORY
+          value: 1024M
+        ports:
+        - containerPort: 61616
+          name: openwire
+        volumeMounts:
+        - name: amq-data
+          mountPath: /data
+        resources:
+          limits:
+            cpu: 2
+            memory: 2Gi
+          requests:
+            cpu: 1
+            memory: 1Gi
+        readinessProbe:
+          tcpSocket:
+            port: openwire
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: openwire
+          initialDelaySeconds: 30
+          periodSeconds: 60
+  volumeClaimTemplates:
+  - metadata:
+      name: amq-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: aws-ebs
+      resources:
+        requests:
+          storage: 10Gi

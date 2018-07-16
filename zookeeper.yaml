@@ -1,0 +1,102 @@
+# @author Alejandro Galue <agalue@opennms.org>
+# Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  labels:
+    app: zk
+spec:
+  ports:
+  - port: 2888
+    name: server
+  - port: 3888
+    name: leader-election
+  - port: 2181
+    name: client
+  clusterIP: None
+  selector:
+    app: zk
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zk
+  labels:
+    app: zk
+spec:
+  serviceName: zookeeper
+  replicas: 3
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: zk
+  template:
+    metadata:
+      labels:
+        app: zk
+    spec:
+      terminationGracePeriodSeconds: 300
+      initContainers:
+      - name: generate-zooid
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - ORD=${HOSTNAME##*-}; MYID=$((ORD+1)); echo $MYID > /data/myid
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: zk-data
+          mountPath: /data
+      containers:
+      - name: zk
+        imagePullPolicy: IfNotPresent
+        image: zookeeper:3.4.10
+        env:
+        - name: ZOO_SERVERS
+          value: server.1=zk-0.zookeeper.default.svc.cluster.local:2888:3888 server.2=zk-1.zookeeper.default.svc.cluster.local:2888:3888 server.3=zk-2.zookeeper.default.svc.cluster.local:2888:3888
+        - name: ZOO_TICK_TIME
+          value: "2000"
+        - name: ZOO_INIT_LIMIT
+          value: "10"
+        - name: ZOO_SYNC_LIMIT
+          value: "5"
+        ports:
+        - containerPort: 2888
+          name: peer
+        - containerPort: 3888
+          name: leader-election
+        - containerPort: 2181
+          name: client
+        volumeMounts:
+        - name: zk-data
+          mountPath: /data
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - '[ "imok" = "$(echo ruok | nc 127.0.0.1 2181)" ]'
+        livenessProbe:
+          tcpSocket:
+            port: client
+          initialDelaySeconds: 30
+          periodSeconds: 60
+  volumeClaimTemplates:
+  - metadata:
+      name: zk-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: aws-ebs
+      resources:
+        requests:
+          storage: 4Gi

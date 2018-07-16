@@ -1,0 +1,111 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# TODO
+# - How to activate Karaf features ? Maybe passing the whole org.apache.karaf.features.cfg for now ?
+#
+# ENHANCEMENTS
+# - A volume + "git sync" container (note that this volume can be an emptyDir populated by GIT,
+#   so no persistentVolume is required)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: onms
+  name: opennms-core
+spec:
+  clusterIP: None
+  ports:
+  - port: 8980
+    name: http
+  - port: 8101
+    name: karaf
+  selector:
+    app: onms
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: onms
+  labels:
+    app: onms
+spec:
+  serviceName: opennms-core
+  replicas: 1
+  selector:
+    matchLabels:
+      app: onms
+  template:
+    metadata:
+      labels:
+        app: onms
+    spec:
+      initContainers:
+      - name: newts-initialization
+        image: opennms/horizon-core-web:22.0.1-1
+        imagePullPolicy: IfNotPresent
+        command: [ "/opt/opennms/bin/newts", "init", "-r", "2" ]
+        volumeMounts:
+        - name: onms-etc
+          mountPath: /opt/opennms/etc/opennms.properties.d/newts.properties
+          subPath: newts.properties
+      containers:
+      - name: onms
+        image: opennms/horizon-core-web:22.0.1-1
+        imagePullPolicy: IfNotPresent
+        command: [ "/docker-entrypoint.sh", "-s" ]
+        ports:
+        - containerPort: 8101
+          name: karaf
+        - containerPort: 8980
+          name: http
+        env:
+        - name: JAVA_OPTS
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+        - name: OPENNMS_OVERLAY_CFG
+          value: /opt/opennms-etc-overlay
+        - name: POSTGRES_HOST
+          value: "postgresql.default.svc.cluster.local"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        - name: OPENNMS_DBNAME
+          value: "opennms"
+        - name: OPENNMS_DBUSER
+          value: "opennms"
+        - name: OPENNMS_DBPASS
+          value: "opennms"
+        volumeMounts:
+        - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/org.opennms.features.datachoices.cfg
+          subPath: org.opennms.features.datachoices.cfg
+        - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/org.opennms.features.flows.persistence.elastic.cfg
+          subPath: org.opennms.features.flows.persistence.elastic.cfg
+        - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
+          subPath: org.opennms.plugin.elasticsearch.rest.forwarder.cfg
+        - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/newts.properties
+          subPath: newts.properties
+        - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/kafka.properties
+          subPath: kafka.properties
+        - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/amq.properties
+          subPath: amq.properties
+        resources:
+          limits:
+            cpu: 4
+            memory: 8Gi
+          requests:
+            cpu: 2
+            memory: 4Gi
+      volumes:
+      - name: onms-etc
+        configMap:
+          name: opennms-core-overlay

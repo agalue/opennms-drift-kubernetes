@@ -1,0 +1,93 @@
+# @author Alejandro Galue <agalue@opennms.org>
+# Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
+#
+# TODO
+# - Add an initConntainer to wait for Zookeeper
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kafka
+  name: kafka
+spec:
+  clusterIP: None
+  ports:
+  - port: 9092
+  selector:
+    app: kafka
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  serviceName: kafka
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+      - name: kafka
+        imagePullPolicy: IfNotPresent
+        image: wurstmeister/kafka:2.11-1.1.0
+        ports:
+        - containerPort: 9092
+          name: client
+        env:
+        - name: BROKER_ID_COMMAND
+          value: echo ${HOSTNAME##*-}
+        - name: HOSTNAME_COMMAND
+          value: hostname -f
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: zk-0.zookeeper.default.svc.cluster.local:2181,zk-1.zookeeper.default.svc.cluster.local:2181,zk-2.zookeeper.default.svc.cluster.local:2181/kafka
+        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+          value: "2"
+        - name: KAFKA_MIN_INSYNC_REPLICAS
+          value: "1"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "16"
+        - name: KAFKA_DELETE_TOPIC_ENABLE
+          value: "false"
+        - name: KAFKA_CONTROLLED_SHUTDOWN_ENABLE
+          value: "true"
+        volumeMounts:
+        - name: kafka-data
+          mountPath: /kafka
+        resources:
+          limits:
+            memory: 4Gi
+            cpu: 2
+          requests:
+            memory: 2Gi
+            cpu: 1
+        readinessProbe:
+          tcpSocket:
+            port: client
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: client
+          initialDelaySeconds: 30
+          periodSeconds: 60
+  volumeClaimTemplates:
+  - metadata:
+      name: kafka-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: aws-ebs
+      resources:
+        requests:
+          storage: 20Gi
