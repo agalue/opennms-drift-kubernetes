@@ -1,10 +1,17 @@
 # OpenNMS Drift in Kubernetes
 
-OpenNMS Drift deployment in Kubernetes through Kops and AWS for testing purposes
+OpenNMS Drift deployment in Kubernetes through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/) for testing purposes
+
+## Requirements
+
+* Install `kops`
+* Install `kubectl`
+* Intall the AWS CLI
+* Have your AWS account configured on your system
 
 ## Cluster Configuration
 
-Create DNS sub-domain, and make sure it works prior start the cluster:
+Create DNS sub-domain, and make sure it works prior start the cluster; for example:
 
 ```shell
 dig ns k8s.opennms.org
@@ -61,6 +68,8 @@ kops create cluster \
   --node-count 4 \
   --yes
 ```
+
+Remember to change the settings to reflect your environment.
 
 After a few minutes, verify the state of the cluster using either `kubectl` or `kops`:
 
