@@ -139,6 +139,11 @@ Volumes for `StatefulSets` are going to be automatically created.
 
 ### Applications
 
+WARNING:
+
+* Order is important.
+* Make sure to wait until each `StatefulSet` has been fully deployed.
+
 ```shell
 kubectl apply -f postgresql.yaml
 kubectl apply -f activemq.yaml
@@ -149,12 +154,49 @@ kubectl apply -f kafka.yaml
 kubectl apply -f opennms.core.yaml
 ```
 
-WARNING:
+After a while, you should be able to see this:
 
-* Order is important.
-* Make sure to wait until each `StatefulSet` has been fully deployed.
+```text
+➜  ~ kubectl get all
+NAME                  READY     STATUS    RESTARTS   AGE
+pod/amq-0             1/1       Running   0          5h
+pod/cassandra-0       1/1       Running   0          5h
+pod/cassandra-1       1/1       Running   0          5h
+pod/cassandra-2       1/1       Running   0          5h
+pod/elasticsearch-0   1/1       Running   0          5h
+pod/elasticsearch-1   1/1       Running   0          5h
+pod/elasticsearch-2   1/1       Running   0          5h
+pod/kafka-0           1/1       Running   0          1h
+pod/kafka-1           1/1       Running   0          1h
+pod/kafka-2           1/1       Running   0          1h
+pod/onms-0            1/1       Running   0          1h
+pod/postgres-0        1/1       Running   0          4h
+pod/zk-0              1/1       Running   0          2h
+pod/zk-1              1/1       Running   0          2h
+pod/zk-2              1/1       Running   0          2h
+
+NAME                    TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                      AGE
+service/activemq        ClusterIP   None         <none>        61616/TCP                    5h
+service/cassandra       ClusterIP   None         <none>        9042/TCP                     5h
+service/elasticsearch   ClusterIP   None         <none>        9200/TCP                     5h
+service/kafka           ClusterIP   None         <none>        9092/TCP                     1h
+service/kubernetes      ClusterIP   100.64.0.1   <none>        443/TCP                      5h
+service/opennms-core    ClusterIP   None         <none>        8980/TCP,8101/TCP            1h
+service/postgresql      ClusterIP   None         <none>        5432/TCP                     4h
+service/zookeeper       ClusterIP   None         <none>        2888/TCP,3888/TCP,2181/TCP   2h
+
+NAME                             DESIRED   CURRENT   AGE
+statefulset.apps/amq             1         1         5h
+statefulset.apps/cassandra       3         3         5h
+statefulset.apps/elasticsearch   3         3         5h
+statefulset.apps/kafka           3         3         1h
+statefulset.apps/onms            1         1         1h
+statefulset.apps/postgres        1         1         4h
+statefulset.apps/zk              3         3         2h
+```
 
 ## Future Enhancements
 
-* Include `initContainers` to validate dependencies.
+* Include `initContainers` to validate and wait for dependencies.
 * Expose services to use them outside Kubernetes/AWS, in order to use Minion.
+* Use `ConfigMaps` to centralize configuration.
