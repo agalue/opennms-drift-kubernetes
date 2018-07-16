@@ -126,7 +126,7 @@ Creation Order:
 ### Configuration Maps
 
 ```shell
-kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/etc/
+kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/
 ```
 
 ### Storage Classes
