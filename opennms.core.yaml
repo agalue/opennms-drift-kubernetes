@@ -12,6 +12,7 @@ kind: Service
 metadata:
   labels:
     app: onms
+    deployment: drift
   name: opennms-core
 spec:
   clusterIP: None
@@ -30,6 +31,7 @@ metadata:
   name: onms
   labels:
     app: onms
+    deployment: drift
 spec:
   serviceName: opennms-core
   replicas: 1
@@ -40,12 +42,49 @@ spec:
     metadata:
       labels:
         app: onms
+        deployment: drift
     spec:
       initContainers:
+      - name: check-postgresql-ready
+        image: postgres:10.4
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'until pg_isready -h $DB_SERVER -p $DB_PORT; do echo "$(date) - Waiting for $DB_SERVER:$DB_PORT..."; sleep 2; done;' ]
+        env:
+          - name: DB_SERVER
+            value: postgresql.default.svc.cluster.local
+          - name: DB_PORT
+            value: '5432'
+      - name: check-cassandra-ready
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
+        env:
+          - name: TARGET_SERVER
+            value: cassandra.default.svc.cluster.local
+          - name: TARGET_PORT
+            value: '9042'
+      - name: check-amq-ready
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
+        env:
+          - name: TARGET_SERVER
+            value: activemq.default.svc.cluster.local
+          - name: TARGET_PORT
+            value: '61616'
+      - name: check-kafka-ready
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
+        env:
+          - name: TARGET_SERVER
+            value: kafka.default.svc.cluster.local
+          - name: TARGET_PORT
+            value: '9092'
       - name: newts-initialization
         image: opennms/horizon-core-web:22.0.1-1
         imagePullPolicy: IfNotPresent
-        command: [ "/opt/opennms/bin/newts", "init", "-r", "2" ]
+        command: [ '/opt/opennms/bin/newts', 'init', '-r', '2' ]
         volumeMounts:
         - name: onms-etc
           mountPath: /opt/opennms/etc/opennms.properties.d/newts.properties
@@ -54,7 +93,7 @@ spec:
       - name: onms
         image: opennms/horizon-core-web:22.0.1-1
         imagePullPolicy: IfNotPresent
-        command: [ "/docker-entrypoint.sh", "-s" ]
+        command: [ '/docker-entrypoint.sh', '-s' ]
         ports:
         - containerPort: 8101
           name: karaf
@@ -63,22 +102,20 @@ spec:
         env:
         - name: JAVA_OPTS
           value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
-        - name: OPENNMS_OVERLAY_CFG
-          value: /opt/opennms-etc-overlay
         - name: POSTGRES_HOST
-          value: "postgresql.default.svc.cluster.local"
+          value: postgresql.default.svc.cluster.local
         - name: POSTGRES_PORT
-          value: "5432"
+          value: '5432'
         - name: POSTGRES_USER
-          value: "postgres"
+          value: postgres
         - name: POSTGRES_PASSWORD
-          value: "postgres"
+          value: postgres
         - name: OPENNMS_DBNAME
-          value: "opennms"
+          value: opennms
         - name: OPENNMS_DBUSER
-          value: "opennms"
+          value: opennms
         - name: OPENNMS_DBPASS
-          value: "opennms"
+          value: opennms
         volumeMounts:
         - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/org.opennms.features.datachoices.cfg

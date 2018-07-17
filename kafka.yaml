@@ -1,8 +1,5 @@
 # @author Alejandro Galue <agalue@opennms.org>
 # Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
-#
-# TODO
-# - Add an initConntainer to wait for Zookeeper
 
 ---
 apiVersion: v1
@@ -10,6 +7,7 @@ kind: Service
 metadata:
   labels:
     app: kafka
+    deployment: drift
   name: kafka
 spec:
   clusterIP: None
@@ -25,6 +23,7 @@ metadata:
   name: kafka
   labels:
     app: kafka
+    deployment: drift
 spec:
   serviceName: kafka
   replicas: 3
@@ -35,12 +34,22 @@ spec:
     metadata:
       labels:
         app: kafka
+        deployment: drift
     spec:
-      terminationGracePeriodSeconds: 300
+      initContainers:
+      - name: check-zk-ready
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: ZK_SERVER
+            value: zookeeper.default.svc.cluster.local
+          - name: ZK_PORT
+            value: '2181'
+        command: [ 'sh', '-c', 'until [ "imok" = "$(echo ruok | nc $ZK_SERVER $ZK_PORT)" ]; do echo "$(date) - Waiting for $ZK_SERVER:$ZK_PORT..."; sleep 2; done;' ]
       containers:
       - name: kafka
-        imagePullPolicy: IfNotPresent
         image: wurstmeister/kafka:2.11-1.1.0
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9092
           name: client
@@ -52,15 +61,15 @@ spec:
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zk-0.zookeeper.default.svc.cluster.local:2181,zk-1.zookeeper.default.svc.cluster.local:2181,zk-2.zookeeper.default.svc.cluster.local:2181/kafka
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
-          value: "2"
+          value: '2'
         - name: KAFKA_MIN_INSYNC_REPLICAS
-          value: "1"
+          value: '1'
         - name: KAFKA_NUM_PARTITIONS
-          value: "16"
+          value: '16'
         - name: KAFKA_DELETE_TOPIC_ENABLE
-          value: "false"
+          value: 'false'
         - name: KAFKA_CONTROLLED_SHUTDOWN_ENABLE
-          value: "true"
+          value: 'true'
         volumeMounts:
         - name: kafka-data
           mountPath: /kafka
@@ -86,7 +95,7 @@ spec:
       name: kafka-data
     spec:
       accessModes:
-        - ReadWriteOnce
+      - ReadWriteOnce
       storageClassName: aws-ebs
       resources:
         requests:

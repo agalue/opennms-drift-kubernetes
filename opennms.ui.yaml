@@ -1,0 +1,113 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: onms-ui
+    deployment: drift
+  name: opennms-ui
+spec:
+  clusterIP: None
+  ports:
+  - port: 8980
+    name: http
+  - port: 8101
+    name: karaf
+  selector:
+    app: onms-ui
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: onms-ui
+  labels:
+    app: onms-ui
+    deployment: drift
+spec:
+  serviceName: opennms-ui
+  replicas: 2
+  selector:
+    matchLabels:
+      app: onms-ui
+  template:
+    metadata:
+      labels:
+        app: onms-ui
+        deployment: drift
+    spec:
+      initContainers:
+      - name: check-opennms-ready
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
+        env:
+          - name: TARGET_SERVER
+            value: opennms-core.default.svc.cluster.local
+          - name: TARGET_PORT
+            value: '8980'
+      containers:
+      - name: onms-ui
+        image: opennms/horizon-core-web:22.0.1-1
+        imagePullPolicy: IfNotPresent
+        command: [ "/docker-entrypoint.sh", "-s" ]
+        ports:
+        - containerPort: 8101
+          name: karaf
+        - containerPort: 8980
+          name: http
+        env:
+        - name: JAVA_OPTS
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+        - name: POSTGRES_HOST
+          value: postgresql.default.svc.cluster.local
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: OPENNMS_DBNAME
+          value: opennms
+        - name: OPENNMS_DBUSER
+          value: opennms
+        - name: OPENNMS_DBPASS
+          value: opennms
+        volumeMounts:
+        - name: onms-core-etc
+          mountPath: /opt/opennms-etc-overlay/org.opennms.features.datachoices.cfg
+          subPath: org.opennms.features.datachoices.cfg
+        - name: onms-core-etc
+          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/newts.properties
+          subPath: newts.properties
+        - name: onms-core-etc
+          mountPath: /opt/opennms-etc-overlay/org.opennms.features.flows.persistence.elastic.cfg
+          subPath: org.opennms.features.flows.persistence.elastic.cfg
+        - name: onms-ui-etc
+          mountPath: /opt/opennms-etc-overlay/eventconf.xml
+          subPath: eventconf.xml
+        - name: onms-ui-etc
+          mountPath: /opt/opennms-etc-overlay/service-configuration.xml
+          subPath: service-configuration.xml
+        - name: onms-ui-etc
+          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/webui.properties
+          subPath: webui.properties
+        - name: onms-ui-etc
+          mountPath: /opt/opennms-jetty-webinf-overlay/applicationContext-spring-security.xml
+          subPath: applicationContext-spring-security.xml
+        resources:
+          limits:
+            cpu: 4
+            memory: 8Gi
+          requests:
+            cpu: 2
+            memory: 4Gi
+      volumes:
+      - name: onms-core-etc
+        configMap:
+          name: opennms-core-overlay
+      - name: onms-ui-etc
+        configMap:
+          name: opennms-ui-overlay

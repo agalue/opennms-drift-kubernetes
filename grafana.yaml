@@ -2,8 +2,7 @@
 #
 # TODO
 # - What if we include this as a container of the onms-web Pod ?
-# - Provide a custom grafana.yaml to connect to PostgreSQL
-# - Add an initContainer to make sure that the Grafana database exist and it is initialized
+# - Add a lifecycle PostStart ahook, to initialize the OpenNMS Helm Plugin and the Data Sources
 
 ---
 apiVersion: v1
@@ -11,6 +10,7 @@ kind: Service
 metadata:
   labels:
     app: grafana
+    deployment: drift
   name: grafana
 spec:
   clusterIP: None
@@ -26,8 +26,8 @@ metadata:
   name: grafana
   labels:
     app: grafana
+    deployment: drift
 spec:
-  serviceName: grafana
   replicas: 2
   selector:
     matchLabels:
@@ -36,7 +36,30 @@ spec:
     metadata:
       labels:
         app: grafana
+        deployment: drift
     spec:
+      initContainers:
+        - name: initialize-database
+          image: postgres:10.4
+          imagePullPolicy: IfNotPresent
+          command: [ 'sh', '/bin/grafana-init.sh']
+          env:
+            - name: DATABASE_HOST
+              value: postgresql.default.svc.cluster.local
+            - name: DATABASE_NAME
+              value: grafana
+            - name: DATABASE_USER
+              value: grafana
+            - name: DATABASE_PASSWORD
+              value: grafana
+            - name: DATABASE_ROOT_USER
+              value: postgres
+            - name: DATABASE_ROOT_PASSWORD
+              value: postgres
+          volumeMounts:
+          - name: grafana
+            mountPath: /bin/grafana-init.sh
+            subPath: grafana-init.sh
       containers:
       - name: grafana
         image: grafana/grafana:5.2.1
@@ -44,9 +67,30 @@ spec:
         ports:
         - containerPort: 3000
           name: http
+        env:
+          - name: GF_INSTALL_PLUGINS
+            value: opennms-helm-app
+          - name: GF_DATABASE_TYPE
+            value: postgres
+          - name: GF_DATABASE_HOST
+            value: postgresql.default.svc.cluster.local:5432
+          - name: GF_DATABASE_NAME
+            value: grafana
+          - name: GF_DATABASE_USER
+            value: grafana
+          - name: GF_DATABASE_PASSWORD
+            value: grafana
+          - name: GF_SESSION_PROVIDER
+            value: postgres
+          - name: GF_SESSION_PROVIDER_CONFIG
+            value: user=grafana password=grafana host=postgresql.default.svc.cluster.local port=5432 dbname=grafana sslmode=disable
         readinessProbe:
           httpGet:
             path: /
             port: http
           initialDelaySeconds: 10
           timeoutSeconds: 5
+      volumes:
+      - name: grafana
+        configMap:
+          name: grafana

@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # A single broker server (no cluster)
+# ACTIVEMQ_CONFIG_MAXMEMORY and ACTIVEMQ_CONFIG_MINMEMORY should be consistent with resources.requests.memory
 #
 # TODO
 # - Create a network of clusters using ConfigMap
@@ -11,6 +12,7 @@ kind: Service
 metadata:
   labels:
     app: amq
+    deployment: drift
   name: activemq
 spec:
   clusterIP: None
@@ -26,6 +28,7 @@ metadata:
   name: amq
   labels:
     app: amq
+    deployment: drift
 spec:
   serviceName: activemq
   replicas: 1
@@ -36,6 +39,7 @@ spec:
     metadata:
       labels:
         app: amq
+        deployment: drift
     spec:
       containers:
       - name: amq
@@ -73,7 +77,8 @@ spec:
   - metadata:
       name: amq-data
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes:
+      - ReadWriteOnce
       storageClassName: aws-ebs
       resources:
         requests:

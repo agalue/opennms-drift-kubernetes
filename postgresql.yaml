@@ -10,6 +10,7 @@ kind: Service
 metadata:
   labels:
     app: postgres
+    deployment: drift
   name: postgresql
 spec:
   clusterIP: None
@@ -25,6 +26,7 @@ metadata:
   name: postgres
   labels:
     app: postgres
+    deployment: drift
 spec:
   serviceName: postgresql
   replicas: 1
@@ -35,6 +37,7 @@ spec:
     metadata:
       labels:
         app: postgres
+        deployment: drift
     spec:
       containers:
       - name: postgres
@@ -84,7 +87,8 @@ spec:
   - metadata:
       name: pg-data
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes:
+      - ReadWriteOnce
       storageClassName: aws-ebs
       resources:
         requests:

@@ -9,6 +9,7 @@ kind: Service
 metadata:
   labels:
     app: cassandra
+    deployment: drift
   name: cassandra
 spec:
   clusterIP: None
@@ -24,6 +25,7 @@ metadata:
   name: cassandra
   labels:
     app: cassandra
+    deployment: drift
 spec:
   serviceName: cassandra
   replicas: 3
@@ -34,8 +36,8 @@ spec:
     metadata:
       labels:
         app: cassandra
+        deployment: drift
     spec:
-      terminationGracePeriodSeconds: 1800
       containers:
       - name: cassandra
         image: cassandra:3.11.2
@@ -91,7 +93,8 @@ spec:
   - metadata:
       name: cassandra-data
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes:
+      - ReadWriteOnce
       storageClassName: aws-ebs
       resources:
         requests:

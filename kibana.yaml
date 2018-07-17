@@ -11,6 +11,7 @@ kind: Service
 metadata:
   labels:
     app: kibana
+    deployment: drift
   name: kibana
 spec:
   clusterIP: None
@@ -26,6 +27,7 @@ metadata:
   name: kibana
   labels:
     app: kibana
+    deployment: drift
 spec:
   replicas: 1
   selector:
@@ -35,6 +37,7 @@ spec:
     metadata:
       labels:
         app: kibana
+        deployment: drift
     spec:
       containers:
       - name: kibana

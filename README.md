@@ -126,7 +126,9 @@ Creation Order:
 ### Configuration Maps
 
 ```shell
-kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/etc/
+kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/
+kubectl create configmap opennms-ui-overlay --from-file=config/opennms-ui/
+kubectl create configmap grafana --from-file=config/grafana/
 ```
 
 ### Storage Classes
@@ -139,10 +141,7 @@ Volumes for `StatefulSets` are going to be automatically created.
 
 ### Applications
 
-WARNING:
-
-* Order is important.
-* Make sure to wait until each `StatefulSet` has been fully deployed.
+It is recommended to follow the same order. The applications will wait for their respective dependencies to be ready prior start.
 
 ```shell
 kubectl apply -f postgresql.yaml
@@ -152,51 +151,78 @@ kubectl apply -f elasticsearch.yaml
 kubectl apply -f zookeper.yaml
 kubectl apply -f kafka.yaml
 kubectl apply -f opennms.core.yaml
+kubectl apply -f opennms.ui.yaml
+kubectl apply -f grafana.yaml
+kubectl apply -f kibana.yaml
 ```
 
 After a while, you should be able to see this:
 
 ```text
-➜  ~ kubectl get all
-NAME                  READY     STATUS    RESTARTS   AGE
-pod/amq-0             1/1       Running   0          5h
-pod/cassandra-0       1/1       Running   0          5h
-pod/cassandra-1       1/1       Running   0          5h
-pod/cassandra-2       1/1       Running   0          5h
-pod/elasticsearch-0   1/1       Running   0          5h
-pod/elasticsearch-1   1/1       Running   0          5h
-pod/elasticsearch-2   1/1       Running   0          5h
-pod/kafka-0           1/1       Running   0          1h
-pod/kafka-1           1/1       Running   0          1h
-pod/kafka-2           1/1       Running   0          1h
-pod/onms-0            1/1       Running   0          1h
-pod/postgres-0        1/1       Running   0          4h
-pod/zk-0              1/1       Running   0          2h
-pod/zk-1              1/1       Running   0          2h
-pod/zk-2              1/1       Running   0          2h
+➜  ~ kubectl get all -l deployment=drift -o wide
+NAME                          READY     STATUS    RESTARTS   AGE       IP            NODE
+pod/amq-0                     1/1       Running   0          53m       100.96.3.2    ip-172-20-52-27.us-east-2.compute.internal
+pod/cassandra-0               1/1       Running   0          53m       100.96.1.4    ip-172-20-57-36.us-east-2.compute.internal
+pod/cassandra-1               0/1       Running   3          52m       100.96.4.8    ip-172-20-36-206.us-east-2.compute.internal
+pod/cassandra-2               1/1       Running   0          51m       100.96.3.6    ip-172-20-52-27.us-east-2.compute.internal
+pod/elasticsearch-0           1/1       Running   0          53m       100.96.2.3    ip-172-20-59-100.us-east-2.compute.internal
+pod/elasticsearch-1           1/1       Running   0          51m       100.96.1.8    ip-172-20-57-36.us-east-2.compute.internal
+pod/elasticsearch-2           1/1       Running   1          50m       100.96.4.9    ip-172-20-36-206.us-east-2.compute.internal
+pod/grafana-946b9b667-4fm6g   1/1       Running   1          52m       100.96.4.7    ip-172-20-36-206.us-east-2.compute.internal
+pod/grafana-946b9b667-6jbzw   1/1       Running   0          52m       100.96.1.6    ip-172-20-57-36.us-east-2.compute.internal
+pod/kafka-0                   1/1       Running   0          26m       100.96.2.6    ip-172-20-59-100.us-east-2.compute.internal
+pod/kafka-1                   1/1       Running   0          26m       100.96.1.9    ip-172-20-57-36.us-east-2.compute.internal
+pod/kafka-2                   1/1       Running   0          25m       100.96.3.7    ip-172-20-52-27.us-east-2.compute.internal
+pod/kibana-7fffd7b66c-zpxqs   1/1       Running   0          52m       100.96.1.7    ip-172-20-57-36.us-east-2.compute.internal
+pod/onms-0                    1/1       Running   1          14m       100.96.3.9    ip-172-20-52-27.us-east-2.compute.internal
+pod/onms-ui-0                 1/1       Running   0          1m        100.96.2.9    ip-172-20-59-100.us-east-2.compute.internal
+pod/onms-ui-1                 1/1       Running   0          8m        100.96.1.10   ip-172-20-57-36.us-east-2.compute.internal
+pod/postgres-0                1/1       Running   1          53m       100.96.4.11   ip-172-20-36-206.us-east-2.compute.internal
+pod/zk-0                      1/1       Running   1          53m       100.96.4.10   ip-172-20-36-206.us-east-2.compute.internal
+pod/zk-1                      1/1       Running   0          53m       100.96.3.4    ip-172-20-52-27.us-east-2.compute.internal
+pod/zk-2                      1/1       Running   0          53m       100.96.1.5    ip-172-20-57-36.us-east-2.compute.internal
 
-NAME                    TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                      AGE
-service/activemq        ClusterIP   None         <none>        61616/TCP                    5h
-service/cassandra       ClusterIP   None         <none>        9042/TCP                     5h
-service/elasticsearch   ClusterIP   None         <none>        9200/TCP                     5h
-service/kafka           ClusterIP   None         <none>        9092/TCP                     1h
-service/kubernetes      ClusterIP   100.64.0.1   <none>        443/TCP                      5h
-service/opennms-core    ClusterIP   None         <none>        8980/TCP,8101/TCP            1h
-service/postgresql      ClusterIP   None         <none>        5432/TCP                     4h
-service/zookeeper       ClusterIP   None         <none>        2888/TCP,3888/TCP,2181/TCP   2h
+NAME                    TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                      AGE       SELECTOR
+service/activemq        ClusterIP   None         <none>        61616/TCP                    53m       app=amq
+service/cassandra       ClusterIP   None         <none>        9042/TCP                     53m       app=cassandra
+service/elasticsearch   ClusterIP   None         <none>        9200/TCP                     53m       app=elasticsearch
+service/grafana         ClusterIP   None         <none>        3000/TCP                     52m       app=grafana
+service/kafka           ClusterIP   None         <none>        9092/TCP                     53m       app=kafka
+service/kibana          ClusterIP   None         <none>        5601/TCP                     52m       app=kibana
+service/opennms-core    ClusterIP   None         <none>        8980/TCP,8101/TCP            53m       app=onms
+service/opennms-ui      ClusterIP   None         <none>        8980/TCP,8101/TCP            53m       app=onms-ui
+service/postgresql      ClusterIP   None         <none>        5432/TCP                     54m       app=postgres
+service/zookeeper       ClusterIP   None         <none>        2888/TCP,3888/TCP,2181/TCP   53m       app=zk
 
-NAME                             DESIRED   CURRENT   AGE
-statefulset.apps/amq             1         1         5h
-statefulset.apps/cassandra       3         3         5h
-statefulset.apps/elasticsearch   3         3         5h
-statefulset.apps/kafka           3         3         1h
-statefulset.apps/onms            1         1         1h
-statefulset.apps/postgres        1         1         4h
-statefulset.apps/zk              3         3         2h
+NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES                                  SELECTOR
+deployment.extensions/grafana   2         2         2            2           52m       grafana      grafana/grafana:5.2.1                   app=grafana
+deployment.extensions/kibana    1         1         1            1           52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana
+
+NAME                                      DESIRED   CURRENT   READY     AGE       CONTAINERS   IMAGES                                  SELECTOR
+replicaset.extensions/grafana-946b9b667   2         2         2         52m       grafana      grafana/grafana:5.2.1                   app=grafana,pod-template-hash=502656223
+replicaset.extensions/kibana-7fffd7b66c   1         1         1         52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana,pod-template-hash=3999836227
+
+NAME                      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES                                  SELECTOR
+deployment.apps/grafana   2         2         2            2           52m       grafana      grafana/grafana:5.2.1                   app=grafana
+deployment.apps/kibana    1         1         1            1           52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana
+
+NAME                                DESIRED   CURRENT   READY     AGE       CONTAINERS   IMAGES                                  SELECTOR
+replicaset.apps/grafana-946b9b667   2         2         2         52m       grafana      grafana/grafana:5.2.1                   app=grafana,pod-template-hash=502656223
+replicaset.apps/kibana-7fffd7b66c   1         1         1         52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana,pod-template-hash=3999836227
+
+NAME                             DESIRED   CURRENT   AGE       CONTAINERS      IMAGES
+statefulset.apps/amq             1         1         53m       amq             webcenter/activemq:5.14.3
+statefulset.apps/cassandra       3         3         53m       cassandra       cassandra:3.11.2
+statefulset.apps/elasticsearch   3         3         53m       elasticsearch   docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
+statefulset.apps/kafka           3         3         26m       kafka           wurstmeister/kafka:2.11-1.1.0
+statefulset.apps/onms            1         1         14m       onms            opennms/horizon-core-web:22.0.1-1
+statefulset.apps/onms-ui         2         2         8m        onms-ui         opennms/horizon-core-web:22.0.1-1
+statefulset.apps/postgres        1         1         53m       postgres        postgres:10.4
+statefulset.apps/zk              3         3         53m       zk              zookeeper:3.4.10
 ```
 
 ## Future Enhancements
 
-* Include `initContainers` to validate and wait for dependencies.
 * Expose services to use them outside Kubernetes/AWS, in order to use Minion.
 * Use `ConfigMaps` to centralize configuration.
+* Use `Secrets` for the passwords.
