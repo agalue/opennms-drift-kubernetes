@@ -20,6 +20,22 @@ spec:
     app: grafana
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grafana
+    deployment: drift
+  name: ext-grafana
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    app: grafana
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

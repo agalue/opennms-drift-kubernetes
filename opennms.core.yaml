@@ -6,6 +6,7 @@
 # ENHANCEMENTS
 # - A volume + "git sync" container (note that this volume can be an emptyDir populated by GIT,
 #   so no persistentVolume is required)
+
 ---
 apiVersion: v1
 kind: Service
@@ -21,6 +22,22 @@ spec:
     name: http
   - port: 8101
     name: karaf
+  selector:
+    app: onms
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: onms
+    deployment: drift
+  name: ext-onms
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8980
+    targetPort: 8980
   selector:
     app: onms
 
@@ -93,7 +110,7 @@ spec:
       - name: onms
         image: opennms/horizon-core-web:22.0.1-1
         imagePullPolicy: IfNotPresent
-        command: [ '/docker-entrypoint.sh', '-s' ]
+        command: [ '/docker-entrypoint.sh', '-s' ] # TODO What about using this ? args: ['-s']
         ports:
         - containerPort: 8101
           name: karaf

@@ -5,6 +5,7 @@
 #
 # TODO
 # - Create a network of clusters using ConfigMap
+# - The AMQ process runs as root. Verify if this can be changed
 
 ---
 apiVersion: v1
@@ -18,6 +19,22 @@ spec:
   clusterIP: None
   ports:
   - port: 61616
+  selector:
+    app: amq
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: amq
+    deployment: drift
+  name: ext-amq
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 61616
+    targetPort: 61616
   selector:
     app: amq
 

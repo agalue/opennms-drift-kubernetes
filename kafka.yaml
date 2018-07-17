@@ -1,5 +1,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 # Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
+#
+# TODO
+# - The kafka process runs as root. Verify if this can be changed
+# - How to expose Kafka Nodes to the outside world ?
 
 ---
 apiVersion: v1
@@ -13,6 +17,22 @@ spec:
   clusterIP: None
   ports:
   - port: 9092
+  selector:
+    app: kafka
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kafka
+    deployment: drift
+  name: ext-kafka
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 9092
+    targetPort: 9092
   selector:
     app: kafka
 
@@ -59,7 +79,7 @@ spec:
         - name: HOSTNAME_COMMAND
           value: hostname -f
         - name: KAFKA_ZOOKEEPER_CONNECT
-          value: zk-0.zookeeper.default.svc.cluster.local:2181,zk-1.zookeeper.default.svc.cluster.local:2181,zk-2.zookeeper.default.svc.cluster.local:2181/kafka
+          value: zookeeper.default.svc.cluster.local:2181/kafka
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
           value: '2'
         - name: KAFKA_MIN_INSYNC_REPLICAS
@@ -70,6 +90,10 @@ spec:
           value: 'false'
         - name: KAFKA_CONTROLLED_SHUTDOWN_ENABLE
           value: 'true'
+        - name: KAFKA_JMX_OPTS
+          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.rmi.port=9999
+        - name: JMX_PORT
+          value: '9999'
         volumeMounts:
         - name: kafka-data
           mountPath: /kafka

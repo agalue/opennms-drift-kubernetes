@@ -21,6 +21,22 @@ spec:
     app: kibana
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kibana
+    deployment: drift
+  name: ext-kibana
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5601
+    targetPort: 5601
+  selector:
+    app: kibana
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
