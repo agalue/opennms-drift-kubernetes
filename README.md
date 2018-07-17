@@ -66,6 +66,7 @@ kops create cluster \
   --master-size t2.medium \
   --node-size t2.2xlarge \
   --node-count 4 \
+  --kubernetes-version=1.11.0 \
   --yes
 ```
 
@@ -223,6 +224,6 @@ statefulset.apps/zk              3         3         53m       zk              z
 
 ## Future Enhancements
 
-* Expose services to use them outside Kubernetes/AWS, in order to use Minion.
+* Expose services to use them outside Kubernetes/AWS, in order to start using Minions. One option is using [External DNS](https://github.com/kubernetes-incubator/external-dns) for the Load Balancers, and for the Headless Service created for Kafka.
 * Use `ConfigMaps` to centralize configuration.
 * Use `Secrets` for the passwords.
