@@ -11,10 +11,10 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: opennms-core
   labels:
     app: onms
     deployment: drift
-  name: opennms-core
 spec:
   clusterIP: None
   ports:
@@ -29,10 +29,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: ext-onms
   labels:
     app: onms
     deployment: drift
-  name: ext-onms
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: onms.k8s.opennms.org.
 spec:
   type: LoadBalancer
   ports:

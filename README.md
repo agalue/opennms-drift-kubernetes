@@ -66,7 +66,6 @@ kops create cluster \
   --master-size t2.medium \
   --node-size t2.2xlarge \
   --node-count 4 \
-  --kubernetes-version=1.11.0 \
   --yes
 ```
 
@@ -118,11 +117,41 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Creation Order:
 
+* Permissions
 * ConfigMaps
 * Storage Classes
 * Volumes (if apply)
 * Services
 * Deployments and StatefulSets
+
+### Permissions
+
+On the AWS Console, go to IAM, then Roles, then click on the IAM Role called `nodes.k8s.opennms.org`, expand the Policy named `nodes.k8s.opennms.org`, and add the following permissions:
+
+```json
+{
+  "Effect": "Allow",
+  "Action": [
+    "route53:GetHostedZone",
+    "route53:ListHostedZonesByName",
+    "route53:ListHostedZones",
+    "route53:ListResourceRecordSets",
+    "route53:CreateHostedZone",
+    "route53:DeleteHostedZone",
+    "route53:ChangeResourceRecordSets",
+    "route53:CreateHealthCheck",
+    "route53:GetHealthCheck",
+    "route53:DeleteHealthCheck",
+    "route53:UpdateHealthCheck",
+    "ec2:DescribeVpcs",
+    "ec2:DescribeRegions",
+    "servicediscovery:*"
+  ],
+  "Resource": [
+    "*"
+  ]
+}
+```
 
 ### Configuration Maps
 
@@ -145,6 +174,7 @@ Volumes for `StatefulSets` are going to be automatically created.
 It is recommended to follow the same order. The applications will wait for their respective dependencies to be ready prior start.
 
 ```shell
+kubectl apply -f external-dns.yaml
 kubectl apply -f postgresql.yaml
 kubectl apply -f activemq.yaml
 kubectl apply -f cassandra.yaml
@@ -222,8 +252,27 @@ statefulset.apps/postgres        1         1         53m       postgres        p
 statefulset.apps/zk              3         3         53m       zk              zookeeper:3.4.10
 ```
 
+## Minion
+
+Your Minion should use the following resources:
+
+* ActiveMQ: `failover:(tcp://activemq.k8s.opennms.org:61616)?randomize=false`
+* Kafka: `kafka-0.k8s.opennms.org:9092,kafka-1.k8s.opennms.org:9092,kafka-2.k8s.opennms.org:9092`
+* OpenNMS Core: `http://onms.k8s.opennms.org:8980/opennms`
+
+Make sure to use your own Domain ;)
+
+## Users
+
+* OpenNMS UI: `http://onmsui.k8s.opennms.org:8980/opennms`
+* Grafana: `http://grafana.k8s.opennms.org:3000/`
+* Kibana: `http://kibana.k8s.opennms.org:5601/`
+
+Make sure to use your own Domain ;)
+
 ## Future Enhancements
 
-* Expose services to use them outside Kubernetes/AWS, in order to start using Minions. One option is using [External DNS](https://github.com/kubernetes-incubator/external-dns) for the Load Balancers, and for the Headless Service created for Kafka.
+* Service created for Kafka.
 * Use `ConfigMaps` to centralize configuration.
 * Use `Secrets` for the passwords.
+* Improve IAM Role handling for the external-dns.

@@ -1,0 +1,45 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-manager
+  labels:
+    app: kafka-manager
+    deployment: drift
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-manager
+  template:
+    metadata:
+      labels:
+        app: kafka-manager
+        deployment: drift
+    spec:
+      containers:
+      - name: kafka-manager
+        image: sheepkiller/kafka-manager:stable
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: ZK_HOSTS
+          value: zookeeper.default.svc.cluster.local:2181/kafka
+        - name: APPLICATION_SECRET
+          value: opennms
+        ports:
+        - containerPort: 9000
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 60
