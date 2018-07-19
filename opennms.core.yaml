@@ -38,7 +38,7 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 8980
+  - port: 80
     targetPort: 8980
   selector:
     app: onms
