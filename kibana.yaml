@@ -64,7 +64,7 @@ spec:
         command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
         env:
           - name: TARGET_SERVER
-            value: elasticsearch.default.svc.cluster.local
+            value: esdata.default.svc.cluster.local
           - name: TARGET_PORT
             value: '9200'
       containers:
@@ -77,7 +77,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: ELASTICSEARCH_URL
-          value: http://elasticsearch.default.svc.cluster.local:9200
+          value: http://esdata.default.svc.cluster.local:9200
         - name: ELASTICSEARCH_USERNAME
           value: elastic
         - name: ELASTICSEARCH_PASSWORD

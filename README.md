@@ -4,14 +4,14 @@ OpenNMS Drift deployment in Kubernetes through [Kops](https://github.com/kuberne
 
 ## Requirements
 
-* Install `kops`
-* Install `kubectl`
+* Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0-alpha.1`)
+* Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Intall the AWS CLI
 * Have your AWS account configured on your system
 
 ## Cluster Configuration
 
-Create DNS sub-domain, and make sure it works prior start the cluster; for example:
+Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), and make sure it works prior start the cluster; for example:
 
 ```shell
 dig ns k8s.opennms.org
@@ -43,7 +43,7 @@ k8s.opennms.org.	21478	IN	NS	ns-1922.awsdns-48.co.uk.
 ;; MSG SIZE  rcvd: 181
 ```
 
-Create an S3 bucket to hold the Kops configuration:
+Create an S3 bucket to hold the Kops configuration; for example:
 
 ```shell
 aws s3api create-bucket \
@@ -66,10 +66,51 @@ kops create cluster \
   --master-size t2.medium \
   --node-size t2.2xlarge \
   --node-count 4 \
-  --yes
 ```
 
-Remember to change the settings to reflect your environment.
+Edit the configuration to add additional AWS permissions for the [external-dns](https://github.com/kubernetes-incubator/external-dns) add-on:
+
+```shell
+kops edit cluster k8s.opennms.org --state s3://k8s.opennms.org
+```
+
+Then, add the following:
+
+```
+spec:
+  additionalPolicies:
+    node: |
+      [{
+        "Effect": "Allow",
+        "Action": [
+          "route53:GetHostedZone",
+          "route53:ListHostedZonesByName",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+          "route53:CreateHostedZone",
+          "route53:DeleteHostedZone",
+          "route53:ChangeResourceRecordSets",
+          "route53:CreateHealthCheck",
+          "route53:GetHealthCheck",
+          "route53:DeleteHealthCheck",
+          "route53:UpdateHealthCheck",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeRegions",
+          "servicediscovery:*"
+        ],
+        "Resource": [
+          "*"
+        ]
+      }]
+```
+
+> **IMPORTANT: Remember to change the settings to reflect your environment.**
+
+Now, apply the configuration to create the Kubernetes cluster on AWS:
+
+```shell
+kops update cluster k8s.opennms.org --state s3://k8s.opennms.org --yes
+```
 
 After a few minutes, verify the state of the cluster using either `kubectl` or `kops`:
 
@@ -117,43 +158,15 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Creation Order:
 
-* Permissions
 * ConfigMaps
 * Storage Classes
 * Volumes (if apply)
 * Services
 * Deployments and StatefulSets
 
-### Permissions
-
-On the AWS Console, go to IAM, then Roles, then click on the IAM Role called `nodes.k8s.opennms.org`, expand the Policy named `nodes.k8s.opennms.org`, and add the following permissions:
-
-```json
-{
-  "Effect": "Allow",
-  "Action": [
-    "route53:GetHostedZone",
-    "route53:ListHostedZonesByName",
-    "route53:ListHostedZones",
-    "route53:ListResourceRecordSets",
-    "route53:CreateHostedZone",
-    "route53:DeleteHostedZone",
-    "route53:ChangeResourceRecordSets",
-    "route53:CreateHealthCheck",
-    "route53:GetHealthCheck",
-    "route53:DeleteHealthCheck",
-    "route53:UpdateHealthCheck",
-    "ec2:DescribeVpcs",
-    "ec2:DescribeRegions",
-    "servicediscovery:*"
-  ],
-  "Resource": [
-    "*"
-  ]
-}
-```
-
 ### Configuration Maps
+
+From the directory on which this repository has been checked out:
 
 ```shell
 kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/
@@ -162,6 +175,8 @@ kubectl create configmap grafana --from-file=config/grafana/
 ```
 
 ### Storage Classes
+
+From the directory on which this repository has been checked out:
 
 ```shell
 kubectl apply -f aws-storage.yaml
@@ -173,12 +188,15 @@ Volumes for `StatefulSets` are going to be automatically created.
 
 It is recommended to follow the same order. The applications will wait for their respective dependencies to be ready prior start.
 
+From the directory on which this repository has been checked out:
+
 ```shell
 kubectl apply -f external-dns.yaml
 kubectl apply -f postgresql.yaml
 kubectl apply -f activemq.yaml
 kubectl apply -f cassandra.yaml
-kubectl apply -f elasticsearch.yaml
+kubectl apply -f elasticsearch.master.yaml
+kubectl apply -f elasticsearch.data.yaml
 kubectl apply -f zookeper.yaml
 kubectl apply -f kafka.yaml
 kubectl apply -f opennms.core.yaml
@@ -190,67 +208,74 @@ kubectl apply -f kibana.yaml
 After a while, you should be able to see this:
 
 ```text
-➜  ~ kubectl get all -l deployment=drift -o wide
+➜  kubectl get all -l deployment=drift -o wide
 NAME                          READY     STATUS    RESTARTS   AGE       IP            NODE
-pod/amq-0                     1/1       Running   0          53m       100.96.3.2    ip-172-20-52-27.us-east-2.compute.internal
-pod/cassandra-0               1/1       Running   0          53m       100.96.1.4    ip-172-20-57-36.us-east-2.compute.internal
-pod/cassandra-1               0/1       Running   3          52m       100.96.4.8    ip-172-20-36-206.us-east-2.compute.internal
-pod/cassandra-2               1/1       Running   0          51m       100.96.3.6    ip-172-20-52-27.us-east-2.compute.internal
-pod/elasticsearch-0           1/1       Running   0          53m       100.96.2.3    ip-172-20-59-100.us-east-2.compute.internal
-pod/elasticsearch-1           1/1       Running   0          51m       100.96.1.8    ip-172-20-57-36.us-east-2.compute.internal
-pod/elasticsearch-2           1/1       Running   1          50m       100.96.4.9    ip-172-20-36-206.us-east-2.compute.internal
-pod/grafana-946b9b667-4fm6g   1/1       Running   1          52m       100.96.4.7    ip-172-20-36-206.us-east-2.compute.internal
-pod/grafana-946b9b667-6jbzw   1/1       Running   0          52m       100.96.1.6    ip-172-20-57-36.us-east-2.compute.internal
-pod/kafka-0                   1/1       Running   0          26m       100.96.2.6    ip-172-20-59-100.us-east-2.compute.internal
-pod/kafka-1                   1/1       Running   0          26m       100.96.1.9    ip-172-20-57-36.us-east-2.compute.internal
-pod/kafka-2                   1/1       Running   0          25m       100.96.3.7    ip-172-20-52-27.us-east-2.compute.internal
-pod/kibana-7fffd7b66c-zpxqs   1/1       Running   0          52m       100.96.1.7    ip-172-20-57-36.us-east-2.compute.internal
-pod/onms-0                    1/1       Running   1          14m       100.96.3.9    ip-172-20-52-27.us-east-2.compute.internal
-pod/onms-ui-0                 1/1       Running   0          1m        100.96.2.9    ip-172-20-59-100.us-east-2.compute.internal
-pod/onms-ui-1                 1/1       Running   0          8m        100.96.1.10   ip-172-20-57-36.us-east-2.compute.internal
-pod/postgres-0                1/1       Running   1          53m       100.96.4.11   ip-172-20-36-206.us-east-2.compute.internal
-pod/zk-0                      1/1       Running   1          53m       100.96.4.10   ip-172-20-36-206.us-east-2.compute.internal
-pod/zk-1                      1/1       Running   0          53m       100.96.3.4    ip-172-20-52-27.us-east-2.compute.internal
-pod/zk-2                      1/1       Running   0          53m       100.96.1.5    ip-172-20-57-36.us-east-2.compute.internal
+pod/amq-0                     1/1       Running   0          1m        100.96.1.9    ip-172-20-51-219.us-east-2.compute.internal
+pod/cassandra-0               1/1       Running   0          1m        100.96.1.12   ip-172-20-51-219.us-east-2.compute.internal
+pod/cassandra-1               1/1       Running   0          1m        100.96.2.8    ip-172-20-32-237.us-east-2.compute.internal
+pod/cassandra-2               1/1       Running   0          1m        100.96.3.10   ip-172-20-53-115.us-east-2.compute.internal
+pod/esdata-0                  1/1       Running   0          1m        100.96.2.5    ip-172-20-32-237.us-east-2.compute.internal
+pod/esdata-1                  1/1       Running   0          1m        100.96.3.9    ip-172-20-53-115.us-east-2.compute.internal
+pod/esdata-2                  1/1       Running   0          1m        100.96.1.11   ip-172-20-51-219.us-east-2.compute.internal
+pod/esmaster-0                1/1       Running   0          1m        100.96.4.2    ip-172-20-34-233.us-east-2.compute.internal
+pod/esmaster-1                1/1       Running   0          1m        100.96.3.4    ip-172-20-53-115.us-east-2.compute.internal
+pod/esmaster-2                1/1       Running   0          1m        100.96.1.14   ip-172-20-51-219.us-east-2.compute.internal
+pod/grafana-b45486b7d-6h76p   1/1       Running   0          1m        100.96.2.10   ip-172-20-32-237.us-east-2.compute.internal
+pod/grafana-b45486b7d-x96sv   1/1       Running   0          1m        100.96.4.14   ip-172-20-34-233.us-east-2.compute.internal
+pod/kafka-0                   1/1       Running   0          1m        100.96.3.8    ip-172-20-53-115.us-east-2.compute.internal
+pod/kafka-1                   1/1       Running   0          1m        100.96.4.6    ip-172-20-34-233.us-east-2.compute.internal
+pod/kafka-2                   1/1       Running   0          1m        100.96.2.9    ip-172-20-32-237.us-east-2.compute.internal
+pod/kibana-6d49bd74c-hvzwf    1/1       Running   0          1m        100.96.3.7    ip-172-20-53-115.us-east-2.compute.internal
+pod/onms-0                    1/1       Running   0          1m        100.96.4.13   ip-172-20-34-233.us-east-2.compute.internal
+pod/onms-ui-0                 1/1       Running   0          1m        100.96.2.11   ip-172-20-32-237.us-east-2.compute.internal
+pod/onms-ui-1                 1/1       Running   0          1m        100.96.1.16   ip-172-20-51-219.us-east-2.compute.internal
+pod/postgres-0                1/1       Running   0          1m        100.96.4.12   ip-172-20-34-233.us-east-2.compute.internal
+pod/zk-0                      1/1       Running   0          1m        100.96.3.6    ip-172-20-53-115.us-east-2.compute.internal
+pod/zk-1                      1/1       Running   0          1m        100.96.1.10   ip-172-20-51-219.us-east-2.compute.internal
+pod/zk-2                      1/1       Running   0          1m        100.96.4.4    ip-172-20-34-233.us-east-2.compute.internal
 
-NAME                    TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                      AGE       SELECTOR
-service/activemq        ClusterIP   None         <none>        61616/TCP                    53m       app=amq
-service/cassandra       ClusterIP   None         <none>        9042/TCP                     53m       app=cassandra
-service/elasticsearch   ClusterIP   None         <none>        9200/TCP                     53m       app=elasticsearch
-service/grafana         ClusterIP   None         <none>        3000/TCP                     52m       app=grafana
-service/kafka           ClusterIP   None         <none>        9092/TCP                     53m       app=kafka
-service/kibana          ClusterIP   None         <none>        5601/TCP                     52m       app=kibana
-service/opennms-core    ClusterIP   None         <none>        8980/TCP,8101/TCP            53m       app=onms
-service/opennms-ui      ClusterIP   None         <none>        8980/TCP,8101/TCP            53m       app=onms-ui
-service/postgresql      ClusterIP   None         <none>        5432/TCP                     54m       app=postgres
-service/zookeeper       ClusterIP   None         <none>        2888/TCP,3888/TCP,2181/TCP   53m       app=zk
+NAME                   TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE       SELECTOR
+service/activemq       ClusterIP      None             <none>                                                                    61616/TCP                    1m        app=amq
+service/cassandra      ClusterIP      None             <none>                                                                    9042/TCP                     1m        app=cassandra
+service/esdata         ClusterIP      None             <none>                                                                    9200/TCP                     1m        role=esdata
+service/esmaster       ClusterIP      None             <none>                                                                    9200/TCP                     1m        role=esmaster
+service/ext-amq        LoadBalancer   100.68.195.71    ab498f0a08b6811e8b4660291aea5df5-2002819493.us-east-2.elb.amazonaws.com   61616:31217/TCP              1m        app=amq
+service/ext-grafana    LoadBalancer   100.70.146.0     a8f440e008b7211e8b4660291aea5df5-164183470.us-east-2.elb.amazonaws.com    80:32025/TCP                 1m        app=grafana
+service/ext-kibana     LoadBalancer   100.65.221.38    ac97e48528b6811e8b4660291aea5df5-455127768.us-east-2.elb.amazonaws.com    80:31220/TCP                 1m        app=kibana
+service/ext-onms       LoadBalancer   100.65.220.235   a8c3c0ca08b7211e8b4660291aea5df5-1551460738.us-east-2.elb.amazonaws.com   80:31133/TCP                 1m        app=onms
+service/ext-onms-ui    LoadBalancer   100.68.95.40     a930883e08b7211e8b4660291aea5df5-1843539511.us-east-2.elb.amazonaws.com   80:30735/TCP                 1m        app=onms-ui
+service/grafana        ClusterIP      None             <none>                                                                    3000/TCP                     1m        app=grafana
+service/kafka          ClusterIP      None             <none>                                                                    9092/TCP                     1m        app=kafka
+service/kibana         ClusterIP      None             <none>                                                                    5601/TCP                     1m        app=kibana
+service/opennms-core   ClusterIP      None             <none>                                                                    8980/TCP,8101/TCP            1m        app=onms
+service/opennms-ui     ClusterIP      None             <none>                                                                    8980/TCP,8101/TCP            1m        app=onms-ui
+service/postgresql     ClusterIP      None             <none>                                                                    5432/TCP                     1m        app=postgres
+service/zookeeper      ClusterIP      None             <none>                                                                    2888/TCP,3888/TCP,2181/TCP   1m        app=zk
 
-NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES                                  SELECTOR
-deployment.extensions/grafana   2         2         2            2           52m       grafana      grafana/grafana:5.2.1                   app=grafana
-deployment.extensions/kibana    1         1         1            1           52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana
-
-NAME                                      DESIRED   CURRENT   READY     AGE       CONTAINERS   IMAGES                                  SELECTOR
-replicaset.extensions/grafana-946b9b667   2         2         2         52m       grafana      grafana/grafana:5.2.1                   app=grafana,pod-template-hash=502656223
-replicaset.extensions/kibana-7fffd7b66c   1         1         1         52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana,pod-template-hash=3999836227
-
-NAME                      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES                                  SELECTOR
-deployment.apps/grafana   2         2         2            2           52m       grafana      grafana/grafana:5.2.1                   app=grafana
-deployment.apps/kibana    1         1         1            1           52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana
+NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS     IMAGES                                                    SELECTOR
+deployment.apps/external-dns   1         1         1            1           1m        external-dns   registry.opensource.zalan.do/teapot/external-dns:latest   app=external-dns
+deployment.apps/grafana        2         2         2            2           1m        grafana        grafana/grafana:5.2.1                                     app=grafana
+deployment.apps/kibana         1         1         1            1           1m        kibana         docker.elastic.co/kibana/kibana:6.2.4                     app=kibana
 
 NAME                                DESIRED   CURRENT   READY     AGE       CONTAINERS   IMAGES                                  SELECTOR
-replicaset.apps/grafana-946b9b667   2         2         2         52m       grafana      grafana/grafana:5.2.1                   app=grafana,pod-template-hash=502656223
-replicaset.apps/kibana-7fffd7b66c   1         1         1         52m       kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana,pod-template-hash=3999836227
+replicaset.apps/grafana-b45486b7d   2         2         2         1m        grafana      grafana/grafana:5.2.1                   app=grafana,pod-template-hash=601042638
+replicaset.apps/kibana-6d49bd74c    1         1         1         1m        kibana       docker.elastic.co/kibana/kibana:6.2.4   app=kibana,pod-template-hash=280568307
 
-NAME                             DESIRED   CURRENT   AGE       CONTAINERS      IMAGES
-statefulset.apps/amq             1         1         53m       amq             webcenter/activemq:5.14.3
-statefulset.apps/cassandra       3         3         53m       cassandra       cassandra:3.11.2
-statefulset.apps/elasticsearch   3         3         53m       elasticsearch   docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
-statefulset.apps/kafka           3         3         26m       kafka           wurstmeister/kafka:2.11-1.1.0
-statefulset.apps/onms            1         1         14m       onms            opennms/horizon-core-web:22.0.1-1
-statefulset.apps/onms-ui         2         2         8m        onms-ui         opennms/horizon-core-web:22.0.1-1
-statefulset.apps/postgres        1         1         53m       postgres        postgres:10.4
-statefulset.apps/zk              3         3         53m       zk              zookeeper:3.4.10
+NAME                         DESIRED   CURRENT   AGE       CONTAINERS   IMAGES
+statefulset.apps/amq         1         1         1m        amq          webcenter/activemq:5.14.3
+statefulset.apps/cassandra   3         3         1m        cassandra    cassandra:3.11.2
+statefulset.apps/esdata      3         3         1m        esdata       docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+statefulset.apps/esmaster    3         3         1m        esmaster     docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+statefulset.apps/kafka       3         3         1m        kafka        wurstmeister/kafka:2.11-1.1.0
+statefulset.apps/onms        1         1         1m        onms         opennms/horizon-core-web:22.0.1-1
+statefulset.apps/onms-ui     2         2         1m        onms-ui      opennms/horizon-core-web:22.0.1-1
+statefulset.apps/postgres    1         1         1m        postgres     postgres:10.4
+statefulset.apps/zk          3         3         1m        zk           zookeeper:3.4.10
 ```
+
+## Issues
+
+Even if the nodes are exposing the Kafka port due to `nodePort`, Kafka is not reachable from the outside. This requires more investigation, as it doesn't work even after forcing `TCP 9092` on the `nodes.k8s.opennms.org` security group.
 
 ## Minion
 
@@ -275,4 +300,5 @@ Make sure to use your own Domain ;)
 * Service created for Kafka.
 * Use `ConfigMaps` to centralize configuration.
 * Use `Secrets` for the passwords.
-* Improve IAM Role handling for the external-dns.
+* Simplify deployment.
+* Add support for Helm.

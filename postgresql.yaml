@@ -1,5 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# Make sure the to tune the max_connections to accomodate ONMS, the UI servers and Grafana.
+#
 # TODO
 # - Add an initContainer to configure master/slave
 # - How to manage replicas if the master can be moved ?
@@ -43,6 +45,9 @@ spec:
       - name: postgres
         image: postgres:10.4
         imagePullPolicy: IfNotPresent
+        command: [ postgres, -c, 'shared_buffers=256MB', -c, 'max_connections=200' ]
+        securityContext:
+          runAsUser: 999 # postgres user
         env:
         - name: PGUSER
           value: postgres

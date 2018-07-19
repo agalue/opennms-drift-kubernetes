@@ -1,0 +1,127 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# ES_JAVA_OPTS should be consistent with resources.requests.memory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: esmaster
+  labels:
+    app: elasticsearch
+    deployment: drift
+    role: esmaster
+spec:
+  clusterIP: None
+  ports:
+  - port: 9200
+  selector:
+    role: esmaster
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: esmaster
+  labels:
+    app: elasticsearch
+    deployment: drift
+    role: esmaster
+spec:
+  serviceName: esmaster
+  replicas: 3
+  selector:
+    matchLabels:
+      role: esmaster
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+        deployment: drift
+        role: esmaster
+    spec:
+      initContainers:
+      # This is to fix the permission on the volume. By default elasticsearch container is not run as non root user.
+      # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_notes_for_production_use_and_defaults
+      - name: fix-the-volume-permission
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c',  'chown -R 1000:1000 /usr/share/elasticsearch/data' ]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+      # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode
+      - name: increase-the-vm-max-map-count
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sysctl' , '-w', 'vm.max_map_count=262144' ]
+        securityContext:
+          privileged: true
+      # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_notes_for_production_use_and_defaults
+      - name: increase-the-ulimit
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'ulimit -n 65536' ]
+        securityContext:
+          privileged: true
+      containers:
+      - name: esmaster
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: tcp
+        env:
+        - name: cluster.name
+          value: OpenNMS
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: discovery.zen.ping.unicast.hosts
+          value: esmaster.default.svc.cluster.local
+        - name: node.master
+          value: 'true'
+        - name: node.data
+          value: 'false'
+        - name: node.ingest
+          value: 'false'
+        - name: ES_JAVA_OPTS
+          value: -Xms1g -Xmx1g
+        - name: ELASTIC_PASSWORD
+          value: elastic
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+        resources:
+          limits:
+            cpu: 2
+            memory: 2Gi
+          requests:
+            cpu: 1
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 60
+  volumeClaimTemplates:
+  - metadata:
+      name: es-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: aws-ebs
+      resources:
+        requests:
+          storage: 5Gi

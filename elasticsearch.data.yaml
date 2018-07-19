@@ -1,42 +1,44 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# A simple cluster with all roles on each node
 # ES_JAVA_OPTS should be consistent with resources.requests.memory
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: elasticsearch
+  name: esdata
   labels:
     app: elasticsearch
     deployment: drift
+    role: esdata
 spec:
   clusterIP: None
   ports:
   - port: 9200
   selector:
-    app: elasticsearch
+    role: esdata
 
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: elasticsearch
+  name: esdata
   labels:
     app: elasticsearch
     deployment: drift
+    role: esdata
 spec:
-  serviceName: elasticsearch
+  serviceName: esdata
   replicas: 3
   selector:
     matchLabels:
-      app: elasticsearch
+      role: esdata
   template:
     metadata:
       labels:
         app: elasticsearch
         deployment: drift
+        role: esdata
     spec:
       initContainers:
       # This is to fix the permission on the volume. By default elasticsearch container is not run as non root user.
@@ -64,8 +66,17 @@ spec:
         command: [ 'sh', '-c', 'ulimit -n 65536' ]
         securityContext:
           privileged: true
+      - name: check-elasticsearch-ready
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
+        env:
+          - name: TARGET_SERVER
+            value: esmaster.default.svc.cluster.local
+          - name: TARGET_PORT
+            value: '9200'
       containers:
-      - name: elasticsearch
+      - name: esdata
         image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
         imagePullPolicy: IfNotPresent
         ports:
@@ -81,7 +92,13 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: discovery.zen.ping.unicast.hosts
-          value: elasticsearch-0.elasticsearch.default.svc.cluster.local
+          value: esmaster.default.svc.cluster.local
+        - name: node.master
+          value: 'false'
+        - name: node.data
+          value: 'true'
+        - name: node.ingest
+          value: 'true'
         - name: ES_JAVA_OPTS
           value: -Xms2g -Xmx2g
         - name: ELASTIC_PASSWORD
