@@ -119,7 +119,7 @@
     <intercept-url pattern="/assets/**" access="hasAnyRole('ROLE_ANONYMOUS','ROLE_USER','ROLE_DASHBOARD')" />
 
     <intercept-url pattern="/admin/ng-requisitions/**" access="hasAnyRole('ROLE_DISABLED')" />
-    <intercept-url pattern="/rest/snmpConfig/**" access="hasAnyRole(ROLE_DISABLED')" />
+    <intercept-url pattern="/rest/snmpConfig/**" access="hasAnyRole('ROLE_DISABLED')" />
     <intercept-url pattern="/admin/**" access="hasAnyRole('ROLE_DISABLED')" />
     <intercept-url pattern="/**/mib-compiler" access="hasAnyRole('ROLE_DISABLED')" />
     <intercept-url pattern="/**/admin-*" access="hasAnyRole('ROLE_DISABLED')" />
