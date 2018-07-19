@@ -33,7 +33,7 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 5601
+  - port: 80
     targetPort: 5601
   selector:
     app: kibana
@@ -57,13 +57,31 @@ spec:
         app: kibana
         deployment: drift
     spec:
+      initContainers:
+      - name: check-elasticsearch-ready
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
+        env:
+          - name: TARGET_SERVER
+            value: elasticsearch.default.svc.cluster.local
+          - name: TARGET_PORT
+            value: '9200'
       containers:
       - name: kibana
         image: docker.elastic.co/kibana/kibana:6.2.4
         imagePullPolicy: IfNotPresent
         env:
+        - name: SERVER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: ELASTICSEARCH_URL
           value: http://elasticsearch.default.svc.cluster.local:9200
+        - name: ELASTICSEARCH_USERNAME
+          value: elastic
+        - name: ELASTICSEARCH_PASSWORD
+          value: elastic
         ports:
         - containerPort: 5601
           name: http

@@ -66,7 +66,7 @@ spec:
           privileged: true
       containers:
       - name: elasticsearch
-        image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9200
@@ -84,6 +84,8 @@ spec:
           value: elasticsearch-0.elasticsearch.default.svc.cluster.local
         - name: ES_JAVA_OPTS
           value: -Xms2g -Xmx2g
+        - name: ELASTIC_PASSWORD
+          value: elastic
         volumeMounts:
         - name: es-data
           mountPath: /usr/share/elasticsearch/data
