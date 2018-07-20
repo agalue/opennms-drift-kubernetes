@@ -45,9 +45,7 @@ spec:
       - name: postgres
         image: postgres:10.4
         imagePullPolicy: IfNotPresent
-        command: [ postgres, -c, 'shared_buffers=256MB', -c, 'max_connections=200' ]
-        securityContext:
-          runAsUser: 999 # postgres user
+        command: [ docker-entrypoint.sh, postgres, -c, 'shared_buffers=256MB', -c, 'max_connections=200' ]
         env:
         - name: PGUSER
           value: postgres
@@ -57,8 +55,6 @@ spec:
           value: postgres
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
-        - name: POD_IP
-          valueFrom: { fieldRef: { fieldPath: status.podIP } }
         ports:
         - containerPort: 5432
           name: pg
@@ -77,7 +73,7 @@ spec:
             command:
             - sh
             - -c
-            - exec pg_isready --host $POD_IP
+            - exec pg_isready --host $HOSTNAME
           initialDelaySeconds: 10
           timeoutSeconds: 5
         livenessProbe:
@@ -85,7 +81,7 @@ spec:
             command:
             - sh
             - -c
-            - exec pg_isready --host $POD_IP
+            - exec pg_isready --host $HOSTNAME
           initialDelaySeconds: 30
           periodSeconds: 30
   volumeClaimTemplates:

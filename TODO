@@ -1,0 +1,5 @@
+Use the following metadata labels:
+
+app: opennms
+component: kafka, amq, zookeeper, elasticsearch, onms-core, onms-ui, grafana
+deployment: drift

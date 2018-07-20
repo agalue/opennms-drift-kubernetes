@@ -55,7 +55,7 @@ aws s3api put-bucket-versioning \
   --versioning-configuration Status=Enabled
 ```
 
-Create the Kubernetes cluster using `kops`:
+Create the Kubernetes cluster using `kops` (1 master node and 4 worker nodes):
 
 ```shell
 kops create cluster \
@@ -64,8 +64,9 @@ kops create cluster \
   --dns-zone k8s.opennms.org \
   --zones us-east-2a \
   --master-size t2.medium \
+  --master-count 1 \
   --node-size t2.2xlarge \
-  --node-count 4 \
+  --node-count 4
 ```
 
 Edit the configuration to add additional AWS permissions for the [external-dns](https://github.com/kubernetes-incubator/external-dns) add-on:
@@ -74,7 +75,7 @@ Edit the configuration to add additional AWS permissions for the [external-dns](
 kops edit cluster k8s.opennms.org --state s3://k8s.opennms.org
 ```
 
-Then, add the following:
+Then, add the following (according to the [docs](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md)):
 
 ```
 spec:
@@ -83,24 +84,16 @@ spec:
       [{
         "Effect": "Allow",
         "Action": [
-          "route53:GetHostedZone",
-          "route53:ListHostedZonesByName",
-          "route53:ListHostedZones",
-          "route53:ListResourceRecordSets",
-          "route53:CreateHostedZone",
-          "route53:DeleteHostedZone",
-          "route53:ChangeResourceRecordSets",
-          "route53:CreateHealthCheck",
-          "route53:GetHealthCheck",
-          "route53:DeleteHealthCheck",
-          "route53:UpdateHealthCheck",
-          "ec2:DescribeVpcs",
-          "ec2:DescribeRegions",
-          "servicediscovery:*"
+          "route53:ChangeResourceRecordSets"
         ],
-        "Resource": [
-          "*"
-        ]
+        "Resource": [ "arn:aws:route53:::hostedzone/*" ]
+      },{
+        "Effect": "Allow",
+        "Action": [
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets"
+        ],
+        "Resource": [ "*" ]
       }]
 ```
 
@@ -275,7 +268,11 @@ statefulset.apps/zk          3         3         1m        zk           zookeepe
 
 ## Issues
 
-Even if the nodes are exposing the Kafka port due to `nodePort`, Kafka is not reachable from the outside. This requires more investigation, as it doesn't work even after forcing `TCP 9092` on the `nodes.k8s.opennms.org` security group.
+Even if the nodes are exposing the Kafka port due to `nodePort`, Kafka is not reachable from the outside. The reason is that `external-dns` is seems to be using the Pod IP for each service, instead of the public IP of the worker EC2 instance to create the Route 53 entry.
+
+'dns-controller' which is available with Kops, can handle `LoadBalancer`, but it cannot handle headless services.
+
+Without having a way to expose headless services, Kafka cannot be accessed from outside Kubernetes.
 
 ## Minion
 
@@ -301,4 +298,5 @@ Make sure to use your own Domain ;)
 * Use `ConfigMaps` to centralize configuration.
 * Use `Secrets` for the passwords.
 * Simplify deployment.
+* Design a better solution to manage OpenNMS Configuration files.
 * Add support for Helm.

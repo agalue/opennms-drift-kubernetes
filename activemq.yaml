@@ -32,6 +32,7 @@ metadata:
     deployment: drift
   annotations:
     external-dns.alpha.kubernetes.io/hostname: activemq.k8s.opennms.org.
+    #dns.alpha.kubernetes.io/external: activemq.k8s.opennms.org.
 spec:
   type: LoadBalancer
   ports:

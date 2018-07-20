@@ -51,8 +51,14 @@ spec:
           value: cassandra-0.cassandra.default.svc.cluster.local
         - name: CASSANDRA_CLUSTER_NAME
           value: OpenNMS
-        - name: POD_IP
-          valueFrom: { fieldRef: { fieldPath: status.podIP } }
+        - name: CASSANDRA_ENDPOINT_SNITCH
+          value: GossipingPropertyFileSnitch
+        - name: CASSANDRA_DC
+          value: Main # Should match config/opennms-core/newts.cql
+        - name: CASSANDRA_RACK
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name # TODO Should the Kubernetes Host name, or create a policy to avoid having 2 instances on the same machine
         ports:
         - containerPort: 7000
           name: intra-node
@@ -82,7 +88,7 @@ spec:
             command:
             - bash
             - -c
-            - 'if [[ $(nodetool status | grep $POD_IP) == *"UN"* ]]; then exit 0; else exit 1; fi'
+            - 'if [[ $(nodetool status -r | grep $HOSTNAME) == *"UN"* ]]; then exit 0; else exit 1; fi'
           initialDelaySeconds: 15
         livenessProbe:
           tcpSocket:

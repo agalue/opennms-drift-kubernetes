@@ -46,8 +46,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
-  labels:
-    deployment: drift
 spec:
   strategy:
     type: Recreate
@@ -64,10 +62,13 @@ spec:
       - name: external-dns
         image: registry.opensource.zalan.do/teapot/external-dns:latest
         args:
+        - --log-level=debug
         - --source=service
         - --source=ingress
         - --namespace=default
         - --domain-filter=k8s.opennms.org.
         - --provider=aws
         - --registry=txt
-        - --txt-owner-id=k8s.opennms.org
+        - --txt-owner-id=opennms
+        - --aws-zone-type=public
+        - --fqdn-template={{.Name}}.k8s.opennms.org

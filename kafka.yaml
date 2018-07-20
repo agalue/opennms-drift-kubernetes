@@ -1,9 +1,15 @@
 # @author Alejandro Galue <agalue@opennms.org>
 # Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
+#             https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/hostport.md
+#
+# Kops dns-controller doesn't support headless services:
+# I0720 17:19:29.893870       1 service.go:188] Cannot expose service default/kafka of type "ClusterIP"
 #
 # TODO
 # - The kafka process runs as root. Verify if this can be changed
-# - How to expose Kafka Nodes to the outside world ?
+# - external-dns seems to work but with the wrong IP (it is using Pods IP, which is not accesible)
+#   This behavior was verified with the annotation, and with --fqdn-template
+#   The port 9092 is exposed on the worker nodes, but it is unreachable from the outside.
 
 ---
 apiVersion: v1
@@ -13,8 +19,6 @@ metadata:
   labels:
     app: kafka
     deployment: drift
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: k8s.opennms.org
 spec:
   clusterIP: None
   ports:

@@ -29,6 +29,7 @@ metadata:
     deployment: drift
   annotations:
     external-dns.alpha.kubernetes.io/hostname: grafana.k8s.opennms.org.
+    #dns.alpha.kubernetes.io/external: grafana.k8s.opennms.org.
 spec:
   type: LoadBalancer
   ports:
@@ -62,18 +63,20 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [ 'sh', '/bin/grafana-init.sh']
           env:
-            - name: DATABASE_HOST
+            - name: PGHOST
               value: postgresql.default.svc.cluster.local
+            - name: PGPORT
+              value: '5432'
+            - name: PGUSER
+              value: postgres
+            - name: PGPASSWORD
+              value: postgres
             - name: DATABASE_NAME
               value: grafana
             - name: DATABASE_USER
               value: grafana
             - name: DATABASE_PASSWORD
               value: grafana
-            - name: DATABASE_ROOT_USER
-              value: postgres
-            - name: DATABASE_ROOT_PASSWORD
-              value: postgres
           volumeMounts:
           - name: grafana
             mountPath: /bin/grafana-init.sh

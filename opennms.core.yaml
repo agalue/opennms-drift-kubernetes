@@ -35,6 +35,7 @@ metadata:
     deployment: drift
   annotations:
     external-dns.alpha.kubernetes.io/hostname: onms.k8s.opennms.org.
+    #dns.alpha.kubernetes.io/external: onms.k8s.opennms.org.
 spec:
   type: LoadBalancer
   ports:
@@ -67,11 +68,11 @@ spec:
       - name: check-postgresql-ready
         image: postgres:10.4
         imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'until pg_isready -h $DB_SERVER -p $DB_PORT; do echo "$(date) - Waiting for $DB_SERVER:$DB_PORT..."; sleep 2; done;' ]
+        command: [ 'sh', '-c', 'until pg_isready; do echo "$(date) - Waiting for $PGHOST:$PGPORT..."; sleep 2; done;' ]
         env:
-          - name: DB_SERVER
+          - name: PGHOST
             value: postgresql.default.svc.cluster.local
-          - name: DB_PORT
+          - name: PGPORT
             value: '5432'
       - name: check-cassandra-ready
         image: busybox
@@ -100,19 +101,29 @@ spec:
             value: kafka.default.svc.cluster.local
           - name: TARGET_PORT
             value: '9092'
-      - name: newts-initialization
+      - name: config-initialization
         image: opennms/horizon-core-web:22.0.1-1
         imagePullPolicy: IfNotPresent
-        command: [ '/opt/opennms/bin/newts', 'init', '-r', '2' ]
+        command: [ 'sh', '-c', 'if [ ! -f /opennms-config/configured ]; then cp -R /opt/opennms/etc/* /opennms-config/; fi' ]
         volumeMounts:
-        - name: onms-etc
-          mountPath: /opt/opennms/etc/opennms.properties.d/newts.properties
-          subPath: newts.properties
+        - name: opennms-config
+          mountPath: /opennms-config
+      - name: newts-initialization
+        image: cassandra:3.11.2
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '-c', 'cqlsh -f /newts.cql $CASSANDRA_HOST' ]
+        env:
+          - name: CASSANDRA_HOST
+            value: cassandra.default.svc.cluster.local
+        volumeMounts:
+        - name:  onms-etc
+          mountPath: /newts.cql
+          subPath: newts.cql
       containers:
       - name: onms
         image: opennms/horizon-core-web:22.0.1-1
         imagePullPolicy: IfNotPresent
-        command: [ '/docker-entrypoint.sh', '-s' ] # TODO What about using this ? args: ['-s']
+        command: [ /docker-entrypoint.sh, -s ]
         ports:
         - containerPort: 8101
           name: karaf
@@ -136,6 +147,8 @@ spec:
         - name: OPENNMS_DBPASS
           value: opennms
         volumeMounts:
+        - name: opennms-config
+          mountPath: /opt/opennms/etc
         - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/org.opennms.features.datachoices.cfg
           subPath: org.opennms.features.datachoices.cfg
@@ -165,3 +178,13 @@ spec:
       - name: onms-etc
         configMap:
           name: opennms-core-overlay
+  volumeClaimTemplates:
+  - metadata:
+      name: opennms-config
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: aws-ebs
+      resources:
+        requests:
+          storage: 1Gi # Cannnot be less than that in AWS for an EBS Volume
