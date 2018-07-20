@@ -27,8 +27,7 @@ metadata:
     app: onms-ui
     deployment: drift
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: onmsui.k8s.opennms.org.
-    #dns.alpha.kubernetes.io/external: onmsui.k8s.opennms.org.
+    dns.alpha.kubernetes.io/external: onmsui.k8s.opennms.org.
 spec:
   type: LoadBalancer
   ports:

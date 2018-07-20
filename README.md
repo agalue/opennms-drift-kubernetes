@@ -67,43 +67,10 @@ kops create cluster \
   --master-count 1 \
   --node-size t2.2xlarge \
   --node-count 4
-```
-
-Edit the configuration to add additional AWS permissions for the [external-dns](https://github.com/kubernetes-incubator/external-dns) add-on:
-
-```shell
-kops edit cluster k8s.opennms.org --state s3://k8s.opennms.org
-```
-
-Then, add the following (according to the [docs](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md)):
-
-```
-spec:
-  additionalPolicies:
-    node: |
-      [{
-        "Effect": "Allow",
-        "Action": [
-          "route53:ChangeResourceRecordSets"
-        ],
-        "Resource": [ "arn:aws:route53:::hostedzone/*" ]
-      },{
-        "Effect": "Allow",
-        "Action": [
-          "route53:ListHostedZones",
-          "route53:ListResourceRecordSets"
-        ],
-        "Resource": [ "*" ]
-      }]
+  --yes
 ```
 
 > **IMPORTANT: Remember to change the settings to reflect your environment.**
-
-Now, apply the configuration to create the Kubernetes cluster on AWS:
-
-```shell
-kops update cluster k8s.opennms.org --state s3://k8s.opennms.org --yes
-```
 
 After a few minutes, verify the state of the cluster using either `kubectl` or `kops`:
 
@@ -184,7 +151,6 @@ It is recommended to follow the same order. The applications will wait for their
 From the directory on which this repository has been checked out:
 
 ```shell
-kubectl apply -f external-dns.yaml
 kubectl apply -f postgresql.yaml
 kubectl apply -f activemq.yaml
 kubectl apply -f cassandra.yaml
@@ -246,7 +212,6 @@ service/postgresql     ClusterIP      None             <none>                   
 service/zookeeper      ClusterIP      None             <none>                                                                    2888/TCP,3888/TCP,2181/TCP   1m        app=zk
 
 NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS     IMAGES                                                    SELECTOR
-deployment.apps/external-dns   1         1         1            1           1m        external-dns   registry.opensource.zalan.do/teapot/external-dns:latest   app=external-dns
 deployment.apps/grafana        2         2         2            2           1m        grafana        grafana/grafana:5.2.1                                     app=grafana
 deployment.apps/kibana         1         1         1            1           1m        kibana         docker.elastic.co/kibana/kibana:6.2.4                     app=kibana
 
@@ -268,11 +233,7 @@ statefulset.apps/zk          3         3         1m        zk           zookeepe
 
 ## Issues
 
-Even if the nodes are exposing the Kafka port due to `nodePort`, Kafka is not reachable from the outside. The reason is that `external-dns` is seems to be using the Pod IP for each service, instead of the public IP of the worker EC2 instance to create the Route 53 entry.
-
-'dns-controller' which is available with Kops, can handle `LoadBalancer`, but it cannot handle headless services.
-
-Without having a way to expose headless services, Kafka cannot be accessed from outside Kubernetes.
+I need to find a way to expose Kafka. I've tried `external-dns`, but I couldn't make it work, the headless services are registered on Route53 using Pod IPs which won't work.
 
 ## Minion
 
@@ -283,6 +244,8 @@ Your Minion should use the following resources:
 * OpenNMS Core: `http://onms.k8s.opennms.org:8980/opennms`
 
 Make sure to use your own Domain ;)
+
+> **WARNING: As mentioned, Kafka doesn't work at the moment.**
 
 ## Users
 
