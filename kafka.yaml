@@ -1,12 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
 # Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
 #
-# Kops dns-controller doesn't support headless services:
-# I0720 17:19:29.893870       1 service.go:188] Cannot expose service default/kafka of type "ClusterIP"
-#
 # TODO
 # - The kafka process runs as root. Verify if this can be changed
-# - The brokers has to be exposed to the outside world in order to use Minions
 
 ---
 apiVersion: v1
@@ -23,6 +19,24 @@ spec:
     name: inside
   - port: 9999
     name: jmx
+  selector:
+    app: kafka
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ext-kafka
+  labels:
+    app: kafka
+    deployment: drift
+  annotations:
+    dns.alpha.kubernetes.io/external: kafka.k8s.opennms.org.
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 9094
+    targetPort: 9094
   selector:
     app: kafka
 
@@ -63,17 +77,23 @@ spec:
         ports:
         - containerPort: 9092
           name: inside
+        - containerPort: 9094
+          name: outside
         - containerPort: 9999
           name: jmx
         env:
         - name: BROKER_ID_COMMAND
           value: echo ${HOSTNAME##*-}
         - name: HOSTNAME_COMMAND
-          value: echo $(hostname -f)
+          value: curl http://169.254.169.254/latest/meta-data/public-hostname
         - name: KAFKA_ADVERTISED_LISTENERS
-          value: PLAINTEXT://_{HOSTNAME_COMMAND}:9092
+          value: INSIDE://:9092,OUTSIDE://_{HOSTNAME_COMMAND}:9094
         - name: KAFKA_LISTENERS
-          value: PLAINTEXT://:9092
+          value: INSIDE://:9092,OUTSIDE://:9094
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: INSIDE
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zookeeper.default.svc.cluster.local:2181/kafka
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR

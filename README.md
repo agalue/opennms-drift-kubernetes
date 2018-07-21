@@ -66,13 +66,13 @@ kops create cluster \
   --master-size t2.medium \
   --master-count 1 \
   --node-size t2.2xlarge \
-  --node-count 4
+  --node-count 4 \
   --yes
 ```
 
 > **IMPORTANT: Remember to change the settings to reflect your environment.**
 
-After a few minutes, verify the state of the cluster using either `kubectl` or `kops`:
+It takes a few minutes to have the cluster ready. Verify the cluster statue using `kubectl` and `kops`:
 
 ```shell
 kops validate cluster --name k8s.opennms.org --state s3://k8s.opennms.org
@@ -156,7 +156,7 @@ kubectl apply -f activemq.yaml
 kubectl apply -f cassandra.yaml
 kubectl apply -f elasticsearch.master.yaml
 kubectl apply -f elasticsearch.data.yaml
-kubectl apply -f zookeper.yaml
+kubectl apply -f zookeeper.yaml
 kubectl apply -f kafka.yaml
 kubectl apply -f opennms.core.yaml
 kubectl apply -f opennms.ui.yaml
@@ -231,27 +231,40 @@ statefulset.apps/postgres    1         1         1m        postgres     postgres
 statefulset.apps/zk          3         3         1m        zk           zookeeper:3.4.10
 ```
 
-## Issues
-
-I need to find a way to expose Kafka. I've tried `external-dns`, but I couldn't make it work, the headless services are registered on Route53 using Pod IPs which won't work.
-
 ## Minion
 
 Your Minion should use the following resources:
 
 * ActiveMQ: `failover:(tcp://activemq.k8s.opennms.org:61616)?randomize=false`
-* Kafka: `kafka-0.k8s.opennms.org:9092,kafka-1.k8s.opennms.org:9092,kafka-2.k8s.opennms.org:9092`
-* OpenNMS Core: `http://onms.k8s.opennms.org:8980/opennms`
+* OpenNMS Core: `http://onms.k8s.opennms.org/opennms`
+* Kafka: `kafka.k8s.opennms.org:9094`
+
+For example:
+
+```shell
+[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg 
+location=Vagrant
+id=onms-minion.local
+http-url=http://onms.k8s.opennms.org/opennms
+broker-url=failover:(tcp://activemq.k8s.opennms.org:61616)?randomize=false
+
+[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg 
+bootstrap.servers=kafka.k8s.opennms.org:9094
+acks=1
+
+[root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot 
+!opennms-core-ipc-sink-camel
+opennms-core-ipc-sink-kafka
+```
 
 Make sure to use your own Domain ;)
 
-> **WARNING: As mentioned, Kafka doesn't work at the moment.**
-
 ## Users
 
-* OpenNMS UI: `http://onmsui.k8s.opennms.org:8980/opennms`
-* Grafana: `http://grafana.k8s.opennms.org:3000/`
-* Kibana: `http://kibana.k8s.opennms.org:5601/`
+* OpenNMS UI: `http://onmsui.k8s.opennms.org/opennms`
+* Grafana: `http://grafana.k8s.opennms.org/`
+* Kibana: `http://kibana.k8s.opennms.org/`
+* Kafka Manager: `http://kaffa-manager.k8s.opennms.org/`
 
 Make sure to use your own Domain ;)
 
