@@ -1,6 +1,24 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ext-kafka-manager
+  labels:
+    app: kafka-manager
+    deployment: drift
+  annotations:
+    dns.alpha.kubernetes.io/external: kafka-manager.k8s.opennms.org.
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 9000
+  selector:
+    app: kafka-manager
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
