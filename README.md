@@ -66,7 +66,7 @@ kops create cluster \
   --master-size t2.medium \
   --master-count 1 \
   --node-size t2.2xlarge \
-  --node-count 4 \
+  --node-count 5 \
   --yes
 ```
 
@@ -90,11 +90,12 @@ nodes			Node	t2.2xlarge	4	4	us-east-2a
 
 NODE STATUS
 NAME						ROLE	READY
-ip-172-20-32-202.us-east-2.compute.internal	node	True
-ip-172-20-33-61.us-east-2.compute.internal	node	True
-ip-172-20-40-131.us-east-2.compute.internal	master	True
-ip-172-20-55-47.us-east-2.compute.internal	node	True
-ip-172-20-57-252.us-east-2.compute.internal	node	True
+ip-172-20-32-113.us-east-2.compute.internal	node	True
+ip-172-20-36-231.us-east-2.compute.internal	node	True
+ip-172-20-39-240.us-east-2.compute.internal	node	True
+ip-172-20-40-133.us-east-2.compute.internal	master	True
+ip-172-20-50-153.us-east-2.compute.internal	node	True
+ip-172-20-50-57.us-east-2.compute.internal	node	True
 
 Your cluster k8s.opennms.org is ready
 ```
@@ -258,6 +259,8 @@ opennms-core-ipc-sink-kafka
 ```
 
 Make sure to use your own Domain ;)
+
+> **WARNING: This part is a work in progress, as I need to find a proper way to expose Kafka.**
 
 ## Users
 
