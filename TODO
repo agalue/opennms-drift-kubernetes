@@ -1,8 +1,0 @@
-Use the following metadata labels:
-
-app: opennms
-component: kafka, amq, zookeeper, elasticsearch, onms-core, onms-ui, grafana
-deployment: drift
-
-
-https://stackoverflow.com/questions/41868161/kafka-in-kubernetes-cluster-how-to-publish-consume-messages-from-outside-of-kub/41869856
