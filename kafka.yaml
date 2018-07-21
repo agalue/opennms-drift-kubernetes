@@ -78,6 +78,7 @@ spec:
         - containerPort: 9092
           name: inside
         - containerPort: 9094
+          hostPort: 9094
           name: outside
         - containerPort: 9999
           name: jmx
