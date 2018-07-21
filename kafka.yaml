@@ -20,6 +20,9 @@ spec:
   clusterIP: None
   ports:
   - port: 9092
+    name: inside
+  - port: 9999
+    name: jmx
   selector:
     app: kafka
 
