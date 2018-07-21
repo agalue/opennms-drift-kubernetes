@@ -20,7 +20,6 @@ spec:
   clusterIP: None
   ports:
   - port: 9092
-    name: external
   selector:
     app: kafka
 
@@ -60,15 +59,14 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9092
-#         hostPort: 9092
-          name: external
+          name: inside
         - containerPort: 9999
           name: jmx
         env:
         - name: BROKER_ID_COMMAND
           value: echo ${HOSTNAME##*-}
         - name: HOSTNAME_COMMAND
-          value: echo $(hostname).k8s.opennms.org
+          value: echo $(hostname -f)
         - name: KAFKA_ADVERTISED_LISTENERS
           value: PLAINTEXT://_{HOSTNAME_COMMAND}:9092
         - name: KAFKA_LISTENERS
@@ -101,12 +99,12 @@ spec:
             cpu: 1
         readinessProbe:
           tcpSocket:
-            port: external
+            port: inside
           initialDelaySeconds: 10
           timeoutSeconds: 5
         livenessProbe:
           tcpSocket:
-            port: external
+            port: inside
           initialDelaySeconds: 30
           periodSeconds: 60
   volumeClaimTemplates:
