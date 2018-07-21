@@ -1,9 +1,0 @@
-# @author Alejandro Galue <agalue@opennms.org>
-
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: opennms
-  labels:
-    deployment: drift
