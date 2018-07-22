@@ -1,5 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
-# TODO find a newer image or create a custom one
+#
+# TODO
+# - Find a newer image or create a custom one
 
 ---
 apiVersion: v1

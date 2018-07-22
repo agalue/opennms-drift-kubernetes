@@ -2,6 +2,7 @@
 #
 # A simple cluster with 3 nodes
 # MAX_HEAP_SIZE should be consistent with resources.requests.memory
+# CASSANDRA_DC should match config/opennms-core/newts.cql
 
 ---
 apiVersion: v1
@@ -54,11 +55,11 @@ spec:
         - name: CASSANDRA_ENDPOINT_SNITCH
           value: GossipingPropertyFileSnitch
         - name: CASSANDRA_DC
-          value: Main # Should match config/opennms-core/newts.cql
+          value: Main
         - name: CASSANDRA_RACK
           valueFrom:
             fieldRef:
-              fieldPath: metadata.name # TODO Should the Kubernetes Host name, or create a policy to avoid having 2 instances on the same machine
+              fieldPath: metadata.name # TODO Should be the Kubernetes worker name, or create a policy to avoid having 2 instances on the same machine
         ports:
         - containerPort: 7000
           name: intra-node

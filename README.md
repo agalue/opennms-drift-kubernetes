@@ -6,7 +6,8 @@ OpenNMS Drift deployment in Kubernetes through [Kops](https://github.com/kuberne
 
 * Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0-alpha.1`)
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-* Intall the AWS CLI
+* Install the [AWS CLI](https://aws.amazon.com/cli/)
+* Install [terraform](https://www.terraform.io)
 * Have your AWS account configured on your system (`~/.aws/credentials`)
 
 ## Cluster Configuration
@@ -55,7 +56,7 @@ aws s3api put-bucket-versioning \
   --versioning-configuration Status=Enabled
 ```
 
-Create the Kubernetes cluster using `kops` (1 master node and 5 worker nodes):
+Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `k8s.opennms.org`:
 
 ```shell
 kops create cluster \
@@ -150,7 +151,7 @@ Volumes for `StatefulSets` are going to be automatically created.
 
 When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a [Terraform](https://www.terraform.io) recipe has been used for this purpose (`update-security-groups.tf).
 
-Make sure you have it installed on your system, and then:
+Make sure you have it installed on your system, and then execute the following:
 
 ```shell
 terraform init
@@ -158,9 +159,11 @@ terraform plan
 terraform apply
 ```
 
+> NOTE: it is possible to pass additional security groups when creating the cluster, but that requires to pre-create a VPC. An example for this might be added in the future.
+
 ### Services, Deployments and StatefulSets
 
-It is recommended to follow the same order. The applications will wait for their respective dependencies to be ready prior start.
+It is not strictly required, but recommended to start the elements on a given order. Although, the applications will wait for their respective dependencies to be ready prior start.
 
 From the directory on which this repository has been checked out:
 
@@ -247,7 +250,7 @@ statefulset.apps/zk          3         3         1m        zk           zookeepe
 
 ## Minion
 
-Your Minion should use the following resources:
+Your Minions should use the following resources in order to connect to OpenNMS and the dependept applications:
 
 * ActiveMQ: `failover:(tcp://activemq.k8s.opennms.org:61616)?randomize=false`
 * OpenNMS Core: `http://onms.k8s.opennms.org/opennms`
@@ -271,7 +274,7 @@ acks=1
 opennms-core-ipc-sink-kafka
 ```
 
-Make sure to use your own Domain ;)
+> NOTE: Make sure to use your own Domain ;)
 
 ## Users
 
@@ -280,7 +283,7 @@ Make sure to use your own Domain ;)
 * Kibana: `http://kibana.k8s.opennms.org/`
 * Kafka Manager: `http://kaffa-manager.k8s.opennms.org/`
 
-Make sure to use your own Domain ;)
+> NOTE: Make sure to use your own Domain ;)
 
 ## Cleanup
 
@@ -299,3 +302,4 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 * Simplify deployment.
 * Design a better solution to manage OpenNMS Configuration files.
 * Add support for Helm.
+* Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).

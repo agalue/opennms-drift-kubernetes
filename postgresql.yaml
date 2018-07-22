@@ -3,8 +3,8 @@
 # Make sure the to tune the max_connections to accomodate ONMS, the UI servers and Grafana.
 #
 # TODO
-# - Add an initContainer to configure master/slave
-# - How to manage replicas if the master can be moved ?
+# - Add an initContainer to configure master/slave; but, how to manage replicas if the master can be moved ?
+# - Use a more advanced approach: https://github.com/zalando-incubator/postgres-operator
 
 ---
 apiVersion: v1
