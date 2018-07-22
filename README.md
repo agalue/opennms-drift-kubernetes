@@ -273,8 +273,6 @@ opennms-core-ipc-sink-kafka
 
 Make sure to use your own Domain ;)
 
-> **WARNING: This part is a work in progress, as I need to find a proper way to expose Kafka.**
-
 ## Users
 
 * OpenNMS UI: `http://onmsui.k8s.opennms.org/opennms`
@@ -283,6 +281,15 @@ Make sure to use your own Domain ;)
 * Kafka Manager: `http://kaffa-manager.k8s.opennms.org/`
 
 Make sure to use your own Domain ;)
+
+## Cleanup
+
+To remove the Kubernetes cluster, do the following:
+
+```shell
+kubectl delete all -l deployment=drift
+kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
+```
 
 ## Future Enhancements
 
