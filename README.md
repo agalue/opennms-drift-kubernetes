@@ -7,7 +7,7 @@ OpenNMS Drift deployment in Kubernetes through [Kops](https://github.com/kuberne
 * Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0-alpha.1`)
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Intall the AWS CLI
-* Have your AWS account configured on your system
+* Have your AWS account configured on your system (`~/.aws/credentials`)
 
 ## Cluster Configuration
 
@@ -43,7 +43,7 @@ k8s.opennms.org.	21478	IN	NS	ns-1922.awsdns-48.co.uk.
 ;; MSG SIZE  rcvd: 181
 ```
 
-Create an S3 bucket to hold the Kops configuration; for example:
+Create an S3 bucket to hold the `kops` configuration; for example:
 
 ```shell
 aws s3api create-bucket \
@@ -55,7 +55,7 @@ aws s3api put-bucket-versioning \
   --versioning-configuration Status=Enabled
 ```
 
-Create the Kubernetes cluster using `kops` (1 master node and 4 worker nodes):
+Create the Kubernetes cluster using `kops` (1 master node and 5 worker nodes):
 
 ```shell
 kops create cluster \
@@ -70,7 +70,7 @@ kops create cluster \
   --yes
 ```
 
-> **IMPORTANT: Remember to change the settings to reflect your environment.**
+> **IMPORTANT: Remember to change the settings to reflect your desired environment.**
 
 It takes a few minutes to have the cluster ready. Verify the cluster statue using `kubectl` and `kops`:
 
@@ -86,16 +86,16 @@ Validating cluster k8s.opennms.org
 INSTANCE GROUPS
 NAME			ROLE	MACHINETYPE	MIN	MAX	SUBNETS
 master-us-east-2a	Master	t2.medium	1	1	us-east-2a
-nodes			Node	t2.2xlarge	4	4	us-east-2a
+nodes			Node	t2.2xlarge	5	5	us-east-2a
 
 NODE STATUS
 NAME						ROLE	READY
-ip-172-20-32-113.us-east-2.compute.internal	node	True
-ip-172-20-36-231.us-east-2.compute.internal	node	True
-ip-172-20-39-240.us-east-2.compute.internal	node	True
-ip-172-20-40-133.us-east-2.compute.internal	master	True
-ip-172-20-50-153.us-east-2.compute.internal	node	True
-ip-172-20-50-57.us-east-2.compute.internal	node	True
+ip-172-20-37-147.us-east-2.compute.internal	node	True
+ip-172-20-40-60.us-east-2.compute.internal	node	True
+ip-172-20-46-131.us-east-2.compute.internal	node	True
+ip-172-20-48-40.us-east-2.compute.internal	node	True
+ip-172-20-53-105.us-east-2.compute.internal	master	True
+ip-172-20-63-49.us-east-2.compute.internal	node	True
 
 Your cluster k8s.opennms.org is ready
 ```
@@ -122,6 +122,7 @@ Creation Order:
 * ConfigMaps
 * Storage Classes
 * Volumes (if apply)
+* Security Groups
 * Services
 * Deployments and StatefulSets
 
@@ -145,7 +146,19 @@ kubectl apply -f aws-storage.yaml
 
 Volumes for `StatefulSets` are going to be automatically created.
 
-### Applications
+### Security Groups
+
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a [Terraform](https://www.terraform.io) recipe has been used for this purpose (`update-security-groups.tf).
+
+Make sure you have it installed on your system, and then:
+
+```shell
+terraform init
+terraform plan
+terraform apply
+```
+
+### Services, Deployments and StatefulSets
 
 It is recommended to follow the same order. The applications will wait for their respective dependencies to be ready prior start.
 
