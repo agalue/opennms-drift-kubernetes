@@ -40,6 +40,10 @@ spec:
   ports:
   - port: 80
     targetPort: 8980
+    name: http
+  - port: 22
+    targetPort: 8101
+    name: karaf
   selector:
     app: onms
 
