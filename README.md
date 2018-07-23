@@ -1,6 +1,10 @@
 # OpenNMS Drift in Kubernetes
 
-OpenNMS Drift deployment in Kubernetes through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/) for testing purposes
+OpenNMS Drift deployment in Kubernetes through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/).
+
+This is basically the Kubernetes version of my work done [here](https://github.com/OpenNMS/opennms-drift-aws).
+
+Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with Kubernetes.
 
 ## Requirements
 
