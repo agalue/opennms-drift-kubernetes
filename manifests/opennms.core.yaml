@@ -1,8 +1,5 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# TODO
-# - How to activate Karaf features ? Maybe passing the whole org.apache.karaf.features.cfg for now ?
-#
 # ENHANCEMENTS
 # - A volume + "git sync" container (note that this volume can be an emptyDir populated by GIT,
 #   so no persistentVolume is required)
@@ -111,6 +108,21 @@ spec:
         volumeMounts:
         - name: opennms-config
           mountPath: /opennms-config
+      - name: karaf-features-initialization
+        image: opennms/horizon-core-web:22.0.1-1
+        imagePullPolicy: IfNotPresent
+        command: [ 'sh', '/karaf-features.init.sh' ]
+        env:
+          - name: FEATURES_CFG
+            value: /opennms-config/org.apache.karaf.features.cfg
+          - name: FEATURES_LIST
+            value: opennms-es-rest
+        volumeMounts:
+        - name: opennms-config
+          mountPath: /opennms-config
+        - name: onms-etc
+          mountPath: /karaf-features.init.sh
+          subPath: karaf-features.init.sh
       - name: newts-initialization
         image: cassandra:3.11.2
         imagePullPolicy: IfNotPresent
