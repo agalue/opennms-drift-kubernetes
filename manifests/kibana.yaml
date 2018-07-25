@@ -1,9 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# TODO
-# - What if we include this as a container of the onms-web Pod ?
-# - Add an initContainer to wait for Elasticsearch
-# - Add an ingress to work as LoadBalancer
 
 ---
 apiVersion: v1

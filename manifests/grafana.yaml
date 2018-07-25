@@ -1,8 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# TODO
-# - What if we include this as a container of the onms-web Pod ?
-# - Add a lifecycle PostStart ahook, to initialize the OpenNMS Helm Plugin and the Data Sources
 
 ---
 apiVersion: v1
@@ -60,7 +56,9 @@ spec:
         - name: initialize-database
           image: postgres:10.4
           imagePullPolicy: IfNotPresent
-          command: [ 'sh', '/bin/grafana-init.sh']
+          command:
+          - sh
+          - /bin/grafana-init.sh
           env:
             - name: PGHOST
               value: postgresql.default.svc.cluster.local
@@ -82,12 +80,14 @@ spec:
             subPath: grafana-init.sh
       containers:
       - name: grafana
-        image: grafana/grafana:5.2.1
+        image: grafana/grafana:5.2.2
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
           name: http
         env:
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            value: opennms
           - name: GF_INSTALL_PLUGINS
             value: opennms-helm-app
           - name: GF_DATABASE_TYPE

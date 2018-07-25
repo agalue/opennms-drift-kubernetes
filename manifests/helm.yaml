@@ -1,0 +1,44 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: helm-init
+  labels:
+    app: grafana
+    deployment: drift
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:5.2.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        command:
+          - sh
+          - /bin/helm-init.sh
+        env:
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            value: opennms
+          - name: GRAFANA_URL
+            value: http://grafana.k8s.opennms.org
+          - name: ONMS_URL
+            value: http://onmsui.k8s.opennms.org/opennms
+          - name: ONMS_USER
+            value: admin
+          - name: ONMS_PASSWD
+            value: admin
+        volumeMounts:
+        - name: grafana
+          mountPath: /bin/helm-init.sh
+          subPath: helm-init.sh
+      restartPolicy: Never
+      volumes:
+      - name: grafana
+        configMap:
+          name: grafana

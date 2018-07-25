@@ -1,5 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-# Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
 
 apiVersion: v1
 kind: Service

@@ -59,7 +59,7 @@ spec:
         - name: CASSANDRA_RACK
           valueFrom:
             fieldRef:
-              fieldPath: metadata.name # TODO Should be the Kubernetes worker name, or create a policy to avoid having 2 instances on the same machine
+              fieldPath: metadata.name # TODO spec.nodeName should be more correct, or create a policy to avoid having 2 instances on the same machine
         ports:
         - containerPort: 7000
           name: intra-node
@@ -82,7 +82,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command:
+              command: # TODO What about decommissioning ?
               - nodetool drain
         readinessProbe:
           exec:

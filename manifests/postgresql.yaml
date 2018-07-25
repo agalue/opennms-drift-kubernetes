@@ -28,6 +28,7 @@ metadata:
   name: postgres
   labels:
     app: postgres
+    role: master
     deployment: drift
 spec:
   serviceName: postgresql
@@ -39,13 +40,20 @@ spec:
     metadata:
       labels:
         app: postgres
+        role: master
         deployment: drift
     spec:
       containers:
       - name: postgres
         image: postgres:10.4
         imagePullPolicy: IfNotPresent
-        command: [ docker-entrypoint.sh, postgres, -c, 'shared_buffers=256MB', -c, 'max_connections=200' ]
+        command:
+        - docker-entrypoint.sh
+        - postgres
+        - -c
+        - 'shared_buffers=256MB'
+        - -c
+        - 'max_connections=200'
         env:
         - name: PGUSER
           value: postgres

@@ -1,5 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-# Inspired by https://github.com/Yolean/kubernetes-kafka/tree/master/kafka
 #
 # TODO
 # - The kafka process runs as root. Verify if this can be changed
