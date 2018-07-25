@@ -16,9 +16,6 @@ spec:
       - name: grafana
         image: grafana/grafana:5.2.2
         imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 3000
-          name: http
         command:
           - sh
           - /bin/helm-init.sh
