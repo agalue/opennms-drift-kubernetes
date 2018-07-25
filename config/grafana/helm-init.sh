@@ -22,17 +22,22 @@ until $(curl --output /dev/null --silent --head --fail $GRAFANA_URL); do
   sleep 5
 done
 
-if (( $( curl -u $GRAFANA_AUTH "$HELM_URL" 2>/dev/null | grep -c '"enabled":false' ) > 0 )); then
-  echo "$(date) Enabling helm..."
+echo "$(date) Checking if OpenNMS Helm is enabled..."
+if curl -u $GRAFANA_AUTH "$HELM_URL" 2>/dev/null | grep -q '"enabled":false'; then
+  echo
+  echo "$(date) Enabling OpenNMS Helm..."
   curl -u $GRAFANA_AUTH -XPOST "$HELM_URL" -d "id=opennms-helm-app&enabled=true" 2>/dev/null
+  echo
   echo "$(date) Adding data source for performance metrics..."
-  curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL
+  curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL 2>/dev/null
   sed -i -r 's/-performance/-fault/g' $JSON_FILE
+  echo
   echo "$(date) Adding data source for alarms..."
-  curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL
+  curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL 2>/dev/null
   sed -i -r 's/-fault/-flow/g' $JSON_FILE
+  echo
   echo "$(date) Adding data source for flows..."
-  curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL
+  curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL 2>/dev/null
 else
   echo "$(date) OpenNMS Helm was already enabled and configured."
 fi

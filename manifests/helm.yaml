@@ -23,7 +23,7 @@ spec:
           - name: GF_SECURITY_ADMIN_PASSWORD
             value: opennms
           - name: GRAFANA_URL
-            value: http://grafana.k8s.opennms.org
+            value: http://grafana.default.svc.cluster.local:3000
           - name: ONMS_URL
             value: http://onmsui.k8s.opennms.org/opennms
           - name: ONMS_USER
