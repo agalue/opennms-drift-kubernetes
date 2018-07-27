@@ -297,6 +297,6 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 * Use `ConfigMaps` to centralize the configuration of the applications.
 * Use `Secrets` for the applications passwords.
 * Design a better solution to manage OpenNMS Configuration files.
-* Explore and add support for Helm.
+* Explore adding support for [Helm](https://helm.sh).
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Build a PostgreSQL cluster based on Spilo/Patroni using the [postgres-operator](https://postgres-operator.readthedocs.io/en/latest/)
