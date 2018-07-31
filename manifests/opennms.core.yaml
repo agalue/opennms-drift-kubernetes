@@ -74,14 +74,14 @@ spec:
         - name: TIMEOUT
           value: '600'
       - name: config-initialization
-        image: opennms/horizon-core-web:22.0.1-1
+        image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'if [ ! -f /opennms-config/configured ]; then cp -R /opt/opennms/etc/* /opennms-config/; fi' ]
         volumeMounts:
         - name: opennms-config
           mountPath: /opennms-config
       - name: karaf-features-initialization
-        image: opennms/horizon-core-web:22.0.1-1
+        image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
         command: [ sh, /karaf-features.init.sh ]
         env:
@@ -108,7 +108,7 @@ spec:
           subPath: newts.cql
       containers:
       - name: onms
-        image: opennms/horizon-core-web:22.0.1-1
+        image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:

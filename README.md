@@ -2,7 +2,7 @@
 
 OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/) through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/).
 
-This is basically the `Kubernetes` version of my work done [here](https://github.com/OpenNMS/opennms-drift-aws). For learning purposes, I'm avodiong `Helm` charts and `operators` for this solution. Maybe I'll write one re-using existing solutions in the future.
+This is basically the `Kubernetes` version of my work done [here](https://github.com/OpenNMS/opennms-drift-aws/tree/release/horizon-23). For learning purposes, I'm avodiong `Helm` charts and `operators` for this solution. Maybe I'll write one re-using existing solutions in the future.
 
 Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
 
@@ -181,79 +181,81 @@ After a while, you should be able to see this:
 
 ```text
 ➜  kubectl get all -l deployment=drift
-NAME                                READY     STATUS    RESTARTS   AGE
-pod/amq-0                           1/1       Running   0          4m
-pod/cassandra-0                     1/1       Running   0          4m
-pod/cassandra-1                     1/1       Running   0          4m
-pod/cassandra-2                     1/1       Running   0          2m
-pod/esdata-0                        1/1       Running   0          4m
-pod/esdata-1                        1/1       Running   0          3m
-pod/esdata-2                        1/1       Running   0          2m
-pod/esmaster-0                      1/1       Running   0          4m
-pod/esmaster-1                      1/1       Running   0          3m
-pod/esmaster-2                      1/1       Running   0          2m
-pod/grafana-784d596db-8b2t8         1/1       Running   0          4m
-pod/grafana-784d596db-vf8n4         1/1       Running   0          4m
-pod/kafka-0                         1/1       Running   0          4m
-pod/kafka-1                         1/1       Running   0          3m
-pod/kafka-2                         1/1       Running   0          2m
-pod/kafka-manager-85588cfdd-ks4dr   1/1       Running   1          4m
-pod/kibana-6d49bd74c-d6vn7          1/1       Running   0          4m
-pod/onms-0                          1/1       Running   0          4m
-pod/onms-ui-0                       1/1       Running   0          4m
-pod/onms-ui-1                       1/1       Running   0          50s
-pod/postgres-0                      1/1       Running   0          4m
-pod/zk-0                            1/1       Running   0          4m
-pod/zk-1                            1/1       Running   0          4m
-pod/zk-2                            1/1       Running   0          4m
+NAME                                 READY     STATUS    RESTARTS   AGE
+pod/amq-0                            1/1       Running   0          5m
+pod/cassandra-0                      1/1       Running   0          5m
+pod/cassandra-1                      1/1       Running   0          4m
+pod/cassandra-2                      1/1       Running   0          2m
+pod/esdata-0                         1/1       Running   0          5m
+pod/esdata-1                         1/1       Running   0          3m
+pod/esdata-2                         1/1       Running   0          2m
+pod/esmaster-0                       1/1       Running   0          5m
+pod/esmaster-1                       1/1       Running   0          5m
+pod/esmaster-2                       1/1       Running   0          5m
+pod/grafana-5875cd6cb4-9mp9x         1/1       Running   0          5m
+pod/grafana-5875cd6cb4-xp7r2         1/1       Running   0          5m
+pod/kafka-0                          1/1       Running   0          5m
+pod/kafka-1                          1/1       Running   0          4m
+pod/kafka-2                          1/1       Running   0          3m
+pod/kafka-manager-86c876b86d-x6f7l   1/1       Running   0          5m
+pod/kibana-58cc68bdb6-5svx8          1/1       Running   0          5m
+pod/onms-0                           1/1       Running   0          5m
+pod/onms-ui-0                        1/1       Running   0          5m
+pod/onms-ui-1                        1/1       Running   0          53s
+pod/postgres-0                       1/1       Running   0          5m
+pod/zk-0                             1/1       Running   0          5m
+pod/zk-1                             1/1       Running   0          5m
+pod/zk-2                             1/1       Running   0          5m
 
-NAME                        TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
-service/activemq            ClusterIP      None             <none>                                                                    61616/TCP                    4m
-service/cassandra           ClusterIP      None             <none>                                                                    9042/TCP                     4m
-service/esdata              ClusterIP      None             <none>                                                                    9200/TCP                     4m
-service/esmaster            ClusterIP      None             <none>                                                                    9200/TCP                     4m
-service/ext-amq             LoadBalancer   100.71.184.150   a0f53a3508e6e11e895c9020628a7ebf-1853095402.us-east-2.elb.amazonaws.com   61616:30630/TCP              4m
-service/ext-grafana         LoadBalancer   100.68.116.191   a0fb99d728e6e11e895c9020628a7ebf-44402179.us-east-2.elb.amazonaws.com     80:30628/TCP                 4m
-service/ext-kafka           LoadBalancer   100.65.3.135     a1001e4d28e6e11e895c9020628a7ebf-1768085006.us-east-2.elb.amazonaws.com   9094:30893/TCP               4m
-service/ext-kafka-manager   LoadBalancer   100.69.228.85    a0fd5d1a38e6e11e895c9020628a7ebf-667457554.us-east-2.elb.amazonaws.com    80:31726/TCP                 4m
-service/ext-kibana          LoadBalancer   100.68.20.233    a10262eb08e6e11e895c9020628a7ebf-753179253.us-east-2.elb.amazonaws.com    80:32228/TCP                 4m
-service/ext-onms            LoadBalancer   100.69.111.89    a1049980a8e6e11e895c9020628a7ebf-1303376795.us-east-2.elb.amazonaws.com   80:30636/TCP                 4m
-service/ext-onms-ui         LoadBalancer   100.64.249.172   a106e36c38e6e11e895c9020628a7ebf-588826144.us-east-2.elb.amazonaws.com    80:31956/TCP                 4m
-service/grafana             ClusterIP      None             <none>                                                                    3000/TCP                     4m
-service/kafka               ClusterIP      None             <none>                                                                    9092/TCP,9999/TCP            4m
-service/kibana              ClusterIP      None             <none>                                                                    5601/TCP                     4m
-service/opennms-core        ClusterIP      None             <none>                                                                    8980/TCP,8101/TCP            4m
-service/opennms-ui          ClusterIP      None             <none>                                                                    8980/TCP,8101/TCP            4m
-service/postgresql          ClusterIP      None             <none>                                                                    5432/TCP                     4m
-service/zookeeper           ClusterIP      None             <none>                                                                    2888/TCP,3888/TCP,2181/TCP   4m
+NAME                        TYPE           CLUSTER-IP      EXTERNAL-IP                                                               PORT(S)                      AGE
+service/activemq            ClusterIP      None            <none>                                                                    61616/TCP                    5m
+service/cassandra           ClusterIP      None            <none>                                                                    9042/TCP                     5m
+service/esdata              ClusterIP      None            <none>                                                                    9200/TCP                     5m
+service/esmaster            ClusterIP      None            <none>                                                                    9200/TCP                     5m
+service/ext-amq             LoadBalancer   100.67.68.167   a949cbb9d94d711e8b7260237766b9bd-767693230.us-east-2.elb.amazonaws.com    61616:32025/TCP              5m
+service/ext-grafana         LoadBalancer   100.67.191.97   a952e211294d711e8b7260237766b9bd-1940089271.us-east-2.elb.amazonaws.com   80:31208/TCP                 5m
+service/ext-kafka           LoadBalancer   100.67.9.253    a957950ca94d711e8b7260237766b9bd-190599261.us-east-2.elb.amazonaws.com    9094:31462/TCP               5m
+service/ext-kafka-manager   LoadBalancer   100.69.25.196   a954f722494d711e8b7260237766b9bd-477111945.us-east-2.elb.amazonaws.com    80:32057/TCP                 5m
+service/ext-kibana          LoadBalancer   100.69.95.130   a95a4686594d711e8b7260237766b9bd-1027115664.us-east-2.elb.amazonaws.com   80:30451/TCP                 5m
+service/ext-onms            LoadBalancer   100.69.213.65   a95cdc01094d711e8b7260237766b9bd-516396540.us-east-2.elb.amazonaws.com    80:30383/TCP,22:31675/TCP    5m
+service/ext-onms-ui         LoadBalancer   100.67.73.35    a9602fe8c94d711e8b7260237766b9bd-479598917.us-east-2.elb.amazonaws.com    80:31820/TCP                 5m
+service/grafana             ClusterIP      None            <none>                                                                    3000/TCP                     5m
+service/kafka               ClusterIP      None            <none>                                                                    9092/TCP,9999/TCP            5m
+service/kibana              ClusterIP      None            <none>                                                                    5601/TCP                     5m
+service/opennms-core        ClusterIP      None            <none>                                                                    8980/TCP,8101/TCP            5m
+service/opennms-ui          ClusterIP      None            <none>                                                                    8980/TCP,8101/TCP            5m
+service/postgresql          ClusterIP      None            <none>                                                                    5432/TCP                     5m
+service/zookeeper           ClusterIP      None            <none>                                                                    2888/TCP,3888/TCP,2181/TCP   5m
 
 NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/grafana         2         2         2            2           4m
-deployment.apps/kafka-manager   1         1         1            1           4m
-deployment.apps/kibana          1         1         1            1           4m
+deployment.apps/grafana         2         2         2            2           5m
+deployment.apps/kafka-manager   1         1         1            1           5m
+deployment.apps/kibana          1         1         1            1           5m
 
-NAME                                      DESIRED   CURRENT   READY     AGE
-replicaset.apps/grafana-784d596db         2         2         2         4m
-replicaset.apps/kafka-manager-85588cfdd   1         1         1         4m
-replicaset.apps/kibana-6d49bd74c          1         1         1         4m
+NAME                                       DESIRED   CURRENT   READY     AGE
+replicaset.apps/grafana-5875cd6cb4         2         2         2         5m
+replicaset.apps/kafka-manager-86c876b86d   1         1         1         5m
+replicaset.apps/kibana-58cc68bdb6          1         1         1         5m
 
 NAME                         DESIRED   CURRENT   AGE
-statefulset.apps/amq         1         1         4m
-statefulset.apps/cassandra   3         3         4m
-statefulset.apps/esdata      3         3         4m
-statefulset.apps/esmaster    3         3         4m
-statefulset.apps/kafka       3         3         4m
-statefulset.apps/onms        1         1         4m
-statefulset.apps/onms-ui     2         2         4m
-statefulset.apps/postgres    1         1         4m
-statefulset.apps/zk          3         3         4m
+statefulset.apps/amq         1         1         5m
+statefulset.apps/cassandra   3         3         5m
+statefulset.apps/esdata      3         3         5m
+statefulset.apps/esmaster    3         3         5m
+statefulset.apps/kafka       3         3         5m
+statefulset.apps/onms        1         1         5m
+statefulset.apps/onms-ui     2         2         5m
+statefulset.apps/postgres    1         1         5m
+statefulset.apps/zk          3         3         5m
+
+NAME                  DESIRED   SUCCESSFUL   AGE
+job.batch/helm-init   1         1            5m
 ```
 
 ## Minion
 
 Your Minions should use the following resources in order to connect to OpenNMS and the dependept applications:
 
-* ActiveMQ: `failover:(tcp://activemq.k8s.opennms.org:61616)?randomize=false`
 * OpenNMS Core: `http://onms.k8s.opennms.org/opennms`
 * Kafka: `kafka.k8s.opennms.org:9094`
 
@@ -270,9 +272,15 @@ broker-url=failover:(tcp://activemq.k8s.opennms.org:61616)?randomize=false
 bootstrap.servers=kafka.k8s.opennms.org:9094
 acks=1
 
+[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.rpc.kafka.cfg 
+bootstrap.servers=kafka.k8s.opennms.org:9094
+acks=1
+
 [root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot 
 !opennms-core-ipc-sink-camel
+!opennms-core-ipc-rpc-jms
 opennms-core-ipc-sink-kafka
+opennms-core-ipc-rpc-kafka
 ```
 
 > NOTE: Make sure to use your own Domain ;)
@@ -309,4 +317,3 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Add a `StatefulSet` for OpenNMS `Sentinel` forcing the Core OpenNMS to only handle telemetry data through `telemetryd`, leaving the flows processing to `Sentinel`.
-* Use the bleeding-edge release of OpenNMS to remove ActiveMQ in favor of Kafka
