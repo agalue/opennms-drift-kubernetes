@@ -1,8 +1,14 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# A simple cluster with 3 nodes
 # MAX_HEAP_SIZE should be consistent with resources.requests.memory
 # CASSANDRA_DC should match config/opennms-core/newts.cql
+#
+# TODO
+# - Do we need to update volumes ownership for the cassandra user like we did for elasticsearch ?
+# - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.
+#   A script that looks for a specific file (copied through kubectl) can help to decide which kind of task to execute.
+#   In theory, persistent volumes should also be deleted as well.
+# - Take a look at https://github.com/instaclustr/cassandra-operator
 
 ---
 apiVersion: v1

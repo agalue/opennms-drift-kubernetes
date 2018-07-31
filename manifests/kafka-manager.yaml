@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: kafka-manager
-        image: sheepkiller/kafka-manager:stable
+        image: sheepkiller/kafka-manager:alpine
         imagePullPolicy: IfNotPresent
         env:
         - name: ZK_HOSTS

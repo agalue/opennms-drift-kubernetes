@@ -1,6 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # ES_JAVA_OPTS should be consistent with resources.requests.memory
+#
+# TODO
+# - minimum_master_nodes should be 2, but that enters in conflict with the dns-controller and the readinessProbe.
+#   That's because the FQDN are not reach until the readinessProbe says so, and ES won't start until the master are initialized.
 
 ---
 apiVersion: v1
@@ -30,6 +34,7 @@ metadata:
 spec:
   serviceName: esmaster
   replicas: 3
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       role: esmaster
@@ -41,31 +46,20 @@ spec:
         role: esmaster
     spec:
       initContainers:
-      # This is to fix the permission on the volume. By default elasticsearch container is not run as non root user.
-      # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_notes_for_production_use_and_defaults
-      - name: fix-the-volume-permission
+      - name: initialize-elastic-environment
         image: busybox
         imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c',  'chown -R 1000:1000 /usr/share/elasticsearch/data' ]
+        command:
+        - sh
+        - /bin/es-init.sh
         securityContext:
           privileged: true
         volumeMounts:
         - name: es-data
           mountPath: /usr/share/elasticsearch/data
-      # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode
-      - name: increase-the-vm-max-map-count
-        image: busybox
-        imagePullPolicy: IfNotPresent
-        command: [ 'sysctl' , '-w', 'vm.max_map_count=262144' ]
-        securityContext:
-          privileged: true
-      # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_notes_for_production_use_and_defaults
-      - name: increase-the-ulimit
-        image: busybox
-        imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'ulimit -n 65536' ]
-        securityContext:
-          privileged: true
+        - name: elasticsearch
+          mountPath: /bin/es-init.sh
+          subPath: es-init.sh
       containers:
       - name: esmaster
         image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
@@ -74,7 +68,7 @@ spec:
         - containerPort: 9200
           name: http
         - containerPort: 9300
-          name: tcp
+          name: transport
         env:
         - name: cluster.name
           value: OpenNMS
@@ -82,8 +76,14 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: xpack.license.self_generated.type
+          value: basic # Use 'trial', to enable authentication
+        - name: xpack.security.enabled
+          value: 'true'
         - name: discovery.zen.ping.unicast.hosts
           value: esmaster.default.svc.cluster.local
+        - name: discovery.zen.minimum_master_nodes
+          value: '1' # TODO It should be 2
         - name: node.master
           value: 'true'
         - name: node.data
@@ -115,6 +115,10 @@ spec:
             port: http
           initialDelaySeconds: 60
           periodSeconds: 60
+      volumes:
+      - name: elasticsearch
+        configMap:
+          name: elasticsearch
   volumeClaimTemplates:
   - metadata:
       name: es-data

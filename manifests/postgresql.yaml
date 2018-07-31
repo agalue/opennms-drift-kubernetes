@@ -3,8 +3,9 @@
 # Make sure the to tune the max_connections to accomodate ONMS, the UI servers and Grafana.
 #
 # TODO
-# - Add an initContainer to configure master/slave; but, how to manage replicas if the master can be moved ?
-# - Use a more advanced approach: https://github.com/zalando-incubator/postgres-operator
+# - Use a simple approach to manage a cluster: add an init-container that configures master/slave
+# - Use an advanced approach to manage a cluster: https://github.com/zalando-incubator/postgres-operator
+# - Use barman to keep a backup of the DB and rebuild the server in case of data corruption
 
 ---
 apiVersion: v1
@@ -32,7 +33,7 @@ metadata:
     deployment: drift
 spec:
   serviceName: postgresql
-  replicas: 1
+  replicas: 1 # The solution only allows 1 instane
   selector:
     matchLabels:
       app: postgres

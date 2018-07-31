@@ -54,7 +54,7 @@ metadata:
     deployment: drift
 spec:
   serviceName: opennms-core
-  replicas: 1
+  replicas: 1 # The solution only allows 1 instane
   selector:
     matchLabels:
       app: onms
@@ -65,58 +65,30 @@ spec:
         deployment: drift
     spec:
       initContainers:
-      - name: check-postgresql-ready
-        image: postgres:10.4
+      - name: wait-for-dependencies
+        image: waisbrot/wait
         imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'until pg_isready; do echo "$(date) - Waiting for $PGHOST:$PGPORT..."; sleep 2; done;' ]
         env:
-          - name: PGHOST
-            value: postgresql.default.svc.cluster.local
-          - name: PGPORT
-            value: '5432'
-      - name: check-cassandra-ready
-        image: busybox
-        imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
-        env:
-          - name: TARGET_SERVER
-            value: cassandra.default.svc.cluster.local
-          - name: TARGET_PORT
-            value: '9042'
-      - name: check-amq-ready
-        image: busybox
-        imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
-        env:
-          - name: TARGET_SERVER
-            value: activemq.default.svc.cluster.local
-          - name: TARGET_PORT
-            value: '61616'
-      - name: check-kafka-ready
-        image: busybox
-        imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
-        env:
-          - name: TARGET_SERVER
-            value: kafka.default.svc.cluster.local
-          - name: TARGET_PORT
-            value: '9092'
+        - name: TARGETS
+          value: postgresql.default.svc.cluster.local:5432,cassandra.default.svc.cluster.local:9042,activemq.default.svc.cluster.local:61616,kafka.default.svc.cluster.local:9092,esdata.default.svc.cluster.local:9200
+        - name: TIMEOUT
+          value: '600'
       - name: config-initialization
         image: opennms/horizon-core-web:22.0.1-1
         imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'if [ ! -f /opennms-config/configured ]; then cp -R /opt/opennms/etc/* /opennms-config/; fi' ]
+        command: [ sh, -c, 'if [ ! -f /opennms-config/configured ]; then cp -R /opt/opennms/etc/* /opennms-config/; fi' ]
         volumeMounts:
         - name: opennms-config
           mountPath: /opennms-config
       - name: karaf-features-initialization
         image: opennms/horizon-core-web:22.0.1-1
         imagePullPolicy: IfNotPresent
-        command: [ 'sh', '/karaf-features.init.sh' ]
+        command: [ sh, /karaf-features.init.sh ]
         env:
-          - name: FEATURES_CFG
-            value: /opennms-config/org.apache.karaf.features.cfg
-          - name: FEATURES_LIST
-            value: opennms-es-rest
+        - name: FEATURES_CFG
+          value: /opennms-config/org.apache.karaf.features.cfg
+        - name: FEATURES_LIST
+          value: opennms-es-rest,opennms-kafka-producer
         volumeMounts:
         - name: opennms-config
           mountPath: /opennms-config
@@ -126,10 +98,10 @@ spec:
       - name: newts-initialization
         image: cassandra:3.11.2
         imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'cqlsh -f /newts.cql $CASSANDRA_HOST' ]
+        command: [ sh, -c, 'cqlsh -f /newts.cql $CASSANDRA_HOST' ]
         env:
-          - name: CASSANDRA_HOST
-            value: cassandra.default.svc.cluster.local
+        - name: CASSANDRA_HOST
+          value: cassandra.default.svc.cluster.local
         volumeMounts:
         - name:  onms-etc
           mountPath: /newts.cql
@@ -173,6 +145,9 @@ spec:
         - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
           subPath: org.opennms.plugin.elasticsearch.rest.forwarder.cfg
+        - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/org.opennms.features.kafka.producer.client.cfg
+          subPath: org.opennms.features.kafka.producer.client.cfg
         - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/opennms.properties.d/newts.properties
           subPath: newts.properties

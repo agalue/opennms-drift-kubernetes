@@ -50,7 +50,7 @@ metadata:
     deployment: drift
 spec:
   serviceName: activemq
-  replicas: 1
+  replicas: 1 # The solution only allows 1 instane
   selector:
     matchLabels:
       app: amq

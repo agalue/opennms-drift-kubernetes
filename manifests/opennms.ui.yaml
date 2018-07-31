@@ -56,16 +56,28 @@ spec:
         app: onms-ui
         deployment: drift
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - onms
+              topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 300
       initContainers:
-      - name: check-opennms-ready
-        image: busybox
+      - name: wait-for-dependencies
+        image: waisbrot/wait
         imagePullPolicy: IfNotPresent
-        command: [ 'sh', '-c', 'until nc -zv $TARGET_SERVER $TARGET_PORT; do echo "$(date) - Waiting for $TARGET_SERVER:$TARGET_PORT..."; sleep 2; done;' ]
         env:
-          - name: TARGET_SERVER
-            value: opennms-core.default.svc.cluster.local
-          - name: TARGET_PORT
-            value: '8980'
+        - name: TARGETS
+          value: opennms-core.default.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
       containers:
       - name: onms-ui
         image: opennms/horizon-core-web:22.0.1-1

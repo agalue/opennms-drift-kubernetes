@@ -1,14 +1,16 @@
 # OpenNMS Drift in Kubernetes
 
-OpenNMS Drift deployment in Kubernetes through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/).
+OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/) through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/).
 
-This is basically the Kubernetes version of my work done [here](https://github.com/OpenNMS/opennms-drift-aws).
+This is basically the `Kubernetes` version of my work done [here](https://github.com/OpenNMS/opennms-drift-aws). For learning purposes, I'm avodiong `Helm` charts and `operators` for this solution. Maybe I'll write one re-using existing solutions in the future.
 
-Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with Kubernetes.
+Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
+
+`Kafka` uses the `hostPort` feature to expose the advertise external listeners on port 9094, so applications outside `Kubernetes` like `Minion` can access it. For this reason, `Kafka` can be scaled up to the number of worker nodes on the `Kubernetes` cluster.
 
 ## Requirements
 
-* Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0-alpha.1`)
+* Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0-beta.1`)
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
 * Install [terraform](https://www.terraform.io)
@@ -138,6 +140,7 @@ From the directory on which this repository has been checked out:
 ```shell
 kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/
 kubectl create configmap opennms-ui-overlay --from-file=config/opennms-ui/
+kubectl create configmap elasticsearch --from-file=config/elasticsearch/
 kubectl create configmap grafana --from-file=config/grafana/
 ```
 
@@ -296,7 +299,14 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 
 * Use `ConfigMaps` to centralize the configuration of the applications.
 * Use `Secrets` for the applications passwords.
-* Design a better solution to manage OpenNMS Configuration files.
-* Explore adding support for [Helm](https://helm.sh).
+* Use a dedicated `namespace`.
+* Design a solution to handle scale down of Cassandra and decommission of nodes.
+* Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory).
+* Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.
+* Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
+* Add support for monioring. Initially through the basic metrics provided via [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/); then, through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). As a bonus, create a Dashboard for the cluster metrics in Grafana.
+* Explore [Helm](https://helm.sh), and potentially add support for it.
+* Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
-* Build a PostgreSQL cluster based on Spilo/Patroni using the [postgres-operator](https://postgres-operator.readthedocs.io/en/latest/)
+* Add a `StatefulSet` for OpenNMS `Sentinel` forcing the Core OpenNMS to only handle telemetry data through `telemetryd`, leaving the flows processing to `Sentinel`.
+* Use the bleeding-edge release of OpenNMS to remove ActiveMQ in favor of Kafka

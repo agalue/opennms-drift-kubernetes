@@ -53,31 +53,31 @@ spec:
         deployment: drift
     spec:
       initContainers:
-        - name: initialize-database
-          image: postgres:10.4
-          imagePullPolicy: IfNotPresent
-          command:
-          - sh
-          - /bin/grafana-init.sh
-          env:
-            - name: PGHOST
-              value: postgresql.default.svc.cluster.local
-            - name: PGPORT
-              value: '5432'
-            - name: PGUSER
-              value: postgres
-            - name: PGPASSWORD
-              value: postgres
-            - name: DATABASE_NAME
-              value: grafana
-            - name: DATABASE_USER
-              value: grafana
-            - name: DATABASE_PASSWORD
-              value: grafana
-          volumeMounts:
-          - name: grafana
-            mountPath: /bin/grafana-init.sh
-            subPath: grafana-init.sh
+      - name: initialize-database
+        image: postgres:10.4
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - /bin/grafana-init.sh
+        env:
+          - name: PGHOST
+            value: postgresql.default.svc.cluster.local
+          - name: PGPORT
+            value: '5432'
+          - name: PGUSER
+            value: postgres
+          - name: PGPASSWORD
+            value: postgres
+          - name: DATABASE_NAME
+            value: grafana
+          - name: DATABASE_USER
+            value: grafana
+          - name: DATABASE_PASSWORD
+            value: grafana
+        volumeMounts:
+        - name: grafana
+          mountPath: /bin/grafana-init.sh
+          subPath: grafana-init.sh
       containers:
       - name: grafana
         image: grafana/grafana:5.2.2
