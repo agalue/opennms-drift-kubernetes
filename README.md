@@ -162,7 +162,7 @@ Make sure you have it installed on your system, and then execute the following:
 
 ```shell
 terraform init
-terraform apply
+terraform apply -auto-approve
 ```
 
 > NOTE: it is possible to pass additional security groups when creating the cluster, but that requires to pre-create a VPC. An example for this might be added in the future.
@@ -298,6 +298,7 @@ To remove the Kubernetes cluster, do the following:
 
 ```shell
 kubectl delete all -l deployment=drift
+kubectl delete pv --all
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 ```
 
