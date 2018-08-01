@@ -208,7 +208,6 @@ pod/zk-1                             1/1       Running   0          5m
 pod/zk-2                             1/1       Running   0          5m
 
 NAME                        TYPE           CLUSTER-IP      EXTERNAL-IP                                                               PORT(S)                      AGE
-service/activemq            ClusterIP      None            <none>                                                                    61616/TCP                    5m
 service/cassandra           ClusterIP      None            <none>                                                                    9042/TCP                     5m
 service/esdata              ClusterIP      None            <none>                                                                    9200/TCP                     5m
 service/esmaster            ClusterIP      None            <none>                                                                    9200/TCP                     5m
@@ -266,7 +265,6 @@ For example:
 location=Vagrant
 id=onms-minion.local
 http-url=http://onms.k8s.opennms.org/opennms
-broker-url=failover:(tcp://activemq.k8s.opennms.org:61616)?randomize=false
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg 
 bootstrap.servers=kafka.k8s.opennms.org:9094
