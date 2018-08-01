@@ -149,6 +149,9 @@ spec:
           mountPath: /opt/opennms-etc-overlay/org.opennms.features.kafka.producer.client.cfg
           subPath: org.opennms.features.kafka.producer.client.cfg
         - name: onms-etc
+          mountPath: /opt/opennms-etc-overlay/org.opennms.features.kafka.producer.cfg
+          subPath: org.opennms.features.kafka.producer.cfg
+        - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/opennms.properties.d/newts.properties
           subPath: newts.properties
         - name: onms-etc
