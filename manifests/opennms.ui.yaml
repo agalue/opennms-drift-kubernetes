@@ -134,6 +134,22 @@ spec:
           requests:
             cpu: 500m
             memory: 2Gi
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /opt/opennms/bin/opennms stop
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 60
       volumes:
       - name: onms-core-etc
         configMap:
