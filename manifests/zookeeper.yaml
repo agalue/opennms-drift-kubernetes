@@ -29,7 +29,7 @@ metadata:
     deployment: drift
 spec:
   serviceName: zookeeper
-  replicas: 3
+  replicas: 3 # The solution is designed for 3 instances
   podManagementPolicy: Parallel
   selector:
     matchLabels:
