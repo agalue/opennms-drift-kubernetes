@@ -45,20 +45,14 @@ spec:
         role: esdata
     spec:
       initContainers:
-      - name: initialize-elastic-environment
+      - name: init-sysctl
         image: busybox
-        imagePullPolicy: IfNotPresent
         command:
-        - sh
-        - /bin/es-init.sh
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
         securityContext:
           privileged: true
-        volumeMounts:
-        - name: es-data
-          mountPath: /usr/share/elasticsearch/data
-        - name: elasticsearch
-          mountPath: /bin/es-init.sh
-          subPath: es-init.sh
       - name: wait-for-dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
@@ -126,10 +120,6 @@ spec:
             port: http
           initialDelaySeconds: 60
           periodSeconds: 60
-      volumes:
-      - name: elasticsearch
-        configMap:
-          name: elasticsearch
   volumeClaimTemplates:
   - metadata:
       name: es-data
