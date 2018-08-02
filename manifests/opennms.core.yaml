@@ -54,7 +54,7 @@ metadata:
     deployment: drift
 spec:
   serviceName: opennms-core
-  replicas: 1 # The solution only allows 1 instane
+  replicas: 1 # The solution only allows 1 instance
   selector:
     matchLabels:
       app: onms

@@ -33,7 +33,7 @@ metadata:
     deployment: drift
 spec:
   serviceName: postgresql
-  replicas: 1 # The solution only allows 1 instane
+  replicas: 1 # The solution only allows 1 instance
   selector:
     matchLabels:
       app: postgres
