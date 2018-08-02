@@ -140,7 +140,6 @@ From the directory on which this repository has been checked out:
 ```shell
 kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/
 kubectl create configmap opennms-ui-overlay --from-file=config/opennms-ui/
-kubectl create configmap elasticsearch --from-file=config/elasticsearch/
 kubectl create configmap grafana --from-file=config/grafana/
 ```
 
