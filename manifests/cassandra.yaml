@@ -4,7 +4,6 @@
 # CASSANDRA_DC should match config/opennms-core/newts.cql
 #
 # TODO
-# - Do we need to update volumes ownership for the cassandra user like we did for elasticsearch ?
 # - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.
 #   A script that looks for a specific file (copied through kubectl) can help to decide which kind of task to execute.
 #   In theory, persistent volumes should also be deleted as well.
