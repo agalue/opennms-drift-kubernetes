@@ -1,8 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # ENHANCEMENTS
-# - A volume + "git sync" container (note that this volume can be an emptyDir populated by GIT,
-#   so no persistentVolume is required)
+# - Use a tool like ksync for /opt/opennms.etc:
+#   https://vapor-ware.github.io/ksync/
 
 ---
 apiVersion: v1
@@ -70,7 +70,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TARGETS
-          value: postgresql.default.svc.cluster.local:5432,cassandra.default.svc.cluster.local:9042,activemq.default.svc.cluster.local:61616,kafka.default.svc.cluster.local:9092,esdata.default.svc.cluster.local:9200
+          value: postgresql.default.svc.cluster.local:5432,cassandra.default.svc.cluster.local:9042,kafka.default.svc.cluster.local:9092,esdata.default.svc.cluster.local:9200
         - name: TIMEOUT
           value: '600'
       - name: config-initialization
@@ -157,9 +157,6 @@ spec:
         - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/opennms.properties.d/kafka.properties
           subPath: kafka.properties
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/amq.properties
-          subPath: amq.properties
         resources:
           limits:
             cpu: 4

@@ -182,7 +182,6 @@ After a while, you should be able to see this:
 ```text
 ➜  kubectl get all -l deployment=drift
 NAME                                 READY     STATUS    RESTARTS   AGE
-pod/amq-0                            1/1       Running   0          5m
 pod/cassandra-0                      1/1       Running   0          5m
 pod/cassandra-1                      1/1       Running   0          4m
 pod/cassandra-2                      1/1       Running   0          2m
@@ -211,7 +210,6 @@ NAME                        TYPE           CLUSTER-IP      EXTERNAL-IP          
 service/cassandra           ClusterIP      None            <none>                                                                    9042/TCP                     5m
 service/esdata              ClusterIP      None            <none>                                                                    9200/TCP                     5m
 service/esmaster            ClusterIP      None            <none>                                                                    9200/TCP                     5m
-service/ext-amq             LoadBalancer   100.67.68.167   a949cbb9d94d711e8b7260237766b9bd-767693230.us-east-2.elb.amazonaws.com    61616:32025/TCP              5m
 service/ext-grafana         LoadBalancer   100.67.191.97   a952e211294d711e8b7260237766b9bd-1940089271.us-east-2.elb.amazonaws.com   80:31208/TCP                 5m
 service/ext-kafka           LoadBalancer   100.67.9.253    a957950ca94d711e8b7260237766b9bd-190599261.us-east-2.elb.amazonaws.com    9094:31462/TCP               5m
 service/ext-kafka-manager   LoadBalancer   100.69.25.196   a954f722494d711e8b7260237766b9bd-477111945.us-east-2.elb.amazonaws.com    80:32057/TCP                 5m
@@ -237,7 +235,6 @@ replicaset.apps/kafka-manager-86c876b86d   1         1         1         5m
 replicaset.apps/kibana-58cc68bdb6          1         1         1         5m
 
 NAME                         DESIRED   CURRENT   AGE
-statefulset.apps/amq         1         1         5m
 statefulset.apps/cassandra   3         3         5m
 statefulset.apps/esdata      3         3         5m
 statefulset.apps/esmaster    3         3         5m
@@ -308,7 +305,7 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 * Use `Secrets` for the applications passwords.
 * Use a dedicated `namespace`.
 * Design a solution to handle scale down of Cassandra and decommission of nodes.
-* Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory).
+* Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
 * Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.
 * Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
 * Add support for monioring. Initially through the basic metrics provided via [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/); then, through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). As a bonus, create a Dashboard for the cluster metrics in Grafana.
