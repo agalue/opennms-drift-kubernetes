@@ -33,7 +33,7 @@ metadata:
     role: esmaster
 spec:
   serviceName: esmaster
-  replicas: 3
+  replicas: 3 # The solution is designed for 3 instances
   podManagementPolicy: Parallel
   selector:
     matchLabels:
@@ -77,7 +77,7 @@ spec:
         - name: discovery.zen.ping.unicast.hosts
           value: esmaster.default.svc.cluster.local
         - name: discovery.zen.minimum_master_nodes
-          value: '1' # TODO It should be 2
+          value: '2'
         - name: node.master
           value: 'true'
         - name: node.data
@@ -99,14 +99,13 @@ spec:
             cpu: 500m
             memory: 1Gi
         readinessProbe:
-          httpGet:
-            path: /
-            port: http
-          initialDelaySeconds: 15
+          tcpSocket:
+            port: transport
+          initialDelaySeconds: 5
+          periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /
-            port: http
+          tcpSocket:
+            port: transport
           initialDelaySeconds: 60
           periodSeconds: 60
   volumeClaimTemplates:

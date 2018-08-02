@@ -84,7 +84,7 @@ spec:
         - name: discovery.zen.ping.unicast.hosts
           value: esmaster.default.svc.cluster.local
         - name: discovery.zen.minimum_master_nodes
-          value: '1'
+          value: '2'
         - name: node.master
           value: 'false'
         - name: node.data
@@ -113,7 +113,8 @@ spec:
           httpGet:
             path: /
             port: http
-          initialDelaySeconds: 15
+          initialDelaySeconds: 10
+          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /
