@@ -38,14 +38,13 @@ spec:
 
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: onms-ui
   labels:
     app: onms-ui
     deployment: drift
 spec:
-  serviceName: opennms-ui
   replicas: 2
   selector:
     matchLabels:
@@ -68,7 +67,6 @@ spec:
                   values:
                   - onms
               topologyKey: kubernetes.io/hostname
-      terminationGracePeriodSeconds: 300
       initContainers:
       - name: wait-for-dependencies
         image: waisbrot/wait
@@ -82,7 +80,7 @@ spec:
       - name: onms-ui
         image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
-        command: [ "/docker-entrypoint.sh", "-s" ]
+        command: [ /docker-entrypoint.sh, -s ]
         ports:
         - containerPort: 8101
           name: karaf
@@ -112,7 +110,7 @@ spec:
         - name: onms-core-etc
           mountPath: /opt/opennms-etc-overlay/opennms.properties.d/newts.properties
           subPath: newts.properties
-        - name: onms-core-etc
+        - name: onms-ui-etc
           mountPath: /opt/opennms-etc-overlay/org.opennms.features.flows.persistence.elastic.cfg
           subPath: org.opennms.features.flows.persistence.elastic.cfg
         - name: onms-ui-etc
@@ -134,11 +132,6 @@ spec:
           requests:
             cpu: 500m
             memory: 2Gi
-        lifecycle:
-          preStop:
-            exec:
-              command:
-              - /opt/opennms/bin/opennms stop
         readinessProbe:
           httpGet:
             path: /

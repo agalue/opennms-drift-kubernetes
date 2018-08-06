@@ -45,6 +45,8 @@ spec:
         deployment: drift
         role: esmaster
     spec:
+      securityContext:
+        fsGroup: 1000
       initContainers:
       - name: init-sysctl
         image: busybox
@@ -58,6 +60,12 @@ spec:
       - name: esmaster
         image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
         imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 1000
+          capabilities:
+            add:
+            - IPC_LOCK
+            - SYS_RESOURCE
         ports:
         - containerPort: 9200
           name: http

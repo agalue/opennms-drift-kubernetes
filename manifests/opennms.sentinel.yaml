@@ -1,0 +1,83 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinel
+  labels:
+    app: sentinel
+    deployment: drift
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sentinel
+  template:
+    metadata:
+      labels:
+        app: sentinel
+        deployment: drift
+    spec:
+      initContainers:
+      - name: wait-for-dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.default.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: sentinel
+        image: opennms/sentinel:bleeding
+        imagePullPolicy: IfNotPresent
+        args:
+          - -d
+        ports:
+        - containerPort: 8301
+          name: karaf
+        env:
+        - name: POSTGRES_HOST
+          value: postgresql.default.svc.cluster.local
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: opennms
+        - name: OPENNMS_HTTP_URL
+          value: http://opennms-core.default.svc.cluster.local:8980/opennms
+        - name: SENTINEL_LOCATION
+          value: Sentinel
+        - name: OPENNMS_HTTP_USER
+          value: admin
+        - name: OPENNMS_HTTP_PASS
+          value: admin
+        volumeMounts:
+        - name: sentinel-config
+          mountPath: /opt/sentinel/deploy/features.xml
+          subPath: features.xml
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        readinessProbe:
+          tcpSocket:
+            port: karaf
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: karaf
+          initialDelaySeconds: 60
+          periodSeconds: 60
+      volumes:
+      - name: sentinel-config
+        configMap:
+          name: opennms-sentinel-overlay

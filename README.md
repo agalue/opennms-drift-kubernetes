@@ -139,6 +139,7 @@ From the directory on which this repository has been checked out:
 
 ```shell
 kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/
+kubectl create configmap opennms-sentinel-overlay --from-file=config/opennms-sentinel/
 kubectl create configmap opennms-ui-overlay --from-file=config/opennms-ui/
 kubectl create configmap grafana --from-file=config/grafana/
 ```
@@ -288,6 +289,30 @@ opennms-core-ipc-rpc-kafka
 
 > NOTE: Make sure to use your own Domain ;)
 
+## Optional Kubernetes Addons
+
+To install the  Dashboard:
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.8.3.yaml
+```
+
+To install the standalone Heapster monitoring (required for the `kubectl top` command):
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.7.0.yaml
+```
+
+To install Prometheus Operator for monitoring:
+
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.19.0.yaml
+```
+
+At least the first 2 are recommended to have a basic insight about how the kubernetes cluster behaves.
+
+Click [here](https://github.com/kubernetes/kops/blob/1.10.0-beta.1/docs/addons.md) for more information.
+
 ## Cleanup
 
 To remove the Kubernetes cluster, do the following:
@@ -311,4 +336,3 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 * Explore [Helm](https://helm.sh), and potentially add support for it.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
-* Add a `StatefulSet` for OpenNMS `Sentinel` forcing the Core OpenNMS to only handle telemetry data through `telemetryd`, leaving the flows processing to `Sentinel`.

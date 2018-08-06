@@ -1,7 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # ENHANCEMENTS
-# - Use a tool like ksync for /opt/opennms.etc:
+# - Use a tool like ksync for /opt/opennms/etc:
 #   https://vapor-ware.github.io/ksync/
 
 ---
@@ -139,9 +139,6 @@ spec:
         - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/org.opennms.features.datachoices.cfg
           subPath: org.opennms.features.datachoices.cfg
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/org.opennms.features.flows.persistence.elastic.cfg
-          subPath: org.opennms.features.flows.persistence.elastic.cfg
         - name: onms-etc
           mountPath: /opt/opennms-etc-overlay/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
           subPath: org.opennms.plugin.elasticsearch.rest.forwarder.cfg
