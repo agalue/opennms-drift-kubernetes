@@ -324,6 +324,7 @@ To remove the Kubernetes cluster, do the following:
 
 ```shell
 kubectl delete all -l deployment=drift
+kubectl delete pvc --all
 kubectl delete pv --all
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 ```
