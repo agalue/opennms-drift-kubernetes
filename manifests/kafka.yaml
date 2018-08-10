@@ -107,7 +107,9 @@ spec:
         - name: KAFKA_MIN_INSYNC_REPLICAS
           value: '1'
         - name: KAFKA_NUM_PARTITIONS
-          value: '16'
+          value: '32'
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: 'true'
         - name: KAFKA_DELETE_TOPIC_ENABLE
           value: 'false'
         - name: KAFKA_CONTROLLED_SHUTDOWN_ENABLE
