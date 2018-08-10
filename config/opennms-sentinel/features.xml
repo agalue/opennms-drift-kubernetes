@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features
-  name="opennms-${project.version}"
+  name="opennms-23.0.0-SNAPSHOT"
   xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
 >
 
-  <feature name="autostart-sentinel-telemetry-flows" version="${project.version}" start-level="200" install="auto">
+  <feature name="autostart-sentinel-telemetry-flows" description="OpenNMS :: Features :: Sentinel :: Auto-Start" version="23.0.0-SNAPSHOT" start-level="200" install="auto">
     <config name="org.opennms.features.telemetry.adapters-netflow5">
       name = Netflow-5
       class-name = org.opennms.netmgt.telemetry.adapters.netflow.v5.Netflow5Adapter
