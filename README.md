@@ -10,7 +10,7 @@ Instead of using discrete EC2 instances, this repository explains how to deploy 
 
 ## Requirements
 
-* Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0-beta.1`)
+* Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0`, but I can't find a reason why it would't work with `1.9.x`)
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
 * Install [terraform](https://www.terraform.io)

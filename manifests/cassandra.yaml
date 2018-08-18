@@ -3,11 +3,14 @@
 # MAX_HEAP_SIZE should be consistent with resources.requests.memory
 # CASSANDRA_DC should match config/opennms-core/newts.cql
 #
+# WARNING: the process runs as root, which is not allowed on OpenShift
+#
 # TODO
 # - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.
 #   A script that looks for a specific file (copied through kubectl) can help to decide which kind of task to execute.
 #   In theory, persistent volumes should also be deleted as well.
 # - Take a look at https://github.com/instaclustr/cassandra-operator
+# - Take a look at https://github.com/scylladb/scylla-code-samples/tree/master/kubernetes-scylla
 
 ---
 apiVersion: v1
@@ -20,7 +23,14 @@ metadata:
 spec:
   clusterIP: None
   ports:
+  - port: 7000
+    name: intra-node
+  - port: 7001
+    name: tls-intra-node
+  - port: 7199
+    name: jmx
   - port: 9042
+    name: cql
   selector:
     app: cassandra
 
@@ -46,7 +56,7 @@ spec:
     spec:
       containers:
       - name: cassandra
-        image: cassandra:3.11.2
+        image: cassandra:3.11.3
         imagePullPolicy: IfNotPresent
         env:
         - name: MAX_HEAP_SIZE

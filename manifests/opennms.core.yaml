@@ -1,8 +1,14 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
+# It will also use an overlay directory through config-maps for the critical configuration files that should
+# always be overriden, regardless the content of /opt/opennms/etc every time the Pod runs.
+#
 # ENHANCEMENTS
 # - Use a tool like ksync for /opt/opennms/etc:
 #   https://vapor-ware.github.io/ksync/
+# - Use an init-container to either pre-populate the mandatory config through config-maps or through a script
+#   that uses environment variables, to avoid the need of the overlay directory.
 
 ---
 apiVersion: v1
@@ -96,7 +102,7 @@ spec:
           mountPath: /karaf-features.init.sh
           subPath: karaf-features.init.sh
       - name: newts-initialization
-        image: cassandra:3.11.2
+        image: cassandra:3.11.3
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -f /newts.cql $CASSANDRA_HOST' ]
         env:

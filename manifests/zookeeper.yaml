@@ -1,4 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# WARNING: User 1000 cannot be used in OpenShift
+#          Invalid value: 1000: must be in the ranges: [1000220000, 1000229999]
 
 apiVersion: v1
 kind: Service
@@ -44,19 +47,19 @@ spec:
       - name: generate-zooid
         image: busybox
         imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
         command:
         - sh
         - -c
         - ORD=${HOSTNAME##*-}; MYID=$((ORD+1)); echo $MYID > /data/myid
-        securityContext:
-          privileged: true
         volumeMounts:
         - name: zk-data
           mountPath: /data
       containers:
       - name: zk
-        imagePullPolicy: IfNotPresent
         image: zookeeper:3.4.10
+        imagePullPolicy: IfNotPresent
         env:
         - name: ZOO_SERVERS
           value: server.1=zk-0.zookeeper.default.svc.cluster.local:2888:3888 server.2=zk-1.zookeeper.default.svc.cluster.local:2888:3888 server.3=zk-2.zookeeper.default.svc.cluster.local:2888:3888

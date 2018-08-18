@@ -19,6 +19,9 @@ spec:
   clusterIP: None
   ports:
   - port: 9200
+    name: http
+  - port: 9300
+    name: transport
   selector:
     role: esdata
 

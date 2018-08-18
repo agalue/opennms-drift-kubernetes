@@ -46,7 +46,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: ZK_HOSTS
-          value: zookeeper.default.svc.cluster.local:2181/kafka
+          value: zookeeper.default.svc.cluster.local:2181
         - name: APPLICATION_SECRET
           value: opennms
         ports:
