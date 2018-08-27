@@ -5,6 +5,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kibana
+  namespace: opennms
   labels:
     app: kibana
     deployment: drift
@@ -20,6 +21,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ext-kibana
+  namespace: opennms
   labels:
     app: kibana
     deployment: drift
@@ -38,6 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kibana
+  namespace: opennms
   labels:
     app: kibana
     deployment: drift
@@ -62,7 +65,7 @@ spec:
         - 'until wget -q $ELASTICSEARCH_URL >/dev/null; do echo "$(date) - Waiting for $ELASTICSEARCH_URL..."; sleep 5; done'
         env:
         - name: ELASTICSEARCH_URL
-          value: http://esdata.default.svc.cluster.local:9200
+          value: http://esdata.opennms.svc.cluster.local:9200
       containers:
       - name: kibana
         image: docker.elastic.co/kibana/kibana:6.2.4
@@ -73,7 +76,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: ELASTICSEARCH_URL
-          value: http://esdata.default.svc.cluster.local:9200
+          value: http://esdata.opennms.svc.cluster.local:9200
         - name: ELASTICSEARCH_USERNAME
           value: elastic
         - name: ELASTICSEARCH_PASSWORD

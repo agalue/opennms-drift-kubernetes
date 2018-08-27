@@ -1,9 +1,13 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# WARNING: User 1000 cannot be used in OpenShift
+#          Invalid value: 1000: must be in the ranges: [1000220000, 1000229999]
 
 apiVersion: v1
 kind: Service
 metadata:
   name: zookeeper
+  namespace: opennms
   labels:
     app: zk
     deployment: drift
@@ -24,12 +28,13 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
+  namespace: opennms
   labels:
     app: zk
     deployment: drift
 spec:
   serviceName: zookeeper
-  replicas: 3
+  replicas: 3 # The solution is designed for 3 instances
   podManagementPolicy: Parallel
   selector:
     matchLabels:
@@ -44,22 +49,22 @@ spec:
       - name: generate-zooid
         image: busybox
         imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
         command:
         - sh
         - -c
         - ORD=${HOSTNAME##*-}; MYID=$((ORD+1)); echo $MYID > /data/myid
-        securityContext:
-          privileged: true
         volumeMounts:
         - name: zk-data
           mountPath: /data
       containers:
       - name: zk
-        imagePullPolicy: IfNotPresent
         image: zookeeper:3.4.10
+        imagePullPolicy: IfNotPresent
         env:
         - name: ZOO_SERVERS
-          value: server.1=zk-0.zookeeper.default.svc.cluster.local:2888:3888 server.2=zk-1.zookeeper.default.svc.cluster.local:2888:3888 server.3=zk-2.zookeeper.default.svc.cluster.local:2888:3888
+          value: server.1=zk-0.zookeeper.opennms.svc.cluster.local:2888:3888 server.2=zk-1.zookeeper.opennms.svc.cluster.local:2888:3888 server.3=zk-2.zookeeper.opennms.svc.cluster.local:2888:3888
         - name: ZOO_TICK_TIME
           value: '2000'
         - name: ZOO_INIT_LIMIT

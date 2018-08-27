@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features
+  name="opennms-23.0.0-SNAPSHOT"
+  xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
+>
+
+  <feature name="autostart-sentinel-telemetry-flows" description="OpenNMS :: Features :: Sentinel :: Auto-Start" version="23.0.0-SNAPSHOT" start-level="200" install="auto">
+    <config name="org.opennms.features.telemetry.adapters-netflow5">
+      name = Netflow-5
+      class-name = org.opennms.netmgt.telemetry.adapters.netflow.v5.Netflow5Adapter
+    </config>
+    <config name="org.opennms.features.telemetry.adapters-netflow9">
+      name = Netflow-9
+      class-name = org.opennms.netmgt.telemetry.adapters.netflow.v9.Netflow9Adapter
+    </config>
+    <config name="org.opennms.features.flows.persistence.elastic">
+      elasticUrl = http://esdata.opennms.svc.cluster.local:9200
+      elasticGlobalUser = elastic
+      elasticGlobalPassword = elastic
+      elasticIndexStrategy = hourly
+      settings.index.number_of_shards = 6
+      settings.index.number_of_replicas = 1
+    </config>
+    <config name="org.opennms.core.ipc.sink.kafka.consumer">
+      group.id = Sentinel
+      bootstrap.servers = kafka.opennms.svc.cluster.local:9092
+    </config>
+    <feature>sentinel-kafka</feature>
+    <feature>sentinel-flows</feature>
+  </feature>
+
+</features>

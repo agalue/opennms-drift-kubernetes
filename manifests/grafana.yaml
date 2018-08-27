@@ -5,6 +5,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: grafana
+  namespace: opennms
   labels:
     app: grafana
     deployment: drift
@@ -20,6 +21,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ext-grafana
+  namespace: opennms
   labels:
     app: grafana
     deployment: drift
@@ -38,6 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
+  namespace: opennms
   labels:
     app: grafana
     deployment: drift
@@ -61,7 +64,7 @@ spec:
         - /bin/grafana-init.sh
         env:
           - name: PGHOST
-            value: postgresql.default.svc.cluster.local
+            value: postgresql.opennms.svc.cluster.local
           - name: PGPORT
             value: '5432'
           - name: PGUSER
@@ -93,7 +96,7 @@ spec:
           - name: GF_DATABASE_TYPE
             value: postgres
           - name: GF_DATABASE_HOST
-            value: postgresql.default.svc.cluster.local:5432
+            value: postgresql.opennms.svc.cluster.local:5432
           - name: GF_DATABASE_NAME
             value: grafana
           - name: GF_DATABASE_USER
@@ -103,7 +106,7 @@ spec:
           - name: GF_SESSION_PROVIDER
             value: postgres
           - name: GF_SESSION_PROVIDER_CONFIG
-            value: user=grafana password=grafana host=postgresql.default.svc.cluster.local port=5432 dbname=grafana sslmode=disable
+            value: user=grafana password=grafana host=postgresql.opennms.svc.cluster.local port=5432 dbname=grafana sslmode=disable
         readinessProbe:
           httpGet:
             path: /

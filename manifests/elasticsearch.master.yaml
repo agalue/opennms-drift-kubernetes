@@ -11,6 +11,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: esmaster
+  namespace: opennms
   labels:
     app: elasticsearch
     deployment: drift
@@ -19,6 +20,9 @@ spec:
   clusterIP: None
   ports:
   - port: 9200
+    name: http
+  - port: 9300
+    name: transport
   selector:
     role: esmaster
 
@@ -27,13 +31,14 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: esmaster
+  namespace: opennms
   labels:
     app: elasticsearch
     deployment: drift
     role: esmaster
 spec:
   serviceName: esmaster
-  replicas: 3
+  replicas: 3 # The solution is designed for 3 instances
   podManagementPolicy: Parallel
   selector:
     matchLabels:
@@ -45,25 +50,27 @@ spec:
         deployment: drift
         role: esmaster
     spec:
+      securityContext:
+        fsGroup: 1000
       initContainers:
-      - name: initialize-elastic-environment
+      - name: init-sysctl
         image: busybox
-        imagePullPolicy: IfNotPresent
         command:
-        - sh
-        - /bin/es-init.sh
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
         securityContext:
           privileged: true
-        volumeMounts:
-        - name: es-data
-          mountPath: /usr/share/elasticsearch/data
-        - name: elasticsearch
-          mountPath: /bin/es-init.sh
-          subPath: es-init.sh
       containers:
       - name: esmaster
         image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
         imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 1000
+          capabilities:
+            add:
+            - IPC_LOCK
+            - SYS_RESOURCE
         ports:
         - containerPort: 9200
           name: http
@@ -81,9 +88,9 @@ spec:
         - name: xpack.security.enabled
           value: 'true'
         - name: discovery.zen.ping.unicast.hosts
-          value: esmaster.default.svc.cluster.local
+          value: esmaster.opennms.svc.cluster.local
         - name: discovery.zen.minimum_master_nodes
-          value: '1' # TODO It should be 2
+          value: '2'
         - name: node.master
           value: 'true'
         - name: node.data
@@ -105,20 +112,15 @@ spec:
             cpu: 500m
             memory: 1Gi
         readinessProbe:
-          httpGet:
-            path: /
-            port: http
-          initialDelaySeconds: 15
+          tcpSocket:
+            port: transport
+          initialDelaySeconds: 5
+          periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /
-            port: http
+          tcpSocket:
+            port: transport
           initialDelaySeconds: 60
           periodSeconds: 60
-      volumes:
-      - name: elasticsearch
-        configMap:
-          name: elasticsearch
   volumeClaimTemplates:
   - metadata:
       name: es-data

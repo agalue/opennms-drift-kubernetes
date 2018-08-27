@@ -4,6 +4,7 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: aws-ebs
+  namespace: opennms
   labels:
     deployment: drift
 provisioner: kubernetes.io/aws-ebs

@@ -1,6 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# Make sure the to tune the max_connections to accomodate ONMS, the UI servers and Grafana.
+# Make sure the to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
 #
 # TODO
 # - Use a simple approach to manage a cluster: add an init-container that configures master/slave
@@ -12,6 +12,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql
+  namespace: opennms
   labels:
     app: postgres
     deployment: drift
@@ -27,13 +28,14 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
+  namespace: opennms
   labels:
     app: postgres
     role: master
     deployment: drift
 spec:
   serviceName: postgresql
-  replicas: 1 # The solution only allows 1 instane
+  replicas: 1 # The solution only allows 1 instance
   selector:
     matchLabels:
       app: postgres
@@ -52,9 +54,9 @@ spec:
         - docker-entrypoint.sh
         - postgres
         - -c
-        - 'shared_buffers=256MB'
+        - 'shared_buffers=512MB'
         - -c
-        - 'max_connections=200'
+        - 'max_connections=300'
         env:
         - name: PGUSER
           value: postgres
