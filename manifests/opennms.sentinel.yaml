@@ -5,6 +5,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sentinel
+  namespace: opennms
   labels:
     app: sentinel
     deployment: drift
@@ -25,7 +26,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TARGETS
-          value: opennms-core.default.svc.cluster.local:8980
+          value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
           value: '600'
       containers:
@@ -39,7 +40,7 @@ spec:
           name: karaf
         env:
         - name: POSTGRES_HOST
-          value: postgresql.default.svc.cluster.local
+          value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
           value: '5432'
         - name: POSTGRES_USER
@@ -49,7 +50,7 @@ spec:
         - name: POSTGRES_DB
           value: opennms
         - name: OPENNMS_HTTP_URL
-          value: http://opennms-core.default.svc.cluster.local:8980/opennms
+          value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
         - name: SENTINEL_LOCATION
           value: Sentinel
         - name: OPENNMS_HTTP_USER

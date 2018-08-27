@@ -126,6 +126,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Creation Order:
 
+* Namespace
 * ConfigMaps
 * Storage Classes
 * Volumes (if apply)
@@ -133,15 +134,23 @@ Creation Order:
 * Services
 * Deployments and StatefulSets
 
+### Namespace
+
+From the directory on which this repository has been checked out:
+
+```shell
+kubectl apply -f ./namespace
+```
+
 ### Configuration Maps
 
 From the directory on which this repository has been checked out:
 
 ```shell
-kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/
-kubectl create configmap opennms-sentinel-overlay --from-file=config/opennms-sentinel/
-kubectl create configmap opennms-ui-overlay --from-file=config/opennms-ui/
-kubectl create configmap grafana --from-file=config/grafana/
+kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/ --namespace opennms
+kubectl create configmap opennms-sentinel-overlay --from-file=config/opennms-sentinel/ --namespace opennms
+kubectl create configmap opennms-ui-overlay --from-file=config/opennms-ui/ --namespace opennms
+kubectl create configmap grafana --from-file=config/grafana/ --namespace opennms
 ```
 
 ### Storage Classes
@@ -180,7 +189,7 @@ kubectl apply -f ./manifests
 After a while, you should be able to see this:
 
 ```text
-➜  kubectl get all -l deployment=drift
+➜  kubectl get all --namespace opennms
 NAME                                 READY     STATUS    RESTARTS   AGE
 pod/cassandra-0                      1/1       Running   0          6m
 pod/cassandra-1                      1/1       Running   0          6m
@@ -323,7 +332,7 @@ Click [here](https://github.com/kubernetes/kops/blob/1.10.0-beta.1/docs/addons.m
 To remove the Kubernetes cluster, do the following:
 
 ```shell
-kubectl delete all -l deployment=drift
+kubectl delete all --namespace opennms
 kubectl delete pvc --all
 kubectl delete pv --all
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
@@ -333,7 +342,6 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 
 * Use `ConfigMaps` to centralize the configuration of the applications.
 * Use `Secrets` for the applications passwords.
-* Use a dedicated `namespace`.
 * Design a solution to handle scale down of Cassandra and decommission of nodes.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
 * Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.

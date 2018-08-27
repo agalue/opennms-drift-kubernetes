@@ -7,6 +7,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: helm-init
+  namespace: opennms
   labels:
     app: grafana
     deployment: drift
@@ -24,7 +25,7 @@ spec:
           - name: GF_SECURITY_ADMIN_PASSWORD
             value: opennms
           - name: GRAFANA_URL
-            value: http://grafana.default.svc.cluster.local:3000
+            value: http://grafana.opennms.svc.cluster.local:3000
           - name: ONMS_URL
             value: http://onmsui.k8s.opennms.org/opennms
           - name: ONMS_USER

@@ -17,6 +17,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cassandra
+  namespace: opennms
   labels:
     app: cassandra
     deployment: drift
@@ -39,6 +40,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: cassandra
+  namespace: opennms
   labels:
     app: cassandra
     deployment: drift
@@ -64,7 +66,7 @@ spec:
         - name: HEAP_NEWSIZE
           value: 2G
         - name: CASSANDRA_SEEDS
-          value: cassandra-0.cassandra.default.svc.cluster.local
+          value: cassandra-0.cassandra.opennms.svc.cluster.local
         - name: CASSANDRA_CLUSTER_NAME
           value: OpenNMS
         - name: CASSANDRA_ENDPOINT_SNITCH

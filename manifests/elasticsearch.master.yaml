@@ -11,6 +11,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: esmaster
+  namespace: opennms
   labels:
     app: elasticsearch
     deployment: drift
@@ -30,6 +31,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: esmaster
+  namespace: opennms
   labels:
     app: elasticsearch
     deployment: drift
@@ -86,7 +88,7 @@ spec:
         - name: xpack.security.enabled
           value: 'true'
         - name: discovery.zen.ping.unicast.hosts
-          value: esmaster.default.svc.cluster.local
+          value: esmaster.opennms.svc.cluster.local
         - name: discovery.zen.minimum_master_nodes
           value: '2'
         - name: node.master

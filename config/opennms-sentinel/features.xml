@@ -16,7 +16,7 @@
       class-name = org.opennms.netmgt.telemetry.adapters.netflow.v9.Netflow9Adapter
     </config>
     <config name="org.opennms.features.flows.persistence.elastic">
-      elasticUrl = http://esdata.default.svc.cluster.local:9200
+      elasticUrl = http://esdata.opennms.svc.cluster.local:9200
       elasticGlobalUser = elastic
       elasticGlobalPassword = elastic
       elasticIndexStrategy = hourly
@@ -25,7 +25,7 @@
     </config>
     <config name="org.opennms.core.ipc.sink.kafka.consumer">
       group.id = Sentinel
-      bootstrap.servers = kafka.default.svc.cluster.local:9092
+      bootstrap.servers = kafka.opennms.svc.cluster.local:9092
     </config>
     <feature>sentinel-kafka</feature>
     <feature>sentinel-flows</feature>

@@ -1,0 +1,11 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# A one time Job to enable OpenNMS Helm and creating the data sources on Grafana
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opennms
+  labels:
+    deployment: drift

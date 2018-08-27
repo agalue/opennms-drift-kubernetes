@@ -12,6 +12,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql
+  namespace: opennms
   labels:
     app: postgres
     deployment: drift
@@ -27,6 +28,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
+  namespace: opennms
   labels:
     app: postgres
     role: master
