@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# WARNING: The kibana user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
 ---
 apiVersion: v1
@@ -13,25 +15,6 @@ spec:
   clusterIP: None
   ports:
   - port: 5601
-  selector:
-    app: kibana
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ext-kibana
-  namespace: opennms
-  labels:
-    app: kibana
-    deployment: drift
-  annotations:
-    dns.alpha.kubernetes.io/external: kibana.k8s.opennms.org.
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 5601
   selector:
     app: kibana
 
@@ -89,10 +72,10 @@ spec:
             path: /
             port: http
           initialDelaySeconds: 10
-          timeoutSeconds: 5
+          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /
             port: http
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 60

@@ -17,25 +17,6 @@ spec:
     app: grafana
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: ext-grafana
-  namespace: opennms
-  labels:
-    app: grafana
-    deployment: drift
-  annotations:
-    dns.alpha.kubernetes.io/external: grafana.k8s.opennms.org.
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 3000
-  selector:
-    app: grafana
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -83,7 +64,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana
-        image: grafana/grafana:5.2.2
+        image: grafana/grafana:5.2.4
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -112,7 +93,7 @@ spec:
             path: /
             port: http
           initialDelaySeconds: 10
-          timeoutSeconds: 5
+          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /

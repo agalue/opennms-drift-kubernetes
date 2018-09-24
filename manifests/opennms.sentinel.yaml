@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# WARNING: the karaf process runs as root, which is not allowed on OpenShift
 
 ---
 apiVersion: apps/v1

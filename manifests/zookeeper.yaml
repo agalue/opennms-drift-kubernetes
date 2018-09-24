@@ -1,7 +1,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNING: User 1000 cannot be used in OpenShift
-#          Invalid value: 1000: must be in the ranges: [1000220000, 1000229999]
+# JVMFLAGS should be consistent with resources.requests.memory
+#
+# WARNING: For some reason, full FQDNs are required for ZOO_SERVERS; otherwise, the leader election fails.
+# WARNING: The zookeeper user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
 apiVersion: v1
 kind: Service
@@ -45,6 +47,7 @@ spec:
         app: zk
         deployment: drift
     spec:
+      terminationGracePeriodSeconds: 300
       initContainers:
       - name: generate-zooid
         image: busybox
@@ -60,7 +63,7 @@ spec:
           mountPath: /data
       containers:
       - name: zk
-        image: zookeeper:3.4.10
+        image: zookeeper:3.4.13
         imagePullPolicy: IfNotPresent
         env:
         - name: ZOO_SERVERS
@@ -71,6 +74,8 @@ spec:
           value: '10'
         - name: ZOO_SYNC_LIMIT
           value: '5'
+        - name: JVMFLAGS
+          value: -Xmx256M -Xms128M
         ports:
         - containerPort: 2888
           name: peer
@@ -91,10 +96,12 @@ spec:
             - sh
             - -c
             - '[ "imok" = "$(echo ruok | nc 127.0.0.1 2181)" ]'
+          initialDelaySeconds: 10
+          periodSeconds: 10
         livenessProbe:
           tcpSocket:
             port: client
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 60
   volumeClaimTemplates:
   - metadata:

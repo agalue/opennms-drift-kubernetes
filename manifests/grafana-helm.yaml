@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: grafana
-        image: grafana/grafana:5.2.2
+        image: grafana/grafana:5.2.4
         imagePullPolicy: IfNotPresent
         command:
           - sh

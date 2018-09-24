@@ -2,6 +2,8 @@
 #
 # Make sure the to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
 #
+# WARNING: The postgres user (uid: 999, gid: 999) cannot be used in OpenShift by default.
+
 # TODO
 # - Use a simple approach to manage a cluster: add an init-container that configures master/slave
 # - Use an advanced approach to manage a cluster: https://github.com/zalando-incubator/postgres-operator
@@ -48,7 +50,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:10.4
+        image: postgres:10.5-alpine
         imagePullPolicy: IfNotPresent
         command:
         - docker-entrypoint.sh
@@ -86,15 +88,15 @@ spec:
             - -c
             - exec pg_isready --host $HOSTNAME
           initialDelaySeconds: 10
-          timeoutSeconds: 5
+          periodSeconds: 10
         livenessProbe:
           exec:
             command:
             - sh
             - -c
             - exec pg_isready --host $HOSTNAME
-          initialDelaySeconds: 30
-          periodSeconds: 30
+          initialDelaySeconds: 60
+          periodSeconds: 60
   volumeClaimTemplates:
   - metadata:
       name: pg-data

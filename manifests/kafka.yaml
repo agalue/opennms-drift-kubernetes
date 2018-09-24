@@ -3,8 +3,10 @@
 # This solution expose 9094 on the k8s worker node.
 # That means, kafka can be scaled up to the number of workers on the k8s cluster.
 #
-# TODO
-# - The kafka process runs as root. Verify if this can be changed
+# KAFKA_HEAP_OPTS should be consistent with resources.requests.memory
+#
+# WARNING: the kafka process runs as root, which is not allowed on OpenShift
+# WARNING: due to HZN-1387, SASL Authentication cannot be used with OpenNMS
 
 ---
 apiVersion: v1
@@ -20,27 +22,10 @@ spec:
   ports:
   - port: 9092
     name: inside
+  - port: 9094
+    name: outside
   - port: 9999
     name: jmx
-  selector:
-    app: kafka
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ext-kafka
-  namespace: opennms
-  labels:
-    app: kafka
-    deployment: drift
-  annotations:
-    dns.alpha.kubernetes.io/external: kafka.k8s.opennms.org.
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 9094
-    targetPort: 9094
   selector:
     app: kafka
 
@@ -65,6 +50,7 @@ spec:
         app: kafka
         deployment: drift
     spec:
+      terminationGracePeriodSeconds: 300
       initContainers:
       - name: check-zk-ready
         image: busybox
@@ -121,6 +107,8 @@ spec:
           value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.rmi.port=9999
         - name: JMX_PORT
           value: '9999'
+        - name: KAFKA_HEAP_OPTS
+          value: -Xmx2G -Xms1G
         volumeMounts:
         - name: kafka-data
           mountPath: /kafka
@@ -135,11 +123,11 @@ spec:
           tcpSocket:
             port: inside
           initialDelaySeconds: 10
-          timeoutSeconds: 5
+          periodSeconds: 10
         livenessProbe:
           tcpSocket:
             port: inside
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 60
   volumeClaimTemplates:
   - metadata:

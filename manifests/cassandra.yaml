@@ -3,7 +3,7 @@
 # MAX_HEAP_SIZE should be consistent with resources.requests.memory
 # CASSANDRA_DC should match config/opennms-core/newts.cql
 #
-# WARNING: the process runs as root, which is not allowed on OpenShift
+# WARNING: The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 #
 # TODO
 # - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.
@@ -56,6 +56,7 @@ spec:
         app: cassandra
         deployment: drift
     spec:
+      terminationGracePeriodSeconds: 300
       containers:
       - name: cassandra
         image: cassandra:3.11.3
@@ -107,11 +108,12 @@ spec:
             - bash
             - -c
             - 'if [[ $(nodetool status -r | grep $HOSTNAME) == *"UN"* ]]; then exit 0; else exit 1; fi'
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
+          periodSeconds: 10
         livenessProbe:
           tcpSocket:
             port: cql
-          initialDelaySeconds: 90
+          initialDelaySeconds: 120
           periodSeconds: 60
   volumeClaimTemplates:
   - metadata:

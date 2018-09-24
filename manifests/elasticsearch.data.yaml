@@ -2,9 +2,7 @@
 #
 # ES_JAVA_OPTS should be consistent with resources.requests.memory
 #
-# TODO
-# - minimum_master_nodes should be 2, but that enters in conflict with the dns-controller and the readinessProbe.
-#   That's because the FQDN are not reach until the readinessProbe says so, and ES won't start until the master are initialized.
+# WARNING: The elasticsearch user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
 ---
 apiVersion: v1

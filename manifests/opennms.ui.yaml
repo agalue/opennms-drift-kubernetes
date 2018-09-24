@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# WARNING: the opennms process runs as root, which is not allowed on OpenShift
 
 ---
 apiVersion: v1
@@ -16,25 +18,6 @@ spec:
     name: http
   - port: 8101
     name: karaf
-  selector:
-    app: onms-ui
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ext-onms-ui
-  namespace: opennms
-  labels:
-    app: onms-ui
-    deployment: drift
-  annotations:
-    dns.alpha.kubernetes.io/external: onmsui.k8s.opennms.org.
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 8980
   selector:
     app: onms-ui
 
@@ -137,14 +120,15 @@ spec:
             memory: 2Gi
         readinessProbe:
           httpGet:
-            path: /
+            path: /opennms/login.jsp
             port: http
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
+          periodSeconds: 15
         livenessProbe:
           httpGet:
-            path: /
+            path: /opennms/login.jsp
             port: http
-          initialDelaySeconds: 60
+          initialDelaySeconds: 120
           periodSeconds: 60
       volumes:
       - name: onms-core-etc

@@ -4,6 +4,8 @@
 # It will also use an overlay directory through config-maps for the critical configuration files that should
 # always be overriden, regardless the content of /opt/opennms/etc every time the Pod runs.
 #
+# WARNING: the opennms process runs as root, which is not allowed on OpenShift
+#
 # ENHANCEMENTS
 # - Use a tool like ksync for /opt/opennms/etc:
 #   https://vapor-ware.github.io/ksync/
@@ -30,29 +32,6 @@ spec:
     app: onms
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: ext-onms
-  namespace: opennms
-  labels:
-    app: onms
-    deployment: drift
-  annotations:
-    dns.alpha.kubernetes.io/external: onms.k8s.opennms.org.
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 8980
-    name: http
-  - port: 22
-    targetPort: 8101
-    name: karaf
-  selector:
-    app: onms
-
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -73,6 +52,7 @@ spec:
         app: onms
         deployment: drift
     spec:
+      terminationGracePeriodSeconds: 300
       initContainers:
       - name: wait-for-dependencies
         image: waisbrot/wait
@@ -177,14 +157,15 @@ spec:
               - /opt/opennms/bin/opennms stop
         readinessProbe:
           httpGet:
-            path: /
+            path: /opennms/login.jsp
             port: http
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
+          periodSeconds: 15
         livenessProbe:
           httpGet:
-            path: /
+            path: /opennms/login.jsp
             port: http
-          initialDelaySeconds: 60
+          initialDelaySeconds: 120
           periodSeconds: 60
       volumes:
       - name: onms-etc

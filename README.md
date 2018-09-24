@@ -13,7 +13,7 @@ Instead of using discrete EC2 instances, this repository explains how to deploy 
 * Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0`, but I can't find a reason why it would't work with `1.9.x`)
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
-* Install [terraform](https://www.terraform.io)
+* Install [terraform](https://www.terraform.io) [Optional. See security groups]
 * Have your AWS account configured on your system (`~/.aws/credentials`)
 
 ## Cluster Configuration
@@ -131,6 +131,7 @@ Creation Order:
 * Storage Classes
 * Volumes (if apply)
 * Security Groups
+* Plugins/Controllers
 * Services
 * Deployments and StatefulSets
 
@@ -174,7 +175,21 @@ terraform init
 terraform apply -auto-approve
 ```
 
-> NOTE: it is possible to pass additional security groups when creating the cluster, but that requires to pre-create a VPC. An example for this might be added in the future.
+> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create a VPC. An example for this might be added in the future.
+
+### Plugins/Controllers
+
+Add support for Ingress on dns-controller:
+
+```shell
+kubectl patch deployment -n kube-system dns-controller --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/command/1", "value":"--watch-ingress=true"}]'
+```
+
+Install the NGinx Ingress Controller:
+
+```shell
+kubectl apply -f https://github.com/kubernetes/kops/blob/master/addons/ingress-nginx/v1.6.0.yaml
+```
 
 ### Services, Deployments and StatefulSets
 
@@ -208,7 +223,7 @@ pod/kafka-2                          1/1       Running   0          4m
 pod/kafka-manager-86c876b86d-x7bgw   1/1       Running   0          6m
 pod/kibana-58cc68bdb6-xlh58          1/1       Running   0          6m
 pod/onms-0                           1/1       Running   0          6m
-pod/onms-ui-7c56f74975-2mjq7         0/1       Running   0          6m
+pod/onms-ui-7c56f74975-2mjq7         1/1       Running   0          6m
 pod/onms-ui-7c56f74975-jtzvx         1/1       Running   0          6m
 pod/postgres-0                       1/1       Running   0          6m
 pod/sentinel-5fbf86857d-ds6nj        1/1       Running   0          6m
@@ -221,12 +236,7 @@ NAME                        TYPE           CLUSTER-IP       EXTERNAL-IP         
 service/cassandra           ClusterIP      None             <none>                                                                    9042/TCP                     6m
 service/esdata              ClusterIP      None             <none>                                                                    9200/TCP                     6m
 service/esmaster            ClusterIP      None             <none>                                                                    9200/TCP                     6m
-service/ext-grafana         LoadBalancer   100.69.214.165   aa988ea8f99ae11e8a0690240989dcf9-1502556027.us-east-2.elb.amazonaws.com   80:31375/TCP                 6m
 service/ext-kafka           LoadBalancer   100.68.235.20    aa9bf858199ae11e8a0690240989dcf9-20371613.us-east-2.elb.amazonaws.com     9094:30844/TCP               6m
-service/ext-kafka-manager   LoadBalancer   100.69.134.149   aa9a0282b99ae11e8a0690240989dcf9-734450708.us-east-2.elb.amazonaws.com    80:32134/TCP                 6m
-service/ext-kibana          LoadBalancer   100.69.158.228   aa9e03cc599ae11e8a0690240989dcf9-13927087.us-east-2.elb.amazonaws.com     80:30315/TCP                 6m
-service/ext-onms            LoadBalancer   100.67.218.34    aaa003ad099ae11e8a0690240989dcf9-351868183.us-east-2.elb.amazonaws.com    80:32252/TCP,22:31879/TCP    6m
-service/ext-onms-ui         LoadBalancer   100.69.102.50    aaa2afbc099ae11e8a0690240989dcf9-972434993.us-east-2.elb.amazonaws.com    80:31742/TCP                 6m
 service/grafana             ClusterIP      None             <none>                                                                    3000/TCP                     6m
 service/kafka               ClusterIP      None             <none>                                                                    9092/TCP,9999/TCP            6m
 service/kibana              ClusterIP      None             <none>                                                                    5601/TCP                     6m
@@ -239,14 +249,14 @@ NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/grafana         2         2         2            2           6m
 deployment.apps/kafka-manager   1         1         1            1           6m
 deployment.apps/kibana          1         1         1            1           6m
-deployment.apps/onms-ui         2         2         2            1           6m
+deployment.apps/onms-ui         2         2         2            2           6m
 deployment.apps/sentinel        2         2         2            2           6m
 
 NAME                                       DESIRED   CURRENT   READY     AGE
 replicaset.apps/grafana-5875cd6cb4         2         2         2         6m
 replicaset.apps/kafka-manager-86c876b86d   1         1         1         6m
 replicaset.apps/kibana-58cc68bdb6          1         1         1         6m
-replicaset.apps/onms-ui-7c56f74975         2         2         1         6m
+replicaset.apps/onms-ui-7c56f74975         2         2         2         6m
 replicaset.apps/sentinel-5fbf86857d        2         2         2         6m
 
 NAME                         DESIRED   CURRENT   AGE
@@ -340,7 +350,6 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 
 ## Future Enhancements
 
-* Use `ConfigMaps` to centralize the configuration of the applications.
 * Use `Secrets` for the applications passwords.
 * Design a solution to handle scale down of Cassandra and decommission of nodes.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
