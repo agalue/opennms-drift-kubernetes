@@ -109,7 +109,10 @@ spec:
         - name: ES_JAVA_OPTS
           value: -Xms2g -Xmx2g
         - name: ELASTIC_PASSWORD
-          value: elastic
+          valueFrom:
+            secretKeyRef:
+              key: ELASTICSEARCH
+              name: onms-passwords
         volumeMounts:
         - name: es-data
           mountPath: /usr/share/elasticsearch/data

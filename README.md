@@ -74,10 +74,30 @@ kops create cluster \
   --master-count 1 \
   --node-size t2.2xlarge \
   --node-count 5 \
-  --yes
+  --kubernetes-version 1.10.5
 ```
 
 > **IMPORTANT: Remember to change the settings to reflect your desired environment.**
+
+Then, you should edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
+
+```shell
+kops edit cluster k8s.opennms.org --state s3://k8s.opennms.org
+```
+
+Then, add:
+
+```yaml
+spec:
+  externalDns:
+    watchIngress: true
+```
+
+Finally, apply the changes to create the cluster:
+
+```shell
+kops update cluster k8s.opennms.org --state s3://k8s.opennms.org --yes
+```
 
 It takes a few minutes to have the cluster ready. Verify the cluster statue using `kubectl` and `kops`:
 
@@ -126,14 +146,22 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Creation Order:
 
+* Plugins/Controllers
 * Namespace
-* ConfigMaps
+* ConfigMaps/Secrets
 * Storage Classes
 * Volumes (if apply)
 * Security Groups
-* Plugins/Controllers
 * Services
 * Deployments and StatefulSets
+
+### Plugins/Controllers
+
+#### Install the NGinx Ingress Controller:
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/ingress-nginx/v1.6.0.yaml
+```
 
 ### Namespace
 
@@ -148,11 +176,23 @@ kubectl apply -f ./namespace
 From the directory on which this repository has been checked out:
 
 ```shell
-kubectl create configmap opennms-core-overlay --from-file=config/opennms-core/ --namespace opennms
-kubectl create configmap opennms-sentinel-overlay --from-file=config/opennms-sentinel/ --namespace opennms
-kubectl create configmap opennms-ui-overlay --from-file=config/opennms-ui/ --namespace opennms
-kubectl create configmap grafana --from-file=config/grafana/ --namespace opennms
+kubectl create configmap opennms-config --from-file=config/ --namespace opennms
 ```
+
+Create a secret object for the passwords:
+
+```shell
+kubectl create secret generic onms-passwords \
+ --from-literal POSTGRES=postgres \
+ --from-literal OPENNMS_DB=opennms \
+ --from-literal OPENNMS_UI_ADMIN=admin \
+ --from-literal GRAFANA_UI_ADMIN=opennms \
+ --from-literal ELASTICSEARCH=elastic \
+ --from-literal KAFKA_MANAGER_APPLICATION_SECRET=opennms \
+ --namespace opennms
+```
+
+Feel free to change them.
 
 ### Storage Classes
 
@@ -177,20 +217,6 @@ terraform apply -auto-approve
 
 > NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create a VPC. An example for this might be added in the future.
 
-### Plugins/Controllers
-
-Add support for Ingress on dns-controller:
-
-```shell
-kubectl patch deployment -n kube-system dns-controller --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/command/1", "value":"--watch-ingress=true"}]'
-```
-
-Install the NGinx Ingress Controller:
-
-```shell
-kubectl apply -f https://github.com/kubernetes/kops/blob/master/addons/ingress-nginx/v1.6.0.yaml
-```
-
 ### Services, Deployments and StatefulSets
 
 The applications will wait for their respective dependencies to be ready prior start, so there is no need to start them on a specific order.
@@ -203,7 +229,7 @@ kubectl apply -f ./manifests
 
 After a while, you should be able to see this:
 
-```text
+```shell
 ➜  kubectl get all --namespace opennms
 NAME                                 READY     STATUS    RESTARTS   AGE
 pod/cassandra-0                      1/1       Running   0          6m
@@ -270,6 +296,14 @@ statefulset.apps/zk          3         3         6m
 
 NAME                  DESIRED   SUCCESSFUL   AGE
 job.batch/helm-init   1         1            6m
+```
+
+Ingress are not shown, but you could do:
+
+```bash
+➜  kubectl get ingress -n opennms
+NAME            HOSTS                                                                                      ADDRESS                                                                   PORTS     AGE
+ingress-rules   grafana.k8s.opennms.org,kafka-manager.k8s.opennms.org,kibana.k8s.opennms.org + 2 more...   a580a93fdc35211e8a26702c5612cb12-1869830019.us-east-2.elb.amazonaws.com   80        12m
 ```
 
 ## Minion
@@ -350,7 +384,6 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 
 ## Future Enhancements
 
-* Use `Secrets` for the applications passwords.
 * Design a solution to handle scale down of Cassandra and decommission of nodes.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
 * Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.

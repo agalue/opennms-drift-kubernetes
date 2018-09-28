@@ -62,6 +62,23 @@ spec:
           value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
           value: '600'
+      - name: initialization
+        image: opennms/horizon-core-web:bleeding
+        imagePullPolicy: IfNotPresent
+        command: [ sh, /init.sh ]
+        env:
+        - name: CASSANDRA_SERVER
+          value: cassandra.opennms.svc.cluster.local
+        - name: ELASTIC_SERVER
+          value: esdata.opennms.svc.cluster.local
+        volumeMounts:
+        - name: etc-overlay
+          mountPath: /opt/opennms-etc-overlay
+        - name: web-overlay
+          mountPath: /opt/opennms-jetty-webinf-overlay
+        - name: opennms-config
+          mountPath: /init.sh
+          subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
         image: opennms/horizon-core-web:bleeding
@@ -82,35 +99,24 @@ spec:
         - name: POSTGRES_USER
           value: postgres
         - name: POSTGRES_PASSWORD
-          value: postgres
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES
+              name: onms-passwords
         - name: OPENNMS_DBNAME
           value: opennms
         - name: OPENNMS_DBUSER
           value: opennms
         - name: OPENNMS_DBPASS
-          value: opennms
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_DB
+              name: onms-passwords
         volumeMounts:
-        - name: onms-core-etc
-          mountPath: /opt/opennms-etc-overlay/org.opennms.features.datachoices.cfg
-          subPath: org.opennms.features.datachoices.cfg
-        - name: onms-core-etc
-          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/newts.properties
-          subPath: newts.properties
-        - name: onms-ui-etc
-          mountPath: /opt/opennms-etc-overlay/org.opennms.features.flows.persistence.elastic.cfg
-          subPath: org.opennms.features.flows.persistence.elastic.cfg
-        - name: onms-ui-etc
-          mountPath: /opt/opennms-etc-overlay/eventconf.xml
-          subPath: eventconf.xml
-        - name: onms-ui-etc
-          mountPath: /opt/opennms-etc-overlay/service-configuration.xml
-          subPath: service-configuration.xml
-        - name: onms-ui-etc
-          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/webui.properties
-          subPath: webui.properties
-        - name: onms-ui-etc
-          mountPath: /opt/opennms-jetty-webinf-overlay/applicationContext-spring-security.xml
-          subPath: applicationContext-spring-security.xml
+        - name: etc-overlay
+          mountPath: /opt/opennms-etc-overlay
+        - name: web-overlay
+          mountPath: /opt/opennms-jetty-webinf-overlay
         resources:
           limits:
             cpu: 1
@@ -131,9 +137,10 @@ spec:
           initialDelaySeconds: 120
           periodSeconds: 60
       volumes:
-      - name: onms-core-etc
+      - name: etc-overlay
+        emptyDir: {}
+      - name: web-overlay
+        emptyDir: {}
+      - name: opennms-config
         configMap:
-          name: opennms-core-overlay
-      - name: onms-ui-etc
-        configMap:
-          name: opennms-ui-overlay
+          name: opennms-config

@@ -23,7 +23,10 @@ spec:
           - /bin/helm-init.sh
         env:
           - name: GF_SECURITY_ADMIN_PASSWORD
-            value: opennms
+            valueFrom:
+              secretKeyRef:
+                key: GRAFANA_UI_ADMIN
+                name: onms-passwords
           - name: GRAFANA_URL
             value: http://grafana.opennms.svc.cluster.local:3000
           - name: ONMS_URL
@@ -31,13 +34,16 @@ spec:
           - name: ONMS_USER
             value: admin
           - name: ONMS_PASSWD
-            value: admin
+            valueFrom:
+              secretKeyRef:
+                key: OPENNMS_UI_ADMIN
+                name: onms-passwords
         volumeMounts:
-        - name: grafana
+        - name: opennms-config
           mountPath: /bin/helm-init.sh
           subPath: helm-init.sh
       restartPolicy: Never
       volumes:
-      - name: grafana
+      - name: opennms-config
         configMap:
-          name: grafana
+          name: opennms-config

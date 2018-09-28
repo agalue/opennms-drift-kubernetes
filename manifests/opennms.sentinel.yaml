@@ -48,7 +48,10 @@ spec:
         - name: POSTGRES_USER
           value: postgres
         - name: POSTGRES_PASSWORD
-          value: postgres
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES
+              name: onms-passwords
         - name: POSTGRES_DB
           value: opennms
         - name: OPENNMS_HTTP_URL
@@ -58,11 +61,14 @@ spec:
         - name: OPENNMS_HTTP_USER
           value: admin
         - name: OPENNMS_HTTP_PASS
-          value: admin
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_UI_ADMIN
+              name: onms-passwords
         volumeMounts:
-        - name: sentinel-config
+        - name: opennms-config
           mountPath: /opt/sentinel/deploy/features.xml
-          subPath: features.xml
+          subPath: onms-sentinel-features.xml
         resources:
           limits:
             cpu: 1
@@ -81,6 +87,6 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 60
       volumes:
-      - name: sentinel-config
+      - name: opennms-config
         configMap:
-          name: opennms-sentinel-overlay
+          name: opennms-config

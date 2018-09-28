@@ -1,16 +1,12 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
-# It will also use an overlay directory through config-maps for the critical configuration files that should
-# always be overriden, regardless the content of /opt/opennms/etc every time the Pod runs.
 #
 # WARNING: the opennms process runs as root, which is not allowed on OpenShift
 #
 # ENHANCEMENTS
 # - Use a tool like ksync for /opt/opennms/etc:
 #   https://vapor-ware.github.io/ksync/
-# - Use an init-container to either pre-populate the mandatory config through config-maps or through a script
-#   that uses environment variables, to avoid the need of the overlay directory.
 
 ---
 apiVersion: v1
@@ -62,39 +58,38 @@ spec:
           value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
         - name: TIMEOUT
           value: '600'
-      - name: config-initialization
+      - name: initialization
         image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
-        command: [ sh, -c, 'if [ ! -f /opennms-config/configured ]; then cp -R /opt/opennms/etc/* /opennms-config/; fi' ]
-        volumeMounts:
-        - name: opennms-config
-          mountPath: /opennms-config
-      - name: karaf-features-initialization
-        image: opennms/horizon-core-web:bleeding
-        imagePullPolicy: IfNotPresent
-        command: [ sh, /karaf-features.init.sh ]
+        command: [ sh, /init.sh ]
         env:
-        - name: FEATURES_CFG
-          value: /opennms-config/org.apache.karaf.features.cfg
         - name: FEATURES_LIST
           value: opennms-es-rest,opennms-kafka-producer
+        - name: KAFKA_SERVER
+          value: kafka.opennms.svc.cluster.local
+        - name: ELASTIC_SERVER
+          value: esdata.opennms.svc.cluster.local
+        - name: CASSANDRA_SERVER
+          value: cassandra.opennms.svc.cluster.local
+        - name: CASSANDRA_REPFACTOR
+          value: '2'
         volumeMounts:
+        - name: opennms-etc
+          mountPath: /opennms-etc
         - name: opennms-config
-          mountPath: /opennms-config
-        - name: onms-etc
-          mountPath: /karaf-features.init.sh
-          subPath: karaf-features.init.sh
+          mountPath: /init.sh
+          subPath: onms-core-init.sh
       - name: newts-initialization
         image: cassandra:3.11.3
         imagePullPolicy: IfNotPresent
-        command: [ sh, -c, 'cqlsh -f /newts.cql $CASSANDRA_HOST' ]
+        command: [ sh, -c, 'cqlsh -f /onms-newts.cql $CASSANDRA_HOST' ]
         env:
         - name: CASSANDRA_HOST
           value: cassandra.opennms.svc.cluster.local
         volumeMounts:
-        - name:  onms-etc
-          mountPath: /newts.cql
-          subPath: newts.cql
+        - name: opennms-config
+          mountPath: /onms-newts.cql
+          subPath: onms-newts.cql
       containers:
       - name: onms
         image: opennms/horizon-core-web:bleeding
@@ -115,34 +110,22 @@ spec:
         - name: POSTGRES_USER
           value: postgres
         - name: POSTGRES_PASSWORD
-          value: postgres
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES
+              name: onms-passwords
         - name: OPENNMS_DBNAME
           value: opennms
         - name: OPENNMS_DBUSER
           value: opennms
         - name: OPENNMS_DBPASS
-          value: opennms
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_DB
+              name: onms-passwords
         volumeMounts:
-        - name: opennms-config
+        - name: opennms-etc
           mountPath: /opt/opennms/etc
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/org.opennms.features.datachoices.cfg
-          subPath: org.opennms.features.datachoices.cfg
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
-          subPath: org.opennms.plugin.elasticsearch.rest.forwarder.cfg
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/org.opennms.features.kafka.producer.client.cfg
-          subPath: org.opennms.features.kafka.producer.client.cfg
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/org.opennms.features.kafka.producer.cfg
-          subPath: org.opennms.features.kafka.producer.cfg
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/newts.properties
-          subPath: newts.properties
-        - name: onms-etc
-          mountPath: /opt/opennms-etc-overlay/opennms.properties.d/kafka.properties
-          subPath: kafka.properties
         resources:
           limits:
             cpu: 4
@@ -168,12 +151,12 @@ spec:
           initialDelaySeconds: 120
           periodSeconds: 60
       volumes:
-      - name: onms-etc
+      - name: opennms-config
         configMap:
-          name: opennms-core-overlay
+          name: opennms-config
   volumeClaimTemplates:
   - metadata:
-      name: opennms-config
+      name: opennms-etc
     spec:
       accessModes:
       - ReadWriteOnce

@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# The password for the grafana user in PostgreSQL is plain text here due to GF_SESSION_PROVIDER_CONFIG
 
 ---
 apiVersion: v1
@@ -51,15 +53,18 @@ spec:
           - name: PGUSER
             value: postgres
           - name: PGPASSWORD
-            value: postgres
-          - name: DATABASE_NAME
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES
+                name: onms-passwords
+          - name: GF_DATABASE_NAME
             value: grafana
-          - name: DATABASE_USER
+          - name: GF_DATABASE_USER
             value: grafana
-          - name: DATABASE_PASSWORD
+          - name: GF_DATABASE_PASSWORD
             value: grafana
         volumeMounts:
-        - name: grafana
+        - name: opennms-config
           mountPath: /bin/grafana-init.sh
           subPath: grafana-init.sh
       containers:
@@ -71,7 +76,10 @@ spec:
           name: http
         env:
           - name: GF_SECURITY_ADMIN_PASSWORD
-            value: opennms
+            valueFrom:
+              secretKeyRef:
+                key: GRAFANA_UI_ADMIN
+                name: onms-passwords
           - name: GF_INSTALL_PLUGINS
             value: opennms-helm-app
           - name: GF_DATABASE_TYPE
@@ -86,7 +94,7 @@ spec:
             value: grafana
           - name: GF_SESSION_PROVIDER
             value: postgres
-          - name: GF_SESSION_PROVIDER_CONFIG
+          - name: GF_SESSION_PROVIDER_CONFIG # The password field should match GF_DATABASE_PASSWORD
             value: user=grafana password=grafana host=postgresql.opennms.svc.cluster.local port=5432 dbname=grafana sslmode=disable
         readinessProbe:
           httpGet:
@@ -101,6 +109,6 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 60
       volumes:
-      - name: grafana
+      - name: opennms-config
         configMap:
-          name: grafana
+          name: opennms-config

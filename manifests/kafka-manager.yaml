@@ -31,7 +31,10 @@ spec:
         - name: ZK_HOSTS
           value: zookeeper.opennms.svc.cluster.local:2181
         - name: APPLICATION_SECRET
-          value: opennms
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_MANAGER_APPLICATION_SECRET
+              name: onms-passwords
         ports:
         - containerPort: 9000
           name: http
