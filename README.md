@@ -378,7 +378,7 @@ To remove the Kubernetes cluster, do the following:
 ```shell
 kubectl delete ingress ingress-rules --namespace opennms
 kubectl delete all --all --namespace opennms
-kubectl delete pvc --all
+kubectl delete pvc --all --namespace opennms
 kubectl delete pv --all
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 ```
