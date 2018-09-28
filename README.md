@@ -376,6 +376,7 @@ Click [here](https://github.com/kubernetes/kops/blob/1.10.0-beta.1/docs/addons.m
 To remove the Kubernetes cluster, do the following:
 
 ```shell
+kubectl delete ingress ingress-rules --namespace opennms
 kubectl delete all --all --namespace opennms
 kubectl delete pvc --all
 kubectl delete pv --all
