@@ -86,20 +86,14 @@ fi
 if [ "$ELASTIC_SERVER" != ""]; then
   cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
-elasticGlobalUser=elastic
-elasticGlobalPassword=elastic
+globalElasticUser=elastic
+globalElasticPassword=elastic
 archiveRawEvents=true
 archiveAlarms=true
 archiveAlarmChangeEvents=false
 logAllEvents=false
 retries=1
 connTimeout=3000
-EOF
-
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
-elasticUrl=http://$ELASTIC_SERVER:9200
-elasticGlobalUser=elastic
-elasticGlobalPassword=elastic
 EOF
 fi
 

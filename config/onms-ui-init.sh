@@ -115,8 +115,8 @@ fi
 if [ "$ELASTIC_SERVER" != ""]; then
   cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
-elasticGlobalUser=elastic
-elasticGlobalPassword=elastic
+globalElasticUser=elastic
+globalElasticPassword=elastic
 EOF
 fi
 
