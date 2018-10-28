@@ -97,6 +97,10 @@ spec:
           requests:
             cpu: 2
             memory: 2Gi
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
         lifecycle:
           preStop:
             exec:

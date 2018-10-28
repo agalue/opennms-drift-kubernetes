@@ -68,8 +68,8 @@ spec:
           mountPath: /bin/grafana-init.sh
           subPath: grafana-init.sh
       containers:
-      - name: grafana
-        image: grafana/grafana:5.2.4
+      - name: grafana-helm
+        image: opennms/helm:2.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -80,8 +80,6 @@ spec:
               secretKeyRef:
                 key: GRAFANA_UI_ADMIN
                 name: onms-passwords
-          - name: GF_INSTALL_PLUGINS
-            value: opennms-helm-app
           - name: GF_DATABASE_TYPE
             value: postgres
           - name: GF_DATABASE_HOST

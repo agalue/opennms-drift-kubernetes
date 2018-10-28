@@ -1,7 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# TODO
-# - Find a newer image or create a custom one
 
 ---
 apiVersion: apps/v1
@@ -25,19 +22,35 @@ spec:
     spec:
       containers:
       - name: kafka-manager
-        image: sheepkiller/kafka-manager:alpine
+        image: hlebalbau/kafka-manager:latest
         imagePullPolicy: IfNotPresent
         env:
         - name: ZK_HOSTS
           value: zookeeper.opennms.svc.cluster.local:2181
+        - name: KAFKA_MANAGER_AUTH_ENABLED
+          value: 'true'
         - name: APPLICATION_SECRET
           valueFrom:
             secretKeyRef:
               key: KAFKA_MANAGER_APPLICATION_SECRET
               name: onms-passwords
+        - name: KAFKA_MANAGER_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_MANAGER_USERNAME
+              name: onms-passwords
+        - name: KAFKA_MANAGER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_MANAGER_PASSWORD
+              name: onms-passwords
         ports:
         - containerPort: 9000
           name: http
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 100m
         readinessProbe:
           httpGet:
             path: /

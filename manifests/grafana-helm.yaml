@@ -15,8 +15,8 @@ spec:
   template:
     spec:
       containers:
-      - name: grafana
-        image: grafana/grafana:5.2.4
+      - name: helm
+        image: opennms/helm:2.0.0
         imagePullPolicy: IfNotPresent
         command:
           - sh

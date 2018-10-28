@@ -21,6 +21,8 @@ spec:
     name: leader-election
   - port: 2181
     name: client
+  - port: 9998
+    name: jmx
   clusterIP: None
   selector:
     app: zk
@@ -76,6 +78,16 @@ spec:
           value: '5'
         - name: JVMFLAGS
           value: -Xmx256M -Xms128M
+        - name: JMXLOCALONLY
+          value: 'false'
+        - name: JMXDISABLE
+          value: 'false'
+        - name: JMXPORT
+          value: '9998'
+        - name: JMXAUTH
+          value: 'false'
+        - name: JMXSSL
+          value: 'false'
         ports:
         - containerPort: 2888
           name: peer
@@ -83,6 +95,8 @@ spec:
           name: leader-election
         - containerPort: 2181
           name: client
+        - containerPort: 9998
+          name: jmx
         volumeMounts:
         - name: zk-data
           mountPath: /data

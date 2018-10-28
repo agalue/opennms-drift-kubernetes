@@ -1,6 +1,27 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# A one time Job to enable OpenNMS Helm and creating the data sources on Grafana
+# TODO Define resource quota and limits.
+# TODO Define default limits.
+#
+# Adding Users:
+#
+# Retrieve keys from kops:
+#
+# aws s3 sync s3://k8s.opennms.org/k8s.opennms.org/pki/private/ca/ ca-key
+# aws s3 sync s3://k8s.opennms.org/k8s.opennms.org/pki/issued/ca/ ca-crt
+# mv ca-key/*.key ca.key
+# mv ca-crt/*.crt ca.crt
+#
+# To create user "agalue" that belongs to the group "admin":
+#
+# openssl genrsa -out agalue.pem 2048
+# openssl req -new -key agalue.pem -out agalue-csr.pem -subj "/CN=agalue/O=admin/"
+# openssl x509 -req -in agalue-csr.pem -CA ca.crt -CAkey ca.key -CAcreateserial -out agalue.crt -days 365
+#
+# To add new context:
+#
+# kubectl config set-credentials agalue --client-certificate=agalue.crt --client-key=agalue.pem
+# kubectl config set-context agalue --cluster=k8s.opennms.org --user agalue
 
 ---
 apiVersion: v1
@@ -9,3 +30,97 @@ metadata:
   name: opennms
   labels:
     deployment: drift
+
+# The following is optional.
+# It is here as a template in case other admin/operators have to interact with the cluster.
+
+# RBAC Role onms-operator: to view the K8s solution on the opennms namespace.
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: opennms
+  name: onms-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - pods/log
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+
+# RBAC RoleBinding opennms-operator: to associate the users of group "operator" to the "onms-operator" role.
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: opennms
+  name: opennms-operator
+subjects:
+- kind: Group
+  name: operator
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: onms-operator
+  apiGroup: rbac.authorization.k8s.io
+
+# RBAC Role onms-admin: to manage the K8s solution on the opennms namespace.
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: opennms
+  name: onms-admin
+rules:
+- apiGroups:
+  - ""
+  - batch
+  - apps
+  - extensions
+  resources:
+  - configmaps
+  - pods
+  - pods/log
+  - services
+  - ingresses
+  - endpoints
+  - secrets
+  - jobs
+  - deployments
+  - deployments/rollback
+  - deployments/scale
+  - replicasets
+  - replicasets/scale
+  - statefulsets
+  - statefulsets/scale
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+  - deletecollection
+
+# RBAC RoleBinding opennms-admin: to associate the users of group "admin" to the "onms-admin" role.
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: opennms
+  name: opennms-admin
+subjects:
+- kind: Group
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: onms-admin
+  apiGroup: rbac.authorization.k8s.io

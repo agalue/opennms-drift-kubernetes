@@ -1,6 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNING: the karaf process runs as root, which is not allowed on OpenShift
+# WARNING: The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
 
 ---
 apiVersion: apps/v1
@@ -22,6 +22,18 @@ spec:
         app: sentinel
         deployment: drift
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - onms
       initContainers:
       - name: wait-for-dependencies
         image: waisbrot/wait

@@ -43,16 +43,14 @@ spec:
     spec:
       affinity:
         podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 1
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - onms
-              topologyKey: kubernetes.io/hostname
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - onms
       initContainers:
       - name: wait-for-dependencies
         image: waisbrot/wait
@@ -119,11 +117,11 @@ spec:
           mountPath: /opt/opennms-jetty-webinf-overlay
         resources:
           limits:
-            cpu: 1
-            memory: 4Gi
+            cpu: 2
+            memory: 8Gi
           requests:
             cpu: 500m
-            memory: 2Gi
+            memory: 4Gi
         readinessProbe:
           httpGet:
             path: /opennms/login.jsp

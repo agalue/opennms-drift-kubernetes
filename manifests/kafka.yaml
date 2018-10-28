@@ -6,7 +6,8 @@
 # KAFKA_HEAP_OPTS should be consistent with resources.requests.memory
 #
 # WARNING: the kafka process runs as root, which is not allowed on OpenShift
-# WARNING: due to HZN-1387, SASL Authentication cannot be used with OpenNMS
+# WARNING: due to HZN-1387, SASL/SSL cannot be used with Sentinel older than Horizon 23.0.1;
+#          unless, it is applied only to the external face (for Minions on port 9094).
 
 ---
 apiVersion: v1

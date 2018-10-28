@@ -189,6 +189,8 @@ kubectl create secret generic onms-passwords \
  --from-literal GRAFANA_UI_ADMIN=opennms \
  --from-literal ELASTICSEARCH=elastic \
  --from-literal KAFKA_MANAGER_APPLICATION_SECRET=opennms \
+ --from-literal KAFKA_MANAGER_USERNAME=admin \
+ --from-literal KAFKA_MANAGER_PASSWORD=opennms \
  --namespace opennms
 ```
 
@@ -316,24 +318,53 @@ Your Minions should use the following resources in order to connect to OpenNMS a
 For example:
 
 ```shell
-[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg 
-location=Vagrant
+[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg
+location=Apex
 id=onms-minion.local
 http-url=http://onms.k8s.opennms.org/opennms
 
-[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg 
+[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg
 bootstrap.servers=kafka.k8s.opennms.org:9094
 acks=1
 
-[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.rpc.kafka.cfg 
+[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.rpc.kafka.cfg
 bootstrap.servers=kafka.k8s.opennms.org:9094
 acks=1
 
-[root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot 
+[root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot
 !opennms-core-ipc-sink-camel
 !opennms-core-ipc-rpc-jms
 opennms-core-ipc-sink-kafka
 opennms-core-ipc-rpc-kafka
+```
+
+Here is a more detailed example using Docker:
+
+```shell
+docker run -d --name minion \
+ -e MINION_ID=minion01
+ -e MINION_LOCATION=Docker
+ -e OPENNMS_HTTP_URL=http://onms.k8s.opennms.org/opennms
+ -e OPENNMS_HTTP_USER=admin
+ -e OPENNMS_HTTP_PASS=admin
+ -e KAFKA_RPC_ACKS=1
+ -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094
+ -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094
+ -e UDP_8877_NAME=Netflow-5
+ -e UDP_8877_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.udp.UdpListener
+ -e UDP_8877_LISTENER_PORT=8877
+ -e UDP_4729_NAME=Netflow-9
+ -e UDP_4729_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.flow.netflow9.UdpListener
+ -e UDP_4729_LISTENER_PORT=4729
+ -e UDP_6343_NAME=SFlow
+ -e UDP_6343_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.sflow.Listener
+ -e UDP_6343_LISTENER_PORT=6343
+ -p 8877:8877
+ -p 4729:4729
+ -p 6343:6343
+ -p 8201:8201
+ --sysctl "net.ipv4.ping_group_range=0 429496729"
+ opennms/minion:23.0.0-1
 ```
 
 > NOTE: Make sure to use your own Domain ;)
@@ -363,7 +394,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 
 To install Prometheus Operator for monitoring:
 
-```
+```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.19.0.yaml
 ```
 
@@ -385,11 +416,12 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 
 ## Future Enhancements
 
+* Add SSL encryption with SASL Authentication for external Kafka (for Minions outside K8S/AWS)
 * Design a solution to handle scale down of Cassandra and decommission of nodes.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
 * Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.
 * Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
-* Add support for monioring. Initially through the basic metrics provided via [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/); then, through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). As a bonus, create a Dashboard for the cluster metrics in Grafana.
+* Add support for monitoring. Initially through the basic metrics provided via [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/); then, through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). As a bonus, create a Dashboard for the cluster metrics in Grafana.
 * Explore [Helm](https://helm.sh), and potentially add support for it.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
