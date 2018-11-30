@@ -40,7 +40,7 @@ spec:
     spec:
       initContainers:
       - name: initialize-database
-        image: postgres:10.4
+        image: postgres:10.6-alpine
         imagePullPolicy: IfNotPresent
         command:
         - sh

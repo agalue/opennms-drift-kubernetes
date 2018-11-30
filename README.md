@@ -69,12 +69,13 @@ kops create cluster \
   --name k8s.opennms.org \
   --state s3://k8s.opennms.org \
   --dns-zone k8s.opennms.org \
-  --zones us-east-2a \
   --master-size t2.medium \
   --master-count 1 \
+  --master-zones us-east-2a \
   --node-size t2.2xlarge \
   --node-count 5 \
-  --kubernetes-version 1.10.5
+  --zones us-east-2a \
+  --kubernetes-version 1.10.11
 ```
 
 > **IMPORTANT: Remember to change the settings to reflect your desired environment.**
@@ -91,6 +92,21 @@ Then, add:
 spec:
   externalDns:
     watchIngress: true
+```
+
+Then, edit the instancegroup to apply AWS tags to the resources (for more information, check [this](https://github.com/kubernetes/kops/blob/master/docs/labels.md)).
+
+```shell
+kops edit ig nodes --state s3://k8s.opennms.org
+```
+
+Then, add:
+
+```yaml
+spec:
+  cloudLabels:
+    Environment: Test
+    Department: Support
 ```
 
 Finally, apply the changes to create the cluster:

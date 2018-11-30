@@ -8,6 +8,19 @@
 # WARNING: the kafka process runs as root, which is not allowed on OpenShift
 # WARNING: due to HZN-1387, SASL/SSL cannot be used with Sentinel older than Horizon 23.0.1;
 #          unless, it is applied only to the external face (for Minions on port 9094).
+#
+# TODO: For SSL, we need the advertised.listener on port 9094 to be the public FQDN of the K8S host.
+#       The reason for this is that all the certificates will be associated with that FQDN.
+#       For this, the K8S Metadata and a environment variable can help (~ spec.nodeName)
+#
+#       name: K8S_HOST
+#          valueFrom:
+#            fieldRef:
+#              fieldPath: spec.nodeName
+#
+#       Then, we can use:
+#        - name: KAFKA_ADVERTISED_LISTENERS
+#          value: INSIDE://:9092,OUTSIDE://_{K8S_HOST}:9094
 
 ---
 apiVersion: v1
@@ -67,7 +80,7 @@ spec:
             value: '2181'
       containers:
       - name: kafka
-        image: wurstmeister/kafka:2.11-2.0.0
+        image: wurstmeister/kafka:2.12-2.1.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9092
@@ -78,6 +91,10 @@ spec:
         - containerPort: 9999
           name: jmx
         env:
+        - name: K8S_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         - name: BROKER_ID_COMMAND
           value: echo ${HOSTNAME##*-}
         - name: HOSTNAME_COMMAND
