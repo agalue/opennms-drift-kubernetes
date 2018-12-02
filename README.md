@@ -10,11 +10,12 @@ Instead of using discrete EC2 instances, this repository explains how to deploy 
 
 ## Requirements
 
+* Have your AWS account configured on your system (`~/.aws/credentials`)
 * Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0`, but I can't find a reason why it would't work with `1.9.x`)
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
-* Install [terraform](https://www.terraform.io) [Optional. See security groups]
-* Have your AWS account configured on your system (`~/.aws/credentials`)
+* Install [Terraform](https://www.terraform.io) [Optional. See security groups]
+* Install [Helm](https://docs.helm.sh/using_helm/#installing-helm) [Optional]
 
 ## Cluster Configuration
 
@@ -75,6 +76,7 @@ kops create cluster \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
+  --cloud-labels Environment=Test,Department=Support \
   --kubernetes-version 1.10.11
 ```
 
@@ -92,21 +94,6 @@ Then, add:
 spec:
   externalDns:
     watchIngress: true
-```
-
-Then, edit the instancegroup to apply AWS tags to the resources (for more information, check [this](https://github.com/kubernetes/kops/blob/master/docs/labels.md)).
-
-```shell
-kops edit ig nodes --state s3://k8s.opennms.org
-```
-
-Then, add:
-
-```yaml
-spec:
-  cloudLabels:
-    Environment: Test
-    Department: Support
 ```
 
 Finally, apply the changes to create the cluster:
@@ -173,10 +160,41 @@ Creation Order:
 
 ### Plugins/Controllers
 
+Helm is not 100% required, but the following illustrates how to ise it.
+
+```shell
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-role --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller --upgrade
+helm repo update
+```
+
 #### Install the NGinx Ingress Controller:
+
+With Helm:
+
+```shell
+helm install --name nginx-ingress --namespace nginx-ingress --set rbac.create=true stable/nginx-ingress
+```
+
+Without Helm:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/ingress-nginx/v1.6.0.yaml
+```
+
+#### Install the CertManager:
+
+With Helm:
+
+```shell
+helm install --name cert-manager --namespace cert-manager stable/cert-manager
+```
+
+Without Helm:
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/contrib/manifests/cert-manager/with-rbac.yaml
 ```
 
 ### Namespace
@@ -360,7 +378,7 @@ Here is a more detailed example using Docker:
 docker run -d --name minion \
  -e MINION_ID=minion01
  -e MINION_LOCATION=Docker
- -e OPENNMS_HTTP_URL=http://onms.k8s.opennms.org/opennms
+ -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms
  -e OPENNMS_HTTP_USER=admin
  -e OPENNMS_HTTP_PASS=admin
  -e KAFKA_RPC_ACKS=1
@@ -380,17 +398,17 @@ docker run -d --name minion \
  -p 6343:6343
  -p 8201:8201
  --sysctl "net.ipv4.ping_group_range=0 429496729"
- opennms/minion:23.0.0-1
+ opennms/minion:bleeding
 ```
 
 > NOTE: Make sure to use your own Domain ;)
 
 ## Users
 
-* OpenNMS UI: `http://onmsui.k8s.opennms.org/opennms`
-* Grafana: `http://grafana.k8s.opennms.org/`
-* Kibana: `http://kibana.k8s.opennms.org/`
-* Kafka Manager: `http://kaffa-manager.k8s.opennms.org/`
+* OpenNMS UI: `https://onmsui.k8s.opennms.org/opennms`
+* Grafana: `https://grafana.k8s.opennms.org/`
+* Kibana: `https://kibana.k8s.opennms.org/`
+* Kafka Manager: `https://kaffa-manager.k8s.opennms.org/`
 
 > NOTE: Make sure to use your own Domain ;)
 
@@ -399,16 +417,16 @@ docker run -d --name minion \
 To install the  Dashboard:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.8.3.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.10.0.yaml
 ```
 
 To install the standalone Heapster monitoring (required for the `kubectl top` command):
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.7.0.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.11.0.yaml
 ```
 
-To install Prometheus Operator for monitoring:
+To install Prometheus Operator for monitoring (to avoid Heapster):
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.19.0.yaml
@@ -416,7 +434,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 
 At least the first 2 are recommended to have a basic insight about how the kubernetes cluster behaves.
 
-Click [here](https://github.com/kubernetes/kops/blob/1.10.0-beta.1/docs/addons.md) for more information.
+Click [here](https://github.com/kubernetes/kops/blob/master/docs/addons.md) for more information.
 
 ## Cleanup
 

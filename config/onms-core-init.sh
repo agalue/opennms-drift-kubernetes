@@ -23,7 +23,7 @@ fi
 
 if ! grep --quiet "opennms-bundle-refresher," $FEATURES_CFG; then
   echo "Enabling features: $FEATURES_LIST ..."
-  sed -r -i "s/opennms-bundle-refresher.*/opennms-bundle-refresher,$FEATURES_LIST/" $CONFIG_DIR/org.apache.karaf.features.cfg
+  sed -r -i "s/opennms-bundle-refresher.*/$FEATURES_LIST,opennms-bundle-refresher/" $CONFIG_DIR/org.apache.karaf.features.cfg
 else
   echo "Features already enabled."
 fi
@@ -49,7 +49,7 @@ EOF
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
 nodeTopic=OpenNMS.Nodes
 alarmTopic=OpenNMS.Alarms
-eventTopic=
+eventTopic=OpenNMS.Events
 metricTopic=OpenNMS.Metrics
 forward.metrics=true
 nodeRefreshTimeoutMs=300000
@@ -89,7 +89,7 @@ elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=elastic
 archiveRawEvents=true
-archiveAlarms=true
+archiveAlarms=false
 archiveAlarmChangeEvents=false
 logAllEvents=false
 retries=1
@@ -97,3 +97,7 @@ connTimeout=3000
 EOF
 fi
 
+cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
+opennms.web.base-url = https://%x%c/
+org.opennms.security.disableLoginSuccessEvent=true
+EOF

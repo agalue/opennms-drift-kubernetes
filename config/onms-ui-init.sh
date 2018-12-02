@@ -41,7 +41,6 @@ cat <<EOF > $CONFIG_DIR/eventconf.xml
   <event-file>events/opennms.internal.events.xml</event-file>
   <event-file>events/opennms.linkd.events.xml</event-file>
   <event-file>events/opennms.mib.events.xml</event-file>
-  <event-file>events/opennms.ncs-component.events.xml</event-file>
   <event-file>events/opennms.pollerd.events.xml</event-file>
   <event-file>events/opennms.provisioning.events.xml</event-file>
   <event-file>events/opennms.minion.events.xml</event-file>
@@ -87,6 +86,7 @@ cat <<EOF > $CONFIG_DIR/service-configuration.xml
 EOF
 
 cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
+opennms.web.base-url = https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true
 org.opennms.web.console.centerUrl=/status/status-box.jsp,/geomap/map-box.jsp,/heatmap/heatmap-box.jsp
 EOF

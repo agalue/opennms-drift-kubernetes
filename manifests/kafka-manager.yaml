@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# TODO: Authentication is not working, specially with probes
 
 ---
 apiVersion: apps/v1
@@ -27,8 +29,8 @@ spec:
         env:
         - name: ZK_HOSTS
           value: zookeeper.opennms.svc.cluster.local:2181
-        - name: KAFKA_MANAGER_AUTH_ENABLED
-          value: 'true'
+#       - name: KAFKA_MANAGER_AUTH_ENABLED
+#         value: 'true'
         - name: APPLICATION_SECRET
           valueFrom:
             secretKeyRef:
@@ -49,6 +51,9 @@ spec:
           name: http
         resources:
           limits:
+            memory: 512Mi
+            cpu: 200m
+          requests:
             memory: 256Mi
             cpu: 100m
         readinessProbe:
