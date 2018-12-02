@@ -376,28 +376,28 @@ Here is a more detailed example using Docker:
 
 ```shell
 docker run -d --name minion \
- -e MINION_ID=minion01
- -e MINION_LOCATION=Docker
- -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms
- -e OPENNMS_HTTP_USER=admin
- -e OPENNMS_HTTP_PASS=admin
- -e KAFKA_RPC_ACKS=1
- -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094
- -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094
- -e UDP_8877_NAME=Netflow-5
- -e UDP_8877_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.udp.UdpListener
- -e UDP_8877_LISTENER_PORT=8877
- -e UDP_4729_NAME=Netflow-9
- -e UDP_4729_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.flow.netflow9.UdpListener
- -e UDP_4729_LISTENER_PORT=4729
- -e UDP_6343_NAME=SFlow
- -e UDP_6343_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.sflow.Listener
- -e UDP_6343_LISTENER_PORT=6343
- -p 8877:8877
- -p 4729:4729
- -p 6343:6343
- -p 8201:8201
- --sysctl "net.ipv4.ping_group_range=0 429496729"
+ -e MINION_ID=minion01 \
+ -e MINION_LOCATION=Docker \
+ -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms \
+ -e OPENNMS_HTTP_USER=admin \
+ -e OPENNMS_HTTP_PASS=admin \
+ -e KAFKA_RPC_ACKS=1 \
+ -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
+ -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
+ -e UDP_8877_NAME=Netflow-5 \
+ -e UDP_8877_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.udp.UdpListener \
+ -e UDP_8877_LISTENER_PORT=8877 \
+ -e UDP_4729_NAME=Netflow-9 \
+ -e UDP_4729_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.flow.netflow9.UdpListener \
+ -e UDP_4729_LISTENER_PORT=4729 \
+ -e UDP_6343_NAME=SFlow \
+ -e UDP_6343_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.sflow.Listener \
+ -e UDP_6343_LISTENER_PORT=6343 \
+ -p 8877:8877 \
+ -p 4729:4729 \
+ -p 6343:6343 \
+ -p 8201:8201 \
+ --sysctl "net.ipv4.ping_group_range=0 429496729" \
  opennms/minion:bleeding
 ```
 
