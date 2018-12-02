@@ -15,7 +15,6 @@ Instead of using discrete EC2 instances, this repository explains how to deploy 
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
 * Install [Terraform](https://www.terraform.io) [Optional. See security groups]
-* Install [Helm](https://docs.helm.sh/using_helm/#installing-helm) [Optional]
 
 ## Cluster Configuration
 
@@ -160,38 +159,13 @@ Creation Order:
 
 ### Plugins/Controllers
 
-Helm is not 100% required, but the following illustrates how to ise it.
-
-```shell
-kubectl create serviceaccount --namespace kube-system tiller
-kubectl create clusterrolebinding tiller-cluster-role --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-helm init --service-account tiller --upgrade
-helm repo update
-```
-
 #### Install the NGinx Ingress Controller:
-
-With Helm:
-
-```shell
-helm install --name nginx-ingress --namespace nginx-ingress --set rbac.create=true stable/nginx-ingress
-```
-
-Without Helm:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/ingress-nginx/v1.6.0.yaml
 ```
 
 #### Install the CertManager:
-
-With Helm:
-
-```shell
-helm install --name cert-manager --namespace cert-manager stable/cert-manager
-```
-
-Without Helm:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/contrib/manifests/cert-manager/with-rbac.yaml
@@ -455,7 +429,7 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
 * Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.
 * Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
-* Add support for monitoring. Initially through the basic metrics provided via [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/); then, through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). As a bonus, create a Dashboard for the cluster metrics in Grafana.
-* Explore [Helm](https://helm.sh), and potentially add support for it.
+* Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
+* Explore [Helm](https://helm.sh), and potentially add support for it.
