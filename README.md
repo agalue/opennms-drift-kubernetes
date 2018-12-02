@@ -388,11 +388,48 @@ docker run -it --name minion \
 
 ## Optional Kubernetes Addons
 
-To install the  Dashboard:
+Click [here](https://github.com/kubernetes/kops/blob/master/docs/addons.md) for more information.
+
+### Dashboard
+
+To install the dashboard:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.10.0.yaml
 ```
+
+To provide access to the dashboard, apply the following YAML:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-dashboard
+  labels:
+    k8s-app: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kube-system
+```
+
+To get the password of the `admin` account for the dashboard:
+
+```shell
+kops get secrets kube --type secret -oplaintext --state s3://k8s.opennms.org
+```
+
+Or,
+
+```shell
+kubectl config view --minify
+```
+
+### Heapster
 
 To install the standalone Heapster monitoring (required for the `kubectl top` command):
 
@@ -400,15 +437,15 @@ To install the standalone Heapster monitoring (required for the `kubectl top` co
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.11.0.yaml
 ```
 
-To install Prometheus Operator for monitoring (to avoid Heapster):
+### Prometheus
+
+To install Prometheus Operator for monitoring:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.19.0.yaml
 ```
 
-At least the first 2 are recommended to have a basic insight about how the kubernetes cluster behaves.
-
-Click [here](https://github.com/kubernetes/kops/blob/master/docs/addons.md) for more information.
+Click [here](https://github.com/coreos/prometheus-operator/blob/master/contrib/kube-prometheus/README.md) for more information.
 
 ## Cleanup
 
@@ -430,6 +467,7 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 * Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.
 * Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
+* Expose the Kubernetes Dashboard through the Ingress controller.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Explore [Helm](https://helm.sh), and potentially add support for it.
