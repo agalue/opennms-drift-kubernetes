@@ -21,15 +21,14 @@ acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
 EOF
 fi
 
-if ! grep --quiet "opennms-bundle-refresher," $FEATURES_CFG; then
+if ! grep --quiet "$FEATURES_LIST" $FEATURES_CFG; then
   echo "Enabling features: $FEATURES_LIST ..."
-  sed -r -i "s/opennms-bundle-refresher.*/$FEATURES_LIST,opennms-bundle-refresher/" $CONFIG_DIR/org.apache.karaf.features.cfg
+  sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $CONFIG_DIR/org.apache.karaf.features.cfg
 else
   echo "Features already enabled."
 fi
 
-if [ "$KAFKA_SERVER" != ""]; then
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/kafka.properties
+cat <<EOF > $CONFIG_DIR/opennms.properties.d/kafka.properties
 # Sink
 org.opennms.core.ipc.sink.initialSleepTime=60000
 org.opennms.core.ipc.sink.strategy=kafka
@@ -42,11 +41,11 @@ org.opennms.core.ipc.rpc.kafka.bootstrap.servers=$KAFKA_SERVER:9092
 org.opennms.core.ipc.rpc.kafka.ttl=30000
 EOF
 
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
+cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
 EOF
 
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
+cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
 nodeTopic=OpenNMS.Nodes
 alarmTopic=OpenNMS.Alarms
 eventTopic=OpenNMS.Events
@@ -55,10 +54,8 @@ forward.metrics=true
 nodeRefreshTimeoutMs=300000
 alarmSyncIntervalMs=300000
 EOF
-fi
 
-if [ "$CASSANDRA_SERVER" != ""]; then
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
+cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
 # ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
 # ring_buffer_size and cache.max_entries should be consistent with the expected load
 
@@ -81,10 +78,8 @@ org.opennms.newts.config.cache.priming.block_ms=60000
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
-fi
 
-if [ "$ELASTIC_SERVER" != ""]; then
-  cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
+cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=elastic
@@ -95,7 +90,6 @@ logAllEvents=false
 retries=1
 connTimeout=3000
 EOF
-fi
 
 cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
 opennms.web.base-url = https://%x%c/

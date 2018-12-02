@@ -96,8 +96,7 @@ cp /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security
 sed -r -i 's/ROLE_ADMIN/ROLE_DISABLED/' $SECURITY_CONFIG
 sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' $SECURITY_CONFIG
 
-if [ "$CASSANDRA_SERVER" != ""]; then
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
+cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
 
@@ -110,13 +109,10 @@ org.opennms.newts.config.write_consistency=ANY
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
-fi
 
-if [ "$ELASTIC_SERVER" != ""]; then
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
+cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=elastic
 EOF
-fi
 
