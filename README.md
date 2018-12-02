@@ -375,7 +375,7 @@ opennms-core-ipc-rpc-kafka
 Here is a more detailed example using Docker:
 
 ```shell
-docker run -d --name minion \
+docker run -it --name minion \
  -e MINION_ID=minion01 \
  -e MINION_LOCATION=Docker \
  -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms \
@@ -398,7 +398,7 @@ docker run -d --name minion \
  -p 6343:6343 \
  -p 8201:8201 \
  --sysctl "net.ipv4.ping_group_range=0 429496729" \
- opennms/minion:bleeding
+ opennms/minion:bleeding -f
 ```
 
 > NOTE: Make sure to use your own Domain ;)
