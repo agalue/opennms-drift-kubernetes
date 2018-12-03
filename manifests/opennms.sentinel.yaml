@@ -22,6 +22,7 @@ spec:
         app: sentinel
         deployment: drift
     spec:
+      terminationGracePeriodSeconds: 60
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -53,6 +54,8 @@ spec:
         - containerPort: 8301
           name: karaf
         env:
+        - name: JAVA_OPTS
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
@@ -88,6 +91,10 @@ spec:
           requests:
             cpu: 500m
             memory: 1Gi
+        lifecycle:
+          preStop:
+            exec:
+              command: [ bash, -c, /opt/sentinel/bin/stop ]
         readinessProbe:
           tcpSocket:
             port: karaf

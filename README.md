@@ -157,6 +157,12 @@ Creation Order:
 * Services
 * Deployments and StatefulSets
 
+As a side note, instead of providing the name space for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
+
+```shell
+kubectl config set-context $(kubectl config current-context) --namespace=opennms
+```
+
 ### Plugins/Controllers
 
 #### Install the NGinx Ingress Controller:

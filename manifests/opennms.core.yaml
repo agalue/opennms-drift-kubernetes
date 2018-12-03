@@ -136,8 +136,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command:
-              - /opt/opennms/bin/opennms stop
+              command: [ bash, -c, /opt/opennms/bin/opennms stop ]
         readinessProbe:
           httpGet:
             path: /opennms/login.jsp

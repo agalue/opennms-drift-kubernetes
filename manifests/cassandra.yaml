@@ -56,7 +56,7 @@ spec:
         app: cassandra
         deployment: drift
     spec:
-      terminationGracePeriodSeconds: 300
+      terminationGracePeriodSeconds: 600
       containers:
       - name: cassandra
         image: cassandra:3.11.3
@@ -105,6 +105,8 @@ spec:
           preStop:
             exec:
               command: # TODO What about decommissioning ?
+              - bash
+              - -c
               - nodetool drain
         readinessProbe:
           exec:
