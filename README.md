@@ -161,11 +161,15 @@ Creation Order:
 
 #### Install the NGinx Ingress Controller:
 
+This add-on is required in order to avoid having a LoadBalancer per external service.
+
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/ingress-nginx/v1.6.0.yaml
 ```
 
 #### Install the CertManager:
+
+This add-on is required in order to provide HTTP/TLS support through LetsEncrypt to the HTTP services managed by the ingress controller.
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/contrib/manifests/cert-manager/with-rbac.yaml
