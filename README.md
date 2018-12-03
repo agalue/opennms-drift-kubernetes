@@ -179,13 +179,15 @@ From the directory on which this repository has been checked out:
 kubectl apply -f ./namespace
 ```
 
-### Configuration Maps
+### Config Maps
 
 From the directory on which this repository has been checked out:
 
 ```shell
 kubectl create configmap opennms-config --from-file=config/ --namespace opennms
 ```
+
+### Secrets
 
 Create a secret object for the passwords:
 
@@ -320,7 +322,7 @@ ingress-rules   grafana.k8s.opennms.org,kafka-manager.k8s.opennms.org,kibana.k8s
 
 Your Minions should use the following resources in order to connect to OpenNMS and the dependept applications:
 
-* OpenNMS Core: `http://onms.k8s.opennms.org/opennms`
+* OpenNMS Core: `https://onms.k8s.opennms.org/opennms`
 * Kafka: `kafka.k8s.opennms.org:9094`
 
 For example:
@@ -329,7 +331,7 @@ For example:
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg
 location=Apex
 id=onms-minion.local
-http-url=http://onms.k8s.opennms.org/opennms
+http-url=https://onms.k8s.opennms.org/opennms
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg
 bootstrap.servers=kafka.k8s.opennms.org:9094
@@ -453,10 +455,17 @@ To remove the Kubernetes cluster, do the following:
 
 ```shell
 kubectl delete ingress ingress-rules --namespace opennms
-kubectl delete all --all --namespace opennms
+kubectl delete all --all --namespace opennms --force --grace-period 0
 kubectl delete pvc --all --namespace opennms
 kubectl delete pv --all
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
+```
+
+If you're using add-ons, you might also need to manually remove those resources too, to guarantee that nothing left at AWS; for example:
+
+```shell
+kubectl delete all --all --namespace kube-ingress --force --grace-period 0
+kubectl delete all --all --namespace monitoring --force --grace-period 0
 ```
 
 ## Future Enhancements
