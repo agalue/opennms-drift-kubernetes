@@ -228,7 +228,7 @@ Volumes for `StatefulSets` are going to be automatically created.
 
 ### Security Groups
 
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a [Terraform](https://www.terraform.io) recipe has been used for this purpose (`update-security-groups.tf).
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
 
 Make sure you have it installed on your system, and then execute the following:
 
@@ -370,18 +370,6 @@ docker run -it --name minion \
  -e KAFKA_RPC_ACKS=1 \
  -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
  -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
- -e UDP_8877_NAME=Netflow-5 \
- -e UDP_8877_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.udp.UdpListener \
- -e UDP_8877_LISTENER_PORT=8877 \
- -e UDP_4729_NAME=Netflow-9 \
- -e UDP_4729_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.flow.netflow9.UdpListener \
- -e UDP_4729_LISTENER_PORT=4729 \
- -e UDP_6343_NAME=SFlow \
- -e UDP_6343_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.sflow.Listener \
- -e UDP_6343_LISTENER_PORT=6343 \
- -p 8877:8877 \
- -p 4729:4729 \
- -p 6343:6343 \
  -p 8201:8201 \
  --sysctl "net.ipv4.ping_group_range=0 429496729" \
  opennms/minion:bleeding -f
