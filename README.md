@@ -76,7 +76,8 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.10.11
+  --kubernetes-version 1.10.12 \
+  --networking calico
 ```
 
 > **IMPORTANT: Remember to change the settings to reflect your desired environment.**
@@ -144,6 +145,19 @@ KubeDNS is running at https://api.k8s.opennms.org/api/v1/namespaces/kube-system/
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
+## Security Groups
+
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
+
+Make sure you have it installed on your system, and then execute the following:
+
+```shell
+terraform init
+terraform apply -auto-approve
+```
+
+> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create the securigy group.
+
 ## Deployment
 
 Creation Order:
@@ -153,9 +167,7 @@ Creation Order:
 * ConfigMaps/Secrets
 * Storage Classes
 * Volumes (if apply)
-* Security Groups
-* Services
-* Deployments and StatefulSets
+* Services, Deployments and StatefulSets
 
 As a side note, instead of providing the name space for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
 
@@ -165,7 +177,7 @@ kubectl config set-context $(kubectl config current-context) --namespace=opennms
 
 ### Plugins/Controllers
 
-#### Install the NGinx Ingress Controller:
+#### Install the NGinx Ingress Controller
 
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
@@ -173,13 +185,17 @@ This add-on is required in order to avoid having a LoadBalancer per external ser
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/ingress-nginx/v1.6.0.yaml
 ```
 
-#### Install the CertManager:
+#### Install the CertManager
 
 This add-on is required in order to provide HTTP/TLS support through LetsEncrypt to the HTTP services managed by the ingress controller.
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/contrib/manifests/cert-manager/with-rbac.yaml
+kubectl create namespace cert-manager
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/00-crds.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/cert-manager.yaml
 ```
+
+> NOTE: you might see an error, but the main functionality is not affected. I expect a fix soon, as the part that seems to be failing is the one associated with update the expired certificates.
 
 ### Namespace
 
@@ -189,7 +205,9 @@ From the directory on which this repository has been checked out:
 kubectl apply -f ./namespace
 ```
 
-### Config Maps
+### ConfigMaps/Secrets
+
+#### ConfigMaps
 
 From the directory on which this repository has been checked out:
 
@@ -197,7 +215,7 @@ From the directory on which this repository has been checked out:
 kubectl create configmap opennms-config --from-file=config/ --namespace opennms
 ```
 
-### Secrets
+#### Secrets
 
 Create a secret object for the passwords:
 
@@ -226,22 +244,9 @@ kubectl apply -f ./storage
 
 Volumes for `StatefulSets` are going to be automatically created.
 
-### Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
-
-Make sure you have it installed on your system, and then execute the following:
-
-```shell
-terraform init
-terraform apply -auto-approve
-```
-
-> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create a VPC. An example for this might be added in the future.
-
 ### Services, Deployments and StatefulSets
 
-The applications will wait for their respective dependencies to be ready prior start, so there is no need to start them on a specific order.
+The applications will wait for their respective dependencies to be ready prior start (a feature implemented through `initContainers`), so there is no need to start them on a specific order.
 
 From the directory on which this repository has been checked out:
 
@@ -253,71 +258,76 @@ After a while, you should be able to see this:
 
 ```shell
 ➜  kubectl get all --namespace opennms
-NAME                                 READY     STATUS    RESTARTS   AGE
-pod/cassandra-0                      1/1       Running   0          6m
-pod/cassandra-1                      1/1       Running   0          6m
-pod/cassandra-2                      1/1       Running   0          4m
-pod/esdata-0                         1/1       Running   0          6m
-pod/esdata-1                         1/1       Running   0          5m
-pod/esdata-2                         1/1       Running   0          4m
-pod/esmaster-0                       1/1       Running   0          6m
-pod/esmaster-1                       1/1       Running   0          6m
-pod/esmaster-2                       1/1       Running   0          6m
-pod/grafana-5875cd6cb4-75h2j         1/1       Running   0          6m
-pod/grafana-5875cd6cb4-ntthk         1/1       Running   0          6m
-pod/kafka-0                          1/1       Running   0          6m
-pod/kafka-1                          1/1       Running   0          5m
-pod/kafka-2                          1/1       Running   0          4m
-pod/kafka-manager-86c876b86d-x7bgw   1/1       Running   0          6m
-pod/kibana-58cc68bdb6-xlh58          1/1       Running   0          6m
-pod/onms-0                           1/1       Running   0          6m
-pod/onms-ui-7c56f74975-2mjq7         1/1       Running   0          6m
-pod/onms-ui-7c56f74975-jtzvx         1/1       Running   0          6m
-pod/postgres-0                       1/1       Running   0          6m
-pod/sentinel-5fbf86857d-ds6nj        1/1       Running   0          6m
-pod/sentinel-5fbf86857d-f5lwl        1/1       Running   0          6m
-pod/zk-0                             1/1       Running   0          6m
-pod/zk-1                             1/1       Running   0          6m
-pod/zk-2                             1/1       Running   0          6m
+NAME                                 READY   STATUS      RESTARTS   AGE
+pod/cassandra-0                      1/1     Running     0          7m
+pod/cassandra-1                      1/1     Running     0          6m
+pod/cassandra-2                      1/1     Running     0          4m
+pod/esdata-0                         1/1     Running     0          7m
+pod/esdata-1                         1/1     Running     0          5m
+pod/esdata-2                         1/1     Running     0          4m
+pod/esmaster-0                       1/1     Running     0          7m
+pod/esmaster-1                       1/1     Running     0          7m
+pod/esmaster-2                       1/1     Running     0          7m
+pod/grafana-77dccf7559-drqnz         1/1     Running     0          7m
+pod/grafana-77dccf7559-lxb8l         1/1     Running     0          7m
+pod/helm-init-qlzb7                  0/1     Completed   0          7m
+pod/kafka-0                          1/1     Running     0          7m
+pod/kafka-1                          1/1     Running     0          5m
+pod/kafka-2                          1/1     Running     0          4m
+pod/kafka-manager-68d7b4d664-g4dpv   1/1     Running     0          7m
+pod/kibana-6b495f6c9b-h7jqt          1/1     Running     0          7m
+pod/minion-0                         1/1     Running     0          1m
+pod/minion-1                         1/1     Running     0          1m
+pod/onms-0                           1/1     Running     0          7m
+pod/onms-ui-7648fd4fdb-vnq2b         1/1     Running     0          7m
+pod/onms-ui-7648fd4fdb-z47br         1/1     Running     0          7m
+pod/postgres-0                       1/1     Running     0          7m
+pod/sentinel-684c6959b4-qtwk8        1/1     Running     0          7m
+pod/sentinel-684c6959b4-sv6gj        1/1     Running     0          7m
+pod/zk-0                             1/1     Running     0          7m
+pod/zk-1                             1/1     Running     0          7m
+pod/zk-2                             1/1     Running     0          7m
 
-NAME                        TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                      AGE
-service/cassandra           ClusterIP      None             <none>                                                                    9042/TCP                     6m
-service/esdata              ClusterIP      None             <none>                                                                    9200/TCP                     6m
-service/esmaster            ClusterIP      None             <none>                                                                    9200/TCP                     6m
-service/ext-kafka           LoadBalancer   100.68.235.20    aa9bf858199ae11e8a0690240989dcf9-20371613.us-east-2.elb.amazonaws.com     9094:30844/TCP               6m
-service/grafana             ClusterIP      None             <none>                                                                    3000/TCP                     6m
-service/kafka               ClusterIP      None             <none>                                                                    9092/TCP,9999/TCP            6m
-service/kibana              ClusterIP      None             <none>                                                                    5601/TCP                     6m
-service/opennms-core        ClusterIP      None             <none>                                                                    8980/TCP,8101/TCP            6m
-service/opennms-ui          ClusterIP      None             <none>                                                                    8980/TCP,8101/TCP            6m
-service/postgresql          ClusterIP      None             <none>                                                                    5432/TCP                     6m
-service/zookeeper           ClusterIP      None             <none>                                                                    2888/TCP,3888/TCP,2181/TCP   6m
+NAME                   TYPE           CLUSTER-IP       EXTERNAL-IP                                                              PORT(S)                               AGE
+service/cassandra      ClusterIP      None             <none>                                                                   7000/TCP,7001/TCP,7199/TCP,9042/TCP   7m
+service/esdata         ClusterIP      None             <none>                                                                   9200/TCP,9300/TCP                     7m
+service/esmaster       ClusterIP      None             <none>                                                                   9200/TCP,9300/TCP                     7m
+service/ext-kafka      LoadBalancer   100.66.151.114   a99afef5b14f211e99200024245e3dd7-837167553.us-east-2.elb.amazonaws.com   9094:31403/TCP                        7m
+service/grafana        ClusterIP      None             <none>                                                                   3000/TCP                              7m
+service/kafka          ClusterIP      None             <none>                                                                   9092/TCP,9094/TCP,9999/TCP            7m
+service/kibana         ClusterIP      None             <none>                                                                   5601/TCP                              7m
+service/minion         ClusterIP      None             <none>                                                                   8201/TCP                              2m
+service/opennms-core   ClusterIP      None             <none>                                                                   8980/TCP,8101/TCP                     7m
+service/opennms-ui     ClusterIP      None             <none>                                                                   8980/TCP,8101/TCP                     7m
+service/postgresql     ClusterIP      None             <none>                                                                   5432/TCP                              7m
+service/zookeeper      ClusterIP      None             <none>                                                                   2888/TCP,3888/TCP,2181/TCP,9998/TCP   7m
 
 NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/grafana         2         2         2            2           6m
-deployment.apps/kafka-manager   1         1         1            1           6m
-deployment.apps/kibana          1         1         1            1           6m
-deployment.apps/onms-ui         2         2         2            2           6m
-deployment.apps/sentinel        2         2         2            2           6m
+deployment.apps/grafana         2         2         2            2           7m
+deployment.apps/kafka-manager   1         1         1            1           7m
+deployment.apps/kibana          1         1         1            1           7m
+deployment.apps/onms-ui         2         2         2            2           7m
+deployment.apps/sentinel        2         2         2            2           7m
 
-NAME                                       DESIRED   CURRENT   READY     AGE
-replicaset.apps/grafana-5875cd6cb4         2         2         2         6m
-replicaset.apps/kafka-manager-86c876b86d   1         1         1         6m
-replicaset.apps/kibana-58cc68bdb6          1         1         1         6m
-replicaset.apps/onms-ui-7c56f74975         2         2         2         6m
-replicaset.apps/sentinel-5fbf86857d        2         2         2         6m
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/grafana-77dccf7559         2         2         2       7m
+replicaset.apps/kafka-manager-68d7b4d664   1         1         1       7m
+replicaset.apps/kibana-6b495f6c9b          1         1         1       7m
+replicaset.apps/onms-ui-7648fd4fdb         2         2         2       7m
+replicaset.apps/sentinel-684c6959b4        2         2         2       7m
 
 NAME                         DESIRED   CURRENT   AGE
-statefulset.apps/cassandra   3         3         6m
-statefulset.apps/esdata      3         3         6m
-statefulset.apps/esmaster    3         3         6m
-statefulset.apps/kafka       3         3         6m
-statefulset.apps/onms        1         1         6m
-statefulset.apps/postgres    1         1         6m
-statefulset.apps/zk          3         3         6m
+statefulset.apps/cassandra   3         3         7m
+statefulset.apps/esdata      3         3         7m
+statefulset.apps/esmaster    3         3         7m
+statefulset.apps/kafka       3         3         7m
+statefulset.apps/minion      2         2         2m
+statefulset.apps/onms        1         1         7m
+statefulset.apps/postgres    1         1         7m
+statefulset.apps/zk          3         3         7m
 
 NAME                  DESIRED   SUCCESSFUL   AGE
-job.batch/helm-init   1         1            6m
+job.batch/helm-init   1         1            7m
 ```
 
 Ingress are not shown, but you could do:
@@ -330,7 +340,7 @@ ingress-rules   grafana.k8s.opennms.org,kafka-manager.k8s.opennms.org,kibana.k8s
 
 ## Minion
 
-Your Minions should use the following resources in order to connect to OpenNMS and the dependept applications:
+This deployment already contains Minions inside the opennms namespace for monitoring devices within the cluster. In order to have Minions outside the Kubernetes cluster, they should use the following resources in order to connect to OpenNMS and the dependent applications:
 
 * OpenNMS Core: `https://onms.k8s.opennms.org/opennms`
 * Kafka: `kafka.k8s.opennms.org:9094`
@@ -469,6 +479,7 @@ kubectl delete all --all --namespace monitoring --force --grace-period 0
 ## Future Enhancements
 
 * Add SSL encryption with SASL Authentication for external Kafka (for Minions outside K8S/AWS)
+* Add Network Policies to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other component should not access those resources). A network manager like Calico is required.
 * Design a solution to handle scale down of Cassandra and decommission of nodes.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
 * Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.
@@ -476,5 +487,6 @@ kubectl delete all --all --namespace monitoring --force --grace-period 0
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
 * Expose the Kubernetes Dashboard through the Ingress controller.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
-* Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Explore [Helm](https://helm.sh), and potentially add support for it.
+* Install [Kubeless](https://kubeless.io)], and use the existing Kafka as specified [here](https://kubeless.io/docs/use-existing-kafka/) to trigger processing of events, alarms or performance data.
+* Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).

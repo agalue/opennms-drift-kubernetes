@@ -1,0 +1,121 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# Using StatefulSets for Minions only to have a unique and immutable MINION_ID
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minion
+  namespace: opennms
+  labels:
+    app: minion
+    deployment: drift
+spec:
+  clusterIP: None
+  ports:
+  - port: 8201
+    name: karaf
+  selector:
+    app: minion
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minion
+  namespace: opennms
+  labels:
+    app: minion
+    deployment: drift
+spec:
+  serviceName: minion
+  replicas: 2
+  selector:
+    matchLabels:
+      app: minion
+  template:
+    metadata:
+      labels:
+        app: minion
+        deployment: drift
+    spec:
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - net.ipv4.ping_group_range=0 429496729
+        securityContext:
+          privileged: true
+      - name: initialization
+        image: opennms/minion:bleeding
+        imagePullPolicy: IfNotPresent
+        command: [ bash, /init.sh ]
+        env:
+        - name: INSTANCE_ID
+          value: K8S
+        volumeMounts:
+        - name: etc-overlay
+          mountPath: /etc-overlay
+        - name: opennms-config
+          mountPath: /init.sh
+          subPath: onms-minion-init.sh
+      - name: wait-for-dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092,opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: minion
+        image: opennms/minion:bleeding
+        command: [ /docker-entrypoint.sh, -f ]
+        env:
+        - name: MINION_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MINION_LOCATION
+          value: Kubernetes
+        - name: OPENNMS_HTTP_URL
+          value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
+        - name: OPENNMS_HTTP_USER
+          value: admin
+        - name: OPENNMS_HTTP_PASS
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_UI_ADMIN
+              name: onms-passwords
+        - name: KAFKA_RPC_ACKS
+          value: '1'
+        - name: KAFKA_RPC_BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: KAFKA_SINK_BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        ports:
+        - containerPort: 1162
+          name: traps
+        - containerPort: 1514
+          name: syslog
+        - containerPort: 8201
+          name: shell
+        volumeMounts:
+        - name: etc-overlay
+          mountPath: /opt/minion-etc-overlay
+        resources:
+          limits:
+            cpu: 400m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+      volumes:
+      - name: etc-overlay
+        emptyDir: {}
+      - name: opennms-config
+        configMap:
+          name: opennms-config

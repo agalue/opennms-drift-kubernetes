@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 
 # Required environment variables:

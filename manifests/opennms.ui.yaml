@@ -63,7 +63,7 @@ spec:
       - name: initialization
         image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
-        command: [ sh, /init.sh ]
+        command: [ bash, /init.sh ]
         env:
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
