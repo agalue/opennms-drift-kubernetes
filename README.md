@@ -406,7 +406,7 @@ Click [here](https://github.com/kubernetes/kops/blob/master/docs/addons.md) for 
 To install the dashboard:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.10.0.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.10.1.yaml
 ```
 
 To provide access to the dashboard, apply the following YAML:
@@ -453,7 +453,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 To install Prometheus Operator for monitoring:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.19.0.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.26.0.yaml
 ```
 
 Click [here](https://github.com/coreos/prometheus-operator/blob/master/contrib/kube-prometheus/README.md) for more information.
@@ -489,6 +489,6 @@ kubectl delete all --all --namespace monitoring --force --grace-period 0
 * Expose the Kubernetes Dashboard through the Ingress controller.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Explore [Strimzi](https://strimzi.io/) an operator for Kafka that supports encryption and authentication.
-* Explore [Kubeless](https://kubeless.io)], or [Fission](https://fission.io), and use Kafka for trigger `serverless` apps based on alarms or events. Hint: I've found Fission more feature reach and works with modern versions of Kafka. On both cases, it is important to create a Kafka Stream application to convert from GPB to JSON the required data.
+* Explore [Kubeless](https://kubeless.io), or [Fission](https://fission.io), and use Kafka for trigger `serverless` apps based on alarms or events. Hint: I've found Fission more feature reach and works with modern versions of Kafka. On both cases, it is important to create a Kafka Stream application to convert from GPB to JSON the required data.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Explore [Helm](https://helm.sh), and potentially add support for it.
