@@ -295,6 +295,7 @@ service/esmaster       ClusterIP      None             <none>                   
 service/ext-kafka      LoadBalancer   100.66.151.114   a99afef5b14f211e99200024245e3dd7-837167553.us-east-2.elb.amazonaws.com   9094:31403/TCP                        7m
 service/grafana        ClusterIP      None             <none>                                                                   3000/TCP                              7m
 service/kafka          ClusterIP      None             <none>                                                                   9092/TCP,9094/TCP,9999/TCP            7m
+service/kafka-manager  ClusterIP      None             <none>                                                                   9000/TCP                              7m
 service/kibana         ClusterIP      None             <none>                                                                   5601/TCP                              7m
 service/minion         ClusterIP      None             <none>                                                                   8201/TCP                              2m
 service/opennms-core   ClusterIP      None             <none>                                                                   8980/TCP,8101/TCP                     7m

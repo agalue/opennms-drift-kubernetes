@@ -3,6 +3,22 @@
 # TODO: Authentication is not working, specially with probes
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-manager
+  namespace: opennms
+  labels:
+    app: kafka-manager
+    deployment: drift
+spec:
+  clusterIP: None
+  ports:
+  - port: 9000
+  selector:
+    app: kafka-manager
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
