@@ -487,6 +487,7 @@ kubectl delete all --all --namespace monitoring --force --grace-period 0
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
 * Expose the Kubernetes Dashboard through the Ingress controller.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
-* Explore [Helm](https://helm.sh), and potentially add support for it.
-* Install [Kubeless](https://kubeless.io)], and use the existing Kafka as specified [here](https://kubeless.io/docs/use-existing-kafka/) to trigger processing of events, alarms or performance data.
+* Explore [Strimzi](https://strimzi.io/) an operator for Kafka that supports encryption and authentication.
+* Explore [Kubeless](https://kubeless.io)], or [Fission](https://fission.io), and use Kafka for trigger `serverless` apps based on alarms or events. Hint: I've found Fission more feature reach and works with modern versions of Kafka. On both cases, it is important to create a Kafka Stream application to convert from GPB to JSON the required data.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
+* Explore [Helm](https://helm.sh), and potentially add support for it.

@@ -21,8 +21,6 @@
 #       Then, we can use:
 #        - name: KAFKA_ADVERTISED_LISTENERS
 #          value: INSIDE://:9092,OUTSIDE://_{K8S_HOST}:9094
-#
-# FUTURE: https://strimzi.io/ an operator for kafka that supports encryption and authentication
 
 ---
 apiVersion: v1
