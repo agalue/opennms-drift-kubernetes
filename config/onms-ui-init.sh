@@ -126,6 +126,7 @@ if [[ $ELASTIC_SERVER ]]; then
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=elastic
+elasticIndexStrategy=daily
 EOF
 fi
 
