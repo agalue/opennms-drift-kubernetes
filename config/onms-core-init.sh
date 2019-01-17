@@ -23,10 +23,11 @@ acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
 EOF
 fi
 
+FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
 if [[ $FEATURES_LIST ]]; then
   if [ ! grep --quiet "$FEATURES_LIST" $FEATURES_CFG ]; then
     echo "Enabling features: $FEATURES_LIST ..."
-    sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $CONFIG_DIR/org.apache.karaf.features.cfg
+    sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
   else
     echo "Features already enabled."
   fi

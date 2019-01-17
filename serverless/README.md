@@ -15,6 +15,10 @@ https://github.com/agalue/OpenNMS-Kafka-Converter
 
 The repository explains how to generate a Docker image for it, and a YAML file to deploy the converter to Kubernetes, on the same keyspace where OpenNMS is running.
 
+```shell
+kubectl apply -f https://raw.githubusercontent.com/agalue/OpenNMS-Kafka-Converter/master/deployment/k8s-converter.yaml
+```
+
 ### Create a Slack WebHook
 
 Follow the Slack API [documentation](https://api.slack.com/incoming-webhooks) to create a Webhook to send messages to a given channel.

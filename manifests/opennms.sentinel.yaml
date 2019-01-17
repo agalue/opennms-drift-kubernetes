@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING: The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
+# TODO: Fix the sentinel overlay handling on the image.
 
 ---
 apiVersion: apps/v1
@@ -36,6 +37,19 @@ spec:
                   values:
                   - onms
       initContainers:
+      - name: initialization
+        image: opennms/sentinel:bleeding
+        imagePullPolicy: IfNotPresent
+        command: [ bash, /init.sh ]
+        env:
+        - name: INSTANCE_ID
+          value: K8S
+        volumeMounts:
+        - name: etc-overlay
+          mountPath: /etc-overlay
+        - name: opennms-config
+          mountPath: /init.sh
+          subPath: onms-sentinel-init.sh
       - name: wait-for-dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
@@ -84,6 +98,8 @@ spec:
         - name: opennms-config
           mountPath: /opt/sentinel/deploy/features.xml
           subPath: onms-sentinel-features.xml
+        - name: etc-overlay
+          mountPath: /opt/sentinel-etc-overlay
         resources:
           limits:
             cpu: 1
@@ -106,6 +122,8 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 60
       volumes:
+      - name: etc-overlay
+        emptyDir: {}
       - name: opennms-config
         configMap:
           name: opennms-config
