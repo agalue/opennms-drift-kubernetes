@@ -1,0 +1,36 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtrigger-kafka
+  labels:
+    chart: "fission-all-1.0-rc2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        svc: mqtrigger
+        messagequeue: kafka
+  template:
+    metadata:
+      labels:
+        svc: mqtrigger
+        messagequeue: kafka
+    spec:
+      containers:
+      - name: mqtrigger
+        image: "index.docker.io/fission/fission-bundle:1.0-rc2"
+        imagePullPolicy: IfNotPresent
+        command: ["/fission-bundle"]
+        args: ["--mqt", "--routerUrl", "http://router.default"]
+        env:
+        - name: MESSAGE_QUEUE_TYPE
+          value: kafka
+        - name: MESSAGE_QUEUE_URL
+          value: "kafka.opennms.svc.cluster.local:9092"
+        - name: MESSAGE_QUEUE_KAFKA_VERSION
+          value: "2.1.0"
+      serviceAccount: fission-svc
+

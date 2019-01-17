@@ -1,0 +1,11 @@
+{
+  "name": "alarm2slack",
+  "version": "1.0.0",
+  "description": "OpenNMS Alarms to Slack",
+  "main": "alarm2slack.js",
+  "author": "Alejandro Galue <agalue@opennms.org>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0"
+  }
+}
