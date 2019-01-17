@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Mandatory Environment variables:
+#
+# GF_SECURITY_ADMIN_PASSWORD
+# GRAFANA_URL
+
 GRAFANA_AUTH="admin:$GF_SECURITY_ADMIN_PASSWORD"
 HELM_URL="$GRAFANA_URL/api/plugins/opennms-helm-app/settings"
 DS_URL="$GRAFANA_URL/api/datasources"

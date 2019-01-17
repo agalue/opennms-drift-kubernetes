@@ -11,10 +11,10 @@ Instead of using discrete EC2 instances, this repository explains how to deploy 
 ## Requirements
 
 * Have your AWS account configured on your system (`~/.aws/credentials`)
-* Install [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) (this environment has been tested with version `1.10.0`, but I can't find a reason why it would't work with `1.9.x`)
-* Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary
+* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
-* Install [Terraform](https://www.terraform.io) [Optional. See security groups]
+* Install the [terraform](https://www.terraform.io) binary [Optional. See security groups]
 
 ## Cluster Configuration
 
@@ -76,7 +76,7 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.10.12 \
+  --kubernetes-version 1.11.6 \
   --networking calico
 ```
 
@@ -160,16 +160,7 @@ terraform apply -auto-approve
 
 ## Deployment
 
-Creation Order:
-
-* Plugins/Controllers
-* Namespace
-* ConfigMaps/Secrets
-* Storage Classes
-* Volumes (if apply)
-* Services, Deployments and StatefulSets
-
-As a side note, instead of providing the name space for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
+As a side note, instead of providing the namespace for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
 
 ```shell
 kubectl config set-context $(kubectl config current-context) --namespace=opennms
@@ -190,12 +181,12 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 This add-on is required in order to provide HTTP/TLS support through LetsEncrypt to the HTTP services managed by the ingress controller.
 
 ```shell
-kubectl create namespace cert-manager
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/00-crds.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/01-namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/cert-manager.yaml
 ```
 
-> NOTE: you might see an error, but the main functionality is not affected. I expect a fix soon, as the part that seems to be failing is the one associated with update the expired certificates.
+> NOTE: this solution is intended to be installed through Helm. For this reason, the static deployments might contain errors. It looks like the main functionality is not affected, as the failing part seems to be associated with update the expired certificates.
 
 ### Namespace
 

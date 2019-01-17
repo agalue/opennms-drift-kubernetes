@@ -1,9 +1,13 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 
-# Required environment variables:
+# External Environment variables:
+#
 # CASSANDRA_SERVER
 # ELASTIC_SERVER
+# GRAFANA_URL
+# GRAFANA_PUBLIC_URL
+# GF_SECURITY_ADMIN_PASSWORD
 
 CONFIG_DIR=/opt/opennms-etc-overlay
 WEB_DIR=/opt/opennms-jetty-webinf-overlay
@@ -96,7 +100,10 @@ cp /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security
 sed -r -i 's/ROLE_ADMIN/ROLE_DISABLED/' $SECURITY_CONFIG
 sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' $SECURITY_CONFIG
 
-cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
+if [[ $CASSANDRA_SERVER ]]; then
+  echo "Configuring Cassandra..."
+
+  cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
 
@@ -106,13 +113,42 @@ org.opennms.newts.config.keyspace=newts
 org.opennms.newts.config.port=9042
 org.opennms.newts.config.read_consistency=ONE
 org.opennms.newts.config.write_consistency=ANY
+
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
+fi
 
-cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
+if [[ $ELASTIC_SERVER ]]; then
+  echo "Configuring Elasticsearch..."
+
+  cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=elastic
 EOF
+fi
 
+if [[ $GRAFANA_PUBLIC_URL ]] && [[ $GRAFANA_URL ]] && [[ $GF_SECURITY_ADMIN_PASSWORD ]]; then
+  GRAFANA_AUTH="admin:$GF_SECURITY_ADMIN_PASSWORD"
+
+  yum -q -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  yum -q -y install jq
+
+  FLOW_DASHBOARD=$(curl -u $GRAFANA_AUTH "$GRAFANA_URL/api/search?query=flow" 2>/dev/null | jq '.[0].url' | sed 's/"//g')
+  cat <<EOF > $CONFIG_DIR/org.opennms.netmgt.flows.rest.cfg
+flowGraphUrl=$GRAFANA_PUBLIC_URL$FLOW_DASHBOARD?node=\$nodeId&interface=\$ifIndex
+EOF
+
+  GRAFANA_KEY=$(curl -u $GRAFANA_AUTH -X POST -H "Content-Type: application/json" -d '{"name":"opennms-ui", "role": "Viewer"}' $GRAFANA_URL/api/auth/keys 2>/dev/null | jq .key - | sed 's/"//g')
+  if [ "$GRAFANA_KEY" != "null" ]; then
+    GRAFANA_HOSTNAME=$(echo $GRAFANA_URL | sed -E 's/http[s]?:|\///g')
+    cat <<EOF > $opennms_etc/opennms.properties.d/grafana.properties
+org.opennms.grafanaBox.show=true
+org.opennms.grafanaBox.hostname=$GRAFANA_HOSTNAME
+org.opennms.grafanaBox.port=443
+org.opennms.grafanaBox.basePath=/
+org.opennms.grafanaBox.apiKey=$GRAFANA_KEY
+EOF
+  fi
+fi

@@ -57,7 +57,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TARGETS
-          value: opennms-core.opennms.svc.cluster.local:8980
+          value: opennms-core.opennms.svc.cluster.local:8980,grafana.opennms.svc.cluster.local:3000
         - name: TIMEOUT
           value: '600'
       - name: initialization
@@ -69,6 +69,15 @@ spec:
           value: cassandra.opennms.svc.cluster.local
         - name: ELASTIC_SERVER
           value: esdata.opennms.svc.cluster.local
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: GRAFANA_UI_ADMIN
+              name: onms-passwords
+        - name: GRAFANA_URL
+          value: http://grafana.opennms.svc.cluster.local:3000
+        - name: GRAFANA_PUBLIC_URL
+          value: https://grafana.k8s.opennms.org
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/opennms-etc-overlay

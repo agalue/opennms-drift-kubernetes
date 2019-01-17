@@ -1,7 +1,7 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 
-# Environment variables:
+# External Environment variables:
 #
 # INSTANCE_ID
 # FEATURES_LIST
@@ -79,6 +79,7 @@ org.opennms.newts.config.keyspace=newts
 org.opennms.newts.config.port=9042
 org.opennms.newts.config.read_consistency=ONE
 org.opennms.newts.config.write_consistency=ANY
+
 org.opennms.newts.config.resource_shard=604800
 org.opennms.newts.config.ttl=31540000
 org.opennms.newts.config.writer_threads=2

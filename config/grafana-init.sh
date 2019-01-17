@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# Mandatory Environment variables:
+#
+# PGHOST
+# GF_DATABASE_NAME
+# GF_DATABASE_USER
+# GF_DATABASE_PASSWORD
+
 until pg_isready; do
   echo "$(date) Waiting for postgresql host $PGHOST..."
   sleep 2

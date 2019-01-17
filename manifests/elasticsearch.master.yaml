@@ -128,7 +128,7 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: aws-ebs
+      storageClassName: ssd
       resources:
         requests:
           storage: 5Gi
