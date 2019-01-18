@@ -77,7 +77,7 @@ From now on, when an alarm is generated in OpenNMS, the Kafka Producer will forw
 Another way to test is create an HTTP triger and use curl to emulate an alarm:
 
 ```shell
-fission route create --name alarm2slack --url /alarm2slack --host fission.k8s.opennms.org --createingress
+fission route create --name alarm2slack --method POST --url /alarm2slack --host fission.k8s.opennms.org --createingress
 ```
 
 Then,
