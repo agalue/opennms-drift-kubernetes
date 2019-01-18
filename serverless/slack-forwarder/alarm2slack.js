@@ -1,14 +1,21 @@
 // @author Alejandro Galue <agalue@opennms.org>
 
 const axios = require('axios');
+const mrkdwn = require('html-to-mrkdwn');
 const fs = require('fs');
 
 const configPath = '/configs/default/alarms2kafka-config/SLACK_URL';
 
 var slackUrl;
 if (fs.existsSync(configPath)) {
-  slackUrl = fs.readFileSync(configPath, 'utf8');
+  slackUrl = fs.readFileSync(configPath,'utf8');
   console.log('Slack URL: ' + slackUrl);
+}
+
+function buildMessage(alarm) {
+  const logMsg = mrkdwn(alarm.logMessage).text;
+  const descr = mrkdwn(alarm.description).text;
+  return `*Alarm ID:${alarm.id}, ${logMsg}*\n${descr}`;
 }
 
 module.exports = async function(context) {
@@ -19,7 +26,7 @@ module.exports = async function(context) {
     const alarm = context.request.body;
     console.log('Posting alarm with ID ' + alarm.id + ' to ' + slackUrl);
     const response = await axios.post(slackUrl, {
-      text: alarm.logMessage
+      text: buildMessage(alarm)
     });
     console.log(response.statusText);
     return { status: 200, body: response.statusText };
