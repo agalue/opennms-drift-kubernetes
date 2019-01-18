@@ -7,7 +7,7 @@ const configPath = '/configs/default/alarms2kafka-config/SLACK_URL';
 
 var slackUrl;
 if (fs.existsSync(configPath)) {
-  slackUrl = fs.readFileSync(configPath);
+  slackUrl = fs.readFileSync(configPath, 'utf8');
   console.log('Slack URL: ' + slackUrl);
 }
 
