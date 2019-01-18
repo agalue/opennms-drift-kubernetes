@@ -64,7 +64,7 @@ spec:
         command: [ bash, /init.sh ]
         env:
         - name: INSTANCE_ID
-          value: K8S
+          value: OpenNMS
         - name: FEATURES_LIST
           value: opennms-es-rest,opennms-kafka-producer
         - name: KAFKA_SERVER

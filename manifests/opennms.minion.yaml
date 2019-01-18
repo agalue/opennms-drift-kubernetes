@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Using StatefulSets for Minions only to have a unique and immutable MINION_ID
+# This Pod includes 2 containers, one for the Minion and one for the GRPC Server for NX-OS
 
 ---
 apiVersion: v1
@@ -22,8 +23,6 @@ spec:
   - port: 514
     name: syslog
     targetPort: 1514
-  - port: 50001
-    name: nxos
   - port: 8877
     name: netflow5
   - port: 4729
@@ -32,6 +31,10 @@ spec:
     name: sflow
   - port: 4738
     name: ipfix
+  - port: 50001
+    name: nxos-udp
+  - port: 50002
+    name: nxos-grpc
   selector:
     app: minion
 
@@ -71,7 +74,7 @@ spec:
         command: [ bash, /init.sh ]
         env:
         - name: INSTANCE_ID
-          value: K8S
+          value: OpenNMS
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
@@ -120,7 +123,7 @@ spec:
         - containerPort: 8201
           name: karaf
         - containerPort: 50001
-          name: nxos
+          name: nxos-udp
         - containerPort: 8877
           name: netflow5
         - containerPort: 4729
@@ -149,6 +152,24 @@ spec:
             port: karaf
           initialDelaySeconds: 60
           periodSeconds: 60
+      - name: nxos-grpc
+        image: agalue/opennms-nxos-grpc:latest
+        env:
+          - name: BOOTSTRAP_SERVERS
+            value: kafka.opennms.svc.cluster.local:9092
+          - name: MINION_LOCATION
+            value: Kubernetes
+          - name: MINION_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: PORT
+            value: '50002'
+          - name: TOPIC
+            value: OpenNMS.Sink.Telemetry-NXOS
+        ports:
+        - containerPort: 50002
+          name: nxos-grpc
       volumes:
       - name: etc-overlay
         emptyDir: {}
