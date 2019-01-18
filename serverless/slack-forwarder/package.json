@@ -6,6 +6,7 @@
   "author": "Alejandro Galue <agalue@opennms.org>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "html-to-mrkdwn": "^3.0.0"
   }
 }
