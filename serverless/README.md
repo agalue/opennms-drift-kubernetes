@@ -1,19 +1,21 @@
 
 # Introduction to Serverless
 
-This is a very simple serverless function to retrieve an alarm from OpenNMS and send it to a Slack channel as a message.
+This is a very simple serverless function to retrieve an alarm from OpenNMS through Kafka (assuming that the OpenNMS server is using the Kafka Producer feature), and send it to a Slack channel as a message.
 
 ## Installation
 
 ### Deploy the Kafka Converter Application
 
-The Kafka Producer feature of OpenNMS publishes events, alarms, metrics and nodes to topics using Google Protobuf as the payload format. Unfortunately, serverless controllers like Fission expect plain text, or to be more presice JSON as the payload. For this reason we need to convert the GPB messages to JSON messgages.
+The Kafka Producer feature of OpenNMS publishes events, alarms, metrics and nodes to topics using Google Protobuf as the payload format.
+
+Unfortunately, serverless controllers like Fission or Kubeless expect plain text, or to be more presice JSON as the payload. For this reason we need to convert the GPB messages to JSON messgages.
 
 There is an application for that:
 
 https://github.com/agalue/OpenNMS-Kafka-Converter
 
-The repository explains how to generate a Docker image for the application, and has a YAML file to deploy the converter to Kubernetes, on the same keyspace where OpenNMS is running.
+The repository explains all the details to to generate a Docker image for the application, and has an example YAML file to deploy the converter to Kubernetes.
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/agalue/OpenNMS-Kafka-Converter/master/deployment/k8s-converter.yaml
@@ -40,7 +42,7 @@ kubectl apply -f https://github.com/fission/fission/releases/download/1.0-rc2/fi
 kubectl apply -f fission-mqtrigger-kafka.yaml
 ```
 
-The above will publish the Pods on the default namespace. It is required to change the above YAMLs to use a different keyspace, as the solution is intended to be installed through Helm. The YAML for the Kafka mqtrigger is provided on this repository.
+The above will publish the Pods on the default namespace. It is required to change the above YAMLs to use a different keyspace, as the solution is intended to be installed through Helm. The second YAML contains the Kafka mqtrigger which is not included/enabled by default with Fission.
 
 ### Create the NodeJS Environment
 
