@@ -22,6 +22,16 @@ spec:
   - port: 514
     name: syslog
     targetPort: 1514
+  - port: 50001
+    name: nxos
+  - port: 8877
+    name: netflow5
+  - port: 4729
+    name: netflow9
+  - port: 6343
+    name: sflow
+  - port: 4738
+    name: ipfix
   selector:
     app: minion
 
@@ -108,7 +118,17 @@ spec:
         - containerPort: 1514
           name: syslog
         - containerPort: 8201
-          name: shell
+          name: karaf
+        - containerPort: 50001
+          name: nxos
+        - containerPort: 8877
+          name: netflow5
+        - containerPort: 4729
+          name: netflow9
+        - containerPort: 6343
+          name: sflow
+        - containerPort: 4738
+          name: ipfix
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/minion-etc-overlay
@@ -119,6 +139,16 @@ spec:
           requests:
             cpu: 200m
             memory: 256Mi
+        readinessProbe:
+          tcpSocket:
+            port: karaf
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: karaf
+          initialDelaySeconds: 60
+          periodSeconds: 60
       volumes:
       - name: etc-overlay
         emptyDir: {}
