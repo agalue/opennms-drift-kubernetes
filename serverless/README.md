@@ -13,7 +13,7 @@ There is an application for that:
 
 https://github.com/agalue/OpenNMS-Kafka-Converter
 
-The repository explains how to generate a Docker image for it, and a YAML file to deploy the converter to Kubernetes, on the same keyspace where OpenNMS is running.
+The repository explains how to generate a Docker image for the application, and has a YAML file to deploy the converter to Kubernetes, on the same keyspace where OpenNMS is running.
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/agalue/OpenNMS-Kafka-Converter/master/deployment/k8s-converter.yaml
@@ -59,7 +59,7 @@ zip alarm2slack.zip ./slack-forwarder/package.json ./slack-forwarder/alarm2slack
 ### Create the function
 
 ```shell
-fission function create --name alarm2slack --src alarm2slack.zip --env nodejs
+fission function create --name alarm2slack --src alarm2slack.zip --env nodejs --configmap alarms2kafka-config
 ```
 
 ### Create the function trigger based on a Kafka Topic
@@ -73,3 +73,15 @@ The name of the topic relies on the Kafka Converter YAML file.
 ## Test
 
 From now on, when an alarm is generated in OpenNMS, the Kafka Producer will forward it to Kafka. From there, the converter will put the JSON version of the GPB alarm to another topic. From there, the Fission Message Queue Listener will grab it and call the function. Finally, the function will post the alarm on Slack.
+
+Another way to test is create an HTTP triger and use curl to emulate an alarm:
+
+```shell
+fission route create --name alarm2slack --url /alarm2slack --host fission.k8s.opennms.org --createingress
+```
+
+Then,
+
+```shell
+curl -X POST -v -d '{"uei":"uei.jigsaw/test", "id":666, "logMessage":"I want to play a game"}' http://fission.k8s.opennms.org/alarm2slack
+```
