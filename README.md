@@ -181,12 +181,10 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 This add-on is required in order to provide HTTP/TLS support through LetsEncrypt to the HTTP services managed by the ingress controller.
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/00-crds.yaml
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/01-namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/master/deploy/manifests/cert-manager.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml
 ```
 
-> NOTE: this solution is intended to be installed through Helm. For this reason, the static deployments might contain errors. It looks like the main functionality is not affected, as the failing part seems to be associated with update the expired certificates.
+> NOTE: For troubleshooting, check the [installation guide](https://cert-manager.readthedocs.io/en/latest/getting-started/2-installing.html#with-static-manifests).
 
 ### Namespace
 
