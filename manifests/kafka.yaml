@@ -6,8 +6,6 @@
 # KAFKA_HEAP_OPTS should be consistent with resources.requests.memory
 #
 # WARNING: the kafka process runs as root, which is not allowed on OpenShift
-# WARNING: due to HZN-1387, SASL/SSL cannot be used with Sentinel older than Horizon 23.0.1;
-#          unless, it is applied only to the external face (for Minions on port 9094).
 #
 # TODO: For SSL, we need the advertised.listener on port 9094 to be the public FQDN of the K8S host.
 #       The reason for this is that all the certificates will be associated with that FQDN.
@@ -122,9 +120,7 @@ spec:
         - name: KAFKA_CONTROLLED_SHUTDOWN_ENABLE
           value: 'true'
         - name: KAFKA_JMX_OPTS
-          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.rmi.port=9999
-        - name: JMX_PORT
-          value: '9999'
+          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(HOSTNAME) -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999
         - name: KAFKA_HEAP_OPTS
           value: -Xmx2G -Xms1G
         volumeMounts:
