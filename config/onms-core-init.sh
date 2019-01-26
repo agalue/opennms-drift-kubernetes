@@ -118,6 +118,7 @@ org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
 
+# Required changes in order to use HTTPS through Ingress
 cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
 opennms.web.base-url=https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true

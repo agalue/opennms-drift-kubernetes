@@ -97,7 +97,8 @@ spec:
       containers:
       - name: minion
         image: opennms/minion:bleeding
-        command: [ /docker-entrypoint.sh, -f ]
+        args:
+        - -f
         env:
         - name: MINION_ID
           valueFrom:

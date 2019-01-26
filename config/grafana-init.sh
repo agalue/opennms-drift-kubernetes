@@ -1,4 +1,5 @@
 #!/bin/sh
+# @author Alejandro Galue <agalue@opennms.org>
 
 # Mandatory Environment variables:
 #

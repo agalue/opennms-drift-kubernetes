@@ -47,6 +47,12 @@ spec:
         env:
         - name: INSTANCE_ID
           value: OpenNMS
+        - name: KAFKA_SERVER
+          value: kafka.opennms.svc.cluster.local
+        - name: ELASTIC_SERVER
+          value: esdata.opennms.svc.cluster.local
+        - name: CASSANDRA_SERVER
+          value: cassandra.opennms.svc.cluster.local
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
@@ -98,9 +104,6 @@ spec:
               key: OPENNMS_UI_ADMIN
               name: onms-passwords
         volumeMounts:
-        - name: opennms-config
-          mountPath: /opt/sentinel/deploy/features.xml
-          subPath: onms-sentinel-features.xml
         - name: etc-overlay
           mountPath: /opt/sentinel-etc-overlay
         resources:

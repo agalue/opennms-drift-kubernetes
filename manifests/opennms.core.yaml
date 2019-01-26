@@ -100,7 +100,8 @@ spec:
       - name: onms
         image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
-        command: [ /docker-entrypoint.sh, -s ]
+        args:
+        - -s
         ports:
         - containerPort: 8101
           name: karaf
