@@ -4,7 +4,7 @@ const axios = require('axios');
 const mrkdwn = require('html-to-mrkdwn');
 const fs = require('fs');
 
-const configPath = '/configs/default/alarms2kafka-config/SLACK_URL';
+const configPath = '/configs/default/serverless-config/SLACK_URL';
 
 var slackUrl;
 if (fs.existsSync(configPath)) {

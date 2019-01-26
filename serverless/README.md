@@ -28,7 +28,7 @@ Follow the Slack API [documentation](https://api.slack.com/incoming-webhooks) to
 Once you have the URL, add it to a config-map; for example:
 
 ```shell
-kubectl -n default create configmap alarm2slack-config --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz"
+kubectl -n default create configmap serverless-config --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz"
 ```
 
 ### Install Fission
@@ -61,7 +61,7 @@ zip alarm2slack.zip ./slack-forwarder/package.json ./slack-forwarder/alarm2slack
 ### Create the function
 
 ```shell
-fission function create --name alarm2slack --src alarm2slack.zip --env nodejs --configmap alarm2slack-config
+fission function create --name alarm2slack --src alarm2slack.zip --env nodejs --configmap serverless-config
 ```
 
 ### Create the function trigger based on a Kafka Topic
