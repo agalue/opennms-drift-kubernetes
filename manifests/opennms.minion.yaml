@@ -2,6 +2,11 @@
 #
 # Using StatefulSets for Minions only to have a unique and immutable MINION_ID
 # This Pod includes 2 containers, one for the Minion and one for the GRPC Server for NX-OS
+#
+# WARNINGS:
+# - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
+#   Oracle JDK based images are available at no42org. For example: no42org/minion:23.0.2
+# - The image opennms/minion:bleeding refers to the upcoming version of OpenNMS (unstable)
 
 ---
 apiVersion: v1

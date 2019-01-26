@@ -2,7 +2,11 @@
 #
 # This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
 #
-# WARNING: the opennms process runs as root, which is not allowed on OpenShift
+# WARNINGS:
+# - The opennms process runs as root, which is not allowed on OpenShift
+# - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
+#   Oracle JDK based images are available at no42org. For example: no42org/horizon:23.0.2
+# - The image opennms/horizon-core-web:bleeding refers to the upcoming version of OpenNMS (unstable)
 #
 # ENHANCEMENTS
 # - Use a tool like ksync for /opt/opennms/etc:

@@ -1,7 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNING: The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
-# TODO: Fix the sentinel overlay handling on the image.
+# WARNINGS:
+# - The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
+# - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
+#   Oracle JDK based images are available at no42org. For example: no42org/sentinel:23.0.2
+# - The image opennms/sentinel:bleeding refers to the upcoming version of OpenNMS (unstable)
 
 ---
 apiVersion: apps/v1
