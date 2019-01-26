@@ -89,6 +89,10 @@ spec:
         - containerPort: 9999
           name: jmx
         env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: K8S_HOST
           valueFrom:
             fieldRef:
@@ -120,7 +124,7 @@ spec:
         - name: KAFKA_CONTROLLED_SHUTDOWN_ENABLE
           value: 'true'
         - name: KAFKA_JMX_OPTS
-          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(HOSTNAME) -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999
+          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(POD_IP) -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999
         - name: KAFKA_HEAP_OPTS
           value: -Xmx2G -Xms1G
         volumeMounts:
