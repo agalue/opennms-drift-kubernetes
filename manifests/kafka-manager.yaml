@@ -1,7 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# TODO:
-# - Authentication is not working
 
 ---
 apiVersion: v1
@@ -46,23 +43,11 @@ spec:
         env:
         - name: ZK_HOSTS
           value: zookeeper.opennms.svc.cluster.local:2181
-#        - name: KAFKA_MANAGER_AUTH_ENABLED
-#          value: 'true'
-#        - name: APPLICATION_SECRET
-#          valueFrom:
-#            secretKeyRef:
-#              key: KAFKA_MANAGER_APPLICATION_SECRET
-#              name: onms-passwords
-#        - name: KAFKA_MANAGER_USERNAME
-#          valueFrom:
-#            secretKeyRef:
-#              key: KAFKA_MANAGER_USERNAME
-#              name: onms-passwords
-#        - name: KAFKA_MANAGER_PASSWORD
-#          valueFrom:
-#            secretKeyRef:
-#              key: KAFKA_MANAGER_PASSWORD
-#              name: onms-passwords
+        - name: APPLICATION_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_MANAGER_APPLICATION_SECRET
+              name: onms-passwords
         ports:
         - containerPort: 9000
           name: http

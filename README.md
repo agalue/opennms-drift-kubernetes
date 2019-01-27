@@ -224,8 +224,6 @@ kubectl create secret generic onms-passwords \
  --from-literal GRAFANA_UI_ADMIN=opennms \
  --from-literal ELASTICSEARCH=elastic \
  --from-literal KAFKA_MANAGER_APPLICATION_SECRET=opennms \
- --from-literal KAFKA_MANAGER_USERNAME=admin \
- --from-literal KAFKA_MANAGER_PASSWORD=opennms \
  --namespace opennms
 ```
 
