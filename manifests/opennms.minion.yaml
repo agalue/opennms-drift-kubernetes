@@ -74,7 +74,7 @@ spec:
         securityContext:
           privileged: true
       - name: init-config
-        image: opennms/minion:bleeding
+        image: opennms/minion:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -96,7 +96,7 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: opennms/minion:bleeding
+        image: opennms/minion:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         args:
         - -f

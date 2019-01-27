@@ -1,12 +1,14 @@
 #!/bin/sh
 # @author Alejandro Galue <agalue@opennms.org>
-
-# Mandatory Environment variables:
 #
-# PGHOST
-# GF_DATABASE_NAME
-# GF_DATABASE_USER
-# GF_DATABASE_PASSWORD
+# Purpose:
+# - Create a PostgreSQL database for grafana only if it doesn't exist
+#
+# Mandatory Environment variables:
+# - PGHOST
+# - GF_DATABASE_NAME
+# - GF_DATABASE_USER
+# - GF_DATABASE_PASSWORD
 
 until pg_isready; do
   echo "$(date) Waiting for postgresql host $PGHOST..."

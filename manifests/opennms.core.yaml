@@ -62,7 +62,7 @@ spec:
         - name: TIMEOUT
           value: '600'
       - name: init-config
-        image: opennms/horizon-core-web:bleeding
+        image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -97,7 +97,7 @@ spec:
           subPath: onms-newts.cql
       containers:
       - name: onms
-        image: opennms/horizon-core-web:bleeding
+        image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         args:
         - -s

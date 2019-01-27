@@ -1,3 +1,10 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# Creates the Newts keyspace assuming a single-dc cluster with at least 3 nodes,
+# only if the keyspace/tables are not present.
+# The name of the keyspace must be consistent with org.opennms.newts.config.keyspace
+# See onms-core-init.sh for more details.
+
 CREATE KEYSPACE IF NOT EXISTS newts WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : 2 };
 
 CREATE TABLE IF NOT EXISTS newts.samples (

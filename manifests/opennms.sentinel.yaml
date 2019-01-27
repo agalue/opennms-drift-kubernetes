@@ -41,7 +41,7 @@ spec:
                   - onms
       initContainers:
       - name: init-config
-        image: opennms/sentinel:bleeding
+        image: opennms/sentinel:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -69,7 +69,7 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        image: opennms/sentinel:bleeding
+        image: opennms/sentinel:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         args:
           - -d

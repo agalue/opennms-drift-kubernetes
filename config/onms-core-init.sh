@@ -1,14 +1,20 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
-
-# External Environment variables:
 #
-# INSTANCE_ID
-# FEATURES_LIST
-# KAFKA_SERVER
-# CASSANDRA_SERVER
-# CASSANDRA_REPFACTOR
-# ELASTIC_SERVER
+# Purpose:
+# - Initialize the config directory on the volume only one.
+# - Apply mandatory configuration changes based on the provided variables.
+#
+# Warning:
+# - Multiple assumptions are made on Newts/Cassandra configuration.
+#
+# External Environment variables:
+# - INSTANCE_ID
+# - FEATURES_LIST
+# - KAFKA_SERVER
+# - CASSANDRA_SERVER
+# - CASSANDRA_REPFACTOR
+# - ELASTIC_SERVER
 
 CONFIG_DIR=/opennms-etc
 
@@ -54,10 +60,10 @@ bootstrap.servers=$KAFKA_SERVER:9092
 EOF
 
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
-nodeTopic=OpenNMS.Nodes
-alarmTopic=OpenNMS.Alarms
-eventTopic=OpenNMS.Events
-metricTopic=OpenNMS.Metrics
+nodeTopic=$INSTANCE_ID.Nodes
+alarmTopic=$INSTANCE_ID.Alarms
+eventTopic=$INSTANCE_ID.Events
+metricTopic=$INSTANCE_ID.Metrics
 forward.metrics=true
 nodeRefreshTimeoutMs=300000
 alarmSyncIntervalMs=300000

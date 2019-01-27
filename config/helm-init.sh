@@ -1,10 +1,12 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
-
-# Mandatory Environment variables:
 #
-# GF_SECURITY_ADMIN_PASSWORD
-# GRAFANA_URL
+# Purpose:
+# - Enable and initialize Helm data sources only when Helm is disable.
+#
+# Mandatory Environment variables:
+# - GF_SECURITY_ADMIN_PASSWORD
+# - GRAFANA_URL
 
 GRAFANA_AUTH="admin:$GF_SECURITY_ADMIN_PASSWORD"
 HELM_URL="$GRAFANA_URL/api/plugins/opennms-helm-app/settings"

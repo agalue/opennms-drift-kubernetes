@@ -1,13 +1,17 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
-
-# Environment variables:
 #
-# INSTANCE_ID
-# ELASTIC_SERVER
-# KAFKA_SERVER
-# KAFKA_GROUP_ID
-# CASSANDRA_SERVER
+# Purpose:
+# - Configure instance ID and the Telemetry adapters only if Elasticsearch is provided.
+# - Configure the Kafka consumers only if Kafka is provided.
+# - Configure the Telemetry persistence only if Cassandra is provided.
+#
+# Environment variables:
+# - INSTANCE_ID
+# - ELASTIC_SERVER
+# - KAFKA_SERVER
+# - KAFKA_GROUP_ID
+# - CASSANDRA_SERVER
 
 GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
 CFG=/opt/sentinel/etc/system.properties

@@ -1,9 +1,11 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
-
-# Environment variables:
 #
-# INSTANCE_ID
+# Purpose:
+# - Configure instance ID and the Telemetry listeners (on fixed ports)
+#
+# Environment variables:
+# - INSTANCE_ID
 
 CFG=/opt/minion/etc/system.properties
 OVERLAY=/etc-overlay

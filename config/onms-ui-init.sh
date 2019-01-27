@@ -1,13 +1,17 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
-
-# External Environment variables:
 #
-# CASSANDRA_SERVER
-# ELASTIC_SERVER
-# GRAFANA_URL
-# GRAFANA_PUBLIC_URL
-# GF_SECURITY_ADMIN_PASSWORD
+# Purpose:
+# - Apply recommended changes to force OpenNMS to be a read-only WebUI server.
+#   Only Eventd, Jetty and Karaf will be running.
+# - Apply mandatory configuration changes based on the provided variables.
+#
+# External Environment variables:
+# - CASSANDRA_SERVER
+# - ELASTIC_SERVER
+# - GRAFANA_URL
+# - GRAFANA_PUBLIC_URL
+# - GF_SECURITY_ADMIN_PASSWORD
 
 CONFIG_DIR=/opt/opennms-etc-overlay
 WEB_DIR=/opt/opennms-jetty-webinf-overlay
