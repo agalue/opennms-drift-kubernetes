@@ -1,15 +1,27 @@
 // @author Alejandro Galue <agalue@opennms.org>
+// This is intended to work with either Fission or Kubeless
+// The SLACK_URL should be provided as a secret or environment variable.
 
 const axios = require('axios');
 const mrkdwn = require('html-to-mrkdwn');
 const fs = require('fs');
 
-const configPath = '/configs/default/serverless-config/SLACK_URL';
-
-var slackUrl;
-if (fs.existsSync(configPath)) {
-  slackUrl = fs.readFileSync(configPath,'utf8');
-  console.log('Slack URL: ' + slackUrl);
+function getSlackUrl() {
+  let paths = [
+    '/configs/default/serverless-config/SLACK_URL',
+    '/secrets/default/serverless-config/SLACK_URL',
+    '/serverless-config/SLACK_URL'
+  ];
+  for (var i=0; i < paths.length; i++) {
+    var configPath = paths[i];
+    console.log(`Validating path ${configPath}`);
+    if (fs.existsSync(configPath)) {
+      let slackUrl = fs.readFileSync(configPath,'utf8');
+      console.log(`Slack URL ${slackUrl} from ${configPath}`);
+      return slackUrl;
+    }
+  }
+  return process.env.SLACK_URL;
 }
 
 function buildMessage(alarm) {
@@ -18,12 +30,11 @@ function buildMessage(alarm) {
   return `*Alarm ID:${alarm.id}, ${logMsg}*\n${descr}`;
 }
 
-module.exports = async function(context) {
-  if (slackUrl === undefined) {
-    return { status: 404, body: 'The slackUrl is not defined on the config-map.' };
+async function sendAlarm(alarm, slackUrl) {
+  if (!slackUrl) {
+    return { status: 404, body: 'The slackUrl is not defined.' };
   }
   try {
-    const alarm = context.request.body;
     console.log('Posting alarm with ID ' + alarm.id + ' to ' + slackUrl);
     const response = await axios.post(slackUrl, {
       text: buildMessage(alarm)
@@ -34,4 +45,18 @@ module.exports = async function(context) {
     console.error(error);
     return { status: 500, body: 'ERROR: something went wrong. ' + error };
   }
+}
+
+var globalSlackUrl = getSlackUrl();
+
+module.exports = {
+
+  fission: async function(context) {
+    return await sendAlarm(context.request.body, globalSlackUrl);
+  },
+
+  kubeless: async function(event, context) {
+    return await sendAlarm(event.data, globalSlackUrl);
+  }
+
 }

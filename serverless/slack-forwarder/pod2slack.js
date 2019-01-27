@@ -1,7 +1,7 @@
 // @author Alejandro Galue <agalue@opennms.org>
 
 // Deployment:
-// zip pod2slack.zip package.json pod.js
+// zip pod2slack.zip package.json pod2slack.js
 // fission function create --name pod2slack --src pod2slack.zip --env nodejs --configmap serverless-config
 // fission watch create --function pod2slack --type pod --ns opennms
 

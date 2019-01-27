@@ -1,0 +1,81 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    kubeless: kafka-trigger-controller
+  name: kafka-trigger-controller
+  namespace: kubeless
+spec:
+  selector:
+    matchLabels:
+      kubeless: kafka-trigger-controller
+  template:
+    metadata:
+      labels:
+        kubeless: kafka-trigger-controller
+    spec:
+      containers:
+      - name: kafka-trigger-controller
+        image: bitnami/kafka-trigger-controller:v1.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KAFKA_BROKERS
+          value: kafka.opennms.svc.cluster.local:9092
+      serviceAccountName: controller-acct
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: kafkatriggers.kubeless.io
+spec:
+  group: kubeless.io
+  names:
+    kind: KafkaTrigger
+    plural: kafkatriggers
+    singular: kafkatrigger
+  scope: Namespaced
+  version: v1beta1
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kafka-controller-deployer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kafka-controller-deployer
+subjects:
+- kind: ServiceAccount
+  name: controller-acct
+  namespace: kubeless
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kafka-controller-deployer
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - configmaps
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - kubeless.io
+  resources:
+  - functions
+  - kafkatriggers
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - delete
