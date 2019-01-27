@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNING: the opennms process runs as root, which is not allowed on OpenShift
+# WARNING:
+# - The opennms process runs as root, which is not allowed on OpenShift
 
 ---
 apiVersion: v1
@@ -52,7 +53,7 @@ spec:
                 values:
                 - onms
       initContainers:
-      - name: wait-for-dependencies
+      - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
         env:
@@ -60,7 +61,7 @@ spec:
           value: opennms-core.opennms.svc.cluster.local:8980,grafana.opennms.svc.cluster.local:3000
         - name: TIMEOUT
           value: '600'
-      - name: initialization
+      - name: init-config
         image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]

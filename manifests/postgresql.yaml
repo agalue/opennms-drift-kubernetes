@@ -1,10 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# Make sure the to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
+# WARNING:
+# - Make sure the to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
+# - The postgres user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 #
-# WARNING: The postgres user (uid: 999, gid: 999) cannot be used in OpenShift by default.
-
-# TODO
+# TODO:
 # - Use a simple approach to manage a cluster: add an init-container that configures master/slave
 # - Use an advanced approach to manage a cluster: https://github.com/zalando-incubator/postgres-operator
 # - Use barman to keep a backup of the DB and rebuild the server in case of data corruption

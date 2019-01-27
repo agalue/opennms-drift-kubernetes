@@ -1,9 +1,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# JVMFLAGS should be consistent with resources.requests.memory
-#
-# WARNING: For some reason, full FQDNs are required for ZOO_SERVERS; otherwise, the leader election fails.
-# WARNING: The zookeeper user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
+# WARNING:
+# - JVMFLAGS should be consistent with resources.requests.memory
+# - Full FQDNs are required for ZOO_SERVERS; otherwise, the leader election fails.
+# - The zookeeper user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
 apiVersion: v1
 kind: Service
@@ -53,7 +53,6 @@ spec:
       initContainers:
       - name: generate-zooid
         image: busybox
-        imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
         command:

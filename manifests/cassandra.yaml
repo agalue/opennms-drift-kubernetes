@@ -1,11 +1,11 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# MAX_HEAP_SIZE should be consistent with resources.requests.memory
-# CASSANDRA_DC should match config/opennms-core/newts.cql
+# WARNING:
+# - MAX_HEAP_SIZE should be consistent with resources.requests.memory
+# - CASSANDRA_DC should match config/opennms-core/newts.cql
+# - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 #
-# WARNING: The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
-#
-# TODO
+# TODO:
 # - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.
 #   A script that looks for a specific file (copied through kubectl) can help to decide which kind of task to execute.
 #   In theory, persistent volumes should also be deleted as well.

@@ -1,6 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNINGS:
+# WARNING:
 # - The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 #   Oracle JDK based images are available at no42org. For example: no42org/sentinel:23.0.2
@@ -40,7 +40,7 @@ spec:
                   values:
                   - onms
       initContainers:
-      - name: initialization
+      - name: init-config
         image: opennms/sentinel:bleeding
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
@@ -59,7 +59,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-sentinel-init.sh
-      - name: wait-for-dependencies
+      - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
         env:

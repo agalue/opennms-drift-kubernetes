@@ -3,7 +3,7 @@
 # Using StatefulSets for Minions only to have a unique and immutable MINION_ID
 # This Pod includes 2 containers, one for the Minion and one for the GRPC Server for NX-OS
 #
-# WARNINGS:
+# WARNING:
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 #   Oracle JDK based images are available at no42org. For example: no42org/minion:23.0.2
 # - The image opennms/minion:bleeding refers to the upcoming version of OpenNMS (unstable)
@@ -73,7 +73,7 @@ spec:
         - net.ipv4.ping_group_range=0 429496729
         securityContext:
           privileged: true
-      - name: initialization
+      - name: init-config
         image: opennms/minion:bleeding
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
@@ -86,7 +86,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-minion-init.sh
-      - name: wait-for-dependencies
+      - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
         env:
@@ -97,6 +97,7 @@ spec:
       containers:
       - name: minion
         image: opennms/minion:bleeding
+        imagePullPolicy: IfNotPresent
         args:
         - -f
         env:

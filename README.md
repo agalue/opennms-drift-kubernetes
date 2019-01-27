@@ -96,6 +96,14 @@ spec:
     watchIngress: true
 ```
 
+While you're on edit mode, if you're interested on using `CoreDNS` instead, you can add:
+
+```yaml
+spec:
+  kubeDNS:
+    provider: CoreDNS
+```
+
 Finally, apply the changes to create the cluster:
 
 ```shell
@@ -472,12 +480,11 @@ kubectl delete all --all --namespace monitoring --force --grace-period 0
 * Add Network Policies to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other component should not access those resources). A network manager like Calico is required.
 * Design a solution to handle scale down of Cassandra and decommission of nodes.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
-* Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Make sure `heapster` is running.
+* Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information.
 * Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
 * Expose the Kubernetes Dashboard through the Ingress controller.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
 * Explore [Strimzi](https://strimzi.io/) an operator for Kafka that supports encryption and authentication.
-* Explore [Kubeless](https://kubeless.io), or [Fission](https://fission.io), and use Kafka for trigger `serverless` apps based on alarms or events. Hint: I've found Fission more feature reach and works with modern versions of Kafka. On both cases, it is important to create a Kafka Stream application to convert from GPB to JSON the required data.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Explore [Helm](https://helm.sh), and potentially add support for it.

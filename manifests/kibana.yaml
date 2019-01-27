@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNING: The kibana user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
+# WARNING:
+# - The kibana user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
 ---
 apiVersion: v1
@@ -39,9 +40,8 @@ spec:
         deployment: drift
     spec:
       initContainers:
-      - name: check-elasticsearch-ready
+      - name: dependencies
         image: busybox
-        imagePullPolicy: IfNotPresent
         command:
         - sh
         - -c

@@ -1,24 +1,14 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# This solution expose 9094 on the k8s worker node.
-# That means, kafka can be scaled up to the number of workers on the k8s cluster.
+# WARNING:
+# - KAFKA_HEAP_OPTS should be consistent with resources.requests.memory
+# - This solution expose 9094 on the k8s worker node.
+#   That means, kafka can be scaled up to the number of workers on the k8s cluster.
+# - The kafka process runs as root, which is not allowed on OpenShift
 #
-# KAFKA_HEAP_OPTS should be consistent with resources.requests.memory
-#
-# WARNING: the kafka process runs as root, which is not allowed on OpenShift
-#
-# TODO: For SSL, we need the advertised.listener on port 9094 to be the public FQDN of the K8S host.
-#       The reason for this is that all the certificates will be associated with that FQDN.
-#       For this, the K8S Metadata and a environment variable can help (~ spec.nodeName)
-#
-#       name: K8S_HOST
-#          valueFrom:
-#            fieldRef:
-#              fieldPath: spec.nodeName
-#
-#       Then, we can use:
-#        - name: KAFKA_ADVERTISED_LISTENERS
-#          value: INSIDE://:9092,OUTSIDE://_{K8S_HOST}:9094
+# TODO:
+# - For SSL, the advertised.listener on port 9094 should be the public FQDN of the K8S host.
+#   The reason for this is that all the certificates must be associated with that FQDN.
 
 ---
 apiVersion: v1
@@ -64,9 +54,8 @@ spec:
     spec:
       terminationGracePeriodSeconds: 300
       initContainers:
-      - name: check-zk-ready
+      - name: dependencies
         image: busybox
-        imagePullPolicy: IfNotPresent
         command:
         - sh
         - -c

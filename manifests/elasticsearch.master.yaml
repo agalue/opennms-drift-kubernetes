@@ -1,8 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# ES_JAVA_OPTS should be consistent with resources.requests.memory
-#
-# WARNING: The elasticsearch user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
+# WARNING:
+# - ES_JAVA_OPTS should be consistent with resources.requests.memory
+# - The elasticsearch user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
 ---
 apiVersion: v1

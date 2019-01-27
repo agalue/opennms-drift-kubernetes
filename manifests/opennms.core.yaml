@@ -1,14 +1,13 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
-#
-# WARNINGS:
+# WARNING:
+# - This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
 # - The opennms process runs as root, which is not allowed on OpenShift
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 #   Oracle JDK based images are available at no42org. For example: no42org/horizon:23.0.2
 # - The image opennms/horizon-core-web:bleeding refers to the upcoming version of OpenNMS (unstable)
 #
-# ENHANCEMENTS
+# TODO:
 # - Use a tool like ksync for /opt/opennms/etc:
 #   https://vapor-ware.github.io/ksync/
 
@@ -54,7 +53,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 300
       initContainers:
-      - name: wait-for-dependencies
+      - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
         env:
@@ -62,7 +61,7 @@ spec:
           value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
         - name: TIMEOUT
           value: '600'
-      - name: initialization
+      - name: init-config
         image: opennms/horizon-core-web:bleeding
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
@@ -85,7 +84,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-core-init.sh
-      - name: newts-initialization
+      - name: init-newts
         image: cassandra:3.11.3
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -f /onms-newts.cql $CASSANDRA_HOST' ]

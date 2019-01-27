@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# TODO: Authentication is not working
+# TODO:
+# - Authentication is not working
 
 ---
 apiVersion: v1

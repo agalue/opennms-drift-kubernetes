@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# The password for the grafana user in PostgreSQL is plain text here due to GF_SESSION_PROVIDER_CONFIG
+# WARNING:
+# - The password for the grafana user in PostgreSQL is plain text here due to GF_SESSION_PROVIDER_CONFIG
 
 ---
 apiVersion: v1
@@ -39,7 +40,7 @@ spec:
         deployment: drift
     spec:
       initContainers:
-      - name: initialize-database
+      - name: init-database
         image: postgres:10.6-alpine
         imagePullPolicy: IfNotPresent
         command:
