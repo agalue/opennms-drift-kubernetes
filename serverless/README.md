@@ -28,7 +28,9 @@ Follow the Slack API [documentation](https://api.slack.com/incoming-webhooks) to
 Once you have the WebHook URL, add it to a `secret`; for example:
 
 ```shell
-kubectl -n default create secret generic serverless-config --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz"
+kubectl -n default create secret generic serverless-config \
+ --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
+ --dry-run -o yaml | kubectl apply -f -
 ```
 
 ### Deploy the Function

@@ -8,8 +8,9 @@
 # - The image opennms/horizon-core-web:bleeding refers to the upcoming version of OpenNMS (unstable)
 #
 # TODO:
-# - Use a tool like ksync for /opt/opennms/etc:
+# - Potential tools for managing /opt/opennms/etc:
 #   https://vapor-ware.github.io/ksync/
+#   https://github.com//kubernetes/git-sync
 
 ---
 apiVersion: v1

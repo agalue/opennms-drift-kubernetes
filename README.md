@@ -209,7 +209,7 @@ kubectl apply -f ./namespace
 From the directory on which this repository has been checked out:
 
 ```shell
-kubectl create configmap opennms-config --from-file=config/ --namespace opennms
+kubectl create configmap opennms-config --from-file=config/ --namespace opennms --dry-run -o yaml | kubectl apply -f -
 ```
 
 #### Secrets
@@ -224,7 +224,7 @@ kubectl create secret generic onms-passwords \
  --from-literal GRAFANA_UI_ADMIN=opennms \
  --from-literal ELASTICSEARCH=elastic \
  --from-literal KAFKA_MANAGER_APPLICATION_SECRET=opennms \
- --namespace opennms
+ --namespace opennms --dry-run -o yaml | kubectl apply -f -
 ```
 
 Feel free to change them.
