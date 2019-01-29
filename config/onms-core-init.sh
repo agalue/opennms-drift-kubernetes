@@ -100,6 +100,9 @@ org.opennms.newts.query.heartbeat=450000
 EOF
 
 cat <<EOF > $CONFIG_DIR/newts.cql
+# The value of compaction_window_size should be consistent with the chosen TTL
+# The number of SSTables will be the TTL/compaction_window_size (52 for 1 year)
+
 CREATE KEYSPACE IF NOT EXISTS $CASSANDRA_KEYSPACE WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $CASSANDRA_REPFACTOR };
 
 CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.samples (
@@ -163,7 +166,7 @@ fi
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
 
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/minions.properties
+  cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
 # Used for Kafka Topics
 org.opennms.instance.id=$INSTANCE_ID
 EOF
