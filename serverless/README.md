@@ -21,6 +21,8 @@ The repository explains all the details to to generate a Docker image for the ap
 kubectl apply -f https://raw.githubusercontent.com/agalue/OpenNMS-Kafka-Converter/master/k8s-converter.yaml
 ```
 
+> NOTE: Make sure the `INSTANCE_ID` has not been changed on your OpenNMS Pod, as the above yaml assumes it should be `OpenNMS`.
+
 ### Create a Slack WebHook
 
 Follow the Slack API [documentation](https://api.slack.com/incoming-webhooks) to create a Webhook to send messages to a given channel.
