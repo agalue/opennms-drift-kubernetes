@@ -77,6 +77,8 @@ spec:
           value: esdata.opennms.svc.cluster.local
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
+        - name: CASSANDRA_KEYSPACE
+          value: ${INSTANCE_ID}_newts
         - name: CASSANDRA_REPFACTOR
           value: '2'
         volumeMounts:
@@ -88,14 +90,13 @@ spec:
       - name: init-newts
         image: cassandra:3.11.3
         imagePullPolicy: IfNotPresent
-        command: [ sh, -c, 'cqlsh -f /onms-newts.cql $CASSANDRA_HOST' ]
+        command: [ sh, -c, 'cqlsh -f /opennms-etc/newts.cql $CASSANDRA_HOST' ]
         env:
         - name: CASSANDRA_HOST
           value: cassandra.opennms.svc.cluster.local
         volumeMounts:
-        - name: opennms-config
-          mountPath: /onms-newts.cql
-          subPath: onms-newts.cql
+        - name: opennms-etc
+          mountPath: /opennms-etc
       containers:
       - name: onms
         image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
