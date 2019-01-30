@@ -2,6 +2,8 @@
 // This is intended to work with either Fission or Kubeless
 // The SLACK_URL should be provided as a secret or environment variable.
 
+'use strict';
+
 const axios = require('axios');
 const mrkdwn = require('html-to-mrkdwn');
 const fs = require('fs');

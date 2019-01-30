@@ -8,6 +8,8 @@
 // Future Enhancements:
 // Update an OpenNMS requisition to monitor Pods (requires access to Kubernetes API)
 
+'use strict';
+
 const axios = require('axios');
 const fs = require('fs');
 
