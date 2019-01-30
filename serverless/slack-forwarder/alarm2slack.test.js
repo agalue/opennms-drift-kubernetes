@@ -8,7 +8,7 @@ const app = require('./alarm2slack');
 const mockAxios = require('axios');
 
 test('Test message generation', async() => {
-  await app.kubeless({
+  const results = await app.kubeless({
     data: {
       id: 666,
       uei: 'uei.test/jigsaw',
@@ -16,7 +16,7 @@ test('Test message generation', async() => {
       description: '<p>I want to play a game.</p>'
     }
   });
-
+  expect(results.status).toBe(200);
   expect(mockAxios.post).toHaveBeenCalledWith(process.env.SLACK_URL, {
       text: '*Alarm ID:666, Hello *alejandro**\nI want to play a game.'
   });
