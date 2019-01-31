@@ -108,7 +108,7 @@ spec:
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
-              resource: limits.memory
+              resource: requests.memory
               divisor: 1Mi
         - name: ES_JAVA_OPTS # TODO jvm.options default will be used if Xms/Xmx are not passed
           value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap

@@ -66,7 +66,7 @@ spec:
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
-              resource: limits.memory
+              resource: requests.memory
               divisor: 1Mi
         - name: MAX_HEAP_SIZE
           value: $(MEM_TOTAL_MB)m
