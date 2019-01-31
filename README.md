@@ -148,7 +148,7 @@ The output should be:
 
 ```text
 Kubernetes master is running at https://api.k8s.opennms.org
-KubeDNS is running at https://api.k8s.opennms.org/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+CoreDNS is running at https://api.k8s.opennms.org/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
@@ -249,89 +249,10 @@ From the directory on which this repository has been checked out:
 kubectl apply -f ./manifests
 ```
 
-After a while, you should be able to see this:
+Use the following to check whether or not all the resources have been created:
 
 ```shell
-➜  kubectl get all --namespace opennms
-NAME                                 READY   STATUS      RESTARTS   AGE
-pod/cassandra-0                      1/1     Running     0          7m
-pod/cassandra-1                      1/1     Running     0          6m
-pod/cassandra-2                      1/1     Running     0          4m
-pod/esdata-0                         1/1     Running     0          7m
-pod/esdata-1                         1/1     Running     0          5m
-pod/esdata-2                         1/1     Running     0          4m
-pod/esmaster-0                       1/1     Running     0          7m
-pod/esmaster-1                       1/1     Running     0          7m
-pod/esmaster-2                       1/1     Running     0          7m
-pod/grafana-77dccf7559-drqnz         1/1     Running     0          7m
-pod/grafana-77dccf7559-lxb8l         1/1     Running     0          7m
-pod/helm-init-qlzb7                  0/1     Completed   0          7m
-pod/kafka-0                          1/1     Running     0          7m
-pod/kafka-1                          1/1     Running     0          5m
-pod/kafka-2                          1/1     Running     0          4m
-pod/kafka-manager-68d7b4d664-g4dpv   1/1     Running     0          7m
-pod/kibana-6b495f6c9b-h7jqt          1/1     Running     0          7m
-pod/minion-0                         1/1     Running     0          1m
-pod/minion-1                         1/1     Running     0          1m
-pod/onms-0                           1/1     Running     0          7m
-pod/onms-ui-7648fd4fdb-vnq2b         1/1     Running     0          7m
-pod/onms-ui-7648fd4fdb-z47br         1/1     Running     0          7m
-pod/postgres-0                       1/1     Running     0          7m
-pod/sentinel-684c6959b4-qtwk8        1/1     Running     0          7m
-pod/sentinel-684c6959b4-sv6gj        1/1     Running     0          7m
-pod/zk-0                             1/1     Running     0          7m
-pod/zk-1                             1/1     Running     0          7m
-pod/zk-2                             1/1     Running     0          7m
-
-NAME                   TYPE           CLUSTER-IP       EXTERNAL-IP                                                              PORT(S)                               AGE
-service/cassandra      ClusterIP      None             <none>                                                                   7000/TCP,7001/TCP,7199/TCP,9042/TCP   7m
-service/esdata         ClusterIP      None             <none>                                                                   9200/TCP,9300/TCP                     7m
-service/esmaster       ClusterIP      None             <none>                                                                   9200/TCP,9300/TCP                     7m
-service/ext-kafka      LoadBalancer   100.66.151.114   a99afef5b14f211e99200024245e3dd7-837167553.us-east-2.elb.amazonaws.com   9094:31403/TCP                        7m
-service/grafana        ClusterIP      None             <none>                                                                   3000/TCP                              7m
-service/kafka          ClusterIP      None             <none>                                                                   9092/TCP,9094/TCP,9999/TCP            7m
-service/kafka-manager  ClusterIP      None             <none>                                                                   9000/TCP                              7m
-service/kibana         ClusterIP      None             <none>                                                                   5601/TCP                              7m
-service/minion         ClusterIP      None             <none>                                                                   8201/TCP                              2m
-service/opennms-core   ClusterIP      None             <none>                                                                   8980/TCP,8101/TCP                     7m
-service/opennms-ui     ClusterIP      None             <none>                                                                   8980/TCP,8101/TCP                     7m
-service/postgresql     ClusterIP      None             <none>                                                                   5432/TCP                              7m
-service/zookeeper      ClusterIP      None             <none>                                                                   2888/TCP,3888/TCP,2181/TCP,9998/TCP   7m
-
-NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/grafana         2         2         2            2           7m
-deployment.apps/kafka-manager   1         1         1            1           7m
-deployment.apps/kibana          1         1         1            1           7m
-deployment.apps/onms-ui         2         2         2            2           7m
-deployment.apps/sentinel        2         2         2            2           7m
-
-NAME                                       DESIRED   CURRENT   READY   AGE
-replicaset.apps/grafana-77dccf7559         2         2         2       7m
-replicaset.apps/kafka-manager-68d7b4d664   1         1         1       7m
-replicaset.apps/kibana-6b495f6c9b          1         1         1       7m
-replicaset.apps/onms-ui-7648fd4fdb         2         2         2       7m
-replicaset.apps/sentinel-684c6959b4        2         2         2       7m
-
-NAME                         DESIRED   CURRENT   AGE
-statefulset.apps/cassandra   3         3         7m
-statefulset.apps/esdata      3         3         7m
-statefulset.apps/esmaster    3         3         7m
-statefulset.apps/kafka       3         3         7m
-statefulset.apps/minion      2         2         2m
-statefulset.apps/onms        1         1         7m
-statefulset.apps/postgres    1         1         7m
-statefulset.apps/zk          3         3         7m
-
-NAME                  DESIRED   SUCCESSFUL   AGE
-job.batch/helm-init   1         1            7m
-```
-
-Ingress are not shown, but you could do:
-
-```bash
-➜  kubectl get ingress -n opennms
-NAME            HOSTS                                                                                      ADDRESS                                                                   PORTS     AGE
-ingress-rules   grafana.k8s.opennms.org,kafka-manager.k8s.opennms.org,kibana.k8s.opennms.org + 2 more...   a580a93fdc35211e8a26702c5612cb12-1869830019.us-east-2.elb.amazonaws.com   80        12m
+kubectl get all --namespace opennms
 ```
 
 ## Minion

@@ -101,12 +101,16 @@ spec:
         args:
         - -f
         env:
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
         - name: MINION_ID
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         - name: JAVA_OPTS
-          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+          value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: MINION_LOCATION
           value: Kubernetes
         - name: OPENNMS_HTTP_URL

@@ -14,8 +14,8 @@
 # - KAFKA_SERVER
 # - CASSANDRA_SERVER
 # - CASSANDRA_REPFACTOR
-# - CASSANDRA_KEYSPACE
 # - ELASTIC_SERVER
+# - ELASTIC_PASSWORD
 
 CONFIG_DIR=/opennms-etc
 
@@ -27,6 +27,15 @@ if [ ! -f $CONFIG_DIR/configured ]; then
 enabled=false
 acknowledged-by=admin
 acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
+EOF
+fi
+
+if [[ $INSTANCE_ID ]]; then
+  echo "Configuring Instance ID..."
+
+  cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
+# Used for Kafka Topics
+org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
 
@@ -75,15 +84,20 @@ if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
 
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
-# ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
-# ring_buffer_size and cache.max_entries should be consistent with the expected load
+# About the properties:
+# - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
+# - ring_buffer_size and cache.max_entries should be consistent with the expected load
+#
+# About the keyspace:
+# - The value of compaction_window_size should be consistent with the chosen TTL
+# - The number of SSTables will be the TTL/compaction_window_size (52 for 1 year)
 
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
 
 org.opennms.timeseries.strategy=newts
-org.opennms.newts.config.hostname=$CASSANDRA_SERVER
-org.opennms.newts.config.keyspace=$CASSANDRA_KEYSPACE
+org.opennms.newts.config.hostname=${CASSANDRA_SERVER}
+org.opennms.newts.config.keyspace=${INSTANCE_ID}_newts
 org.opennms.newts.config.port=9042
 org.opennms.newts.config.read_consistency=ONE
 org.opennms.newts.config.write_consistency=ANY
@@ -99,13 +113,10 @@ org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
 
-cat <<EOF > $CONFIG_DIR/newts.cql
-# The value of compaction_window_size should be consistent with the chosen TTL
-# The number of SSTables will be the TTL/compaction_window_size (52 for 1 year)
+  cat <<EOF > $CONFIG_DIR/newts.cql
+CREATE KEYSPACE IF NOT EXISTS ${INSTANCE_ID}_newts WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $CASSANDRA_REPFACTOR };
 
-CREATE KEYSPACE IF NOT EXISTS $CASSANDRA_KEYSPACE WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $CASSANDRA_REPFACTOR };
-
-CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.samples (
+CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.samples (
   context text,
   partition int,
   resource text,
@@ -122,7 +133,7 @@ CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.samples (
 } AND gc_grace_seconds = 604800
   AND read_repair_chance = 0;
 
-CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.terms (
+CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.terms (
   context text,
   field text,
   value text,
@@ -130,7 +141,7 @@ CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.terms (
   PRIMARY KEY((context, field, value), resource)
 );
 
-CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.resource_attributes (
+CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.resource_attributes (
   context text,
   resource text,
   attribute text,
@@ -138,7 +149,7 @@ CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.resource_attributes (
   PRIMARY KEY((context, resource), attribute)
 );
 
-CREATE TABLE IF NOT EXISTS $CASSANDRA_KEYSPACE.resource_metrics (
+CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.resource_metrics (
   context text,
   resource text,
   metric_name text,
@@ -148,27 +159,18 @@ EOF
 fi
 
 if [[ $ELASTIC_SERVER ]]; then
-  echo "Configuring Elasticsearch..."
+  echo "Configuring Elasticsearch Event Forwarder..."
 
   cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
-globalElasticPassword=elastic
+globalElasticPassword=$ELASTIC_PASSWORD
 archiveRawEvents=true
 archiveAlarms=false
 archiveAlarmChangeEvents=false
 logAllEvents=false
 retries=1
 connTimeout=3000
-EOF
-fi
-
-if [[ $INSTANCE_ID ]]; then
-  echo "Configuring Instance ID..."
-
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
-# Used for Kafka Topics
-org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
 

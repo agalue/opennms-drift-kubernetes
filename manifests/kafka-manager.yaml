@@ -41,6 +41,8 @@ spec:
         image: hlebalbau/kafka-manager:stable
         imagePullPolicy: IfNotPresent
         env:
+        - name: JAVA_OPTS
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: ZK_HOSTS
           value: zookeeper.opennms.svc.cluster.local:2181
         - name: APPLICATION_SECRET

@@ -66,10 +66,17 @@ spec:
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
+        - name: INSTANCE_ID
+          value: OpenNMS
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
         - name: ELASTIC_SERVER
           value: esdata.opennms.svc.cluster.local
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: ELASTICSEARCH
+              name: onms-passwords
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -98,6 +105,10 @@ spec:
         - containerPort: 8980
           name: http
         env:
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
         - name: JAVA_OPTS
           value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: POSTGRES_HOST

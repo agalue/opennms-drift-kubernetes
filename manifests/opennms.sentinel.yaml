@@ -49,10 +49,17 @@ spec:
           value: OpenNMS
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
-        - name: ELASTIC_SERVER
-          value: esdata.opennms.svc.cluster.local
+        - name: KAFKA_GROUP_ID
+          value: Sentinel
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
+        - name: ELASTIC_SERVER
+          value: esdata.opennms.svc.cluster.local
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: ELASTICSEARCH
+              name: onms-passwords
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
@@ -77,8 +84,12 @@ spec:
         - containerPort: 8301
           name: karaf
         env:
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
         - name: JAVA_OPTS
-          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+          value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT

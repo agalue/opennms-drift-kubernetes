@@ -7,8 +7,10 @@
 # - Apply mandatory configuration changes based on the provided variables.
 #
 # External Environment variables:
+# - INSTANCE_ID
 # - CASSANDRA_SERVER
 # - ELASTIC_SERVER
+# - ELASTIC_PASSWORD
 # - GRAFANA_URL
 # - GRAFANA_PUBLIC_URL
 # - GF_SECURITY_ADMIN_PASSWORD
@@ -18,6 +20,15 @@ WEB_DIR=/opt/opennms-jetty-webinf-overlay
 
 mkdir -p $CONFIG_DIR/opennms.properties.d/
 touch $CONFIG_DIR/configured
+
+if [[ $INSTANCE_ID ]]; then
+  echo "Configuring Instance ID..."
+
+  cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
+# Used for Kafka Topics
+org.opennms.instance.id=$INSTANCE_ID
+EOF
+fi
 
 cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
 enabled=false
@@ -108,11 +119,13 @@ if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
 
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
+# WARNING: Must match what OpenNMS has configured for Newts
+
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
 
-org.opennms.timeseries.strategy=newts
-org.opennms.newts.config.hostname=$CASSANDRA_SERVER
+org.opennms.newts.config.hostname=${CASSANDRA_SERVER}
+org.opennms.newts.config.keyspace=${INSTANCE_ID}_newts
 org.opennms.newts.config.keyspace=newts
 org.opennms.newts.config.port=9042
 org.opennms.newts.config.read_consistency=ONE
@@ -129,7 +142,7 @@ if [[ $ELASTIC_SERVER ]]; then
   cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
-globalElasticPassword=elastic
+globalElasticPassword=$ELASTIC_PASSWORD
 elasticIndexStrategy=daily
 EOF
 fi

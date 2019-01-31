@@ -77,10 +77,13 @@ spec:
           value: esdata.opennms.svc.cluster.local
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
-        - name: CASSANDRA_KEYSPACE
-          value: ${INSTANCE_ID}_newts
         - name: CASSANDRA_REPFACTOR
           value: '2'
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: ELASTICSEARCH
+              name: onms-passwords
         volumeMounts:
         - name: opennms-etc
           mountPath: /opennms-etc
@@ -109,8 +112,12 @@ spec:
         - containerPort: 8980
           name: http
         env:
-        - name: JAVA_OPTS
-          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+        - name: JAVA_OPTS # This overrides opennms.conf
+          value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT

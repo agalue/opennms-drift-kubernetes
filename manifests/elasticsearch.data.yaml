@@ -106,8 +106,8 @@ spec:
           value: 'true'
         - name: http.cors.allow-origin
           value: '*'
-        - name: ES_JAVA_OPTS
-          value: -Xms2g -Xmx2g
+        - name: ES_JAVA_OPTS # TODO jvm.options default will be used if Xms/Xmx are not passed
+          value: -Xms2g -Xmx2g -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XshowSettings:vm
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:

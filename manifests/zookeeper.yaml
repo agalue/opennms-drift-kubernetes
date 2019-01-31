@@ -1,7 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - JVMFLAGS should be consistent with resources.requests.memory
 # - Full FQDNs are required for ZOO_SERVERS; otherwise, the leader election fails.
 # - The zookeeper user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
@@ -76,7 +75,7 @@ spec:
         - name: ZOO_SYNC_LIMIT
           value: '5'
         - name: JVMFLAGS
-          value: -Xmx256M -Xms128M
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: JMXLOCALONLY
           value: 'false'
         - name: JMXDISABLE
@@ -100,6 +99,9 @@ spec:
         - name: zk-data
           mountPath: /data
         resources:
+          limits:
+            memory: 512Mi
+            cpu: 200m
           requests:
             memory: 256Mi
             cpu: 100m

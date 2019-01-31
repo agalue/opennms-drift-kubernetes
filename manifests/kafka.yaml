@@ -1,7 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - KAFKA_HEAP_OPTS should be consistent with resources.requests.memory
 # - This solution expose 9094 on the k8s worker node.
 #   That means, kafka can be scaled up to the number of workers on the k8s cluster.
 # - The kafka process runs as root, which is not allowed on OpenShift
@@ -115,7 +114,7 @@ spec:
         - name: KAFKA_JMX_OPTS
           value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(POD_IP) -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999
         - name: KAFKA_HEAP_OPTS
-          value: -Xmx2G -Xms1G
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         volumeMounts:
         - name: kafka-data
           mountPath: /kafka

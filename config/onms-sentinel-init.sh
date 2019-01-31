@@ -9,6 +9,7 @@
 # Environment variables:
 # - INSTANCE_ID
 # - ELASTIC_SERVER
+# - ELASTIC_PASSWORD
 # - KAFKA_SERVER
 # - KAFKA_GROUP_ID
 # - CASSANDRA_SERVER
@@ -60,11 +61,12 @@ EOF
   cat <<EOF > $OVERLAY/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl = http://$ELASTIC_SERVER:9200
 globalElasticUser = elastic
-globalElasticPassword = elastic
+globalElasticPassword = $ELASTIC_PASSWORD
 elasticIndexStrategy = daily
 settings.index.number_of_shards = 6
 settings.index.number_of_replicas = 1
 EOF
+fi
 
 if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
@@ -86,9 +88,10 @@ sentinel-telemetry-nxos
 sentinel-telemetry-jti
 EOF
 
-  cat <<EOF > $FEATURES/org.opennms.newts.config.cfg
-hostname = $CASSANDRA_SERVER
-keyspace = newts
+  cat <<EOF > $OVERLAY/org.opennms.newts.config.cfg
+# WARNING: Must match what OpenNMS has configured for Newts
+hostname = ${CASSANDRA_SERVER}
+keyspace = ${INSTANCE_ID}_newts
 port = 9042
 read_consistency = ONE
 write_consistency = ANY
@@ -99,7 +102,7 @@ cache.max_entries = 131072
 cache.strategy = org.opennms.netmgt.newts.support.GuavaSearchableResourceMetadataCache
 EOF
 
-  cat <<EOF > $FEATURES/org.opennms.features.telemetry.adapters-sflow-telemetry.cfg
+  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-sflow-telemetry.cfg
 adapters.1.name = SFlow
 adapters.1.class-name = org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowAdapter
 adapters.2.name = SFlow-Telemetry
@@ -107,7 +110,7 @@ adapters.2.class-name = org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlo
 adapters.2.parameters.script = $telemedry_dir/sflow-host.groovy
 EOF
 
-  cat <<EOF > $FEATURES/org.opennms.features.telemetry.adapters-nxos.cfg
+  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-nxos.cfg
 name = NXOS
 class-name = org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbAdapter
 parameters.script = $telemedry_dir/cisco-nxos-telemetry-interface.groovy
