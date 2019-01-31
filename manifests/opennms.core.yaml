@@ -112,12 +112,8 @@ spec:
         - containerPort: 8980
           name: http
         env:
-        - name: MEM_TOTAL_MB
-          valueFrom:
-            resourceFieldRef:
-              resource: limits.memory
         - name: JAVA_OPTS # This overrides opennms.conf
-          value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+          value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+PrintFlagsFinal
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT

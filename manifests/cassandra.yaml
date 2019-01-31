@@ -1,7 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - MAX_HEAP_SIZE should be consistent with resources.requests.memory
 # - CASSANDRA_DC should match config/opennms-core/newts.cql
 # - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 #
@@ -64,10 +63,15 @@ spec:
         env:
         - name: JAVA_OPTS # TODO This doesn't seem to work, MAX_HEAP_SIZE/HEAP_NEWSIZE seem mandatory
           value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+              divisor: 1Mi
         - name: MAX_HEAP_SIZE
-          value: 2G
+          value: $(MEM_TOTAL_MB)m
         - name: HEAP_NEWSIZE
-          value: 2G
+          value: $(MEM_TOTAL_MB)m
         - name: CASSANDRA_SEEDS
           value: cassandra-0.cassandra.opennms.svc.cluster.local
         - name: CASSANDRA_CLUSTER_NAME

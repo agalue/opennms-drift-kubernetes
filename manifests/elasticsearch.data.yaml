@@ -1,7 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - ES_JAVA_OPTS should be consistent with resources.requests.memory
 # - The elasticsearch user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 
 ---
@@ -106,8 +105,13 @@ spec:
           value: 'true'
         - name: http.cors.allow-origin
           value: '*'
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+              divisor: 1Mi
         - name: ES_JAVA_OPTS # TODO jvm.options default will be used if Xms/Xmx are not passed
-          value: -Xms2g -Xmx2g -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XshowSettings:vm
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:
