@@ -32,7 +32,7 @@ kubeless function deploy alarm2slack --namespace opennms --runtime nodejs8 --dep
 ## Create the function trigger based on a Kafka Topic
 
 ```shell
-kubeless trigger kafka create alarm2slack --function-selector created-by=kubeless,function=alarm2slack --trigger-topic opennms_alarms_json
+kubeless trigger kafka create alarm2slack --namespace opennms --function-selector created-by=kubeless,function=alarm2slack --trigger-topic opennms_alarms_json
 ```
 
 The name of the topic relies on the Kafka Converter YAML file.
