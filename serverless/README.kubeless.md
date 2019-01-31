@@ -13,10 +13,20 @@ kubectl apply -f https://github.com/kubeless/kubeless/releases/download/$RELEASE
 kubectl apply -f kubeless-mqtrigger-kafka.yaml
 ```
 
+## Create the secret for Slack URL
+
+Once you have the WebHook URL, add it to a `secret`; for example:
+
+```shell
+kubectl -n opennms create secret generic serverless-config \
+ --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
+ --dry-run -o yaml | kubectl apply -f -
+```
+
 ## Create the function
 
 ```shell
-kubeless function deploy alarm2slack --runtime nodejs8 --dependencies ./slack-forwarder/package.json --from-file ./slack-forwarder/alarm2slack.js --handler alarm2slack.kubeless --secrets serverless-config
+kubeless function deploy alarm2slack --namespace opennms --runtime nodejs8 --dependencies ./slack-forwarder/package.json --from-file ./slack-forwarder/alarm2slack.js --handler alarm2slack.kubeless --secrets serverless-config
 ```
 
 ## Create the function trigger based on a Kafka Topic
@@ -26,6 +36,8 @@ kubeless trigger kafka create alarm2slack --function-selector created-by=kubeles
 ```
 
 The name of the topic relies on the Kafka Converter YAML file.
+
+Use `kubeless function list` to check whether the function is ready to use.
 
 ## Optional Testing
 

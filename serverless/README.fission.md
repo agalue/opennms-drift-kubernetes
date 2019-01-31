@@ -13,6 +13,16 @@ kubectl apply -f fission-mqtrigger-kafka.yaml
 
 The above will publish the Pods on the default namespace. It is required to change the above YAMLs to use a different keyspace, as the solution is intended to be installed through Helm. The second YAML contains the Kafka mqtrigger which is not included/enabled by default with Fission.
 
+## Create the secret for Slack URL
+
+Once you have the WebHook URL, add it to a `secret`; for example:
+
+```shell
+kubectl -n default create secret generic serverless-config \
+ --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
+ --dry-run -o yaml | kubectl apply -f -
+```
+
 ## Create the NodeJS Environment
 
 ```shell
