@@ -105,8 +105,15 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        - name: JAVA_OPTS
-          value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+PrintFlagsFinal
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+              divisor: 1Mi
+        - name: JAVA_OPTS # Preferred way instead of opennms.conf
+          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
+#       - name: JAVA_OPTS # This doesn't seem to work apparently due to Java 8
+#         value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+PrintFlagsFinal
         - name: MINION_LOCATION
           value: Kubernetes
         - name: OPENNMS_HTTP_URL
@@ -146,11 +153,11 @@ spec:
           mountPath: /opt/minion-etc-overlay
         resources:
           limits:
-            cpu: 400m
-            memory: 512Mi
+            cpu: 500m
+            memory: 2Gi
           requests:
             cpu: 200m
-            memory: 256Mi
+            memory: 1Gi
         readinessProbe:
           tcpSocket:
             port: karaf
