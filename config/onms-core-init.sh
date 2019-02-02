@@ -48,6 +48,10 @@ fi
 if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
 
+  cat <<EOF > $CONFIG_DIR/opennms.properties.d/amq.properties
+org.opennms.activemq.broker.disable=true
+EOF
+
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/kafka.properties
 # Sink
 org.opennms.core.ipc.sink.initialSleepTime=60000
@@ -59,6 +63,16 @@ org.opennms.core.ipc.sink.kafka.group.id=OpenNMS
 org.opennms.core.ipc.rpc.strategy=kafka
 org.opennms.core.ipc.rpc.kafka.bootstrap.servers=$KAFKA_SERVER:9092
 org.opennms.core.ipc.rpc.kafka.ttl=30000
+org.opennms.core.ipc.rpc.kafka.compression.type=gzip
+org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
+
+# RPC Consumer (verify Kafka broker configuration)
+org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=5000000
+
+# RPC Producer (verify Kafka broker configuration)
+org.opennms.core.ipc.rpc.kafka.max.request.size=5000000
+EOF
+
 EOF
 
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
