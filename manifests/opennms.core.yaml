@@ -65,9 +65,9 @@ spec:
       - name: init-config
         image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
-        command: [ bash, /init.sh ]
+        command: [ bash, /init.sh ] # Requires opennms/horizon-core-web
         env:
-        - name: INSTANCE_ID
+        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
           value: OpenNMS
         - name: FEATURES_LIST
           value: opennms-es-rest,opennms-kafka-producer

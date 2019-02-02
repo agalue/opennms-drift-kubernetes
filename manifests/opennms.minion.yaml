@@ -67,7 +67,7 @@ spec:
       initContainers:
       - name: init-sysctl
         image: busybox
-        command:
+        command: # Allow ICMP as non-root
         - sysctl
         - -w
         - net.ipv4.ping_group_range=0 429496729
@@ -76,9 +76,9 @@ spec:
       - name: init-config
         image: opennms/minion:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
-        command: [ bash, /init.sh ]
+        command: [ bash, /init.sh ] # Requires opennms/horizon-core-web
         env:
-        - name: INSTANCE_ID
+        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
           value: OpenNMS
         volumeMounts:
         - name: etc-overlay

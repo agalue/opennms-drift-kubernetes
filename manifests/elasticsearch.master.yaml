@@ -35,7 +35,7 @@ metadata:
     role: esmaster
 spec:
   serviceName: esmaster
-  replicas: 3 # The solution is designed for 3 instances
+  replicas: 3 # The solution is designed for 3 masters only
   podManagementPolicy: Parallel
   selector:
     matchLabels:
@@ -87,7 +87,7 @@ spec:
         - name: discovery.zen.ping.unicast.hosts
           value: esmaster.opennms.svc.cluster.local
         - name: discovery.zen.minimum_master_nodes
-          value: '2'
+          value: '2' # Requires a minimum of 3 replicas
         - name: node.master
           value: 'true'
         - name: node.data

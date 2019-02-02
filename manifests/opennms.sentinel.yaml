@@ -45,7 +45,7 @@ spec:
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
-        - name: INSTANCE_ID
+        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
           value: OpenNMS
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local

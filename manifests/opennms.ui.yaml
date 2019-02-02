@@ -66,7 +66,7 @@ spec:
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
-        - name: INSTANCE_ID
+        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
           value: OpenNMS
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
