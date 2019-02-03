@@ -61,8 +61,6 @@ spec:
         image: cassandra:3.11.3
         imagePullPolicy: IfNotPresent
         env:
-        - name: JAVA_OPTS # TODO This doesn't seem to work, MAX_HEAP_SIZE/HEAP_NEWSIZE seem mandatory
-          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
