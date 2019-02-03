@@ -51,7 +51,7 @@ spec:
           value: http://esdata.opennms.svc.cluster.local:9200
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana:6.2.4
+        image: docker.elastic.co/kibana/kibana:6.5.4
         imagePullPolicy: IfNotPresent
         env:
         - name: SERVER_NAME
