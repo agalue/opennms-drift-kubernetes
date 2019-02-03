@@ -62,23 +62,25 @@ spec:
           value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
         - name: TIMEOUT
           value: '600'
+      # Initialize OpenNMS Common Configuration
+      # Requires opennms/horizon-core-web, using same version as runtime container.
       - name: init-config
         image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
-        command: [ bash, /init.sh ] # Requires opennms/horizon-core-web
+        command: [ bash, /init.sh ]
         env:
         - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
           value: OpenNMS
         - name: FEATURES_LIST
           value: opennms-es-rest,opennms-kafka-producer
-        - name: KAFKA_SERVER
-          value: kafka.opennms.svc.cluster.local
-        - name: ELASTIC_SERVER
-          value: esdata.opennms.svc.cluster.local
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
         - name: CASSANDRA_REPFACTOR
           value: '2'
+        - name: KAFKA_SERVER
+          value: kafka.opennms.svc.cluster.local
+        - name: ELASTIC_SERVER
+          value: esdata.opennms.svc.cluster.local
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -90,6 +92,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-core-init.sh
+      # Initializes Newts keyspace on Cassandra/ScyllaDB
       - name: init-newts
         image: cassandra:3.11.3
         imagePullPolicy: IfNotPresent

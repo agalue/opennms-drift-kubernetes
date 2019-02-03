@@ -61,8 +61,10 @@ spec:
           value: opennms-core.opennms.svc.cluster.local:8980,grafana.opennms.svc.cluster.local:3000
         - name: TIMEOUT
           value: '600'
+      # Initialize OpenNMS UI Configuration
+      # Requires opennms/horizon-core-web, using same version as runtime container.
       - name: init-config
-        image: opennms/horizon-core-web:bleeding
+        image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -96,7 +98,7 @@ spec:
           subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
-        image: opennms/horizon-core-web:bleeding
+        image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:

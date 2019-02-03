@@ -17,13 +17,13 @@
 
 CONFIG_DIR=/opt/opennms-etc-overlay
 WEB_DIR=/opt/opennms-jetty-webinf-overlay
+KEYSPACE=${INSTANCE_ID-onms}_newts
 
 mkdir -p $CONFIG_DIR/opennms.properties.d/
 touch $CONFIG_DIR/configured
 
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
-
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
 # Used for Kafka Topics
 org.opennms.instance.id=$INSTANCE_ID
@@ -104,8 +104,9 @@ cat <<EOF > $CONFIG_DIR/service-configuration.xml
 </service-configuration>
 EOF
 
+# Required changes in order to use HTTPS through Ingress
 cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
-opennms.web.base-url = https://%x%c/
+opennms.web.base-url=https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true
 org.opennms.web.console.centerUrl=/status/status-box.jsp,/geomap/map-box.jsp,/heatmap/heatmap-box.jsp
 EOF
@@ -117,28 +118,39 @@ sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' $SECURITY_CONFIG
 
 if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
-
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
-# WARNING: Must match what OpenNMS has configured for Newts
+# About the properties:
+# - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
+# - ring_buffer_size and cache.max_entries should be consistent with the expected load
+#
+# About the keyspace:
+# - The value of compaction_window_size should be consistent with the chosen TTL
+# - The number of SSTables will be the TTL/compaction_window_size (52 for 1 year)
 
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
 
+org.opennms.timeseries.strategy=newts
 org.opennms.newts.config.hostname=${CASSANDRA_SERVER}
-org.opennms.newts.config.keyspace=${INSTANCE_ID}_newts
-org.opennms.newts.config.keyspace=newts
+org.opennms.newts.config.keyspace=${KEYSPACE}
 org.opennms.newts.config.port=9042
 org.opennms.newts.config.read_consistency=ONE
 org.opennms.newts.config.write_consistency=ANY
 
+org.opennms.newts.config.resource_shard=604800
+org.opennms.newts.config.ttl=31540000
+org.opennms.newts.config.writer_threads=2
+org.opennms.newts.config.ring_buffer_size=8192
+org.opennms.newts.config.cache.max_entries=8192
+org.opennms.newts.config.cache.priming.enable=true
+org.opennms.newts.config.cache.priming.block_ms=60000
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
 fi
 
 if [[ $ELASTIC_SERVER ]]; then
-  echo "Configuring Elasticsearch..."
-
+  echo "Configuring Elasticsearch for Flows..."
   cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic

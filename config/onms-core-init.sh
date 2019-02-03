@@ -1,6 +1,10 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# Requirements:
+# - Must run within a init-container based on opennms/horizon-core-web.
+#   Version must match the runtime container.
+#
 # Purpose:
 # - Initialize the config directory on the volume only one.
 # - Apply mandatory configuration changes based on the provided variables.
@@ -18,28 +22,61 @@
 # - ELASTIC_PASSWORD
 
 CONFIG_DIR=/opennms-etc
+BACKUP_ETC=/opt/opennms/etc
+FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
+KEYSPACE=${INSTANCE_ID-onms}_newts
+KARAF_FILES=( \
+"create.sql" \
+"config.properties" \
+"custom.properties" \
+"jre.properties" \
+"profile.cfg" \
+"jmx.acl.*" \
+"org.apache.felix.*" \
+"org.apache.karaf.*" \
+"org.ops4j.pax.url.mvn.cfg" \
+)
 
+# Initialize configuration directory
+yum install -y -q rsync git
 if [ ! -f $CONFIG_DIR/configured ]; then
-  echo "Initializing configuration directory ..."
-  cp -R /opt/opennms/etc/* $CONFIG_DIR/;
-  echo "Applying basic changes ..."
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
-enabled=false
-acknowledged-by=admin
-acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
-EOF
+  echo "Initializing configuration directory for the first time ..."
+  rsync -ar $BACKUP_ETC/ $CONFIG_DIR/
+  cd $CONFIG_DIR
+  git config --global user.name "Kubernetes"
+  git config --global user.email "root@localhost"
+  git init .
+  git add .
+  git commit -m "Fresh OpenNMS configuration"
+else
+  echo "Previous configuration found. Synchronizing only new files..."
+  rsync -aru $BACKUP_ETC/ $CONFIG_DIR/
 fi
+
+# Guard against application upgrades
+MANDATORY=/tmp/opennms-mandatory
+mkdir -p $MANDATORY
+for file in "${KARAF_FILES[@]}"; do
+  echo "Backing up $file to $MANDATORY..."
+  cp --force $BACKUP_ETC/$file $MANDATORY/
+done
+echo "Overriding mandatory files from $MANDATORY..."
+rsync -a $MANDATORY/ $CONFIG_DIR/
 
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
-
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
 # Used for Kafka Topics
 org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
 
-FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
+cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
+enabled=false
+acknowledged-by=admin
+acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
+EOF
+
 if [[ $FEATURES_LIST ]]; then
   echo "Enabling features: $FEATURES_LIST ..."
   sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
@@ -73,8 +110,6 @@ org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=5000000
 org.opennms.core.ipc.rpc.kafka.max.request.size=5000000
 EOF
 
-EOF
-
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
 EOF
@@ -92,7 +127,6 @@ fi
 
 if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
-
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
 # About the properties:
 # - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
@@ -107,7 +141,7 @@ org.opennms.rrd.storeByForeignSource=true
 
 org.opennms.timeseries.strategy=newts
 org.opennms.newts.config.hostname=${CASSANDRA_SERVER}
-org.opennms.newts.config.keyspace=${INSTANCE_ID}_newts
+org.opennms.newts.config.keyspace=${KEYSPACE}
 org.opennms.newts.config.port=9042
 org.opennms.newts.config.read_consistency=ONE
 org.opennms.newts.config.write_consistency=ANY
@@ -122,11 +156,14 @@ org.opennms.newts.config.cache.priming.block_ms=60000
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
+fi
 
+if [[ $CASSANDRA_REPFACTOR ]]; then
+  echo "Building Newts Schema for Cassandra/ScyllaDB..."
   cat <<EOF > $CONFIG_DIR/newts.cql
-CREATE KEYSPACE IF NOT EXISTS ${INSTANCE_ID}_newts WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $CASSANDRA_REPFACTOR };
+CREATE KEYSPACE IF NOT EXISTS ${KEYSPACE} WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $CASSANDRA_REPFACTOR };
 
-CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.samples (
+CREATE TABLE IF NOT EXISTS ${KEYSPACE}.samples (
   context text,
   partition int,
   resource text,
@@ -143,7 +180,7 @@ CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.samples (
 } AND gc_grace_seconds = 604800
   AND read_repair_chance = 0;
 
-CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.terms (
+CREATE TABLE IF NOT EXISTS ${KEYSPACE}.terms (
   context text,
   field text,
   value text,
@@ -151,7 +188,7 @@ CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.terms (
   PRIMARY KEY((context, field, value), resource)
 );
 
-CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.resource_attributes (
+CREATE TABLE IF NOT EXISTS ${KEYSPACE}.resource_attributes (
   context text,
   resource text,
   attribute text,
@@ -159,7 +196,7 @@ CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.resource_attributes (
   PRIMARY KEY((context, resource), attribute)
 );
 
-CREATE TABLE IF NOT EXISTS ${INSTANCE_ID}_newts.resource_metrics (
+CREATE TABLE IF NOT EXISTS ${KEYSPACE}.resource_metrics (
   context text,
   resource text,
   metric_name text,
@@ -169,8 +206,15 @@ EOF
 fi
 
 if [[ $ELASTIC_SERVER ]]; then
-  echo "Configuring Elasticsearch Event Forwarder..."
+  echo "Configuring Elasticsearch for Flows..."
+  cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
+elasticUrl=http://$ELASTIC_SERVER:9200
+globalElasticUser=elastic
+globalElasticPassword=$ELASTIC_PASSWORD
+elasticIndexStrategy=daily
+EOF
 
+  echo "Configuring Elasticsearch Event Forwarder..."
   cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
