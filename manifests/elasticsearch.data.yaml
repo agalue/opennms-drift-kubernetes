@@ -91,10 +91,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        - name: xpack.license.self_generated.type
-          value: basic # Use 'trial', to enable authentication
         - name: xpack.security.enabled
-          value: 'true' # This won't work without a license
+          value: 'false'
         - name: discovery.zen.ping.unicast.hosts
           value: esmaster.opennms.svc.cluster.local
         - name: discovery.zen.minimum_master_nodes
@@ -115,7 +113,7 @@ spec:
               resource: requests.memory
               divisor: 1Mi
         - name: ES_JAVA_OPTS # TODO jvm.options default will be used if Xms/Xmx are not passed
-          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -132,14 +130,12 @@ spec:
             cpu: 2
             memory: 2Gi
         readinessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: http
           initialDelaySeconds: 10
           periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: http
           initialDelaySeconds: 60
           periodSeconds: 60

@@ -41,14 +41,13 @@ spec:
     spec:
       initContainers:
       - name: dependencies
-        image: busybox
-        command:
-        - sh
-        - -c
-        - 'until wget -q $ELASTICSEARCH_URL >/dev/null; do echo "$(date) - Waiting for $ELASTICSEARCH_URL..."; sleep 5; done'
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
         env:
-        - name: ELASTICSEARCH_URL
-          value: http://esdata.opennms.svc.cluster.local:9200
+        - name: TARGETS
+          value: esdata.opennms.svc.cluster.local:9200
+        - name: TIMEOUT
+          value: '600'
       containers:
       - name: kibana
         image: docker.elastic.co/kibana/kibana:6.5.4
@@ -71,14 +70,12 @@ spec:
         - containerPort: 5601
           name: http
         readinessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: http
           initialDelaySeconds: 10
           periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: http
           initialDelaySeconds: 60
           periodSeconds: 60

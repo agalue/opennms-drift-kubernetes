@@ -6,12 +6,12 @@
 # WARNING:
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 #   Oracle JDK based images are available at no42org. For example: no42org/minion:23.0.2
-# - The image opennms/minion:bleeding refers to the upcoming version of OpenNMS (unstable)
+# - The image agalue/sentinel:23.0.2-oracle-jdk8u201 refers to the upcoming version of OpenNMS (unstable)
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
-# - -XX:ParallelGCThreads and -XX:ConcGCThreads should be updated. This is because
-#    Runtime.getInstance().getAvailableProcessors() will return the number of cores of the host.
+# - -XX:ParallelGCThreads and -XX:ConcGCThreads might require to be updated.
+#    Although, Runtime.getRuntime().availableProcessors() seems to respect the CPU limitations.
 
 ---
 apiVersion: v1
@@ -78,10 +78,12 @@ spec:
         - net.ipv4.ping_group_range=0 429496729
         securityContext:
           privileged: true
+      # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: opennms/minion:bleeding # Experimental version, do not use in production
+        #image: agalue/minion:23.0.2-oracle-jdk8u201
+        image: opennms/minion:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
-        command: [ bash, /init.sh ] # Requires opennms/horizon-core-web
+        command: [ bash, /init.sh ]
         env:
         - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
           value: OpenNMS
@@ -101,7 +103,8 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: opennms/minion:bleeding # Experimental version, do not use in production
+        #image: agalue/minion:23.0.2-oracle-jdk8u201
+        image: opennms/minion:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
         - -f
@@ -115,7 +118,7 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
-        - name: JAVA_OPTS # Preferred way instead of opennms.conf
+        - name: JAVA_OPTS
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
         - name: MINION_LOCATION
           value: Kubernetes

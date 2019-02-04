@@ -1,4 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# WARNING:
+# - In order to use authentication, the readiness/liveness probes should use TCP instead of HTTP
 
 ---
 apiVersion: v1

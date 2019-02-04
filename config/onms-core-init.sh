@@ -9,6 +9,7 @@
 # Purpose:
 # - Initialize the config directory on the volume only one.
 # - Apply mandatory configuration changes based on the provided variables.
+# - Be on guard against upgrades
 #
 # Warning:
 # - Multiple assumptions are made on Newts/Cassandra configuration.
@@ -26,6 +27,7 @@ CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
 FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
 KEYSPACE=${INSTANCE_ID-onms}_newts
+VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-core)
 KARAF_FILES=( \
 "create.sql" \
 "config.properties" \
@@ -234,3 +236,6 @@ cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
 opennms.web.base-url=https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true
 EOF
+
+# Force to execute runjava and the install script
+touch $CONFIG_DIR/do-upgrade

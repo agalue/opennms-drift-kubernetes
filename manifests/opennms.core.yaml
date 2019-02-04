@@ -5,12 +5,12 @@
 # - The opennms process runs as root, which is not allowed on OpenShift
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 #   Oracle JDK based images are available at no42org. For example: no42org/horizon:23.0.2
-# - The image opennms/horizon-core-web:bleeding refers to the upcoming version of OpenNMS (unstable)
+# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
-# - -XX:ParallelGCThreads and -XX:ConcGCThreads should be updated. This is because
-#    Runtime.getInstance().getAvailableProcessors() will return the number of cores of the host.
+# - -XX:ParallelGCThreads and -XX:ConcGCThreads might require to be updated.
+#    Although, Runtime.getRuntime().availableProcessors() seems to respect the CPU limitations.
 #
 # TODO:
 # - Potential tools for managing /opt/opennms/etc:
@@ -68,9 +68,10 @@ spec:
         - name: TIMEOUT
           value: '600'
       # Initialize OpenNMS Common Configuration
-      # Requires opennms/horizon-core-web, using same version as runtime container.
+      # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
+        # image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
+        image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -110,7 +111,8 @@ spec:
           mountPath: /opennms-etc
       containers:
       - name: onms
-        image: opennms/horizon-core-web:bleeding # Experimental version, do not use in production
+        #image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
+        image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
         - -s

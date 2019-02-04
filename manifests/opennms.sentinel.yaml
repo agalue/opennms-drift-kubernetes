@@ -4,12 +4,12 @@
 # - The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 #   Oracle JDK based images are available at no42org. For example: no42org/sentinel:23.0.2
-# - The image opennms/sentinel:bleeding refers to the upcoming version of OpenNMS (unstable)
+# - The image agalue/sentinel:23.0.2-oracle-jdk8u201
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
-# - -XX:ParallelGCThreads and -XX:ConcGCThreads should be updated. This is because
-#    Runtime.getInstance().getAvailableProcessors() will return the number of cores of the host.
+# - -XX:ParallelGCThreads and -XX:ConcGCThreads might require to be updated.
+#    Although, Runtime.getRuntime().availableProcessors() seems to respect the CPU limitations.
 
 ---
 apiVersion: apps/v1
@@ -45,8 +45,10 @@ spec:
                   values:
                   - onms
       initContainers:
+      # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: opennms/sentinel:bleeding # Experimental version, do not use in production
+        #image: agalue/sentinel:23.0.2-oracle-jdk8u201
+        image: opennms/sentinel:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -81,7 +83,8 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        image: opennms/sentinel:bleeding # Experimental version, do not use in production
+        #image: agalue/sentinel:23.0.2-oracle-jdk8u201
+        image: opennms/sentinel:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
           - -d
@@ -94,7 +97,7 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
-        - name: JAVA_OPTS # Preferred way instead of opennms.conf
+        - name: JAVA_OPTS
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
