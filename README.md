@@ -262,7 +262,7 @@ This deployment already contains Minions inside the opennms namespace for monito
 * OpenNMS Core: `https://onms.k8s.opennms.org/opennms`
 * Kafka: `kafka.k8s.opennms.org:9094`
 
-For example:
+For example, here is the minimum configuration (without flow listeners):
 
 ```shell
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg
@@ -308,10 +308,11 @@ docker run -it --name minion \
 
 ## Users
 
-* OpenNMS UI: `https://onmsui.k8s.opennms.org/opennms`
+* OpenNMS Core: `https://onms.k8s.opennms.org/opennms` (for administrative tasks)
+* OpenNMS UI: `https://onmsui.k8s.opennms.org/opennms` (for users/operators)
 * Grafana: `https://grafana.k8s.opennms.org/`
-* Kibana: `https://kibana.k8s.opennms.org/`
-* Kafka Manager: `https://kaffa-manager.k8s.opennms.org/`
+* Kibana: `https://kibana.k8s.opennms.org/` (remember to enable monitoring)
+* Kafka Manager: `https://kaffa-manager.k8s.opennms.org/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
 
 > NOTE: Make sure to use your own Domain ;)
 
