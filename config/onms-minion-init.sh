@@ -1,6 +1,11 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# Requirements:
+# - Must run within a init-container based on opennms/minion.
+#   Version must match the runtime container.
+# - Horizon 24 or newer is required.
+#
 # Purpose:
 # - Configure instance ID and the Telemetry listeners (on fixed ports)
 #

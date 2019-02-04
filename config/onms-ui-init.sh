@@ -1,6 +1,11 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# Requirements:
+# - Must run within a init-container based on opennms/horizon-core-web.
+#   Version must match the runtime container.
+# - Horizon 23 or newer is required.
+#
 # Purpose:
 # - Apply recommended changes to force OpenNMS to be a read-only WebUI server.
 #   Only Eventd, Jetty and Karaf will be running.

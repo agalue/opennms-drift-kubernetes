@@ -4,6 +4,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
+# - Horizon 23 or newer is required.
 #
 # Purpose:
 # - Initialize the config directory on the volume only one.

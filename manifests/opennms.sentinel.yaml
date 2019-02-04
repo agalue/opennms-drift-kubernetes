@@ -5,6 +5,11 @@
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 #   Oracle JDK based images are available at no42org. For example: no42org/sentinel:23.0.2
 # - The image opennms/sentinel:bleeding refers to the upcoming version of OpenNMS (unstable)
+#
+# Java 8 Issues:
+# - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
+# - -XX:ParallelGCThreads and -XX:ConcGCThreads should be updated. This is because
+#    Runtime.getInstance().getAvailableProcessors() will return the number of cores of the host.
 
 ---
 apiVersion: apps/v1
@@ -91,8 +96,6 @@ spec:
               divisor: 1Mi
         - name: JAVA_OPTS # Preferred way instead of opennms.conf
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
-#       - name: JAVA_OPTS # This doesn't seem to work apparently due to Java 8
-#         value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+PrintFlagsFinal
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT

@@ -74,8 +74,6 @@ spec:
           value: '10'
         - name: ZOO_SYNC_LIMIT
           value: '5'
-        - name: JVMFLAGS
-          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: JMXLOCALONLY
           value: 'false'
         - name: JMXDISABLE
@@ -86,6 +84,13 @@ spec:
           value: 'false'
         - name: JMXSSL
           value: 'false'
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+              divisor: 1Mi
+        - name: JVMFLAGS
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         ports:
         - containerPort: 2888
           name: peer

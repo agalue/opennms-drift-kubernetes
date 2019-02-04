@@ -1,6 +1,11 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# Requirements:
+# - Must run within a init-container based on opennms/sentinel.
+#   Version must match the runtime container.
+# - Horizon 24 or newer is required.
+#
 # Purpose:
 # - Configure instance ID and the Telemetry adapters only if Elasticsearch is provided.
 # - Configure the Kafka consumers only if Kafka is provided.
