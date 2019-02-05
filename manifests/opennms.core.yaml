@@ -166,10 +166,6 @@ spec:
           requests:
             cpu: 4
             memory: 4Gi
-        lifecycle:
-          preStop:
-            exec:
-              command: [ bash, -c, /opt/opennms/bin/opennms stop ]
         readinessProbe:
           httpGet:
             path: /opennms/login.jsp

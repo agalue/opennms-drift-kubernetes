@@ -139,10 +139,6 @@ spec:
           requests:
             cpu: 500m
             memory: 1Gi
-        lifecycle:
-          preStop:
-            exec:
-              command: [ bash, -c, /opt/sentinel/bin/stop ]
         readinessProbe:
           tcpSocket:
             port: karaf
