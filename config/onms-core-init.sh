@@ -115,6 +115,9 @@ EOF
 
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
+compression.type=gzip
+timeout.ms=30000
+max.request.size=5000000
 EOF
 
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg

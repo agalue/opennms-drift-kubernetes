@@ -11,25 +11,58 @@
 #
 # Environment variables:
 # - INSTANCE_ID
+# - OPENNMS_HTTP_USER
+# - OPENNMS_HTTP_PASS
+# - KAFKA_SERVER
 
-CFG=/opt/minion/etc/system.properties
+SYSTEM_CFG=/opt/minion/etc/system.properties
+SCV_CFG=/opt/minion/etc/scv.jce
 OVERLAY=/etc-overlay
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF >> $CFG
+  cat <<EOF >> $SYSTEM_CFG
 
 # Used for Kafka Topics
 org.opennms.instance.id=$INSTANCE_ID
 EOF
-  cp $CFG $OVERLAY
+  cp $SYSTEM_CFG $OVERLAY
 fi
 
-# Temporary workaround until the container does that when AMQ is not used.
-FEATURES_DIR=$OVERLAY/featuresBoot.d
-mkdir -p $FEATURES_DIR
-echo "!minion-jms" > $FEATURES_DIR/jms.boot
+if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
+  /opt/minion/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
+  cp $SCV_CFG $OVERLAY
+fi
+
+if [[ $KAFKA_SERVER ]]; then
+  echo "Configuring Kafka..."
+
+  cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.cfg
+bootstrap.servers=$KAFKA_SERVER:9092
+EOF
+
+  cat <<EOF > $OVERLAY/org.opennms.core.ipc.rpc.kafka.cfg
+bootstrap.servers=$KAFKA_SERVER:9092
+acks=1
+compression.type=gzip
+request.timeout.ms=30000
+# Consumer
+max.partition.fetch.bytes=5000000
+# Producer
+max.request.size=5000000
+EOF
+
+  FEATURES_DIR=$OVERLAY/featuresBoot.d
+  mkdir -p $FEATURES_DIR
+  cat <<EOF > $FEATURES_DIR/kafka.boot
+!minion-jms
+!opennms-core-ipc-sink-camel
+!opennms-core-ipc-rpc-jms
+opennms-core-ipc-sink-kafka
+opennms-core-ipc-rpc-kafka
+EOF
+fi
 
 if [[ $VERSION == "23"* ]]; then
   echo "Configuring listeners for Horizon $VERSION"

@@ -102,6 +102,7 @@ if [[ $KAFKA_SERVER ]]; then
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.consumer.cfg
 group.id = $GROUP_ID
 bootstrap.servers = $KAFKA_SERVER:9092
+max.partition.fetch.bytes=5000000
 EOF
 fi
 
