@@ -189,10 +189,13 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 This add-on is required in order to provide HTTP/TLS support through LetsEncrypt to the HTTP services managed by the ingress controller.
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml
+kubectl create namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/00-crds.yaml
+kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml
 ```
 
-> NOTE: For troubleshooting, check the [installation guide](https://cert-manager.readthedocs.io/en/latest/getting-started/2-installing.html#with-static-manifests). It might be failures as this extensions is designed to be installed through Helm (but the core functionality is working).
+> NOTE: For troubleshooting, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
 
 ### Namespace
 
@@ -395,12 +398,7 @@ kubectl delete pv --all
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 ```
 
-If you're using add-ons, you might also need to manually remove those resources too, to guarantee that nothing left at AWS; for example:
-
-```shell
-kubectl delete all --all --namespace kube-ingress --force --grace-period 0
-kubectl delete all --all --namespace monitoring --force --grace-period 0
-```
+Make sure that everything in AWS has been removed (including the Route 53 CNAMEs for your ingresses).
 
 ## Future Enhancements
 
