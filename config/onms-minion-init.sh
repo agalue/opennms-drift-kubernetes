@@ -64,6 +64,18 @@ opennms-core-ipc-rpc-kafka
 EOF
 fi
 
+cat <<EOF > $OVERLAY/org.opennms.netmgt.trapd.cfg
+trapd.listen.interface=0.0.0.0
+trapd.listen.port=1162
+trapd.queue.size=100000
+EOF
+
+cat <<EOF > $OVERLAY/org.opennms.netmgt.syslog.cfg
+syslog.listen.interface=0.0.0.0
+syslog.listen.port=1514
+syslog.queue.size=100000
+EOF
+
 if [[ $VERSION == "23"* ]]; then
   echo "Configuring listeners for Horizon $VERSION"
 

@@ -291,7 +291,7 @@ With Docker:
 
 ```shell
 docker run -it --name minion \
- -e MINION_ID=minion01 \
+ -e MINION_ID=docker-minion-1 \
  -e MINION_LOCATION=Docker \
  -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms \
  -e OPENNMS_HTTP_USER=admin \
@@ -300,9 +300,13 @@ docker run -it --name minion \
  -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
  -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
  -p 8201:8201 \
+ -p 1514:1514 \
+ -p 1162:1162 \
  --sysctl "net.ipv4.ping_group_range=0 429496729" \
- opennms/minion:bleeding -f
+ agalue/minion:23.0.2-oracle-jdk8u201 -c
 ```
+
+> IMPORTANT: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
 
 > NOTE: Make sure to use your own Domain, and use the same version tag as OpenNMS.
 
