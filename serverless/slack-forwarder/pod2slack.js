@@ -2,8 +2,9 @@
 
 // Deployment:
 // zip pod2slack.zip package.json pod2slack.js
-// fission function create --name pod2slack --src pod2slack.zip --env nodejs --configmap serverless-config
+// fission function create --name pod2slack --src pod2slack.zip --env nodejs --secret serverless-config
 // fission watch create --function pod2slack --type pod --ns opennms
+// fission watch create --function pod2slack --type service --ns opennms
 
 // Future Enhancements:
 // Update an OpenNMS requisition to monitor Pods (requires access to Kubernetes API)
@@ -13,7 +14,7 @@
 const axios = require('axios');
 const fs = require('fs');
 
-const configPath = '/configs/default/serverless-config/SLACK_URL';
+const configPath = '/secrets/default/serverless-config/SLACK_URL';
 
 var slackUrl;
 if (fs.existsSync(configPath)) {
