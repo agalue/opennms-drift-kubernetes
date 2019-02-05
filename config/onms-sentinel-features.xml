@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This is only required for H23, as with H24 featuresBoot.d is used -->
+<features
+  name="opennms-23.0.0"
+  xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0">
+
+  <feature name="autostart-sentinel-telemetry-flows" description="OpenNMS :: Features :: Sentinel :: Auto-Start" version="23.0.0" start-level="200" install="auto">
+    <feature>sentinel-kafka</feature>
+    <feature>sentinel-flows</feature>
+    <feature>sentinel-newts</feature>
+    <feature>sentinel-telemetry-nxos</feature>
+    <feature>sentinel-telemetry-jti</feature>
+  </feature>
+
+</features>

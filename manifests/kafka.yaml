@@ -3,7 +3,9 @@
 # WARNING:
 # - This solution expose 9094 on the k8s worker node.
 #   That means, kafka can be scaled up to the number of workers on the k8s cluster.
-# - The kafka process runs as root, which is not allowed on OpenShift
+# - The kafka process runs as root, which is not allowed on OpenShift.
+# - KAFKA_DEFAULT_REPLICATION_FACTOR should be consistent with the number of replicas.
+# - KAFKA_NUM_PARTITIONS should be greater than the number of replicas.
 #
 # TODO:
 # - For SSL, the advertised.listener on port 9094 should be the public FQDN of the K8S host.
@@ -100,11 +102,11 @@ spec:
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zookeeper.opennms.svc.cluster.local:2181/kafka
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
-          value: '2' # Requires a minimum of 3 replicas
+          value: '2'
         - name: KAFKA_MIN_INSYNC_REPLICAS
           value: '1'
         - name: KAFKA_NUM_PARTITIONS
-          value: '8'
+          value: '6'
         - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
           value: 'true'
         - name: KAFKA_DELETE_TOPIC_ENABLE

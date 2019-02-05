@@ -26,6 +26,11 @@ EOF
   cp $CFG $OVERLAY
 fi
 
+# Temporary workaround until the container does that when AMQ is not used.
+FEATURES_DIR=$OVERLAY/featuresBoot.d
+mkdir -p $FEATURES_DIR
+echo "!jms-minion" > $FEATURES_DIR/jms.boot
+
 if [[ $VERSION == "23"* ]]; then
   echo "Configuring listeners for Horizon $VERSION"
 

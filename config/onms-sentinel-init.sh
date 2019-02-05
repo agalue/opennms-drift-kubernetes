@@ -4,7 +4,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
-# - Horizon 23 or newer is required.
+# - Horizon 23 or newer is required (if H23 is used, features.xml must be mounted on the Sentinel Pods)
 #
 # Purpose:
 # - Configure instance ID and the Telemetry adapters only if Elasticsearch is provided.
@@ -34,8 +34,9 @@ EOF
   cp $CFG $OVERLAY
 fi
 
-FEATURES=$OVERLAY/featuresBoot.d
-mkdir -p $FEATURES
+# WARNING: The following directory only exist on H24. For H23 create $MINION_HOME/deploy/features.xml
+FEATURES_DIR=$OVERLAY/featuresBoot.d
+mkdir -p $FEATURES_DIR
 
 # Horizon 23 Classes
 SFLOW_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowAdapter
@@ -59,7 +60,7 @@ fi
 if [[ $ELASTIC_SERVER ]]; then
   echo "Configuring Elasticsearch..."
 
-  echo "sentinel-flows" > $FEATURES/flows.boot
+  echo "sentinel-flows" > $FEATURES_DIR/flows.boot
 
   if [[ ! $CASSANDRA_SERVER ]]; then
     cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-sflow.cfg
@@ -96,7 +97,7 @@ fi
 if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
 
-  echo "sentinel-kafka" > $FEATURES/kafka.boot
+  echo "sentinel-kafka" > $FEATURES_DIR/kafka.boot
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.consumer.cfg
 group.id = $GROUP_ID
@@ -107,7 +108,7 @@ fi
 if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
 
-  cat <<EOF > $FEATURES/telemetry.boot
+  cat <<EOF > $FEATURES_DIR/telemetry.boot
 sentinel-newts
 sentinel-telemetry-nxos
 sentinel-telemetry-jti

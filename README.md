@@ -192,7 +192,7 @@ This add-on is required in order to provide HTTP/TLS support through LetsEncrypt
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml
 ```
 
-> NOTE: For troubleshooting, check the [installation guide](https://cert-manager.readthedocs.io/en/latest/getting-started/2-installing.html#with-static-manifests).
+> NOTE: For troubleshooting, check the [installation guide](https://cert-manager.readthedocs.io/en/latest/getting-started/2-installing.html#with-static-manifests). It might be failures as this extensions is designed to be installed through Helm (but the core functionality is working).
 
 ### Namespace
 
@@ -201,6 +201,8 @@ From the directory on which this repository has been checked out:
 ```shell
 kubectl apply -f ./namespace
 ```
+
+This will additionally add some complementary RBAC permissions, in case there is a need of adding operators and/or administrators to the OpenNMS namespace.
 
 ### ConfigMaps/Secrets
 
@@ -302,7 +304,7 @@ docker run -it --name minion \
  opennms/minion:bleeding -f
 ```
 
-> NOTE: Make sure to use your own Domain
+> NOTE: Make sure to use your own Domain, and use the same version tag as OpenNMS.
 
 > NOTE: The above samples are not including information about the Flow listeners. Check the [Minion's config](config/onms-minion-init.sh) for more details.
 

@@ -69,8 +69,8 @@ spec:
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        #image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
-        image: opennms/horizon-core-web:bleeding # Not good for production
+        image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
+        #image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -104,8 +104,8 @@ spec:
           subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
-        #image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
-        image: opennms/horizon-core-web:bleeding # Not good for production
+        image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
+        #image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:
@@ -161,13 +161,13 @@ spec:
           httpGet:
             path: /opennms/login.jsp
             port: http
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           periodSeconds: 15
         livenessProbe:
           httpGet:
             path: /opennms/login.jsp
             port: http
-          initialDelaySeconds: 120
+          initialDelaySeconds: 30
           periodSeconds: 60
       volumes:
       - name: etc-overlay

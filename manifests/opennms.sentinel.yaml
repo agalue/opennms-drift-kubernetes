@@ -1,10 +1,13 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# NOTES:
+# - It is perfectly valid to have all the required configuration files on a config-map,
+#   and then mount those files to the overlay directory, instead of using an initContainer.
+#
 # WARNING:
 # - The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
-#   Oracle JDK based images are available at no42org. For example: no42org/sentinel:23.0.2
-# - The image agalue/sentinel:23.0.2-oracle-jdk8u201
+# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
@@ -47,8 +50,8 @@ spec:
       initContainers:
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        #image: agalue/sentinel:23.0.2-oracle-jdk8u201
-        image: opennms/sentinel:bleeding # Not good for production
+        image: agalue/sentinel:23.0.2-oracle-jdk8u201
+        #image: opennms/sentinel:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -83,8 +86,8 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        #image: agalue/sentinel:23.0.2-oracle-jdk8u201
-        image: opennms/sentinel:bleeding # Not good for production
+        image: agalue/sentinel:23.0.2-oracle-jdk8u201
+        #image: opennms/sentinel:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
           - -d
@@ -126,6 +129,9 @@ spec:
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/sentinel-etc-overlay
+        - name: opennms-config # WARNING: This is for H23 only. Do not use it with H24+
+          mountPath: /opt/sentinel/deploy/features.xml
+          subPath: onms-sentinel-features.xml
         resources:
           limits:
             cpu: 1
@@ -143,8 +149,11 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 10
         livenessProbe:
-          tcpSocket:
-            port: karaf
+          exec:
+            command:
+            - bash
+            - -c
+            - 'if /opt/sentinel/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
           initialDelaySeconds: 60
           periodSeconds: 60
       volumes:

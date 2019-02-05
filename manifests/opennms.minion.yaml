@@ -3,10 +3,13 @@
 # Using StatefulSets for Minions only to have a unique and immutable MINION_ID
 # This Pod includes 2 containers, one for the Minion and one for the GRPC Server for NX-OS
 #
+# NOTES:
+# - It is perfectly valid to have all the required configuration files on a config-map,
+#   and then mount those files to the overlay directory, instead of using an initContainer.
+#
 # WARNING:
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
-#   Oracle JDK based images are available at no42org. For example: no42org/minion:23.0.2
-# - The image agalue/sentinel:23.0.2-oracle-jdk8u201 refers to the upcoming version of OpenNMS (unstable)
+# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
@@ -80,8 +83,8 @@ spec:
           privileged: true
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        #image: agalue/minion:23.0.2-oracle-jdk8u201
-        image: opennms/minion:bleeding # Not good for production
+        image: agalue/minion:23.0.2-oracle-jdk8u201
+        #image: opennms/minion:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -103,8 +106,8 @@ spec:
           value: '600'
       containers:
       - name: minion
-        #image: agalue/minion:23.0.2-oracle-jdk8u201
-        image: opennms/minion:bleeding # Not good for production
+        image: agalue/minion:23.0.2-oracle-jdk8u201
+        #image: opennms/minion:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
         - -f
@@ -170,9 +173,12 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 10
         livenessProbe:
-          tcpSocket:
-            port: karaf
-          initialDelaySeconds: 60
+          exec:
+            command:
+            - bash
+            - -c
+            - 'if /opt/minion/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
+          initialDelaySeconds: 30
           periodSeconds: 60
       - name: nxos-grpc
         image: agalue/opennms-nxos-grpc:latest
@@ -192,6 +198,16 @@ spec:
         ports:
         - containerPort: 50002
           name: nxos-grpc
+        readinessProbe:
+          tcpSocket:
+            port: nxos-grpc
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: nxos-grpc
+          initialDelaySeconds: 20
+          periodSeconds: 30
       volumes:
       - name: etc-overlay
         emptyDir: {}
