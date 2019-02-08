@@ -1,0 +1,51 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      memory: 2Gi
+    requests:
+      memory: 1Gi
+
+- op: replace
+  path: /spec/replicas
+  value: 1
+
+- op: remove
+  path: /spec/template/spec/initContainers/1
+
+- op: replace
+  path: /spec/template/spec/containers/0/env/3
+  value:
+    name: discovery.zen.ping.unicast.hosts
+    value: esdata-0
+
+- op: replace
+  path: /spec/template/spec/containers/0/env/4
+  value:
+    name: discovery.zen.minimum_master_nodes
+    value: '1'
+    
+- op: remove
+  path: /spec/template/spec/containers/0/env/5
+
+- op: replace
+  path: /spec/template/spec/containers/0/env/5
+  value:
+    name: bootstrap.memory_lock
+    value: 'false'
+
+- op: replace
+  path: /spec/template/spec/containers/0/env/6
+  value:
+    name: xpack.monitoring.enabled
+    value: 'false'
+
+- op: replace
+  path: /spec/volumeClaimTemplates/0/spec/storageClassName
+  value: standard
+
+- op: replace
+  path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+  value: 500Mi

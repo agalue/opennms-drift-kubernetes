@@ -1,0 +1,16 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      memory: 1Gi
+    requests:
+      memory: 512Mi
+
+- op: replace
+  path: /spec/replicas
+  value: 1
+
+- op: remove
+  path: /spec/volumeClaimTemplates

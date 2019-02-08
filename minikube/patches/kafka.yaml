@@ -1,0 +1,46 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      memory: 512Mi
+    requests:
+      memory: 512Mi
+
+- op: replace
+  path: /spec/replicas
+  value: 1
+  
+- op: replace
+  path: /spec/template/spec/containers/0/env/3
+  value:
+    name: HOSTNAME_COMMAND
+    value: echo ${K8S_HOST}
+
+- op: replace
+  path: /spec/template/spec/containers/0/env/9
+  value:
+    name: KAFKA_DEFAULT_REPLICATION_FACTOR
+    value: '1'
+
+- op: replace
+  path: /spec/template/spec/containers/0/env/10
+  value:
+    name: KAFKA_MIN_INSYNC_REPLICAS
+    value: '1'
+
+- op: replace
+  path: /spec/template/spec/containers/0/env/11
+  value:
+    name: KAFKA_NUM_PARTITIONS
+    value: '1'
+
+- op: replace
+  path: /spec/volumeClaimTemplates/0/spec/storageClassName
+  value: standard
+
+- op: replace
+  path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+  value: 500Mi
+

@@ -1,0 +1,27 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 128Mi
+
+- op: replace
+  path: /spec/replicas
+  value: 1
+  
+- op: replace
+  path: /spec/template/spec/containers/0/env/0
+  value:
+    name: ZOO_SERVERS
+    value: server.1=zk-0.zookeeper.opennms.svc.cluster.local:2888:3888
+
+- op: replace
+  path: /spec/volumeClaimTemplates/0/spec/storageClassName
+  value: standard
+
+- op: replace
+  path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+  value: 500Mi
