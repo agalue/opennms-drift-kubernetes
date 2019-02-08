@@ -34,7 +34,16 @@ function buildMessage(alarm) {
 
 async function sendAlarm(alarm, slackUrl) {
   if (!slackUrl) {
-    return { status: 404, body: 'The slackUrl is not defined.' };
+    return { status: 400, body: 'Missing Slack Webhook URL.' };
+  }
+  if (!alarm.id) {
+    return { status: 400, body: 'Missing Alarm ID.' };
+  }
+  if (!alarm.logMessage) {
+    return { status: 400, body: 'Missing Alarm Log Message.' };
+  }
+  if (!alarm.description) {
+    return { status: 400, body: 'Missing Alarm Description.' };
   }
   try {
     console.log('Posting alarm with ID ' + alarm.id + ' to ' + slackUrl);

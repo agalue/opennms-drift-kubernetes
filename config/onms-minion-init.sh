@@ -20,6 +20,8 @@ SCV_CFG=/opt/minion/etc/scv.jce
 OVERLAY=/etc-overlay
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
+### Basic Settings
+
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF >> $SYSTEM_CFG
@@ -75,6 +77,8 @@ syslog.listen.interface=0.0.0.0
 syslog.listen.port=1514
 syslog.queue.size=100000
 EOF
+
+### Optional Settings, only relevant for processing Flows and Telemetry data
 
 if [[ $VERSION == "23"* ]]; then
   echo "Configuring listeners for Horizon $VERSION"

@@ -3,6 +3,9 @@
 # NOTES:
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
+#   That said, without the intelligence to guard against upgrades through the initContainer
+#   script, if you opt for using config-maps, you have to prepare the config giles on the PV
+#   prior upgrading the version of OpenNMS on the chosen image.
 #
 # WARNING:
 # - This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
@@ -62,14 +65,6 @@ spec:
     spec:
       terminationGracePeriodSeconds: 300
       initContainers:
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
-        - name: TIMEOUT
-          value: '600'
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
@@ -112,6 +107,14 @@ spec:
         volumeMounts:
         - name: opennms-etc
           mountPath: /opennms-etc
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
+        - name: TIMEOUT
+          value: '600'
       containers:
       - name: onms
         image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201

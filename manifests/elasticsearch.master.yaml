@@ -117,11 +117,11 @@ spec:
         readinessProbe:
           tcpSocket:
             port: transport
-          initialDelaySeconds: 10
-          periodSeconds: 10
+          initialDelaySeconds: 30
+          periodSeconds: 15
         livenessProbe:
           tcpSocket:
-            port: transport
+            port: http
           initialDelaySeconds: 60
           periodSeconds: 60
   volumeClaimTemplates:

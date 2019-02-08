@@ -123,7 +123,7 @@ spec:
         livenessProbe:
           tcpSocket:
             port: cql
-          initialDelaySeconds: 120
+          initialDelaySeconds: 90
           periodSeconds: 60
   volumeClaimTemplates:
   - metadata:

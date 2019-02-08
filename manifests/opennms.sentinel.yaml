@@ -1,5 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# Sentinel is required only for Processing Flows and Telemetry Data.
+#
 # NOTES:
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.

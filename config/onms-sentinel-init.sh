@@ -168,11 +168,11 @@ mkdir -p $OVERLAY/resource-types.d
 cat <<EOF > $OVERLAY/resource-types.d/nxos-resources.xml
 <?xml version="1.0"?>
 <resource-types>
-  <resourceType name="nxosCpu" label="Nxos Cpu" resourceLabel="${index}">
+  <resourceType name="nxosCpu" label="Nxos Cpu" resourceLabel="\${index}">
     <persistenceSelectorStrategy class="org.opennms.netmgt.collection.support.PersistAllSelectorStrategy"/>
     <storageStrategy class="org.opennms.netmgt.collection.support.IndexStorageStrategy"/>
   </resourceType>
-  <resourceType name="nxosIntf" label="Nxos Interface" resourceLabel="${index}">
+  <resourceType name="nxosIntf" label="Nxos Interface" resourceLabel="\${index}">
     <persistenceSelectorStrategy class="org.opennms.netmgt.collection.support.PersistAllSelectorStrategy"/>
     <storageStrategy class="org.opennms.netmgt.collection.support.IndexStorageStrategy"/>
   </resourceType>
@@ -283,12 +283,12 @@ class CollectionSetGenerator {
     }
 
     def m;
-    if ((m = telemetryMsg.getEncodingPath() =~ /sys\/intf\/phys-\[(.+)\]\/dbgIfHC(In|Out)/)) {
-      def intfId = m.group(1).replaceAll(/\//,"-")
+    if ((m = telemetryMsg.getEncodingPath() =~ /sys\\/intf\\/phys-\\[(.+)\\]\\/dbgIfHC(In|Out)/)) {
+      def intfId = m.group(1).replaceAll(/\\//,"-")
       def statsType = m.group(2)
       def genericTypeResource = new DeferredGenericTypeResource(nodeLevelResource, "nxosIntf", intfId)
       ["ucastPkts", "multicastPkts", "broadcastPkts", "octets"].each { metric ->
-        builder.withNumericAttribute(genericTypeResource, "nxos-intfHC$statsType", "$metric$statsType",
+        builder.withNumericAttribute(genericTypeResource, "nxos-intfHC\$statsType", "\$metric\$statsType",
           NxosGpbParserUtil.getValueAsDouble(telemetryMsg, metric), AttributeType.COUNTER)
       }
     }
@@ -296,16 +296,16 @@ class CollectionSetGenerator {
     if (telemetryMsg.getEncodingPath().equals("sys/intf")) {
       findFieldWithName(telemetryMsg.getDataGpbkvList().get(0), "children").getFieldsList()
         .each { f ->
-          def intfId = findFieldWithName(f, "id").getStringValue().replaceAll(/\//,"_")
+          def intfId = findFieldWithName(f, "id").getStringValue().replaceAll(/\\//,"_")
           log.debug("Processing NX-OS interface {}", intfId)
           def genericTypeResource = new DeferredGenericTypeResource(nodeLevelResource, "nxosIntf", intfId)
           def rmonIfHCIn = findFieldWithName(f, "rmonIfHCIn");
           def rmonIfHCOut = findFieldWithName(f, "rmonIfHCOut");
           if (rmonIfHCIn != null && rmonIfHCOut != null) {
             ["ucastPkts", "multicastPkts", "broadcastPkts", "octets"].each { metric ->
-              builder.withNumericAttribute(genericTypeResource, "nxosRmonIntfStats", "in$metric",
+              builder.withNumericAttribute(genericTypeResource, "nxosRmonIntfStats", "in\$metric",
                 NxosGpbParserUtil.getValueFromRowAsDouble(rmonIfHCIn, metric), AttributeType.COUNTER)
-              builder.withNumericAttribute(genericTypeResource, "nxosRmonIntfStats", "out$metric",
+              builder.withNumericAttribute(genericTypeResource, "nxosRmonIntfStats", "out\$metric",
                 NxosGpbParserUtil.getValueFromRowAsDouble(rmonIfHCOut, metric), AttributeType.COUNTER)
             }
           }

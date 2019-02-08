@@ -58,14 +58,6 @@ spec:
                 values:
                 - onms
       initContainers:
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: opennms-core.opennms.svc.cluster.local:8980,grafana.opennms.svc.cluster.local:3000
-        - name: TIMEOUT
-          value: '600'
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
@@ -102,6 +94,14 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-ui-init.sh
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.opennms.svc.cluster.local:8980,grafana.opennms.svc.cluster.local:3000
+        - name: TIMEOUT
+          value: '600'
       containers:
       - name: onms-ui
         image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201

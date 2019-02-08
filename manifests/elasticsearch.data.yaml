@@ -132,8 +132,8 @@ spec:
         readinessProbe:
           tcpSocket:
             port: http
-          initialDelaySeconds: 10
-          periodSeconds: 10
+          initialDelaySeconds: 30
+          periodSeconds: 15
         livenessProbe:
           tcpSocket:
             port: http

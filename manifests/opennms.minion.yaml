@@ -28,35 +28,35 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - port: 8201
+  - name: karaf
     protocol: TCP
-    name: karaf
-  - port: 161
+    port: 8201
+  - name: traps
     protocol: UDP
-    name: traps
-    targetPort: 1161
-  - port: 514
+    port: 161
+    targetPort: traps
+  - name: syslog
     protocol: UDP
-    name: syslog
-    targetPort: 1514
-  - port: 8877
+    port: 514
+    targetPort: syslog
+  - name: netflow5
     protocol: UDP
-    name: netflow5
-  - port: 4729
+    port: 8877
+  - name: netflow9
     protocol: UDP
-    name: netflow9
-  - port: 6343
+    port: 4729
+  - name: sflow
     protocol: UDP
-    name: sflow
-  - port: 4738
+    port: 6343
+  - name: ipfix
     protocol: UDP
-    name: ipfix
-  - port: 50001
+    port: 4738
+  - name: nxos-udp
     protocol: UDP
-    name: nxos-udp
-  - port: 50002
+    port: 50001
+  - name: nxos-grpc
     protocol: TCP
-    name: nxos-grpc
+    port: 50002
   selector:
     app: minion
 
@@ -205,7 +205,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: PORT
-            value: '50002'
+            value: '50002' # Must match container port
           - name: TOPIC
             value: OpenNMS.Sink.Telemetry-NXOS
         ports:
