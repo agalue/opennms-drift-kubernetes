@@ -27,6 +27,6 @@ test('Test message generation', async() => {
   expect(fissionResults.status).toBe(200);
   expect(mockAxios.post).toHaveBeenCalledTimes(2);
   expect(mockAxios.post).toHaveBeenCalledWith(process.env.SLACK_URL, {
-      text: '*Alarm ID:666, Hello *alejandro**\nI want to play a game.'
+    text: '*Alarm ID:666, Hello *alejandro**\nI want to play a game.'
   });
 });

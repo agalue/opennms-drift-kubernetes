@@ -8,7 +8,7 @@ For the manifets, it is enough to have the core functionality, with the Kafka Li
 
 ```shell
 kubectl config set-context $(kubectl config current-context) --namespace=default
-kubectl apply -f https://github.com/fission/fission/releases/download/1.0-rc2/fission-core-1.0-rc2.yaml
+kubectl apply -f https://github.com/fission/fission/releases/download/1.0/fission-core-1.0.yaml
 kubectl apply -f fission-mqtrigger-kafka.yaml
 ```
 
