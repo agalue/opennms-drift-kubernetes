@@ -10,7 +10,17 @@
 // fission watch create --function pod2slack --type pod --ns opennms
 //
 // Future Enhancements:
-// Update an OpenNMS requisition to monitor Pods (requires access to Kubernetes API)
+// 1. Elements to consider:
+//    - metadata.creationTimestamp
+//    - metadata.labels
+//    - spec.nodeName
+//    - status.hostIp
+//    - status.podIp
+// 2. Headers to consider:
+//    - x-fission-function-name
+//    - x-fission-function-namespace
+// 3. Use the OpenNMS ReST API to add/remove nodes based on Pods.
+//    - Provide ONMS_URL, ONMS_USERNAME, ONMS_PASSWORD as secrets.
 
 'use strict';
 
@@ -34,7 +44,6 @@ module.exports = async function(context) {
     return { status: 400, body: 'Missing Slack Webhook URL.' };
   }
   try {
-    console.debug(context.request);
     let eventType = context.request.get('X-Kubernetes-Event-Type');
     let objType = context.request.get('X-Kubernetes-Object-Type');
     let obj = context.request.body;
@@ -42,6 +51,7 @@ module.exports = async function(context) {
     let objNamespace = obj.metadata.namespace;
     let objVersion = obj.metadata.resourceVersion;
     let text = `${upcaseFirst(eventType)} ${objType} ${objName}@${objNamespace} (version ${objVersion})`;
+    console.debug(JSON.stringify(obj, null, 2));
     console.log(text);
     const response = await axios.post(slackUrl, { text });
     console.log(response.statusText);
