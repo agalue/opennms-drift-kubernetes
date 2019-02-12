@@ -50,6 +50,7 @@ spec:
         deployment: drift
         role: esdata
     spec:
+      terminationGracePeriodSeconds: 300
       securityContext:
         fsGroup: 1000
       initContainers:

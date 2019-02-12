@@ -47,6 +47,7 @@ spec:
         deployment: drift
         role: esmaster
     spec:
+      terminationGracePeriodSeconds: 300
       securityContext:
         fsGroup: 1000
       initContainers:
