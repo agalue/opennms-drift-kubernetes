@@ -395,15 +395,11 @@ To remove the Kubernetes cluster, do the following:
 
 ```shell
 kubectl delete ingress ingress-rules --namespace opennms
-kubectl delete all --all --namespace opennms --force --grace-period 0
-kubectl delete pvc --all --namespace opennms
-kubectl delete pv --all
+kubectl delete service  ext-kafka --namespace opennms
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 ```
 
-Make sure that everything in AWS has been removed (including the Route 53 CNAMEs for your ingresses).
-
-Starting with [Kops 1.11.0](https://github.com/kubernetes/kops/releases/tag/1.11.0), issuing `kops delete cluster` should also delete the volumes. You can review the action by removing the `--yes` before apply it.
+The first 2 will trigger the removal of the Route 53 CNAMEs associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).
 
 ## Future Enhancements
 

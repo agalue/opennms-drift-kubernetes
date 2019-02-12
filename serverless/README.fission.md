@@ -52,18 +52,8 @@ fission mqt create --name alarm2slack --function alarm2slack --mqtype kafka --to
 
 The name of the topic relies on the Kafka Converter YAML file.
 
-## Optional Testing
-
-Create an HTTP triger and use curl to emulate an alarm:
+## Testing
 
 ```shell
-fission route create --name alarm2slack --function alarm2slack --method POST --url /alarm2slack --host fission.k8s.opennms.org --createingress
+fission function test --name alarm2slack --body '{"uei":"uei.jigsaw/test", "id":666, "logMessage":"I want to play a game", "description":"<p>Hope to hear from your soon!</p>"}'
 ```
-
-Then,
-
-```shell
-curl -X POST -v -d '{"uei":"uei.jigsaw/test", "id":666, "logMessage":"I want to play a game", "description":"<p>Hope to hear from your soon!</p>"}' http://fission.k8s.opennms.org/alarm2slack
-```
-
-> NOTE: Unfortunately, even if the ingress is created, I believe something else is missing as it is not working. Please use OpenNMS with `send-event.pl` to test the function.

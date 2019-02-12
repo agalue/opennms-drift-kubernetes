@@ -39,7 +39,7 @@ The name of the topic relies on the Kafka Converter YAML file.
 
 Use `kubeless function list` to check whether the function is ready to use.
 
-## Optional Testing
+## Testing
 
 ```shell
 kubeless function call alarm2slack -n opennms --data '{"uei":"uei.jigsaw/test", "id":666, "logMessage":"I want to play a game", "description":"<p>Hope to hear from your soon!</p>"}'
