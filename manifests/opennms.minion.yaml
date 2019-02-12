@@ -81,7 +81,9 @@ spec:
         app: minion
         deployment: drift
     spec:
+      terminationGracePeriodSeconds: 60
       initContainers:
+      # Requires a fairly recent Kernel on the K8s host
       - name: init-sysctl
         image: busybox
         command: # Allow ICMP as non-root
@@ -193,6 +195,12 @@ spec:
             - 'if /opt/minion/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
           initialDelaySeconds: 30
           periodSeconds: 60
+        lifecycle:
+          preStop:
+            exec:
+              - bash
+              - -c
+              - 'echo "Shutting down minion..." && /opt/minion/bin/karaf stop'
       - name: nxos-grpc
         image: agalue/opennms-nxos-grpc:latest
         env:

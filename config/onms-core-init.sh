@@ -51,6 +51,35 @@ if [ ! -f $CONFIG_DIR/configured ]; then
   git init .
   git add .
   git commit -m "Fresh OpenNMS configuration"
+
+  echo "Disabling data choices"
+  cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
+enabled=false
+acknowledged-by=admin
+acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
+EOF
+
+  echo "Initialize default foreign source definition"
+  cat <<EOF > $CONFIG_DIR/default-foreign-source.xml
+<foreign-source xmlns="http://xmlns.opennms.org/xsd/config/foreign-source" name="default" date-stamp="2018-01-01T00:00:00.000-05:00">
+   <scan-interval>1d</scan-interval>
+   <detectors>
+      <detector name="ICMP" class="org.opennms.netmgt.provision.detector.icmp.IcmpDetector"/>
+      <detector name="SNMP" class="org.opennms.netmgt.provision.detector.snmp.SnmpDetector"/>
+   </detectors>
+   <policies>
+      <policy name="Do Not Persist Discovered IPs" class="org.opennms.netmgt.provision.persist.policies.MatchingIpInterfacePolicy">
+         <parameter key="action" value="DO_NOT_PERSIST"/>
+         <parameter key="matchBehavior" value="NO_PARAMETERS"/>
+      </policy>
+      <policy name="Enable Data Collection" class="org.opennms.netmgt.provision.persist.policies.MatchingSnmpInterfacePolicy">
+         <parameter key="action" value="ENABLE_COLLECTION"/>
+         <parameter key="matchBehavior" value="ANY_PARAMETER"/>
+         <parameter key="ifOperStatus" value="1"/>
+      </policy>
+   </policies>
+</foreign-source>
+EOF
 else
   echo "Previous configuration found. Synchronizing only new files..."
   rsync -aru $BACKUP_ETC/ $CONFIG_DIR/
@@ -73,12 +102,6 @@ if [[ $INSTANCE_ID ]]; then
 org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
-
-cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
-enabled=false
-acknowledged-by=admin
-acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
-EOF
 
 if [[ $FEATURES_LIST ]]; then
   echo "Enabling features: $FEATURES_LIST ..."

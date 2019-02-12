@@ -18,7 +18,6 @@ metadata:
     app: onms-ui
     deployment: drift
 spec:
-  clusterIP: None
   ports:
   - port: 8980
     name: http

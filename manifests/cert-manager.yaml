@@ -32,17 +32,18 @@ spec:
   commonName: k8s.opennms.org
   dnsNames:
     - grafana.k8s.opennms.org
+    - hasura.k8s.opennms.org
     - kafka-manager.k8s.opennms.org
     - kibana.k8s.opennms.org
     - onms.k8s.opennms.org
     - onmsui.k8s.opennms.org
-    - kafka.k8s.opennms.org
   acme:
     config:
       - http01:
           ingressClass: nginx
         domains:
           - grafana.k8s.opennms.org
+          - hasura.k8s.opennms.org
           - kafka-manager.k8s.opennms.org
           - kibana.k8s.opennms.org
           - onms.k8s.opennms.org

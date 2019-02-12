@@ -116,7 +116,7 @@ maxPacketSize=8096
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-4738.cfg
-name=IPFIX-Listener
+name=IPFIX
 class-name=org.opennms.netmgt.telemetry.listeners.flow.ipfix.UdpListener
 host=0.0.0.0
 port=4738

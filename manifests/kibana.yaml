@@ -13,7 +13,6 @@ metadata:
     app: kibana
     deployment: drift
 spec:
-  clusterIP: None
   ports:
   - port: 5601
   selector:

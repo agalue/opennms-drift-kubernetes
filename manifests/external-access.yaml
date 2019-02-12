@@ -37,6 +37,13 @@ spec:
             backend:
               serviceName: grafana
               servicePort: 3000
+    - host: hasura.k8s.opennms.org
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: hasura
+              servicePort: 8080
     - host: kafka-manager.k8s.opennms.org
       http:
         paths:

@@ -154,6 +154,13 @@ spec:
             - 'if /opt/sentinel/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
           initialDelaySeconds: 60
           periodSeconds: 60
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - bash
+              - -c
+              - 'echo "Shutting down sentinel..." && /opt/sentinel/bin/karaf stop'
       volumes:
       - name: etc-overlay
         emptyDir: {}

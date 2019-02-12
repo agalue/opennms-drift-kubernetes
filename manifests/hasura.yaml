@@ -1,0 +1,102 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# GraphQL API with a development UI for PostgreSQL databases.
+#
+# Reference:
+# - https://github.com/hasura/graphql-engine/tree/master/install-manifests/kubernetes
+# - https://github.com/hasura/hasura-k8s-stack
+#
+# TODO:
+# - What about other env vars ? https://docs.hasura.io/1.0/graphql/manual/deployment/graphql-engine-flags/reference.html
+# - Where the GraphQL schema is stored ? Looks like within PostgreSQL itself.
+# - How to pass the GraphQL schema to the container ? Find a way to export/import it.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hasura
+  namespace: opennms
+  labels:
+    app: hasura
+    deployment: drift
+spec:
+  selector:
+    app: hasura
+  ports:
+  - port: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hasura
+  namespace: opennms
+  labels:
+    app: hasura
+    deployment: drift
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hasura
+  template:
+    metadata:
+      labels:
+        app: hasura
+    spec:
+      initContainers:
+      - name: init-database
+        image: postgres:10.6-alpine
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - /init.sh
+        env:
+          - name: PGHOST
+            value: postgresql.opennms.svc.cluster.local
+          - name: PGPORT
+            value: '5432'
+          - name: PGUSER
+            value: postgres
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES
+                name: onms-passwords
+        volumeMounts:
+        - name: opennms-config
+          mountPath: /init.sh
+          subPath: hasura-init.sh
+      containers:
+      - name: hasura
+        image: hasura/graphql-engine:v1.0.0-alpha37
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: PG_PASSWD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES
+              name: onms-passwords
+        - name: HASURA_GRAPHQL_DATABASE_URL
+          value: postgres://postgres:$(PG_PASSWD)@postgresql.opennms.svc.cluster.local:5432/opennms
+        - name: HASURA_GRAPHQL_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              key: HASURA_GRAPHQL_ACCESS_KEY
+              name: onms-passwords
+        - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+          value: 'true'
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 500m
+          requests:
+            memory: 128Mi
+            cpu: 50m
+      volumes:
+      - name: opennms-config
+        configMap:
+          name: opennms-config

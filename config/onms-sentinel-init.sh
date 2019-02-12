@@ -130,7 +130,8 @@ cache.strategy = org.opennms.netmgt.newts.support.GuavaSearchableResourceMetadat
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-sflow-telemetry.cfg
-adapters.1.name = SFlow
+name = SFlow
+adapters.1.name = SFlow-Adapter
 adapters.1.class-name = $SFLOW_CLASS
 adapters.2.name = SFlow-Telemetry
 adapters.2.class-name = $SFLOW_TELEMETRY_CLASS
@@ -143,13 +144,13 @@ class-name = $NXOS_TELEMETRY_CLASS
 parameters.script = /opt/minion/etc/cisco-nxos-telemetry-interface.groovy
 EOF
 
-cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-jti.cfg
+  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-jti.cfg
 name = JTI
 class-name = $JTI_TELEMETRY_CLASS
 parameters.script = /opt/minion/etc/junos-telemetry-interface.groovy
 EOF
 
-cat <<EOF > $OVERLAY/datacollection-config.xml
+  cat <<EOF > $OVERLAY/datacollection-config.xml
 <datacollection-config xmlns="http://xmlns.opennms.org/xsd/config/datacollection" rrdRepository="/var/opennms/rrd/snmp/">
    <snmp-collection name="default" snmpStorageFlag="select">
       <rrd step="300">
@@ -164,8 +165,8 @@ cat <<EOF > $OVERLAY/datacollection-config.xml
 </datacollection-config>
 EOF
 
-mkdir -p $OVERLAY/resource-types.d
-cat <<EOF > $OVERLAY/resource-types.d/nxos-resources.xml
+  mkdir -p $OVERLAY/resource-types.d
+  cat <<EOF > $OVERLAY/resource-types.d/nxos-resources.xml
 <?xml version="1.0"?>
 <resource-types>
   <resourceType name="nxosCpu" label="Nxos Cpu" resourceLabel="\${index}">
@@ -179,8 +180,8 @@ cat <<EOF > $OVERLAY/resource-types.d/nxos-resources.xml
 </resource-types>
 EOF
 
-mkdir -p $OVERLAY/datacollection
-cat <<EOF > $OVERLAY/datacollection/mib2.xml
+  mkdir -p $OVERLAY/datacollection
+  cat <<EOF > $OVERLAY/datacollection/mib2.xml
 <datacollection-group xmlns="http://xmlns.opennms.org/xsd/config/datacollection" name="MIB2">
   <group name="mib2-X-interfaces" ifType="all">
     <mibObj oid=".1.3.6.1.2.1.31.1.1.1.1" instance="ifIndex" alias="ifName" type="string"/>
@@ -197,11 +198,21 @@ cat <<EOF > $OVERLAY/datacollection/mib2.xml
 </datacollection-group>
 EOF
 
-cat <<EOF > $OVERLAY/sflow-host.groovy
-import org.opennms.netmgt.collection.support.builder.NodeLevelResource
+  if [[ $VERSION == "23"* ]]; then
+    cat <<EOF > $OVERLAY/sflow-host.groovy
 import static org.opennms.netmgt.telemetry.adapters.netflow.BsonUtils.get
 import static org.opennms.netmgt.telemetry.adapters.netflow.BsonUtils.getDouble
 import static org.opennms.netmgt.telemetry.adapters.netflow.BsonUtils.getInt64
+EOF
+  else
+    cat <<EOF > $OVERLAY/sflow-host.groovy
+import static org.opennms.netmgt.telemetry.protocols.common.utils.BsonUtils.get
+import static org.opennms.netmgt.telemetry.protocols.common.utils.BsonUtils.getDouble
+import static org.opennms.netmgt.telemetry.protocols.common.utils.BsonUtils.getInt64
+EOF
+  fi
+  cat <<EOF >> $OVERLAY/sflow-host.groovy
+import org.opennms.netmgt.collection.support.builder.NodeLevelResource
 
 NodeLevelResource nodeLevelResource = new NodeLevelResource(agent.getNodeId())
 
@@ -220,12 +231,21 @@ get(msg, "counters", "0:2004").ifPresent { doc ->
 }
 EOF
 
-  cat <<EOF > $OVERLAY/junos-telemetry-interface.groovy
+  if [[ $VERSION == "23"* ]]; then
+    cat <<EOF > $OVERLAY/junos-telemetry-interface.groovy
+import org.opennms.netmgt.telemetry.adapters.jti.proto.Port
+import org.opennms.netmgt.telemetry.adapters.jti.proto.TelemetryTop
+EOF
+  else
+    cat <<EOF > $OVERLAY/junos-telemetry-interface.groovy
+import org.opennms.netmgt.telemetry.protocols.jti.adapter.proto.Port
+import org.opennms.netmgt.telemetry.protocols.jti.adapter.proto.TelemetryTop
+EOF
+  fi
+  cat <<EOF >> $OVERLAY/junos-telemetry-interface.groovy
 import groovy.util.logging.Slf4j
 import org.opennms.core.utils.RrdLabelUtils
 import org.opennms.netmgt.collection.api.AttributeType
-import org.opennms.netmgt.telemetry.adapters.jti.proto.Port
-import org.opennms.netmgt.telemetry.adapters.jti.proto.TelemetryTop
 import org.opennms.netmgt.collection.support.builder.InterfaceLevelResource
 import org.opennms.netmgt.collection.support.builder.NodeLevelResource
 
@@ -250,16 +270,24 @@ TelemetryTop.TelemetryStream jtiMsg = msg
 CollectionSetGenerator.generate(agent, builder, jtiMsg)
 EOF
 
-  cat <<EOF > $OVERLAY/cisco-nxos-telemetry-interface.groovy
+  if [[ $VERSION == "23"* ]]; then
+    cat <<EOF > $OVERLAY/cisco-nxos-telemetry-interface.groovy
+import org.opennms.netmgt.telemetry.adapters.nxos.proto.TelemetryBis
+import org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbParserUtil
+EOF
+  else
+    cat <<EOF > $OVERLAY/cisco-nxos-telemetry-interface.groovy
+import org.opennms.netmgt.telemetry.protocols.nxos.adapter.proto.TelemetryBis
+import org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbParserUtil
+EOF
+  fi
+  cat <<EOF >> $OVERLAY/cisco-nxos-telemetry-interface.groovy
 import groovy.util.logging.Slf4j
 import java.util.List
 import java.util.Objects
 import org.opennms.netmgt.collection.api.AttributeType
 import org.opennms.netmgt.collection.support.builder.DeferredGenericTypeResource
 import org.opennms.netmgt.collection.support.builder.NodeLevelResource
-import org.opennms.netmgt.telemetry.adapters.nxos.proto.TelemetryBis
-import org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbParserUtil
-import org.opennms.netmgt.telemetry.adapters.nxos.proto.TelemetryBis.TelemetryField
 
 @Slf4j
 class CollectionSetGenerator {

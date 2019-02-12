@@ -192,7 +192,7 @@ This add-on is required in order to provide HTTP/TLS support through LetsEncrypt
 kubectl create namespace cert-manager
 kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/00-crds.yaml
-kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml --validate=false
 ```
 
 > NOTE: For troubleshooting, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
@@ -229,6 +229,7 @@ kubectl create secret generic onms-passwords \
  --from-literal GRAFANA_UI_ADMIN=opennms \
  --from-literal ELASTICSEARCH=elastic \
  --from-literal KAFKA_MANAGER_APPLICATION_SECRET=opennms \
+ --from-literal HASURA_GRAPHQL_ACCESS_KEY=0p3nNMS \
  --namespace opennms --dry-run -o yaml | kubectl apply -f -
 ```
 
@@ -322,6 +323,8 @@ docker run -it --name minion \
 * Grafana: `https://grafana.k8s.opennms.org/`
 * Kibana: `https://kibana.k8s.opennms.org/` (remember to enable monitoring)
 * Kafka Manager: `https://kaffa-manager.k8s.opennms.org/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
+* Hasura GraphQL API: `https://hasura.k8s.opennms.org/v1alpha1/graphql`
+* Hasura GraphQL Console: `https://hasura.k8s.opennms.org/console`
 
 > NOTE: Make sure to use your own Domain ;)
 
@@ -400,17 +403,20 @@ kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 
 Make sure that everything in AWS has been removed (including the Route 53 CNAMEs for your ingresses).
 
+Starting with [Kops 1.11.0](https://github.com/kubernetes/kops/releases/tag/1.11.0), issuing `kops delete cluster` should also delete the volumes. You can review the action by removing the `--yes` before apply it.
+
 ## Future Enhancements
 
 * Add SSL encryption with SASL Authentication for external Kafka (for Minions outside K8S/AWS). The challenge here is which FQDN will be taken in consideration for the certificates.
 * Add [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other component should not access those resources). A network manager like [Calico](https://www.projectcalico.org) is required.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
-* Add support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information.
+* Investigate how to provide support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information. Although, using operators seems more feasible in this regard, due to the complexities when expanding/shrinking these kind of applications.
 * Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
 * Expose the Kubernetes Dashboard through the Ingress controller.
 * Design a solution to handle scale down of Cassandra and decommission of nodes; or investigate the existing operators.
-* Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using the [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres.
+* Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using their [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres within K8s. Alternatively, we might consider the [Crunchy Data Operator](https://crunchydata.github.io/postgres-operator/stable/)
+* Add a sidecar container on PostgreSQL using [hasura](https://hasura.io) to expose the DB schema through GraphQL. If a Postgres Operator is used, Hasura can be managed through a deployment instead.
 * Explore a `Kafka` solution like [Strimzi](https://strimzi.io/), an operator that supports encryption and authentication.
 * Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Explore [Helm](https://helm.sh), and potentially add support for it.

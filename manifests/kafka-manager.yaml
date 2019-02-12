@@ -13,7 +13,6 @@ metadata:
     app: kafka-manager
     deployment: drift
 spec:
-  clusterIP: None
   ports:
   - port: 9000
   selector:
