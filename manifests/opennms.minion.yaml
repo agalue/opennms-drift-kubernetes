@@ -141,6 +141,8 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
+        - name: TZ
+          value: America/New_York
         - name: JAVA_OPTS
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
         - name: MINION_LOCATION
@@ -202,21 +204,24 @@ spec:
               - bash
               - -c
               - 'echo "Shutting down minion..." && /opt/minion/bin/karaf stop'
+      # Use the following only when NX-OS Telemetry over gRPC is required.
       - name: nxos-grpc
         image: agalue/opennms-nxos-grpc:latest
         env:
-          - name: BOOTSTRAP_SERVERS
-            value: kafka.opennms.svc.cluster.local:9092
-          - name: MINION_LOCATION
-            value: Kubernetes
-          - name: MINION_ID
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: PORT
-            value: '50002' # Must match container port
-          - name: TOPIC
-            value: OpenNMS.Sink.Telemetry-NXOS
+        - name: BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: MINION_LOCATION # Must match Minion settings
+          value: Kubernetes
+        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
+          value: OpenNMS
+        - name: MINION_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: PORT
+          value: '50002' # Must match container port
+        - name: TOPIC
+          value: $(INSTANCE_ID).Sink.Telemetry-NXOS
         ports:
         - containerPort: 50002
           protocol: TCP

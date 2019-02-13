@@ -22,6 +22,8 @@ VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
 ### Basic Settings
 
+# Configure the instance ID
+# Required when having multiple OpenNMS backends sharing the same Kafka cluster.
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF >> $SYSTEM_CFG
@@ -32,11 +34,13 @@ EOF
   cp $SYSTEM_CFG $OVERLAY
 fi
 
+# Configuring SCV credentials to access the OpenNMS ReST API
 if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
   /opt/minion/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
   cp $SCV_CFG $OVERLAY
 fi
 
+# Configure Sink and RPC to use Kafka
 if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
 
@@ -66,12 +70,16 @@ opennms-core-ipc-rpc-kafka
 EOF
 fi
 
+# Configure SNMP Trap reception
+# Port 162 cannot be used as Minion runs as non-root
 cat <<EOF > $OVERLAY/org.opennms.netmgt.trapd.cfg
 trapd.listen.interface=0.0.0.0
 trapd.listen.port=1162
 trapd.queue.size=100000
 EOF
 
+# Configure Syslog reception
+# Port 514 cannot be used as Minion runs as non-root
 cat <<EOF > $OVERLAY/org.opennms.netmgt.syslog.cfg
 syslog.listen.interface=0.0.0.0
 syslog.listen.port=1514

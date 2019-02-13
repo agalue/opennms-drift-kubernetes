@@ -27,6 +27,8 @@ KEYSPACE=${INSTANCE_ID-onms}_newts
 mkdir -p $CONFIG_DIR/opennms.properties.d/
 touch $CONFIG_DIR/configured
 
+# Configure the instance ID
+# Required when having multiple OpenNMS backends sharing the same Kafka cluster.
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
@@ -35,12 +37,14 @@ org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
 
+# Disable data choices (optional)
 cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
 enabled=false
 acknowledged-by=admin
 acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
 EOF
 
+# Trim down the events configuration, as event processing is not required for the WebUI
 cat <<EOF > $CONFIG_DIR/eventconf.xml
 <?xml version="1.0"?>
 <events xmlns="http://xmlns.opennms.org/xsd/eventconf">
@@ -77,6 +81,7 @@ cat <<EOF > $CONFIG_DIR/eventconf.xml
 </events>
 EOF
 
+# Trim down the services/daemons configuration, as only the WebUI will be running
 cat <<EOF > $CONFIG_DIR/service-configuration.xml
 <?xml version="1.0"?>
 <service-configuration xmlns="http://xmlns.opennms.org/xsd/config/vmmgr">
@@ -116,11 +121,14 @@ org.opennms.security.disableLoginSuccessEvent=true
 org.opennms.web.console.centerUrl=/status/status-box.jsp,/geomap/map-box.jsp,/heatmap/heatmap-box.jsp
 EOF
 
+# Guard against allowing administration changes through the WebUI
 SECURITY_CONFIG=$WEB_DIR/applicationContext-spring-security.xml
 cp /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security.xml $SECURITY_CONFIG
 sed -r -i 's/ROLE_ADMIN/ROLE_DISABLED/' $SECURITY_CONFIG
 sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' $SECURITY_CONFIG
 
+# Configure Newts (works with either Cassandra or ScyllaDB)
+# This has to match the configuration of the OpenNMS Core server.
 if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
@@ -154,6 +162,7 @@ org.opennms.newts.query.heartbeat=450000
 EOF
 fi
 
+# Configure Elasticsearch for Flow processing
 if [[ $ELASTIC_SERVER ]]; then
   echo "Configuring Elasticsearch for Flows..."
   cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
@@ -164,6 +173,7 @@ elasticIndexStrategy=daily
 EOF
 fi
 
+# Enable Grafana features
 if [[ $GRAFANA_PUBLIC_URL ]] && [[ $GRAFANA_URL ]] && [[ $GF_SECURITY_ADMIN_PASSWORD ]]; then
   GRAFANA_AUTH="admin:$GF_SECURITY_ADMIN_PASSWORD"
 

@@ -23,6 +23,8 @@
 #   https://vapor-ware.github.io/ksync/
 #   https://github.com//kubernetes/git-sync
 #   https://gitkube.sh
+# - Add a lifecycle.preStart to execute a "git commit" of the current state of the configuration,
+#   in order to track what has been changed between since the last time the Pod was running.
 
 ---
 apiVersion: v1
@@ -92,14 +94,14 @@ spec:
               key: ELASTICSEARCH
               name: onms-passwords
         volumeMounts:
-        - name: opennms-etc
+        - name: opennms-etc # Persistent volume for OpenNMS Configuration
           mountPath: /opennms-etc
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-core-init.sh
-      # Initializes Newts keyspace on Cassandra/ScyllaDB
+      # Initializes Newts keyspace on Cassandra/ScyllaDB (requires newts.cql)
       - name: init-newts
-        image: cassandra:3.11.3
+        image: cassandra:3.11.4
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -f /opennms-etc/newts.cql $CASSANDRA_HOST' ]
         env:
@@ -138,6 +140,8 @@ spec:
           valueFrom:
             resourceFieldRef:
               resource: requests.cpu
+        - name: TZ
+          value: America/New_York
         - name: JAVA_OPTS # Preferred way instead of opennms.conf
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
         - name: POSTGRES_HOST

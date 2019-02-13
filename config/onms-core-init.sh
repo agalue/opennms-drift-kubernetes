@@ -5,14 +5,20 @@
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
 # - Horizon 23 or newer is required.
+# - The rsync and git command are required, and they are installed through YUM
+#   at runtime, so Internet access is required to use this script.
 #
 # Purpose:
-# - Initialize the config directory on the volume only one.
+# - Initialize the config directory on the volume only once.
 # - Apply mandatory configuration changes based on the provided variables.
-# - Be on guard against upgrades
+# - Be on guard against upgrades, by always overriding Karaf/OSGi configuration
+#   files from the source, with embedded versions for multiple components.
 #
 # Warning:
 # - Multiple assumptions are made on Newts/Cassandra configuration.
+# - Do not include any file that can be changed through the WebUI or is intended
+#   to represent customers/users needs. The configuration directory will be
+#   behind a persistent volume, precisely to save user changes.
 #
 # External Environment variables:
 # - INSTANCE_ID
@@ -40,8 +46,10 @@ KARAF_FILES=( \
 "org.ops4j.pax.url.mvn.cfg" \
 )
 
-# Initialize configuration directory
+# Install missing tools (requires Internet access)
 yum install -y -q rsync git
+
+# Initialize configuration directory
 if [ ! -f $CONFIG_DIR/configured ]; then
   echo "Initializing configuration directory for the first time ..."
   rsync -ar $BACKUP_ETC/ $CONFIG_DIR/
@@ -95,6 +103,8 @@ done
 echo "Overriding mandatory files from $MANDATORY..."
 rsync -a $MANDATORY/ $CONFIG_DIR/
 
+# Configure the instance ID
+# Required when having multiple OpenNMS backends sharing the same Kafka cluster.
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
@@ -103,11 +113,13 @@ org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
 
+# Enable OSGi features
 if [[ $FEATURES_LIST ]]; then
   echo "Enabling features: $FEATURES_LIST ..."
   sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
 fi
 
+# Configure Sink and RPC to use Kafka, and the Kafka Producer.
 if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
 
@@ -154,6 +166,7 @@ alarmSyncIntervalMs=300000
 EOF
 fi
 
+# Configure Newts (works with either Cassandra or ScyllaDB)
 if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
@@ -234,6 +247,7 @@ CREATE TABLE IF NOT EXISTS ${KEYSPACE}.resource_metrics (
 EOF
 fi
 
+# Configure Elasticsearch for Flow processing and for the event forwarder
 if [[ $ELASTIC_SERVER ]]; then
   echo "Configuring Elasticsearch for Flows..."
   cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg

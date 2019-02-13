@@ -58,7 +58,7 @@ spec:
       terminationGracePeriodSeconds: 600
       containers:
       - name: cassandra
-        image: cassandra:3.11.3
+        image: cassandra:3.11.4
         imagePullPolicy: IfNotPresent
         env:
         - name: MEM_TOTAL_MB

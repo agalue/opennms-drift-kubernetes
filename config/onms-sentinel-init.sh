@@ -1,6 +1,8 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# Sentinel is required only when flow/telemetry processing is required.
+#
 # Requirements:
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
@@ -24,6 +26,8 @@ CFG=/opt/sentinel/etc/system.properties
 OVERLAY=/etc-overlay
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-sentinel)
 
+# Configure the instance ID
+# Required when having multiple OpenNMS backends sharing the same Kafka cluster.
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF >> $CFG
@@ -38,7 +42,7 @@ fi
 FEATURES_DIR=$OVERLAY/featuresBoot.d
 mkdir -p $FEATURES_DIR
 
-# Horizon 23 Classes
+# Horizon 23 Classes for Flows
 SFLOW_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowAdapter
 IPFIX_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.ipfix.IpfixAdapter
 NETFLOW5_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.v5.Netflow5Adapter
@@ -47,6 +51,7 @@ SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowT
 NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbAdapter
 JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.jti.JtiGpbAdapter
 
+# Horizon 24 Classes for Flows
 if [[ $VERSION == "24"* ]]; then
   SFLOW_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
   IPFIX_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
@@ -310,17 +315,7 @@ class CollectionSetGenerator {
       }
     }
 
-    def m;
-    if ((m = telemetryMsg.getEncodingPath() =~ /sys\\/intf\\/phys-\\[(.+)\\]\\/dbgIfHC(In|Out)/)) {
-      def intfId = m.group(1).replaceAll(/\\//,"-")
-      def statsType = m.group(2)
-      def genericTypeResource = new DeferredGenericTypeResource(nodeLevelResource, "nxosIntf", intfId)
-      ["ucastPkts", "multicastPkts", "broadcastPkts", "octets"].each { metric ->
-        builder.withNumericAttribute(genericTypeResource, "nxos-intfHC\$statsType", "\$metric\$statsType",
-          NxosGpbParserUtil.getValueAsDouble(telemetryMsg, metric), AttributeType.COUNTER)
-      }
-    }
-
+    // Requires gRPC, this won't work with UDP
     if (telemetryMsg.getEncodingPath().equals("sys/intf")) {
       findFieldWithName(telemetryMsg.getDataGpbkvList().get(0), "children").getFieldsList()
         .each { f ->
