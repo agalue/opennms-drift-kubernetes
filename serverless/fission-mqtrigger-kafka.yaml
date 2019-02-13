@@ -5,12 +5,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mqtrigger-kafka
+  labels:
+    chart: "fission-core-1.0.0"
 spec:
   replicas: 1
   selector:
     matchLabels:
-        svc: mqtrigger
-        messagequeue: kafka
+      svc: mqtrigger
+      messagequeue: kafka
   template:
     metadata:
       labels:
@@ -19,7 +21,7 @@ spec:
     spec:
       containers:
       - name: mqtrigger
-        image: "index.docker.io/fission/fission-bundle:1.0"
+        image: "index.docker.io/fission/fission-bundle:1.0.0"
         imagePullPolicy: IfNotPresent
         command: ["/fission-bundle"]
         args: ["--mqt", "--routerUrl", "http://router.default"]
