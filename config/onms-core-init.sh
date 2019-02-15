@@ -180,7 +180,7 @@ fi
 
 # Configure Newts (works with either Cassandra or ScyllaDB)
 if [[ $CASSANDRA_SERVER ]]; then
-  echo "Configuring Cassandra..."
+  echo "Configuring Newts..."
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
 # About the properties:
 # - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
