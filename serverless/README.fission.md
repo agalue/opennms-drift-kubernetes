@@ -1,5 +1,7 @@
 # Fission
 
+> WARNING: Since version 1.0.0 was released, the solution doesn't work. Still investigating about it ...
+
 ## Install Fission
 
 Make sure to install the fission CLI on your own computer, as explained on the [documentation](https://docs.fission.io/installation/).
@@ -32,7 +34,7 @@ kubectl -n default create secret generic serverless-config \
 ## Create the NodeJS Environment
 
 ```shell
-fission environment create --name nodejs --image fission/node-env:latest --builder fission/node-builder:latest
+fission environment create --name nodejs --image fission/node-env:1.0.0 --builder fission/node-builder:1.0.0
 ```
 
 ## Create a ZIP with the NodeJS app and its dependencies
@@ -46,7 +48,7 @@ zip alarm2slack.zip ./slack-forwarder/package.json ./slack-forwarder/alarm2slack
 ## Create the function
 
 ```shell
-fission function create --name alarm2slack --src alarm2slack.zip --env nodejs --secret serverless-config --entrypoint alarm2slack.fission
+fission function create --name alarm2slack --src alarm2slack.zip --env nodejs --secret serverless-config --entrypoint "alarm2slack.fission"
 ```
 
 ## Create the function trigger based on a Kafka Topic

@@ -60,14 +60,10 @@ async function sendAlarm(alarm, slackUrl) {
 
 var globalSlackUrl = getSlackUrl();
 
-module.exports = {
+module.exports.fission = async function(context) {
+  return await sendAlarm(context.request.body, globalSlackUrl);
+};
 
-  fission: async function(context) {
-    return await sendAlarm(context.request.body, globalSlackUrl);
-  },
-
-  kubeless: async function(event, context) {
-    return await sendAlarm(event.data, globalSlackUrl);
-  }
-
-}
+module.exports.kubeless = async function(event, context) {
+  return await sendAlarm(event.data, globalSlackUrl);
+};
