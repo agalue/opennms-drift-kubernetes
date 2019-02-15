@@ -14,6 +14,10 @@
     name: CASSANDRA_REPFACTOR
     value: '1'
 
+# Do not use Cassandra
+- op: remove
+  path: /spec/template/spec/containers/0/env/2
+
 - op: replace
   path: /spec/volumeClaimTemplates/0/spec/storageClassName
   value: standard

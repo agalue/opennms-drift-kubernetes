@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# Warning: this excludes Cassandra to reduce the overhead on Minikube
 
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -17,7 +19,6 @@ resources:
 - ../manifests/zookeeper.yaml
 - ../manifests/kafka.yaml
 - ../manifests/elasticsearch.data.yaml
-- ../manifests/cassandra.yaml
 - ../manifests/opennms.core.yaml
 - ../manifests/opennms.minion.yaml
 - ../manifests/opennms.sentinel.yaml
@@ -36,7 +37,8 @@ generatorOptions:
 
 secretGenerator:
 - name: onms-passwords
-  envCommand: cat passwords.env
+  env: passwords.env
+  type: Opaque
 
 patchesJson6902:
 - path: patches/postgres.yaml 
@@ -63,12 +65,6 @@ patchesJson6902:
     version: v1
     kind: StatefulSet
     name: esdata
-- path: patches/cassandra.yaml
-  target:
-    group: apps
-    version: v1
-    kind: StatefulSet
-    name: cassandra
 - path: patches/opennms.core.yaml
   target:
     group: apps

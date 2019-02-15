@@ -13,7 +13,7 @@
   value: 1
 
 - op: remove
-  path: /spec/template/spec/initContainers/1
+  path: /spec/template/spec/initContainers/2
 
 - op: replace
   path: /spec/template/spec/containers/0/env/3
@@ -26,7 +26,7 @@
   value:
     name: discovery.zen.minimum_master_nodes
     value: '1'
-    
+
 - op: remove
   path: /spec/template/spec/containers/0/env/5
 

@@ -4,6 +4,8 @@ For testing purposes, it would be nice to be able to start a reduced version of 
 
 For this reason, the `kustomize` tool is used to generate a modified version of the templates, in order to be able to use them with `minikube`.
 
+> WARNING: Since version Kustomize 2.0.0 was released, the solution doesn't work. Still investigating about it ...
+
 ## Requirements
 
 * Install the [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) binary on your machine.
