@@ -278,13 +278,13 @@ http-url=https://onms.k8s.opennms.org/opennms
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg
 bootstrap.servers=kafka.k8s.opennms.org:9094
-acks=1
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.rpc.kafka.cfg
 bootstrap.servers=kafka.k8s.opennms.org:9094
 acks=1
 
 [root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot
+!minion-jms
 !opennms-core-ipc-sink-camel
 !opennms-core-ipc-rpc-jms
 opennms-core-ipc-sink-kafka
@@ -296,7 +296,7 @@ With Docker:
 ```shell
 docker run -it --name minion \
  -e MINION_ID=docker-minion-1 \
- -e MINION_LOCATION=Docker \
+ -e MINION_LOCATION=Apex \
  -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
