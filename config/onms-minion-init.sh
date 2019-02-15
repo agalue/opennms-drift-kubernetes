@@ -15,8 +15,6 @@
 # - OPENNMS_HTTP_PASS
 # - KAFKA_SERVER
 
-SYSTEM_CFG=/opt/minion/etc/system.properties
-SCV_CFG=/opt/minion/etc/scv.jce
 OVERLAY=/etc-overlay
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
@@ -24,6 +22,7 @@ VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
+SYSTEM_CFG=/opt/minion/etc/system.properties
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF >> $SYSTEM_CFG
@@ -37,8 +36,21 @@ fi
 # Configuring SCV credentials to access the OpenNMS ReST API
 if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
   /opt/minion/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
-  cp $SCV_CFG $OVERLAY
+  cp /opt/minion/etc/scv.jce $OVERLAY
 fi
+
+# Append the same relaxed SNMP4J options that OpenNMS has,
+# to make sure that broken SNMP devices still work with Minions.
+cat <<EOF >> $OVERLAY/system.properties
+# Adding SNMP4J Options:
+snmp4j.LogFactory=org.snmp4j.log.Log4jLogFactory
+org.snmp4j.smisyntaxes=opennms-snmp4j-smisyntaxes.properties
+org.opennms.snmp.snmp4j.allowSNMPv2InV1=false
+org.opennms.snmp.snmp4j.forwardRuntimeExceptions=false
+org.opennms.snmp.snmp4j.noGetBulk=false
+org.opennms.snmp.workarounds.allow64BitIpAddress=true
+org.opennms.snmp.workarounds.allowZeroLengthIpAddress=true
+EOF
 
 # Configure Sink and RPC to use Kafka
 if [[ $KAFKA_SERVER ]]; then

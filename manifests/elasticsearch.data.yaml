@@ -62,6 +62,18 @@ spec:
         - vm.max_map_count=262144
         securityContext:
           privileged: true
+      - name: onms-plugin
+        image: busybox
+        command: [ sh, -c ]
+        args: [ "wget $(PLUGIN_URL) && unzip elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip && mv elasticsearch/* plugin/" ]
+        env:
+          - name: PLUGIN_VERSION
+            value: 1.1.0-SNAPSHOT
+          - name: PLUGIN_URL
+            value: https://github.com/OpenNMS/elasticsearch-drift-plugin/releases/download/$(PLUGIN_VERSION)/elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip
+        volumeMounts:
+        - name: onms-plugin-dir
+          mountPath: /plugin
       - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
@@ -123,6 +135,8 @@ spec:
         volumeMounts:
         - name: es-data
           mountPath: /usr/share/elasticsearch/data
+        - name: onms-plugin-dir
+          mountPath: /usr/share/elasticsearch/plugins/drift
         resources:
           limits:
             cpu: 4
@@ -140,6 +154,9 @@ spec:
             port: http
           initialDelaySeconds: 60
           periodSeconds: 60
+      volumes:
+      - name: onms-plugin-dir
+        emptyDir: {}
   volumeClaimTemplates:
   - metadata:
       name: es-data

@@ -1,6 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # The dns-controller will automatically create a CNAME for each host pointing to the Ingress ELB when --watch-ingress=true is applied.
+# Warning: please use your own domains.
+#          this is not intended to be used by any user.
 
 ---
 apiVersion: extensions/v1beta1
@@ -25,6 +27,7 @@ spec:
     - secretName: k8s-opennms-org
       hosts:
         - grafana.k8s.opennms.org
+        - hasura.k8s.opennms.org
         - kafka-manager.k8s.opennms.org
         - kibana.k8s.opennms.org
         - onms.k8s.opennms.org

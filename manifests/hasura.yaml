@@ -45,6 +45,16 @@ spec:
         app: hasura
     spec:
       initContainers:
+      # Make sure that the OpenNMS database exist
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
+      # Patch the database for Hasura
       - name: init-database
         image: postgres:10.6-alpine
         imagePullPolicy: IfNotPresent

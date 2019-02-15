@@ -31,7 +31,6 @@
 
 CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
-FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
 KEYSPACE=${INSTANCE_ID-onms}_newts
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-core)
 KARAF_FILES=( \
@@ -113,10 +112,23 @@ org.opennms.instance.id=$INSTANCE_ID
 EOF
 fi
 
+cat <<EOF > $CONFIG_DIR/opennms.properties.d/rrd.properties
+org.opennms.rrd.storeByGroup=true
+org.opennms.rrd.storeByForeignSource=true
+EOF
+
 # Enable OSGi features
 if [[ $FEATURES_LIST ]]; then
   echo "Enabling features: $FEATURES_LIST ..."
-  sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
+  if [[ $VERSION == "24"* ]]; then
+    IFS=', ' read -r -a FEATURES <<< "$FEATURES_LIST"
+    for FEATURE in "${FEATURES[@]}"; do
+      echo $FEATURE >> $CONFIG_DIR/featuresBoot.d/custom.boot
+    done
+  else
+    FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
+    sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
+  fi
 fi
 
 # Configure Sink and RPC to use Kafka, and the Kafka Producer.
@@ -177,9 +189,6 @@ if [[ $CASSANDRA_SERVER ]]; then
 # About the keyspace:
 # - The value of compaction_window_size should be consistent with the chosen TTL
 # - The number of SSTables will be the TTL/compaction_window_size (52 for 1 year)
-
-org.opennms.rrd.storeByGroup=true
-org.opennms.rrd.storeByForeignSource=true
 
 org.opennms.timeseries.strategy=newts
 org.opennms.newts.config.hostname=${CASSANDRA_SERVER}

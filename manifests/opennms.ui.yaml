@@ -60,7 +60,7 @@ spec:
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
+        image: opennms/horizon-core-web:23.0.2-1
         #image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
@@ -103,7 +103,7 @@ spec:
           value: '600'
       containers:
       - name: onms-ui
-        image: agalue/horizon-core-web:23.0.2-oracle-jdk8u201
+        image: opennms/horizon-core-web:23.0.2-1
         #image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]

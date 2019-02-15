@@ -22,20 +22,20 @@
 # - CASSANDRA_SERVER
 
 GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
-CFG=/opt/sentinel/etc/system.properties
 OVERLAY=/etc-overlay
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-sentinel)
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
+SYSTEM_CFG=/opt/sentinel/etc/system.properties
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF >> $CFG
+  cat <<EOF >> $SYSTEM_CFG
 
 # Used for Kafka Topics
 org.opennms.instance.id=$INSTANCE_ID
 EOF
-  cp $CFG $OVERLAY
+  cp $SYSTEM_CFG $OVERLAY
 fi
 
 # WARNING: The following directory only exist on H24. For H23 create $MINION_HOME/deploy/features.xml
@@ -118,6 +118,12 @@ if [[ $CASSANDRA_SERVER ]]; then
 sentinel-newts
 sentinel-telemetry-nxos
 sentinel-telemetry-jti
+EOF
+
+  cat <<EOF >> $OVERLAY/system.properties
+# WARNING: Must match OpenNMS in order to properly store telemetry metrics on Cassandra
+org.opennms.rrd.storeByGroup=true
+org.opennms.rrd.storeByForeignSource=true
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.newts.config.cfg
