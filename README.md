@@ -307,7 +307,7 @@ docker run -it --name minion \
  -p 1514:1514 \
  -p 1162:1162 \
  --sysctl "net.ipv4.ping_group_range=0 429496729" \
- agalue/minion:23.0.2-oracle-jdk8u201 -c
+ opennms/minion:23.0.2-1 -c
 ```
 
 > IMPORTANT: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
