@@ -1,7 +1,5 @@
 # Fission
 
-> WARNING: Since version 1.0.0 was released, the solution doesn't work. Still investigating about it ...
-
 ## Install Fission
 
 Make sure to install the fission CLI on your own computer, as explained on the [documentation](https://docs.fission.io/installation/).
@@ -20,7 +18,6 @@ The second YAML contains the Kafka mqtrigger which is not included/enabled by de
 
 It has been done this way because it doesn't look possible to use `fission-core` with `mqtrigger-kafka` through Helm, as the Kafka feature is part of `fission-all`, which contains features not required here.
 
-
 ## Create the secret for Slack URL
 
 Once you have the WebHook URL, add it to a `secret`; for example:
@@ -34,7 +31,7 @@ kubectl -n default create secret generic serverless-config \
 ## Create the NodeJS Environment
 
 ```shell
-fission environment create --name nodejs --image fission/node-env:1.0.0 --builder fission/node-builder:1.0.0
+fission environment create --name nodejs --image fission/node-env --builder fission/node-builder
 ```
 
 ## Create a ZIP with the NodeJS app and its dependencies
@@ -42,8 +39,10 @@ fission environment create --name nodejs --image fission/node-env:1.0.0 --builde
 The `slack-forwarder` directory contains the NodeJS application and the dependencies file.
 
 ```shell
-zip alarm2slack.zip ./slack-forwarder/package.json ./slack-forwarder/alarm2slack.js
+zip -j alarm2slack.zip slack-forwarder/package.json slack-forwarder/alarm2slack.js
 ```
+
+> IMPORTANT: all the relevant files should be at the root of the ZIP (hence, the `-j`).
 
 ## Create the function
 
@@ -61,6 +60,24 @@ The name of the topic relies on the Kafka Converter YAML file.
 
 ## Testing
 
+The best way to test is by generating an actual alarm in OpenNMS.
+
+Alternative options are:
+
+1) Using the test command:
+
 ```shell
 fission function test --name alarm2slack --body '{"uei":"uei.jigsaw/test", "id":666, "logMessage":"I want to play a game", "description":"<p>Hope to hear from your soon!</p>"}'
+```
+
+2) Using an HTTP trigger:
+
+```shell
+fission route create --name alarm2slack --function alarm2slack --method POST --url /alarm2slack --host fission.k8s.opennms.org --createingress
+```
+
+Then,
+
+```shell
+curl -X POST -v -d '{"uei":"uei.jigsaw/test", "id":666, "logMessage":"I want to play a game", "description":"<p>Hope to hear from your soon!</p>"}' http://fission.k8s.opennms.org/alarm2slack
 ```

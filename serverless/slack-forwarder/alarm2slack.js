@@ -33,6 +33,7 @@ function buildMessage(alarm) {
 }
 
 async function sendAlarm(alarm, slackUrl) {
+  console.log(alarm);
   if (!slackUrl) {
     return { status: 400, body: 'Missing Slack Webhook URL.' };
   }
