@@ -7,16 +7,16 @@
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-prod
+  name: letsencrypt-issuer
   namespace: opennms
   labels:
     deployment: drift
 spec:
   acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
     email: agalue@opennms.org
     privateKeySecretRef:
-      name: letsencrypt-prod
+      name: letsencrypt-issuer
     http01: {}
 
 ---
@@ -30,7 +30,7 @@ metadata:
 spec:
   secretName: k8s-opennms-org
   issuerRef:
-    name: letsencrypt-prod
+    name: letsencrypt-issuer
     kind: ClusterIssuer
   commonName: k8s.opennms.org
   dnsNames:
@@ -45,10 +45,10 @@ spec:
       - http01:
           ingressClass: nginx
         domains:
+          - k8s.opennms.org
           - grafana.k8s.opennms.org
           - hasura.k8s.opennms.org
           - kafka-manager.k8s.opennms.org
           - kibana.k8s.opennms.org
           - onms.k8s.opennms.org
           - onmsui.k8s.opennms.org
-
