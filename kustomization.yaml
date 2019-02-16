@@ -14,70 +14,70 @@ commonAnnotations:
   owner: agalue@opennms.org
 
 resources:
-- ../namespace/opennms.yaml
-- ../manifests/postgresql.yaml
-- ../manifests/zookeeper.yaml
-- ../manifests/kafka.yaml
-- ../manifests/elasticsearch.data.yaml
-- ../manifests/opennms.core.yaml
-- ../manifests/opennms.minion.yaml
-- ../manifests/opennms.sentinel.yaml
+- namespace/opennms.yaml
+- manifests/postgresql.yaml
+- manifests/zookeeper.yaml
+- manifests/kafka.yaml
+- manifests/elasticsearch.data.yaml
+- manifests/opennms.core.yaml
+- manifests/opennms.minion.yaml
+- manifests/opennms.sentinel.yaml
 
 configMapGenerator:
 - name: opennms-config
   files:
-  - ../config/onms-core-init.sh
-  - ../config/onms-minion-init.sh
-  - ../config/onms-sentinel-features.xml
-  - ../config/onms-sentinel-init.sh
-  - ../config/onms-ui-init.sh
+  - config/onms-core-init.sh
+  - config/onms-minion-init.sh
+  - config/onms-sentinel-features.xml
+  - config/onms-sentinel-init.sh
+  - config/onms-ui-init.sh
 
 generatorOptions:
   disableNameSuffixHash: true
 
 secretGenerator:
 - name: onms-passwords
-  env: passwords.env
+  env: minikube/passwords.env
   type: Opaque
 
 patchesJson6902:
-- path: patches/postgres.yaml 
+- path: minikube/patches/postgres.yaml 
   target:
     group: apps
     version: v1
     kind: StatefulSet
     name: postgres
-- path: patches/zookeeper.yaml
+- path: minikube/patches/zookeeper.yaml
   target:
     group: apps
     version: v1
     kind: StatefulSet
     name: zk
-- path: patches/kafka.yaml
+- path: minikube/patches/kafka.yaml
   target:
     group: apps
     version: v1
     kind: StatefulSet
     name: kafka
-- path: patches/elasticsearch.yaml
+- path: minikube/patches/elasticsearch.yaml
   target:
     group: apps
     version: v1
     kind: StatefulSet
     name: esdata
-- path: patches/opennms.core.yaml
+- path: minikube/patches/opennms.core.yaml
   target:
     group: apps
     version: v1
     kind: StatefulSet
     name: onms
-- path: patches/opennms.minion.yaml
+- path: minikube/patches/opennms.minion.yaml
   target:
     group: apps
     version: v1
     kind: StatefulSet
     name: minion
-- path: patches/opennms.sentinel.yaml
+- path: minikube/patches/opennms.sentinel.yaml
   target:
     group: apps
     version: v1
