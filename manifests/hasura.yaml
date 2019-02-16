@@ -20,10 +20,10 @@ metadata:
     app: hasura
     deployment: drift
 spec:
-  selector:
-    app: hasura
   ports:
   - port: 8080
+  selector:
+    app: hasura
 
 ---
 apiVersion: apps/v1
@@ -43,6 +43,7 @@ spec:
     metadata:
       labels:
         app: hasura
+        deployment: drift
     spec:
       initContainers:
       # Make sure that the OpenNMS database exist
@@ -98,7 +99,7 @@ spec:
           value: 'true'
         ports:
         - containerPort: 8080
-          protocol: TCP
+          name: http
         resources:
           limits:
             memory: 256Mi
@@ -106,6 +107,18 @@ spec:
           requests:
             memory: 128Mi
             cpu: 50m
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 60
       volumes:
       - name: opennms-config
         configMap:
