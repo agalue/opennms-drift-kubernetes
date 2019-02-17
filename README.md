@@ -2,9 +2,11 @@
 
 OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/) through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/).
 
-This is basically the `Kubernetes` version of my work done [here](https://github.com/OpenNMS/opennms-drift-aws/tree/release/horizon-23). For learning purposes, I'm avodiong `Helm` charts and `operators` for this solution. Maybe I'll write one re-using existing solutions in the future.
+This is basically the `Kubernetes` version of the work done [here](https://github.com/OpenNMS/opennms-drift-aws/). For learning purposes, `Helm` charts and `operators` are avoided for this solution. In the future, that might change to take advantage of these technologies.
 
 Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
+
+## Limitations
 
 `Kafka` uses the `hostPort` feature to expose the advertise external listeners on port 9094, so applications outside `Kubernetes` like `Minion` can access it. For this reason, `Kafka` can be scaled up to the number of worker nodes on the `Kubernetes` cluster.
 
@@ -62,7 +64,7 @@ aws s3api put-bucket-versioning \
   --versioning-configuration Status=Enabled
 ```
 
-Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `k8s.opennms.org`:
+Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `k8s.opennms.org`, and the S3 bucked created above:
 
 ```shell
 kops create cluster \
@@ -82,7 +84,7 @@ kops create cluster \
 
 > **IMPORTANT: Remember to change the settings to reflect your desired environment.**
 
-Then, you should edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
+Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
 ```shell
 kops edit cluster k8s.opennms.org --state s3://k8s.opennms.org
@@ -96,7 +98,7 @@ spec:
     watchIngress: true
 ```
 
-While you're on edit mode, if you're interested on using `CoreDNS` instead, you can add:
+While on edit mode, instruct `kops` to use `CoreDNS` instead, by adding:
 
 ```yaml
 spec:
@@ -116,7 +118,7 @@ It takes a few minutes to have the cluster ready. Verify the cluster statue usin
 kops validate cluster --name k8s.opennms.org --state s3://k8s.opennms.org
 ```
 
-The output should be:
+The output should be something like this:
 
 ```text
 Validating cluster k8s.opennms.org
@@ -157,22 +159,16 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
 
-Make sure you have it installed on your system, and then execute the following:
+Make sure `terraform` it installed on your system, and then execute the following:
 
 ```shell
 terraform init
 terraform apply -auto-approve
 ```
 
-> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create the securigy group.
+> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
 
 ## Deployment
-
-As a side note, instead of providing the namespace for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
-
-```shell
-kubectl config set-context $(kubectl config current-context) --namespace=opennms
-```
 
 ### Plugins/Controllers
 
@@ -186,7 +182,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 
 #### Install the CertManager
 
-This add-on is required in order to provide HTTP/TLS support through LetsEncrypt to the HTTP services managed by the ingress controller.
+The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
 
 ```shell
 kubectl create namespace cert-manager
@@ -195,7 +191,7 @@ kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml --validate=false
 ```
 
-> NOTE: For troubleshooting, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
+> NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
 
 ### Namespace
 
@@ -207,11 +203,17 @@ kubectl apply -f ./namespace
 
 This will additionally add some complementary RBAC permissions, in case there is a need of adding operators and/or administrators to the OpenNMS namespace.
 
+As a side note, instead of providing the namespace for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
+
+```shell
+kubectl config set-context $(kubectl config current-context) --namespace=opennms
+```
+
 ### ConfigMaps/Secrets
 
 #### ConfigMaps
 
-From the directory on which this repository has been checked out:
+From the directory on which this repository has been checked out, execute the following to build a config-map based on the files inside the `config` directory:
 
 ```shell
 kubectl create configmap opennms-config --from-file=config/ --namespace opennms --dry-run -o yaml | kubectl apply -f -
@@ -219,7 +221,7 @@ kubectl create configmap opennms-config --from-file=config/ --namespace opennms 
 
 #### Secrets
 
-Create a secret object for the passwords:
+From the directory on which this repository has been checked out, create a secret object for all the passwords that are going to be used with this solution:
 
 ```shell
 kubectl create secret generic onms-passwords \
@@ -326,7 +328,7 @@ docker run -it --name minion \
 * Hasura GraphQL API: `https://hasura.k8s.opennms.org/v1alpha1/graphql`
 * Hasura GraphQL Console: `https://hasura.k8s.opennms.org/console`
 
-> NOTE: Make sure to use your own Domain ;)
+> NOTE: Make sure to use your own Domain.
 
 ## Optional Kubernetes Addons
 
