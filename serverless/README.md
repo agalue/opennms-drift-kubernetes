@@ -1,9 +1,13 @@
 
 # Introduction to Serverless
 
-There are hundreds of possible ways to use Serverless technologies with OpenNMS and Kubernetes. In this particular case, the idea is to have a simple function to react when an alarm from OpenNMS is set to a Kafka topic (which requires to have the Kafka producer feature enabled on the OpenNMS), and forwar it to a given Slack Channel as a message.
+There are hundreds of possible ways to use Serverless technologies with OpenNMS and Kubernetes. In this particular case, the idea is to have a simple function to react when an alarm from OpenNMS is sent to a Kafka topic, and forward it to a given Slack Channel as a message.
 
-In essence, this is a custom OpenNMS NBI implementation, or a Notification systenm absed on alarms.
+For this, it is required to have the Kafka producer feature enabled on the OpenNMS.
+
+In essence, and in terms of OpenNMS, this can be seen as a scalable custom OpenNMS NBI implementation, or a scalable Notification system based on alarms, or a scalable Scriptd alternative based on alarms.
+
+Of course, the events are also available through Kafka topics, but alarms are often more important in terms of notifying a user when a problem is discovered.
 
 ## Installation
 
