@@ -296,5 +296,9 @@ opennms.web.base-url=https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true
 EOF
 
+# Cleanup temporary requisition files:
+rm -f $CONFIG_DIR/imports/pending/*.xml.*
+rm -f $CONFIG_DIR/foreign-sources/pending/*.xml.*
+
 # Force to execute runjava and the install script
 touch $CONFIG_DIR/do-upgrade
