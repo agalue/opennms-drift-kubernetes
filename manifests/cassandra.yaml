@@ -3,6 +3,8 @@
 # WARNING:
 # - CASSANDRA_DC should match config/opennms-core/newts.cql
 # - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
+# - During field tests, Cassandra has shown better performance and CPU usage when using G1GC.
+#   That requires passing a custom jvm.options in order to change the garbage collector.
 #
 # TODO:
 # - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.

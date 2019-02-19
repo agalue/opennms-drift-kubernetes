@@ -168,14 +168,24 @@ max.request.size=5000000
 EOF
 
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
+suppressIncrementalAlarms=true
+forward.metrics=true
+nodeRefreshTimeoutMs=300000
+alarmSyncIntervalMs=300000
 nodeTopic=${INSTANCE_ID}_nodes
 alarmTopic=${INSTANCE_ID}_alarms
 eventTopic=${INSTANCE_ID}_events
 metricTopic=${INSTANCE_ID}_metrics
-forward.metrics=true
-nodeRefreshTimeoutMs=300000
-alarmSyncIntervalMs=300000
 EOF
+
+  if [[ $VERSION == "24"* ]]; then
+    cat <<EOF >> $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
+topologyProtocols=bridge,cdp,isis,lldp,ospf
+topologyVertexTopic=${INSTANCE_ID}_topology_vertex
+topologyEdgeTopic=${INSTANCE_ID}_topology_edge
+alarmFeedbackTopic=${INSTANCE_ID}_alarm_feedback
+EOF
+  fi
 fi
 
 # Configure Newts (works with either Cassandra or ScyllaDB)

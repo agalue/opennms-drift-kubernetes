@@ -28,9 +28,6 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: karaf
-    protocol: TCP
-    port: 8201
   - name: traps
     protocol: UDP
     port: 161
@@ -94,8 +91,8 @@ spec:
           privileged: true
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: opennms/minion:23.0.2-1
-        #image: opennms/minion:bleeding # Not good for production
+        #image: opennms/minion:23.0.2-1
+        image: opennms/minion:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -126,8 +123,8 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: opennms/minion:23.0.2-1
-        #image: opennms/minion:bleeding # Not good for production
+        #image: opennms/minion:23.0.2-1
+        image: opennms/minion:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
         - -f
@@ -156,6 +153,9 @@ spec:
         - containerPort: 1514
           protocol: UDP
           name: syslog
+        - containerPort: 8101
+          protocol: TCP
+          name: http
         - containerPort: 8201
           protocol: TCP
           name: karaf

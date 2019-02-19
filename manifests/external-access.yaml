@@ -15,13 +15,13 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: 'true'
-    certmanager.k8s.io/cluster-issuer: letsencrypt-issuer
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-http01-edit-in-place: 'true'
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
     ingress.kubernetes.io/affinity: cookie
     ingress.kubernetes.io/session-cookie-name: route
     ingress.kubernetes.io/session-cookie-hash: sha1
-    dns.alpha.kubernetes.io/external: ingress.k8s.opennms.org.
 spec:
   tls:
     - secretName: k8s-opennms-org

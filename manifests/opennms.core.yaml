@@ -71,8 +71,8 @@ spec:
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: opennms/horizon-core-web:23.0.2-1
-        #image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.2-1
+        image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -120,8 +120,8 @@ spec:
           value: '600'
       containers:
       - name: onms
-        image: opennms/horizon-core-web:23.0.2-1
-        #image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.2-1
+        image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
         - -s
