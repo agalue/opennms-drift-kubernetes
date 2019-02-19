@@ -14,7 +14,6 @@ metadata:
     deployment: drift
   annotations:
     kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: 'true'
     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
     certmanager.k8s.io/acme-http01-edit-in-place: 'true'
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -24,7 +23,7 @@ metadata:
     ingress.kubernetes.io/session-cookie-hash: sha1
 spec:
   tls:
-    - secretName: k8s-opennms-org
+    - secretName: k8s-opennms-org-ingress
       hosts:
         - grafana.k8s.opennms.org
         - hasura.k8s.opennms.org

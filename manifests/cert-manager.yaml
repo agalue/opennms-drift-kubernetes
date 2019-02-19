@@ -28,7 +28,7 @@ metadata:
   labels:
     deployment: drift
 spec:
-  secretName: k8s-opennms-org
+  secretName: k8s-opennms-org-tls
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
