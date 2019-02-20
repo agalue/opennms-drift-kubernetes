@@ -126,7 +126,7 @@ spec:
         - name: CASSANDRA_RACK
           valueFrom:
             fieldRef:
-              fieldPath: spec.nodeName
+              fieldPath: metadata.name # TODO spec.nodeName seems more accurate, but an affinity policy might be better.
         ports:
         - containerPort: 7000
           name: intra-node
