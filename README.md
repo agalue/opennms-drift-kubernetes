@@ -6,6 +6,8 @@ This is basically the `Kubernetes` version of the work done [here](https://githu
 
 Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
 
+Of course, there are more features in this particular solution compared with the original one, like dealing with additional features like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/kafka-manager) is easier when using containers.
+
 ## Limitations
 
 `Kafka` uses the `hostPort` feature to expose the advertise external listeners on port 9094, so applications outside `Kubernetes` like `Minion` can access it. For this reason, `Kafka` can be scaled up to the number of worker nodes on the `Kubernetes` cluster.
