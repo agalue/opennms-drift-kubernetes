@@ -69,6 +69,7 @@ metadata:
 spec:
   serviceName: minion
   replicas: 2
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       app: minion
