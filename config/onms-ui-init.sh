@@ -181,12 +181,22 @@ if [[ $GRAFANA_PUBLIC_URL ]] && [[ $GRAFANA_URL ]] && [[ $GF_SECURITY_ADMIN_PASS
   yum -q -y install jq
 
   FLOW_DASHBOARD=$(curl -u $GRAFANA_AUTH "$GRAFANA_URL/api/search?query=flow" 2>/dev/null | jq '.[0].url' | sed 's/"//g')
-  cat <<EOF > $CONFIG_DIR/org.opennms.netmgt.flows.rest.cfg
+  if [ "$FLOW_DASHBOARD" != "null" ]; then
+    cat <<EOF > $CONFIG_DIR/org.opennms.netmgt.flows.rest.cfg
 flowGraphUrl=$GRAFANA_PUBLIC_URL$FLOW_DASHBOARD?node=\$nodeId&interface=\$ifIndex
 EOF
+  else
+    echo "WARNING: cannot get Dashboard URL for the Deep Dive Tool"
+  fi
 
-  GRAFANA_KEY=$(curl -u $GRAFANA_AUTH -X POST -H "Content-Type: application/json" -d '{"name":"opennms-ui", "role": "Viewer"}' $GRAFANA_URL/api/auth/keys 2>/dev/null | jq .key - | sed 's/"//g')
+  KEY_ID=$(curl -u $GRAFANA_AUTH "$GRAFANA_URL/api/auth/keys" 2>/dev/null | jq '.[] | select(.name="opennms-ui") | .id')
+  if [ "$KEY_ID" != "" ]; then
+    echo "WARNING: API Key exist, deleting it prior re-creating it again"
+    curl -XDELETE -u $GRAFANA_AUTH "$GRAFANA_URL/api/auth/keys/$KEY_ID"
+  fi
+  GRAFANA_KEY=$(curl -u $GRAFANA_AUTH -X POST -H "Content-Type: application/json" -d '{"name":"opennms-ui", "role": "Viewer"}' "$GRAFANA_URL/api/auth/keys" 2>/dev/null | jq .key - | sed 's/"//g')
   if [ "$GRAFANA_KEY" != "null" ]; then
+    echo "Configuring Grafana Box..."
     GRAFANA_HOSTNAME=$(echo $GRAFANA_URL | sed -E 's/http[s]?:|\///g')
     cat <<EOF > $opennms_etc/opennms.properties.d/grafana.properties
 org.opennms.grafanaBox.show=true
@@ -195,5 +205,7 @@ org.opennms.grafanaBox.port=443
 org.opennms.grafanaBox.basePath=/
 org.opennms.grafanaBox.apiKey=$GRAFANA_KEY
 EOF
+  else
+    echo "WARNING: cannot get Grafana Key"
   fi
 fi

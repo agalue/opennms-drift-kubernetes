@@ -57,11 +57,19 @@ spec:
                 values:
                 - onms
       initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: grafana.opennms.svc.cluster.local:3000,opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: opennms/horizon-core-web:23.0.2-1
-        #image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.2-1
+        image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -93,18 +101,10 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-ui-init.sh
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: opennms-core.opennms.svc.cluster.local:8980,grafana.opennms.svc.cluster.local:3000
-        - name: TIMEOUT
-          value: '600'
       containers:
       - name: onms-ui
-        image: opennms/horizon-core-web:23.0.2-1
-        #image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.2-1
+        image: opennms/horizon-core-web:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:
