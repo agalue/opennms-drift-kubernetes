@@ -3,8 +3,6 @@
 # WARNING:
 # - CASSANDRA_DC should match config/opennms-core/newts.cql
 # - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
-# - During field tests, Cassandra has shown better performance and CPU usage when using G1GC.
-#   That requires passing a custom jvm.options in order to change the garbage collector.
 #
 # TODO:
 # - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.
@@ -37,6 +35,49 @@ spec:
     app: cassandra
 
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cassandra-config
+  namespace: opennms
+  labels:
+    app: cassandra
+    deployment: drift
+data:
+  # Be able to access Cassandra through JMX (for cassandra-reaper and for monitoring purposes)
+  jmxremote.password: |+
+    monitorRole QED
+    controlRole R&D
+    cassandra cassandra
+  # Enable G1GC as the performance tests on the field have proven good results.
+  jvm.options: |+
+    -ea
+    -XX:+UseThreadPriorities
+    -XX:ThreadPriorityPolicy=42
+    -XX:+HeapDumpOnOutOfMemoryError
+    -Xss256k
+    -XX:StringTableSize=1000003
+    -XX:+AlwaysPreTouch
+    -XX:-UseBiasedLocking
+    -XX:+UseTLAB
+    -XX:+ResizeTLAB
+    -XX:+UseNUMA
+    -XX:+PerfDisableSharedMem
+    -Djava.net.preferIPv4Stack=true
+    -XX:+UseG1GC
+    -XX:G1RSetUpdatingPauseTimePercent=5
+    -XX:MaxGCPauseMillis=500
+    -XX:+PrintGCDetails
+    -XX:+PrintGCDateStamps
+    -XX:+PrintHeapAtGC
+    -XX:+PrintTenuringDistribution
+    -XX:+PrintGCApplicationStoppedTime
+    -XX:+PrintPromotionFailure
+    -XX:+UseGCLogFileRotation
+    -XX:NumberOfGCLogFiles=10
+    -XX:GCLogFileSize=10M
+
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -58,11 +99,15 @@ spec:
         deployment: drift
     spec:
       terminationGracePeriodSeconds: 600
+      securityContext:
+        fsGroup: 999
       containers:
       - name: cassandra
         image: cassandra:3.11.4
         imagePullPolicy: IfNotPresent
         env:
+        - name: LOCAL_JMX
+          value: 'false'
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -96,6 +141,12 @@ spec:
         volumeMounts:
         - name: cassandra-data
           mountPath: /cassandra_data
+        - name: cassandra-config
+          mountPath: /etc/cassandra/jmxremote.password
+          subPath: jmxremote.password
+        - name: cassandra-config
+          mountPath: /etc/cassandra/jvm.options
+          subPath: jvm.options
         resources:
           limits:
             cpu: 4
@@ -104,6 +155,7 @@ spec:
             cpu: 2
             memory: 2Gi
         securityContext:
+          runAsUser: 999
           capabilities:
             add:
             - IPC_LOCK
@@ -113,13 +165,13 @@ spec:
               command: # TODO What about decommissioning ?
               - bash
               - -c
-              - nodetool drain
+              - nodetool -u cassandra -pw cassandra drain
         readinessProbe:
           exec:
             command:
             - bash
             - -c
-            - 'if [[ $(nodetool status -r | grep $HOSTNAME) == *"UN"* ]]; then exit 0; else exit 1; fi'
+            - 'if [[ $(nodetool -u cassandra -pw cassandra status -r | grep $HOSTNAME) == *"UN"* ]]; then exit 0; else exit 1; fi'
           initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
@@ -127,6 +179,10 @@ spec:
             port: cql
           initialDelaySeconds: 90
           periodSeconds: 60
+      volumes:
+      - name: cassandra-config
+        configMap:
+          name: cassandra-config
   volumeClaimTemplates:
   - metadata:
       name: cassandra-data

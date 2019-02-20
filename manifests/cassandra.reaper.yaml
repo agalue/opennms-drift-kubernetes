@@ -1,0 +1,71 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cassandra-reaper
+  namespace: opennms
+  labels:
+    app: cassandra-reaper
+    deployment: drift
+spec:
+  clusterIP: None
+  ports:
+  - port: 8080
+    name: http
+  selector:
+    app: cassandra-reaper
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cassandra-reaper
+  namespace: opennms
+  labels:
+    app: cassandra-reaper
+    deployment: drift
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cassandra-reaper
+  template:
+    metadata:
+      labels:
+        app: cassandra-reaper
+        deployment: drift
+    spec:
+      containers:
+      - name: cassandra-reaper
+        image: thelastpickle/cassandra-reaper:1.4.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: REAPER_JMX_AUTH_USERNAME # See config-map cassandra-config
+          value: cassandra
+        - name: REAPER_JMX_AUTH_PASSWORD # See config-map cassandra-config
+          value: cassandra
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8081
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+        readinessProbe:
+          httpGet:
+            path: /webui/
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /webui/
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 60
