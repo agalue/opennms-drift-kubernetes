@@ -5,6 +5,8 @@
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
 # - Horizon 23 or newer is required.
+# - The jq command is required, and it is installed through YUM at runtime,
+#   so Internet access is required to use this script.
 #
 # Purpose:
 # - Apply recommended changes to force OpenNMS to be a read-only WebUI server.
@@ -198,7 +200,8 @@ EOF
   if [ "$GRAFANA_KEY" != "null" ]; then
     echo "Configuring Grafana Box..."
     GRAFANA_HOSTNAME=$(echo $GRAFANA_URL | sed -E 's/http[s]?:|\///g')
-    cat <<EOF > $opennms_etc/opennms.properties.d/grafana.properties
+    mkdir -p $CONFIG_DIR/opennms.properties.d/
+    cat <<EOF > $CONFIG_DIR/opennms.properties.d/grafana.properties
 org.opennms.grafanaBox.show=true
 org.opennms.grafanaBox.hostname=$GRAFANA_HOSTNAME
 org.opennms.grafanaBox.port=443
