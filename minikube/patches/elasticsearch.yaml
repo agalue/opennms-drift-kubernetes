@@ -18,28 +18,25 @@
 - op: replace
   path: /spec/template/spec/containers/0/env/3
   value:
-    name: discovery.zen.ping.unicast.hosts
-    value: esdata-0
-
-- op: replace
-  path: /spec/template/spec/containers/0/env/4
-  value:
-    name: discovery.zen.minimum_master_nodes
-    value: '1'
+    name: discovery.type
+    value: single-node
 
 - op: remove
-  path: /spec/template/spec/containers/0/env/5
+  path: /spec/template/spec/containers/0/env/4
+
+- op: remove
+  path: /spec/template/spec/containers/0/env/4
+
+- op: remove
+  path: /spec/template/spec/containers/0/env/4
+
+- op: remove
+  path: /spec/template/spec/containers/0/env/4
 
 - op: replace
   path: /spec/template/spec/containers/0/env/5
   value:
     name: bootstrap.memory_lock
-    value: 'false'
-
-- op: replace
-  path: /spec/template/spec/containers/0/env/6
-  value:
-    name: xpack.monitoring.enabled
     value: 'false'
 
 - op: replace
