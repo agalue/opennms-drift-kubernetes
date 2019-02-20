@@ -83,7 +83,7 @@ spec:
         - name: CASSANDRA_RACK
           valueFrom:
             fieldRef:
-              fieldPath: metadata.name # TODO spec.nodeName should be more correct, or create a policy to avoid having 2 instances on the same machine
+              fieldPath: spec.nodeName
         ports:
         - containerPort: 7000
           name: intra-node
