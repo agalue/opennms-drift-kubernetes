@@ -50,6 +50,7 @@ spec:
         - containerPort: 8080
           name: http
         - containerPort: 8081
+          name: http-admin
         resources:
           limits:
             cpu: 200m
@@ -58,14 +59,12 @@ spec:
             cpu: 50m
             memory: 128Mi
         readinessProbe:
-          httpGet:
-            path: /webui/
+          tcpSocket:
             port: http
           initialDelaySeconds: 15
           periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /webui/
+          tcpSocket:
             port: http
           initialDelaySeconds: 30
           periodSeconds: 60

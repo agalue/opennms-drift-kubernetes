@@ -3,11 +3,9 @@
 # WARNING:
 # - CASSANDRA_DC should match config/opennms-core/newts.cql
 # - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
+# - Make sure to take appropriate actions when stopping or decomissioning (shrink cluster).
 #
 # TODO:
-# - Improve a PreStop lifecycle hook to perform a decomission when scaling down the cluster.
-#   A script that looks for a specific file (copied through kubectl) can help to decide which kind of task to execute.
-#   In theory, persistent volumes should also be deleted as well.
 # - Take a look at https://github.com/instaclustr/cassandra-operator
 # - Take a look at https://github.com/scylladb/scylla-code-samples/tree/master/kubernetes-scylla
 
@@ -159,13 +157,6 @@ spec:
           capabilities:
             add:
             - IPC_LOCK
-        lifecycle:
-          preStop:
-            exec:
-              command: # TODO What about decommissioning ?
-              - bash
-              - -c
-              - nodetool -u cassandra -pw cassandra drain
         readinessProbe:
           exec:
             command:
