@@ -93,7 +93,7 @@ spec:
         image: opennms/sentinel:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         args:
-          - -d
+          - -f
         ports:
         - containerPort: 8181
           name: http
