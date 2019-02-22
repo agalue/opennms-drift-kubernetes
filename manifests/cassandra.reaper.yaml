@@ -46,6 +46,17 @@ spec:
           value: cassandra
         - name: REAPER_JMX_AUTH_PASSWORD # See config-map cassandra-config
           value: cassandra
+        - name: REAPER_STORAGE_TYPE
+          value: postgres
+        - name: REAPER_POSTGRES_URL
+          value: jdbc:postgresql://postgresql.opennms.svc.cluster.local:5432/reaper
+        - name: REAPER_POSTGRES_USER
+          value: postgres
+        - name: REAPER_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES
+              name: onms-passwords
         ports:
         - containerPort: 8080
           name: http

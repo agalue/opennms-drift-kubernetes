@@ -40,6 +40,7 @@ spec:
   tls:
     - secretName: k8s-opennms-org-ingress
       hosts:
+        - cassandra-reaper.k8s.opennms.org
         - grafana.k8s.opennms.org
         - hasura.k8s.opennms.org
         - kafka-manager.k8s.opennms.org
@@ -47,6 +48,13 @@ spec:
         - onms.k8s.opennms.org
         - onmsui.k8s.opennms.org
   rules:
+    - host: cassandra-reaper.k8s.opennms.org
+      http:
+        paths:
+          - path: /webui
+            backend:
+              serviceName: cassandra-reaper
+              servicePort: 8080
     - host: grafana.k8s.opennms.org
       http:
         paths:
