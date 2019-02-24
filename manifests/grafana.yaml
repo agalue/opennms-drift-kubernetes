@@ -69,7 +69,8 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        image: opennms/helm:2.0.0
+        #image: opennms/helm:3.0.0
+        image: opennms/helm:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000

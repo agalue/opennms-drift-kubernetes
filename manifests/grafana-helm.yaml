@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: helm
-        image: opennms/helm:2.0.0
+        #image: opennms/helm:3.0.0
+        image: opennms/helm:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command:
           - sh
