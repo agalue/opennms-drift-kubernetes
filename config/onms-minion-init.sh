@@ -16,13 +16,14 @@
 # - KAFKA_SERVER
 
 OVERLAY=/etc-overlay
+MINION_HOME=/opt/minion
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
 ### Basic Settings
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-SYSTEM_CFG=/opt/minion/etc/system.properties
+SYSTEM_CFG=$MINION_HOME/etc/system.properties
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF >> $SYSTEM_CFG
@@ -35,8 +36,8 @@ fi
 
 # Configuring SCV credentials to access the OpenNMS ReST API
 if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
-  /opt/minion/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
-  cp /opt/minion/etc/scv.jce $OVERLAY
+  $MINION_HOME/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
+  cp $MINION_HOME/etc/scv.jce $OVERLAY
 fi
 
 # Append the same relaxed SNMP4J options that OpenNMS has,
