@@ -37,6 +37,15 @@ spec:
         app: cassandra-reaper
         deployment: drift
     spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042
+        - name: TIMEOUT
+          value: '600'
       containers:
       - name: cassandra-reaper
         image: thelastpickle/cassandra-reaper:1.4.0
