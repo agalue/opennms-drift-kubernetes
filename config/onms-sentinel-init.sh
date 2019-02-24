@@ -45,8 +45,8 @@ fi
 
 # Configuring SCV credentials to access the OpenNMS ReST API
 if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
-  SENTINEL_HOME/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
-  cp SENTINEL_HOME/etc/scv.jce $OVERLAY
+  $SENTINEL_HOME/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
+  cp $SENTINEL_HOME/etc/scv.jce $OVERLAY
 fi
 
 # WARNING: The following directory only exist on H24. For H23 create $MINION_HOME/deploy/features.xml
