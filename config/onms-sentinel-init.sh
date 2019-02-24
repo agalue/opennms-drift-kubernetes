@@ -7,6 +7,8 @@
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
 # - Horizon 23 or newer is required (if H23 is used, features.xml must be mounted on the Sentinel Pods)
+#   The reason for this is that H23 doesn't support featuresBoot.d/, so features.xml should be used
+#   to start the desired features.
 #
 # Purpose:
 # - Configure instance ID and the Telemetry adapters only if Elasticsearch is provided.
