@@ -20,14 +20,17 @@
 # - KAFKA_SERVER
 # - KAFKA_GROUP_ID
 # - CASSANDRA_SERVER
+# - OPENNMS_HTTP_USER
+# - OPENNMS_HTTP_PASS
 
 GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
 OVERLAY=/etc-overlay
+SENTINEL_HOME=/opt/sentinel
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-sentinel)
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-SYSTEM_CFG=/opt/sentinel/etc/system.properties
+SYSTEM_CFG=$SENTINEL_HOME/etc/system.properties
 if [[ $INSTANCE_ID ]]; then
   echo "Configuring Instance ID..."
   cat <<EOF >> $SYSTEM_CFG
@@ -36,6 +39,12 @@ if [[ $INSTANCE_ID ]]; then
 org.opennms.instance.id=$INSTANCE_ID
 EOF
   cp $SYSTEM_CFG $OVERLAY
+fi
+
+# Configuring SCV credentials to access the OpenNMS ReST API
+if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
+  SENTINEL_HOME/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
+  cp SENTINEL_HOME/etc/scv.jce $OVERLAY
 fi
 
 # WARNING: The following directory only exist on H24. For H23 create $MINION_HOME/deploy/features.xml
@@ -146,19 +155,19 @@ adapters.1.name = SFlow-Adapter
 adapters.1.class-name = $SFLOW_CLASS
 adapters.2.name = SFlow-Telemetry
 adapters.2.class-name = $SFLOW_TELEMETRY_CLASS
-adapters.2.parameters.script = /opt/minion/etc/sflow-host.groovy
+adapters.2.parameters.script = $SENTINEL_HOME/etc/sflow-host.groovy
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-nxos.cfg
 name = NXOS
 class-name = $NXOS_TELEMETRY_CLASS
-parameters.script = /opt/minion/etc/cisco-nxos-telemetry-interface.groovy
+parameters.script = $SENTINEL_HOME/etc/cisco-nxos-telemetry-interface.groovy
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-jti.cfg
 name = JTI
 class-name = $JTI_TELEMETRY_CLASS
-parameters.script = /opt/minion/etc/junos-telemetry-interface.groovy
+parameters.script = $SENTINEL_HOME/etc/junos-telemetry-interface.groovy
 EOF
 
   cat <<EOF > $OVERLAY/datacollection-config.xml

@@ -73,6 +73,13 @@ spec:
             secretKeyRef:
               key: ELASTICSEARCH
               name: onms-passwords
+        - name: OPENNMS_HTTP_USER
+          value: admin
+        - name: OPENNMS_HTTP_PASS
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_UI_ADMIN
+              name: onms-passwords
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
