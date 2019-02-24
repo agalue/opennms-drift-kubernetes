@@ -52,8 +52,6 @@ spec:
       initContainers:
       - name: generate-zooid
         image: busybox
-        securityContext:
-          privileged: true
         command:
         - sh
         - -c
@@ -133,3 +131,4 @@ spec:
       resources:
         requests:
           storage: 4Gi
+
