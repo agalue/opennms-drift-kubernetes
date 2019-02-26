@@ -142,7 +142,7 @@ spec:
         - name: TZ
           value: America/New_York
         - name: JAVA_OPTS
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
+          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: MINION_LOCATION
           value: Kubernetes
         - name: OPENNMS_HTTP_URL
@@ -196,8 +196,9 @@ spec:
             - bash
             - -c
             - 'if /opt/minion/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 60
+          timeoutSeconds: 15
         lifecycle:
           preStop:
             exec:

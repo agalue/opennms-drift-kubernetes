@@ -39,8 +39,16 @@ spec:
         deployment: drift
     spec:
       initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: postgresql.opennms.svc.cluster.local:5432
+        - name: TIMEOUT
+          value: '600'
       - name: init-database
-        image: postgres:10.6-alpine
+        image: postgres:10.7-alpine
         imagePullPolicy: IfNotPresent
         command:
         - sh
@@ -93,8 +101,8 @@ spec:
             value: grafana
           - name: GF_SESSION_PROVIDER
             value: postgres
-          - name: GF_SESSION_PROVIDER_CONFIG # The password field should match GF_DATABASE_PASSWORD
-            value: user=grafana password=grafana host=postgresql.opennms.svc.cluster.local port=5432 dbname=grafana sslmode=disable
+          - name: GF_SESSION_PROVIDER_CONFIG # dbname, user and password fields should match GF_DATABASE_* environment variables
+            value: dbname=grafana user=grafana password=grafana host=postgresql.opennms.svc.cluster.local port=5432 sslmode=disable
         readinessProbe:
           httpGet:
             path: /

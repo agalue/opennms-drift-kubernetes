@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:10.6-alpine
+        image: postgres:10.7-alpine
         imagePullPolicy: IfNotPresent
         command:
         - docker-entrypoint.sh

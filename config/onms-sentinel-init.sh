@@ -53,24 +53,24 @@ fi
 FEATURES_DIR=$OVERLAY/featuresBoot.d
 mkdir -p $FEATURES_DIR
 
-# Horizon 23 Classes for Flows
-SFLOW_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowAdapter
-IPFIX_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.ipfix.IpfixAdapter
-NETFLOW5_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.v5.Netflow5Adapter
-NETFLOW9_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.v9.Netflow9Adapter
-SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowTelemetryAdapter
-NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbAdapter
-JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.jti.JtiGpbAdapter
+# Horizon 24+ Classes for Flows
+SFLOW_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
+IPFIX_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
+NETFLOW5_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
+NETFLOW9_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
+SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowTelemetryAdapter
+NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
+JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
 
 # Horizon 24 Classes for Flows
-if [[ $VERSION == "24"* ]]; then
-  SFLOW_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
-  IPFIX_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
-  NETFLOW5_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
-  NETFLOW9_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
-  SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowTelemetryAdapter
-  NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
-  JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
+if [[ $VERSION == "23"* ]]; then
+  SFLOW_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowAdapter
+  IPFIX_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.ipfix.IpfixAdapter
+  NETFLOW5_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.v5.Netflow5Adapter
+  NETFLOW9_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.v9.Netflow9Adapter
+  SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowTelemetryAdapter
+  NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbAdapter
+  JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.jti.JtiGpbAdapter
 fi
 
 if [[ $ELASTIC_SERVER ]]; then

@@ -8,7 +8,6 @@
 # - Using a Deployment instead of StatefulSet, as the Sentinel ID is not used at the moment.
 #
 # WARNING:
-# - The sentinel user (uid: 999, gid: 997) cannot be used in OpenShift by default.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 #
@@ -115,7 +114,7 @@ spec:
         - name: TZ
           value: America/New_York
         - name: JAVA_OPTS
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
+          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
@@ -156,7 +155,7 @@ spec:
         readinessProbe:
           tcpSocket:
             port: karaf
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
           exec:
@@ -166,6 +165,7 @@ spec:
             - 'if /opt/sentinel/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
           initialDelaySeconds: 60
           periodSeconds: 60
+          timeoutSeconds: 15
         lifecycle:
           preStop:
             exec:

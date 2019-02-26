@@ -143,9 +143,9 @@ host=0.0.0.0
 port=4738
 maxPacketSize=8096
 EOF
-fi
 
-if [[ $VERSION == "24"* ]]; then
+else
+
   echo "Configuring listeners for Horizon $VERSION"
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-50001.cfg

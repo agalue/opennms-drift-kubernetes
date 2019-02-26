@@ -120,14 +120,14 @@ EOF
 # Enable OSGi features
 if [[ $FEATURES_LIST ]]; then
   echo "Enabling features: $FEATURES_LIST ..."
-  if [[ $VERSION == "24"* ]]; then
+  if [[ $VERSION == "23"* ]]; then
+    FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
+    sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
+  else
     IFS=', ' read -r -a FEATURES <<< "$FEATURES_LIST"
     for FEATURE in "${FEATURES[@]}"; do
       echo $FEATURE >> $CONFIG_DIR/featuresBoot.d/custom.boot
     done
-  else
-    FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
-    sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
   fi
 fi
 
@@ -178,7 +178,7 @@ eventTopic=${INSTANCE_ID}_events
 metricTopic=${INSTANCE_ID}_metrics
 EOF
 
-  if [[ $VERSION == "24"* ]]; then
+  if [[ $VERSION != "23"* ]]; then
     cat <<EOF >> $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
 topologyProtocols=bridge,cdp,isis,lldp,ospf
 topologyVertexTopic=${INSTANCE_ID}_topology_vertex
