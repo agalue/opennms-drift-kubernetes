@@ -199,7 +199,7 @@ EOF
   GRAFANA_KEY=$(curl -u $GRAFANA_AUTH -X POST -H "Content-Type: application/json" -d '{"name":"opennms-ui", "role": "Viewer"}' "$GRAFANA_URL/api/auth/keys" 2>/dev/null | jq .key - | sed 's/"//g')
   if [ "$GRAFANA_KEY" != "null" ]; then
     echo "Configuring Grafana Box..."
-    GRAFANA_HOSTNAME=$(echo $GRAFANA_URL | sed -E 's/http[s]?:|\///g')
+    GRAFANA_HOSTNAME=$(echo $GRAFANA_PUBLIC_URL | sed -E 's/http[s]?:|\///g')
     mkdir -p $CONFIG_DIR/opennms.properties.d/
     cat <<EOF > $CONFIG_DIR/opennms.properties.d/grafana.properties
 org.opennms.grafanaBox.show=true
