@@ -22,6 +22,9 @@
 # - GRAFANA_PUBLIC_URL
 # - GF_SECURITY_ADMIN_PASSWORD
 
+# To avoid issues with OpenShift
+umask 002
+
 CONFIG_DIR=/opt/opennms-etc-overlay
 WEB_DIR=/opt/opennms-jetty-webinf-overlay
 KEYSPACE=${INSTANCE_ID-onms}_newts

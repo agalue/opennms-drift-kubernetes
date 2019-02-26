@@ -15,6 +15,9 @@
 # - OPENNMS_HTTP_PASS
 # - KAFKA_SERVER
 
+# To avoid issues with OpenShift
+umask 002
+
 OVERLAY=/etc-overlay
 MINION_HOME=/opt/minion
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)

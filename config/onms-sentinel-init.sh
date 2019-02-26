@@ -25,6 +25,9 @@
 # - OPENNMS_HTTP_USER
 # - OPENNMS_HTTP_PASS
 
+# To avoid issues with OpenShift
+umask 002
+
 GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel

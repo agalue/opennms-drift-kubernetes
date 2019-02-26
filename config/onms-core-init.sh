@@ -29,6 +29,9 @@
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
 
+# To avoid issues with OpenShift
+umask 002
+
 CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
 KEYSPACE=${INSTANCE_ID-onms}_newts
