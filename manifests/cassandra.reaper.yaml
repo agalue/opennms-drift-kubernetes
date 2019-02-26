@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# http://cassandra-reaper.io/docs/configuration/docker_vars/
 
 ---
 apiVersion: v1
@@ -43,9 +45,20 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TARGETS
-          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042
+          value: cassandra.opennms.svc.cluster.local:9042
         - name: TIMEOUT
           value: '600'
+      - name: init-database
+        image: cassandra:3.11.4
+        imagePullPolicy: IfNotPresent
+        command: [ sh, -c, 'cqlsh -e $CQL $CASSANDRA_HOST' ]
+        env:
+        - name: CASSANDRA_HOST
+          value: cassandra.opennms.svc.cluster.local
+        - name: REPFACTOR # Must match CASSANDRA_REPFACTOR from opennms.core.yaml
+          value: '2'
+        - name: CQL
+          value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REPFACTOR) };"
       containers:
       - name: cassandra-reaper
         image: thelastpickle/cassandra-reaper:1.4.0
@@ -56,16 +69,11 @@ spec:
         - name: REAPER_JMX_AUTH_PASSWORD # See config-map cassandra-config
           value: cassandra
         - name: REAPER_STORAGE_TYPE
-          value: postgres
-        - name: REAPER_POSTGRES_URL
-          value: jdbc:postgresql://postgresql.opennms.svc.cluster.local:5432/reaper
-        - name: REAPER_POSTGRES_USER
-          value: postgres
-        - name: REAPER_POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              key: POSTGRES
-              name: onms-passwords
+          value: cassandra
+        - name: REAPER_CASS_CONTACT_POINTS
+          value: "[ cassandra.opennms.svc.cluster.local ]"
+        - name: REAPER_CASS_CLUSTER_NAME # See CASSANDRA_CLUSTER_NAME from cassandra.yaml
+          value: OpenNMS
         ports:
         - containerPort: 8080
           name: http
@@ -81,10 +89,10 @@ spec:
         readinessProbe:
           tcpSocket:
             port: http
-          initialDelaySeconds: 15
-          periodSeconds: 10
+          initialDelaySeconds: 30
+          periodSeconds: 15
         livenessProbe:
           tcpSocket:
             port: http
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 60
