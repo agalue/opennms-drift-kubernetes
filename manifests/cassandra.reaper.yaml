@@ -70,6 +70,10 @@ spec:
           value: "[ cassandra.opennms.svc.cluster.local ]"
         - name: REAPER_CASS_CLUSTER_NAME # See CASSANDRA_CLUSTER_NAME from cassandra.yaml
           value: OpenNMS
+        - name: REAPER_JMX_AUTH_USERNAME # See ConfigMap/cassandra-config from cassandra.yaml
+          value: cassandra
+        - name: REAPER_JMX_AUTH_PASSWORD # See ConfigMap/cassandra-config from cassandra.yaml
+          value: cassandra
         ports:
         - containerPort: 8080
           name: http
