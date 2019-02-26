@@ -31,7 +31,7 @@ spec:
           - name: GRAFANA_URL
             value: http://grafana.opennms.svc.cluster.local:3000
           - name: ONMS_URL
-            value: http://onmsui.k8s.opennms.org/opennms
+            value: https://onmsui.k8s.opennms.org/opennms
           - name: ONMS_USER
             value: admin
           - name: ONMS_PASSWD
