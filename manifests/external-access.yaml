@@ -51,7 +51,7 @@ spec:
     - host: cassandra-reaper.k8s.opennms.org
       http:
         paths:
-          - path: /webui
+          - path: /
             backend:
               serviceName: cassandra-reaper
               servicePort: 8080

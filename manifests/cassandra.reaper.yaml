@@ -51,7 +51,7 @@ spec:
       - name: init-database
         image: cassandra:3.11.4
         imagePullPolicy: IfNotPresent
-        command: [ sh, -c, 'cqlsh -e $CQL $CASSANDRA_HOST' ]
+        command: [ sh, -c, 'cqlsh -e "$CQL" $CASSANDRA_HOST' ]
         env:
         - name: CASSANDRA_HOST
           value: cassandra.opennms.svc.cluster.local
@@ -64,10 +64,6 @@ spec:
         image: thelastpickle/cassandra-reaper:1.4.0
         imagePullPolicy: IfNotPresent
         env:
-        - name: REAPER_JMX_AUTH_USERNAME # See config-map cassandra-config
-          value: cassandra
-        - name: REAPER_JMX_AUTH_PASSWORD # See config-map cassandra-config
-          value: cassandra
         - name: REAPER_STORAGE_TYPE
           value: cassandra
         - name: REAPER_CASS_CONTACT_POINTS
