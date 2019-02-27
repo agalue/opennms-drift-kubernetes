@@ -54,23 +54,23 @@ spec:
         - sh
         - /bin/grafana-init.sh
         env:
-          - name: PGHOST
-            value: postgresql.opennms.svc.cluster.local
-          - name: PGPORT
-            value: '5432'
-          - name: PGUSER
-            value: postgres
-          - name: PGPASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: POSTGRES
-                name: onms-passwords
-          - name: GF_DATABASE_NAME
-            value: grafana
-          - name: GF_DATABASE_USER
-            value: grafana
-          - name: GF_DATABASE_PASSWORD
-            value: grafana
+        - name: PGHOST
+          value: postgresql.opennms.svc.cluster.local
+        - name: PGPORT
+          value: '5432'
+        - name: PGUSER
+          value: postgres
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES
+              name: onms-passwords
+        - name: GF_DATABASE_NAME
+          value: grafana
+        - name: GF_DATABASE_USER
+          value: grafana
+        - name: GF_DATABASE_PASSWORD
+          value: grafana
         volumeMounts:
         - name: opennms-config
           mountPath: /bin/grafana-init.sh
@@ -84,25 +84,27 @@ spec:
         - containerPort: 3000
           name: http
         env:
-          - name: GF_SECURITY_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: GRAFANA_UI_ADMIN
-                name: onms-passwords
-          - name: GF_DATABASE_TYPE
-            value: postgres
-          - name: GF_DATABASE_HOST
-            value: postgresql.opennms.svc.cluster.local:5432
-          - name: GF_DATABASE_NAME
-            value: grafana
-          - name: GF_DATABASE_USER
-            value: grafana
-          - name: GF_DATABASE_PASSWORD
-            value: grafana
-          - name: GF_SESSION_PROVIDER
-            value: postgres
-          - name: GF_SESSION_PROVIDER_CONFIG # dbname, user and password fields should match GF_DATABASE_* environment variables
-            value: dbname=grafana user=grafana password=grafana host=postgresql.opennms.svc.cluster.local port=5432 sslmode=disable
+        - name: TZ
+          value: America/New_York
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: GRAFANA_UI_ADMIN
+              name: onms-passwords
+        - name: GF_DATABASE_TYPE
+          value: postgres
+        - name: GF_DATABASE_HOST
+          value: postgresql.opennms.svc.cluster.local:5432
+        - name: GF_DATABASE_NAME
+          value: grafana
+        - name: GF_DATABASE_USER
+          value: grafana
+        - name: GF_DATABASE_PASSWORD
+          value: grafana
+        - name: GF_SESSION_PROVIDER
+          value: postgres
+        - name: GF_SESSION_PROVIDER_CONFIG # dbname, user and password fields should match GF_DATABASE_* environment variables
+          value: dbname=grafana user=grafana password=grafana host=postgresql.opennms.svc.cluster.local port=5432 sslmode=disable
         readinessProbe:
           httpGet:
             path: /

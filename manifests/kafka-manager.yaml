@@ -43,6 +43,8 @@ spec:
         image: hlebalbau/kafka-manager:stable
         imagePullPolicy: IfNotPresent
         env:
+        - name: TZ
+          value: America/New_York
         - name: JAVA_OPTS
           value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: ZK_HOSTS

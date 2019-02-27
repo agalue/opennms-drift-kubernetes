@@ -98,9 +98,7 @@ spec:
               serviceName: opennms-ui
               servicePort: 8980
 
-# An alternative to the following is creating Route53 entries through Terraform to avoid having an ELB as an entry point for Minions.
-# The Route53 entries should point to all the hosts.
-# Another alternative is use the K8S Hostname on the advertised listener, and then use that on Minions.
+# The following is the entry point needed for external Minions
 ---
 apiVersion: v1
 kind: Service

@@ -20,25 +20,27 @@ spec:
         image: opennms/helm:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         command:
-          - sh
-          - /bin/helm-init.sh
+        - sh
+        - /bin/helm-init.sh
         env:
-          - name: GF_SECURITY_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: GRAFANA_UI_ADMIN
-                name: onms-passwords
-          - name: GRAFANA_URL
-            value: http://grafana.opennms.svc.cluster.local:3000
-          - name: ONMS_URL
-            value: https://onmsui.k8s.opennms.org/opennms
-          - name: ONMS_USER
-            value: admin
-          - name: ONMS_PASSWD
-            valueFrom:
-              secretKeyRef:
-                key: OPENNMS_UI_ADMIN
-                name: onms-passwords
+        - name: TZ
+          value: America/New_York
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: GRAFANA_UI_ADMIN
+              name: onms-passwords
+        - name: GRAFANA_URL
+          value: http://grafana.opennms.svc.cluster.local:3000
+        - name: ONMS_URL
+          value: https://onmsui.k8s.opennms.org/opennms
+        - name: ONMS_USER
+          value: admin
+        - name: ONMS_PASSWD
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_UI_ADMIN
+              name: onms-passwords
         volumeMounts:
         - name: opennms-config
           mountPath: /bin/helm-init.sh

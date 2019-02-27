@@ -130,6 +130,8 @@ spec:
         args:
         - -f
         env:
+        - name: TZ
+          value: America/New_York
         - name: MINION_ID
           valueFrom:
             fieldRef:
@@ -139,8 +141,6 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
-        - name: TZ
-          value: America/New_York
         - name: JAVA_OPTS
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: MINION_LOCATION
@@ -210,6 +210,8 @@ spec:
       - name: nxos-grpc
         image: agalue/opennms-nxos-grpc:latest
         env:
+        - name: TZ
+          value: America/New_York
         - name: BOOTSTRAP_SERVERS
           value: kafka.opennms.svc.cluster.local:9092
         - name: MINION_LOCATION # Must match Minion settings

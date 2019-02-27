@@ -60,6 +60,8 @@ spec:
         - -c
         - 'max_connections=300'
         env:
+        - name: TZ
+          value: America/New_York
         - name: PGUSER
           value: postgres
         - name: POSTGRES_USER

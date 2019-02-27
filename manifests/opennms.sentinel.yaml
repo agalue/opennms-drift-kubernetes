@@ -106,13 +106,13 @@ spec:
         - containerPort: 8301
           name: karaf
         env:
+        - name: TZ
+          value: America/New_York
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
-        - name: TZ
-          value: America/New_York
         - name: JAVA_OPTS
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: POSTGRES_HOST

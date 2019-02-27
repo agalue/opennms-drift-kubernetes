@@ -52,6 +52,8 @@ spec:
         image: docker.elastic.co/kibana/kibana:6.5.4
         imagePullPolicy: IfNotPresent
         env:
+        - name: TZ
+          value: America/New_York
         - name: SERVER_NAME
           valueFrom:
             fieldRef:

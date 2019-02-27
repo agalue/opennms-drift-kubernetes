@@ -63,17 +63,19 @@ spec:
         - sh
         - /init.sh
         env:
-          - name: PGHOST
-            value: postgresql.opennms.svc.cluster.local
-          - name: PGPORT
-            value: '5432'
-          - name: PGUSER
-            value: postgres
-          - name: PGPASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: POSTGRES
-                name: onms-passwords
+        - name: TZ
+          value: America/New_York
+        - name: PGHOST
+          value: postgresql.opennms.svc.cluster.local
+        - name: PGPORT
+          value: '5432'
+        - name: PGUSER
+          value: postgres
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES
+              name: onms-passwords
         volumeMounts:
         - name: opennms-config
           mountPath: /init.sh

@@ -75,6 +75,8 @@ spec:
         - containerPort: 9300
           name: transport
         env:
+        - name: TZ
+          value: America/New_York
         - name: cluster.name
           value: OpenNMS
         - name: node.name

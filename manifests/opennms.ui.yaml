@@ -2,6 +2,7 @@
 #
 # WARNING:
 # - The opennms process runs as root, which is not allowed on OpenShift
+# - NRTG won't work on the UI servers.
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
@@ -113,6 +114,8 @@ spec:
         - containerPort: 8980
           name: http
         env:
+        - name: TZ
+          value: America/New_York
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:

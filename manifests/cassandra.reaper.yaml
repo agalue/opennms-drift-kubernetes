@@ -64,6 +64,8 @@ spec:
         image: thelastpickle/cassandra-reaper:1.4.0
         imagePullPolicy: IfNotPresent
         env:
+        - name: TZ
+          value: America/New_York
         - name: REAPER_STORAGE_TYPE
           value: cassandra
         - name: REAPER_CASS_CONTACT_POINTS

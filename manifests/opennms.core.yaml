@@ -131,6 +131,8 @@ spec:
         - containerPort: 8980
           name: http
         env:
+        - name: TZ
+          value: America/New_York
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -140,8 +142,6 @@ spec:
           valueFrom:
             resourceFieldRef:
               resource: requests.cpu
-        - name: TZ
-          value: America/New_York
         - name: JAVA_OPTS # Preferred way instead of opennms.conf
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
         - name: POSTGRES_HOST

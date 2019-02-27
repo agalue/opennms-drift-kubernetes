@@ -79,6 +79,8 @@ spec:
         - containerPort: 9999
           name: jmx
         env:
+        - name: TZ
+          value: America/New_York
         - name: POD_IP
           valueFrom:
             fieldRef:
