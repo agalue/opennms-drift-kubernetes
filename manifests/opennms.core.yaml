@@ -143,7 +143,7 @@ spec:
             resourceFieldRef:
               resource: requests.cpu
         - name: JAVA_OPTS # Preferred way instead of opennms.conf
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+PrintFlagsFinal
+          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
