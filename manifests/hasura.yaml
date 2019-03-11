@@ -85,7 +85,7 @@ spec:
           subPath: hasura-init.sh
       containers:
       - name: hasura
-        image: hasura/graphql-engine:v1.0.0-alpha38
+        image: hasura/graphql-engine:v1.0.0-alpha39
         imagePullPolicy: IfNotPresent
         env:
         - name: PG_PASSWD
