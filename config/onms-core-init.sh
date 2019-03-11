@@ -7,6 +7,7 @@
 # - Horizon 23 or newer is required.
 # - The rsync and git command are required, and they are installed through YUM
 #   at runtime, so Internet access is required to use this script.
+# - Must run as root (to fix permissions if necessary)
 #
 # Purpose:
 # - Initialize the config directory on the volume only once.
@@ -313,3 +314,9 @@ rm -f $CONFIG_DIR/foreign-sources/pending/*.xml.*
 
 # Force to execute runjava and the install script
 touch $CONFIG_DIR/do-upgrade
+
+# Fix ownership
+if grep -q opennms /etc/passwd; then
+  echo "Fixing ownership ..."
+  chown -R opennms $CONFIG_DIR
+fi

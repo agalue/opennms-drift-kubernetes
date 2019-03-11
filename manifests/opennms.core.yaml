@@ -77,6 +77,8 @@ spec:
         image: opennms/horizon-core-web:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
+        securityContext: # Required to fix ownership when OpenNMS is not running as root
+          runAsUser: 0
         env:
         - name: TZ
           valueFrom:
