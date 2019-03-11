@@ -53,7 +53,10 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: SERVER_NAME
           valueFrom:
             fieldRef:
@@ -65,7 +68,7 @@ spec:
         - name: ELASTICSEARCH_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: ELASTICSEARCH
+              key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
         ports:
         - containerPort: 5601

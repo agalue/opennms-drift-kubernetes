@@ -69,10 +69,10 @@ aws s3api put-bucket-versioning \
 Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `k8s.opennms.org`, and the S3 bucked created above:
 
 ```shell
+export KOPS_CLUSTER_NAME="k8s.opennms.org"
+export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 kops create cluster \
-  --name k8s.opennms.org \
-  --state s3://k8s.opennms.org \
-  --dns-zone k8s.opennms.org \
+  --dns-zone $KOPS_CLUSTER_NAME \
   --master-size t2.medium \
   --master-count 1 \
   --master-zones us-east-2a \
@@ -80,7 +80,7 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.11.7 \
+  --kubernetes-version 1.11.8 \
   --networking calico
 ```
 
@@ -89,7 +89,7 @@ kops create cluster \
 Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
 ```shell
-kops edit cluster k8s.opennms.org --state s3://k8s.opennms.org
+kops edit cluster
 ```
 
 Then, add:
@@ -111,13 +111,13 @@ spec:
 Finally, apply the changes to create the cluster:
 
 ```shell
-kops update cluster k8s.opennms.org --state s3://k8s.opennms.org --yes
+kops update cluster --yes
 ```
 
 It takes a few minutes to have the cluster ready. Verify the cluster statue using `kubectl` and `kops`:
 
 ```shell
-kops validate cluster --name k8s.opennms.org --state s3://k8s.opennms.org
+kops validate cluster
 ```
 
 The output should be something like this:
@@ -218,18 +218,34 @@ From the directory on which this repository has been checked out, execute the fo
 kubectl create configmap opennms-config --from-file=config/ --namespace opennms --dry-run -o yaml | kubectl apply -f -
 ```
 
+Then, create the common settings shared across multiple services, to have then on a central place.
+
+```shell
+kubectl create configmap common-settings \
+ --from-literal TIMEZONE=America/New_York \
+ --from-literal OPENNMS_INSTANCE_ID=OpenNMS \
+ --from-literal MINION_LOCATION=Kubernetes \
+ --from-literal CASSANDRA_CLUSTER_NAME=OpenNMS \
+ --from-literal CASSANDRA_REPLICATION_FACTOR=2 \
+ --namespace opennms --dry-run -o yaml | kubectl apply -f -
+```
+
 #### Secrets
 
-From the directory on which this repository has been checked out, create a secret object for all the passwords that are going to be used with this solution:
+From the directory on which this repository has been checked out, create a secret object for all the custom secrets that are going to be used with this solution:
 
 ```shell
 kubectl create secret generic onms-passwords \
- --from-literal POSTGRES=postgres \
- --from-literal OPENNMS_DB=opennms \
- --from-literal OPENNMS_UI_ADMIN=admin \
- --from-literal GRAFANA_UI_ADMIN=opennms \
- --from-literal ELASTICSEARCH=elastic \
- --from-literal KAFKA_MANAGER_APPLICATION_SECRET=opennms \
+ --from-literal POSTGRES_PASSWORD=postgres \
+ --from-literal OPENNMS_DB_PASSWORD=opennms \
+ --from-literal OPENNMS_UI_ADMIN_PASSWORD=admin \
+ --from-literal GRAFANA_UI_ADMIN_PASSWORD=opennms \
+ --from-literal GRAFANA_DB_USERNAME=grafana \
+ --from-literal GRAFANA_DB_PASSWORD=grafana \
+ --from-literal ELASTICSEARCH_PASSWORD=elastic \
+ --from-literal KAFKA_MANAGER_APPLICATION_SECRET=0p3nNMS \
+ --from-literal KAFKA_MANAGER_USERNAME=opennms \
+ --from-literal KAFKA_MANAGER_PASSWORD=0p3nNMS \
  --from-literal HASURA_GRAPHQL_ACCESS_KEY=0p3nNMS \
  --namespace opennms --dry-run -o yaml | kubectl apply -f -
 ```
@@ -308,7 +324,7 @@ docker run -it --name minion \
  -p 1514:1514 \
  -p 1162:1162 \
  --sysctl "net.ipv4.ping_group_range=0 429496729" \
- opennms/minion:23.0.2-1 -c
+ opennms/minion:23.0.3-1 -c
 ```
 
 > IMPORTANT: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
@@ -396,7 +412,7 @@ To remove the Kubernetes cluster, do the following:
 
 ```shell
 kubectl delete ingress ingress-rules --namespace opennms
-kubectl delete service  ext-kafka --namespace opennms
+kubectl delete service ext-kafka --namespace opennms
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
 ```
 

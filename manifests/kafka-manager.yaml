@@ -1,7 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# WARNING:
-# - In order to use authentication, the readiness/liveness probes should use TCP instead of HTTP
 
 ---
 apiVersion: v1
@@ -38,17 +35,41 @@ spec:
         app: kafka-manager
         deployment: drift
     spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: TIMEOUT
+          value: '600'
       containers:
       - name: kafka-manager
         image: hlebalbau/kafka-manager:stable
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: JAVA_OPTS
           value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: ZK_HOSTS
           value: zookeeper.opennms.svc.cluster.local:2181
+        - name: KAFKA_MANAGER_AUTH_ENABLED
+          value: 'true'
+        - name: KAFKA_MANAGER_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_MANAGER_USERNAME
+              name: onms-passwords
+        - name: KAFKA_MANAGER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_MANAGER_PASSWORD
+              name: onms-passwords
         - name: APPLICATION_SECRET
           valueFrom:
             secretKeyRef:
@@ -65,14 +86,12 @@ spec:
             memory: 256Mi
             cpu: 100m
         readinessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: http
           initialDelaySeconds: 10
           periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: http
           initialDelaySeconds: 30
           periodSeconds: 60

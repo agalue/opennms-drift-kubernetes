@@ -55,8 +55,11 @@ spec:
         env:
         - name: CASSANDRA_HOST
           value: cassandra.opennms.svc.cluster.local
-        - name: REPFACTOR # Must match CASSANDRA_REPFACTOR from opennms.core.yaml
-          value: '2'
+        - name: REPFACTOR
+          valueFrom:
+            configMapKeyRef:
+              key: CASSANDRA_REPLICATION_FACTOR
+              name: common-settings
         - name: CQL
           value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REPFACTOR) };"
       containers:
@@ -65,13 +68,19 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: REAPER_STORAGE_TYPE
           value: cassandra
         - name: REAPER_CASS_CONTACT_POINTS
           value: "[ cassandra.opennms.svc.cluster.local ]"
-        - name: REAPER_CASS_CLUSTER_NAME # See CASSANDRA_CLUSTER_NAME from cassandra.yaml
-          value: OpenNMS
+        - name: REAPER_CASS_CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: CASSANDRA_CLUSTER_NAME
+              name: common-settings
         - name: REAPER_JMX_AUTH_USERNAME # See ConfigMap/cassandra-config from cassandra.yaml
           value: cassandra
         - name: REAPER_JMX_AUTH_PASSWORD # See ConfigMap/cassandra-config from cassandra.yaml

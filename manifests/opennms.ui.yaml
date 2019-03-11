@@ -3,6 +3,18 @@
 # WARNING:
 # - The opennms process runs as root, which is not allowed on OpenShift
 # - NRTG won't work on the UI servers.
+# - Jasper and KSC Reports will partially work on the UI servers.
+# - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
+# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
+#
+# TODO:
+# - Share /opt/opennms/etc from the Core server as read only, to share:
+#   * Graph templates
+#   * Data Collection configuration
+#   * Resource Types configuration
+#   * Jasper and KSC Reports
+#   * Users/Groups
+# - Use the Ingress controller to redirect NRTG Controller requests to Core server.
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
@@ -69,13 +81,21 @@ spec:
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        #image: opennms/horizon-core-web:23.0.2-1
-        image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.3-1
+        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
-        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
-          value: OpenNMS
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
         - name: ELASTIC_SERVER
@@ -83,12 +103,12 @@ spec:
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: ELASTICSEARCH
+              key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: GRAFANA_UI_ADMIN
+              key: GRAFANA_UI_ADMIN_PASSWORD
               name: onms-passwords
         - name: GRAFANA_URL
           value: http://grafana.opennms.svc.cluster.local:3000
@@ -104,8 +124,8 @@ spec:
           subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
-        #image: opennms/horizon-core-web:23.0.2-1
-        image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.3-1
+        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:
@@ -115,7 +135,10 @@ spec:
           name: http
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -132,7 +155,7 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: POSTGRES
+              key: POSTGRES_PASSWORD
               name: onms-passwords
         - name: OPENNMS_DBNAME
           value: opennms
@@ -141,7 +164,7 @@ spec:
         - name: OPENNMS_DBPASS
           valueFrom:
             secretKeyRef:
-              key: OPENNMS_DB
+              key: OPENNMS_DB_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: etc-overlay

@@ -99,7 +99,10 @@ spec:
           name: transport
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: cluster.name
           value: OpenNMS
         - name: node.name
@@ -132,7 +135,7 @@ spec:
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: ELASTICSEARCH
+              key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: es-data

@@ -8,6 +8,8 @@
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 #
 # WARNING:
+# - HorizontalPodAutoscaling is not recommended unless external intelligence is implemented,
+#   to avoid zombie entries on the Minions requisitions, that can lead to outages.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 #
@@ -92,19 +94,27 @@ spec:
           privileged: true
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        #image: opennms/minion:23.0.2-1
-        image: opennms/minion:bleeding # Not good for production
+        #image: opennms/minion:23.0.3-1
+        image: opennms/minion:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
-        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
-          value: OpenNMS
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
         - name: OPENNMS_HTTP_USER
           value: admin
         - name: OPENNMS_HTTP_PASS
           valueFrom:
             secretKeyRef:
-              key: OPENNMS_UI_ADMIN
+              key: OPENNMS_UI_ADMIN_PASSWORD
               name: onms-passwords
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
@@ -124,14 +134,17 @@ spec:
           value: '600'
       containers:
       - name: minion
-        #image: opennms/minion:23.0.2-1
-        image: opennms/minion:bleeding # Not good for production
+        #image: opennms/minion:23.0.3-1
+        image: opennms/minion:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         args:
         - -f
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: MINION_ID
           valueFrom:
             fieldRef:
@@ -141,10 +154,13 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
+        - name: MINION_LOCATION
+          valueFrom:
+            configMapKeyRef:
+              key: MINION_LOCATION
+              name: common-settings
         - name: JAVA_OPTS
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
-        - name: MINION_LOCATION
-          value: Kubernetes
         - name: OPENNMS_HTTP_URL
           value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
         ports:
@@ -211,19 +227,28 @@ spec:
         image: agalue/opennms-nxos-grpc:latest
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: BOOTSTRAP_SERVERS
           value: kafka.opennms.svc.cluster.local:9092
-        - name: MINION_LOCATION # Must match Minion settings
-          value: Kubernetes
-        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
-          value: OpenNMS
+        - name: MINION_LOCATION
+          valueFrom:
+            configMapKeyRef:
+              key: MINION_LOCATION
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
         - name: MINION_ID
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         - name: PORT
-          value: '50002' # Must match container port
+          value: '50002' # Must match containerPort for nxos-grpc
         - name: TOPIC
           value: $(INSTANCE_ID).Sink.Telemetry-NXOS
         ports:

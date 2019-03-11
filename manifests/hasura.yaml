@@ -64,7 +64,10 @@ spec:
         - /init.sh
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: PGHOST
           value: postgresql.opennms.svc.cluster.local
         - name: PGPORT
@@ -74,7 +77,7 @@ spec:
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              key: POSTGRES
+              key: POSTGRES_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: opennms-config
@@ -88,7 +91,7 @@ spec:
         - name: PG_PASSWD
           valueFrom:
             secretKeyRef:
-              key: POSTGRES
+              key: POSTGRES_PASSWORD
               name: onms-passwords
         - name: HASURA_GRAPHQL_DATABASE_URL
           value: postgres://postgres:$(PG_PASSWD)@postgresql.opennms.svc.cluster.local:5432/opennms

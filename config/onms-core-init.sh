@@ -55,6 +55,8 @@ yum install -y -q rsync git
 if [ ! -f $CONFIG_DIR/configured ]; then
   echo "Initializing configuration directory for the first time ..."
   rsync -ar $BACKUP_ETC/ $CONFIG_DIR/
+
+  echo "Initializing GIT on the configuration directory"
   cd $CONFIG_DIR
   git config --global user.name "Kubernetes"
   git config --global user.email "root@localhost"
@@ -120,18 +122,21 @@ org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
 EOF
 
+cat <<EOF > $CONFIG_DIR/opennms.properties.d/collectd.properties
+org.opennms.netmgt.collectd.strictInterval=true
+EOF
+
+# Required changes in order to use HTTPS through Ingress
+cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
+opennms.web.base-url=https://%x%c/
+org.opennms.security.disableLoginSuccessEvent=true
+EOF
+
 # Enable OSGi features
 if [[ $FEATURES_LIST ]]; then
   echo "Enabling features: $FEATURES_LIST ..."
-  if [[ $VERSION == "23"* ]]; then
-    FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
-    sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
-  else
-    IFS=', ' read -r -a FEATURES <<< "$FEATURES_LIST"
-    for FEATURE in "${FEATURES[@]}"; do
-      echo $FEATURE >> $CONFIG_DIR/featuresBoot.d/custom.boot
-    done
-  fi
+  FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
+  sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
 fi
 
 # Configure Sink and RPC to use Kafka, and the Kafka Producer.
@@ -291,13 +296,16 @@ logAllEvents=false
 retries=1
 connTimeout=3000
 EOF
-fi
 
-# Required changes in order to use HTTPS through Ingress
-cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
-opennms.web.base-url=https://%x%c/
-org.opennms.security.disableLoginSuccessEvent=true
+  if [[ $VERSION != "23"* ]]; then
+    echo "Configuring Alarm History Forwarder..."
+    cat <<EOF > $CONFIG_DIR/org.opennms.features.alarms.history.elastic.cfg
+elasticUrl=http://$ELASTIC_SERVER:9200
+globalElasticUser=elastic
+globalElasticPassword=$ELASTIC_PASSWORD
 EOF
+  fi
+fi
 
 # Cleanup temporary requisition files:
 rm -f $CONFIG_DIR/imports/pending/*.xml.*

@@ -80,7 +80,10 @@ spec:
           name: jmx
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: POD_IP
           valueFrom:
             fieldRef:

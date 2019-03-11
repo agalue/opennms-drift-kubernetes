@@ -65,7 +65,10 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: ZOO_SERVERS # Must be consistent with the replicas
           value: server.1=zk-0.zookeeper.opennms.svc.cluster.local:2888:3888 server.2=zk-1.zookeeper.opennms.svc.cluster.local:2888:3888 server.3=zk-2.zookeeper.opennms.svc.cluster.local:2888:3888
         - name: ZOO_TICK_TIME

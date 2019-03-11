@@ -17,6 +17,21 @@
 #    Although, Runtime.getRuntime().availableProcessors() seems to respect the CPU limitations.
 
 ---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sentinel
+  namespace: opennms
+spec:
+  maxReplicas: 5
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sentinel
+  targetCPUUtilizationPercentage: 80
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -52,13 +67,21 @@ spec:
       initContainers:
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        #image: opennms/sentinel:23.0.2-1
-        image: opennms/sentinel:bleeding # Not good for production
+        #image: opennms/sentinel:23.0.3-1
+        image: opennms/sentinel:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
-        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
-          value: OpenNMS
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
         - name: KAFKA_GROUP_ID
@@ -70,14 +93,14 @@ spec:
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: ELASTICSEARCH
+              key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
         - name: OPENNMS_HTTP_USER
           value: admin
         - name: OPENNMS_HTTP_PASS
           valueFrom:
             secretKeyRef:
-              key: OPENNMS_UI_ADMIN
+              key: OPENNMS_UI_ADMIN_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: etc-overlay
@@ -95,8 +118,8 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        #image: opennms/sentinel:23.0.2-1
-        image: opennms/sentinel:bleeding # Not good for production
+        #image: opennms/sentinel:23.0.3-1
+        image: opennms/sentinel:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         args:
           - -f
@@ -107,7 +130,10 @@ spec:
           name: karaf
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -124,7 +150,7 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: POSTGRES
+              key: POSTGRES_PASSWORD
               name: onms-passwords
         - name: POSTGRES_DB
           value: opennms
@@ -137,7 +163,7 @@ spec:
         - name: OPENNMS_HTTP_PASS
           valueFrom:
             secretKeyRef:
-              key: OPENNMS_UI_ADMIN
+              key: OPENNMS_UI_ADMIN_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: etc-overlay

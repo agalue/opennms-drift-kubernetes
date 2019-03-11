@@ -14,21 +14,24 @@ metadata:
 spec:
   template:
     spec:
+      restartPolicy: Never
       containers:
-      - name: helm
-        #image: opennms/helm:3.0.0
-        image: opennms/helm:bleeding # Not good for production
+      - name: init-config
+        image: centos:7
         imagePullPolicy: IfNotPresent
         command:
-        - sh
+        - bash
         - /bin/helm-init.sh
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: GRAFANA_UI_ADMIN
+              key: GRAFANA_UI_ADMIN_PASSWORD
               name: onms-passwords
         - name: GRAFANA_URL
           value: http://grafana.opennms.svc.cluster.local:3000
@@ -39,13 +42,12 @@ spec:
         - name: ONMS_PASSWD
           valueFrom:
             secretKeyRef:
-              key: OPENNMS_UI_ADMIN
+              key: OPENNMS_UI_ADMIN_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: opennms-config
           mountPath: /bin/helm-init.sh
           subPath: helm-init.sh
-      restartPolicy: Never
       volumes:
       - name: opennms-config
         configMap:

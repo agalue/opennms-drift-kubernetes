@@ -1,7 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - The password for the grafana user in PostgreSQL is plain text here due to GF_SESSION_PROVIDER_CONFIG
+# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 
 ---
 apiVersion: v1
@@ -63,7 +63,7 @@ spec:
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              key: POSTGRES
+              key: POSTGRES_PASSWORD
               name: onms-passwords
         - name: GF_DATABASE_NAME
           value: grafana
@@ -85,11 +85,14 @@ spec:
           name: http
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: GRAFANA_UI_ADMIN
+              key: GRAFANA_UI_ADMIN_PASSWORD
               name: onms-passwords
         - name: GF_DATABASE_TYPE
           value: postgres
@@ -98,13 +101,19 @@ spec:
         - name: GF_DATABASE_NAME
           value: grafana
         - name: GF_DATABASE_USER
-          value: grafana
+          valueFrom:
+            secretKeyRef:
+              key: GRAFANA_DB_USERNAME
+              name: onms-passwords
         - name: GF_DATABASE_PASSWORD
-          value: grafana
+          valueFrom:
+            secretKeyRef:
+              key: GRAFANA_DB_PASSWORD
+              name: onms-passwords
         - name: GF_SESSION_PROVIDER
           value: postgres
-        - name: GF_SESSION_PROVIDER_CONFIG # dbname, user and password fields should match GF_DATABASE_* environment variables
-          value: dbname=grafana user=grafana password=grafana host=postgresql.opennms.svc.cluster.local port=5432 sslmode=disable
+        - name: GF_SESSION_PROVIDER_CONFIG
+          value: dbname=$(GF_DATABASE_NAME) user=$(GF_DATABASE_USER) password=$(GF_DATABASE_PASSWORD) host=postgresql.opennms.svc.cluster.local port=5432 sslmode=disable
         readinessProbe:
           httpGet:
             path: /

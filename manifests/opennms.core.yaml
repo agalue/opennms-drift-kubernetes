@@ -42,6 +42,8 @@ spec:
     name: http
   - port: 8101
     name: karaf
+  - port: 2049
+    name: nfs
   selector:
     app: onms
 
@@ -71,19 +73,31 @@ spec:
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        #image: opennms/horizon-core-web:23.0.2-1
-        image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.3-1
+        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
-        - name: INSTANCE_ID # Must be the same on all OpenNMS, Sentinels and Minions
-          value: OpenNMS
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
         - name: FEATURES_LIST
-          value: opennms-es-rest,opennms-kafka-producer
+          value: opennms-alarm-history-elastic,opennms-es-rest,opennms-kafka-producer # For H24+
+          #value: opennms-es-rest,opennms-kafka-producer # For H23
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
         - name: CASSANDRA_REPFACTOR
-          value: '2'
+          valueFrom:
+            configMapKeyRef:
+              key: CASSANDRA_REPLICATION_FACTOR
+              name: common-settings
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
         - name: ELASTIC_SERVER
@@ -91,7 +105,7 @@ spec:
         - name: ELASTIC_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: ELASTICSEARCH
+              key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: opennms-etc # Persistent volume for OpenNMS Configuration
@@ -120,8 +134,8 @@ spec:
           value: '600'
       containers:
       - name: onms
-        #image: opennms/horizon-core-web:23.0.2-1
-        image: opennms/horizon-core-web:bleeding # Not good for production
+        #image: opennms/horizon-core-web:23.0.3-1
+        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
         imagePullPolicy: IfNotPresent
         args:
         - -s
@@ -132,7 +146,10 @@ spec:
           name: http
         env:
         - name: TZ
-          value: America/New_York
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -153,7 +170,7 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: POSTGRES
+              key: POSTGRES_PASSWORD
               name: onms-passwords
         - name: OPENNMS_DBNAME
           value: opennms
@@ -162,7 +179,7 @@ spec:
         - name: OPENNMS_DBPASS
           valueFrom:
             secretKeyRef:
-              key: OPENNMS_DB
+              key: OPENNMS_DB_PASSWORD
               name: onms-passwords
         volumeMounts:
         - name: opennms-etc
@@ -193,6 +210,21 @@ spec:
               - bash
               - -c
               - 'echo "Shutting down minion..." && echo 1 > /opt/opennms/logs/opennms.pid && /opt/opennms/bin/opennms stop'
+      # Optional image to share configuration directory through NFS (required by external UI servers)
+      - name: nfs
+        image: itsthenetwork/nfs-server-alpine:11
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        env:
+        - name: SHARED_DIRECTORY
+          value: /opennms-etc
+        ports:
+        - containerPort: 2049
+          name: nfs
+        volumeMounts:
+        - name: opennms-etc
+          mountPath: /opennms-etc
       volumes:
       - name: opennms-config
         configMap:
