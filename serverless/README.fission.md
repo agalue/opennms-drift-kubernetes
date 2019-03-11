@@ -18,13 +18,14 @@ The second YAML contains the Kafka mqtrigger which is not included/enabled by de
 
 It has been done this way because it doesn't look possible to use `fission-core` with `mqtrigger-kafka` through Helm, as the Kafka feature is part of `fission-all`, which contains features not required here.
 
-## Create the secret for Slack URL
+## Create the secret with configuration
 
-Once you have the WebHook URL, add it to a `secret`; for example:
+Once you have the WebHook URL, add it to a `secret`, as well as the OpenNMS WebUI URL; for example:
 
 ```shell
 kubectl -n default create secret generic serverless-config \
  --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
+ --from-literal=ONMS_URL="https://onmsui.k8s.opennms.org/opennms" \
  --dry-run -o yaml | kubectl apply -f -
 ```
 

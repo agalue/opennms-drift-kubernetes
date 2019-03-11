@@ -13,13 +13,14 @@ kubectl apply -f https://github.com/kubeless/kubeless/releases/download/$RELEASE
 kubectl apply -f kubeless-mqtrigger-kafka.yaml
 ```
 
-## Create the secret for Slack URL
+## Create the secret with configuration
 
-Once you have the WebHook URL, add it to a `secret`; for example:
+Once you have the WebHook URL, add it to a `secret`, as well as the OpenNMS WebUI URL; for example:
 
 ```shell
 kubectl -n opennms create secret generic serverless-config \
  --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
+ --from-literal=ONMS_URL="https://onmsui.k8s.opennms.org/opennms" \
  --dry-run -o yaml | kubectl apply -f -
 ```
 
