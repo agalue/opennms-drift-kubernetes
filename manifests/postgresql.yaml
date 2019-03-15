@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
+# - PostgreSQL expects to have very fast disks for the PVC to avoid performance issues.
 # - Make sure to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
 # - Make sure to tune the rest of the settings based on https://pgtune.leopard.in.ua/#/
 #   Speaking about shared_buffers, it is expected to be 25% of the requested memory.
