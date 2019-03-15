@@ -14,6 +14,35 @@
 
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-config
+  namespace: opennms
+  labels:
+    app: postgresql
+    deployment: drift
+data:
+  # Based on https://pgtune.leopard.in.ua/#/ for the configured requested limits
+  postgresql.conf: |+
+    listen_addresses = '*'
+    shared_buffers = 512MB
+    max_connections = 300
+    effective_cache_size = 1536MB
+    maintenance_work_mem = 128MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 300
+    work_mem = 873kB
+    min_wal_size = 1GB
+    max_wal_size = 2GB
+    max_worker_processes = 2
+    max_parallel_workers_per_gather = 1
+    max_parallel_workers = 2
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: postgresql
@@ -55,39 +84,10 @@ spec:
       - name: postgres
         image: postgres:10.7-alpine
         imagePullPolicy: IfNotPresent
-        command: # Settings for 2GB of RAM and 2 CPU
-        - docker-entrypoint.sh
-        - postgres
-        - -c
-        - 'shared_buffers=512MB'
-        - -c
-        - 'max_connections=300'
-        - -c
-        - 'effective_cache_size=1536MB'
-        - -c
-        - 'maintenance_work_mem=128MB'
-        - -c
-        - 'checkpoint_completion_target=0.9'
-        - -c
-        - 'wal_buffers=16MB'
-        - -c
-        - '''default_statistics_target=100'
-        - -c
-        - 'random_page_cost=1.1'
-        - -c
-        - 'effective_io_concurrency=300'
-        - -c
-        - 'work_mem=873kB'
-        - -c
-        - 'min_wal_size=1GB'
-        - -c
-        - 'max_wal_size=2GB'
-        - -c
-        - 'max_worker_processes=2'
-        - -c
-        - 'max_parallel_workers_per_gather=1'
-        - -c
-        - 'max_parallel_workers=2'
+        args:
+          - postgres
+          - -c
+          - 'config_file=/etc/postgresql.conf'
         env:
         - name: TZ
           valueFrom:
@@ -111,12 +111,15 @@ spec:
         volumeMounts:
         - name: pg-data
           mountPath: /var/lib/postgresql/data
+        - name: postgresql-config
+          mountPath: /etc/postgresql.conf
+          subPath: postgresql.conf
         resources:
           limits:
-            cpu: 4
+#            cpu: 4
             memory: 4Gi
           requests:
-            cpu: 2
+#            cpu: 2
             memory: 2Gi
         readinessProbe:
           exec:
@@ -134,6 +137,10 @@ spec:
             - exec pg_isready --host $HOSTNAME
           initialDelaySeconds: 30
           periodSeconds: 60
+      volumes:
+      - name: postgresql-config
+        configMap:
+          name: postgresql-config
   volumeClaimTemplates:
   - metadata:
       name: pg-data
