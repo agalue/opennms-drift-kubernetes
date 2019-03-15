@@ -8,14 +8,14 @@
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 #   That said, without the intelligence to guard against upgrades through the initContainer
-#   script, if you opt for using config-maps, you have to prepare the config giles on the PV
+#   script, if you opt for using config-maps, you have to prepare the config files on the PV
 #   prior upgrading the version of OpenNMS on the chosen image.
 #
 # WARNING:
 # - This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
-# - The opennms process runs as root, which is not allowed on OpenShift
+# - The opennms process runs as root (for H23 or older), which is not allowed on OpenShift.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
-# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
+# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable).
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
@@ -78,7 +78,7 @@ spec:
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
         #image: opennms/horizon-core-web:23.0.3-1
-        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
+        image: opennms/horizon-core-web:24.0.0-rc # Not ready for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         securityContext: # Required to fix ownership when OpenNMS is not running as root
@@ -141,7 +141,7 @@ spec:
       containers:
       - name: onms
         #image: opennms/horizon-core-web:23.0.3-1
-        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
+        image: opennms/horizon-core-web:24.0.0-rc # Not ready for production
         imagePullPolicy: IfNotPresent
         args:
         - -s

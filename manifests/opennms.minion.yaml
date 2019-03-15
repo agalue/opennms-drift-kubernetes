@@ -98,7 +98,7 @@ spec:
       # Requires the same image/version used at runtime: minion
       - name: init-config
         #image: opennms/minion:23.0.3-1
-        image: opennms/minion:24.0.0-rc # Not good for production
+        image: opennms/minion:24.0.0-rc # Not ready for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -138,7 +138,7 @@ spec:
       containers:
       - name: minion
         #image: opennms/minion:23.0.3-1
-        image: opennms/minion:24.0.0-rc # Not good for production
+        image: opennms/minion:24.0.0-rc # Not ready for production
         imagePullPolicy: IfNotPresent
         args:
         - -f

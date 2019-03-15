@@ -6,11 +6,11 @@
 #   https://github.com/opennms-forge/docker-horizon-core-web
 #
 # WARNING:
-# - The opennms process runs as root, which is not allowed on OpenShift
-# - NRTG won't work on the UI servers.
+# - The opennms process runs as root (for H23 or older), which is not allowed on OpenShift.
+# - NRTG won't work on the UI servers (currently it redirects to the core server through Ingress).
 # - Jasper and KSC Reports will partially work on the UI servers.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
-# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
+# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable).
 #
 # TODO:
 # - Share /opt/opennms/etc from the Core server as read only, to share:
@@ -87,7 +87,7 @@ spec:
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
         #image: opennms/horizon-core-web:23.0.3-1
-        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
+        image: opennms/horizon-core-web:24.0.0-rc # Not ready for production
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -130,7 +130,7 @@ spec:
       containers:
       - name: onms-ui
         #image: opennms/horizon-core-web:23.0.3-1
-        image: opennms/horizon-core-web:24.0.0-rc # Not good for production
+        image: opennms/horizon-core-web:24.0.0-rc # Not ready for production
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:
