@@ -15,6 +15,10 @@
 #   to avoid zombie entries on the Minions requisitions, that can lead to outages.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
+# - In order to execute ICMP requests as non-root a recent kernel on the K8s Hosts is required.
+#   To force Minion to run as root, add the following to the container template:
+#   securityContext:
+#     runAsUser: 0
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work

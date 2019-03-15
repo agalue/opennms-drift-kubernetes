@@ -16,6 +16,10 @@
 # - The opennms process runs as root (for H23 or older), which is not allowed on OpenShift.
 # - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable).
+# - In order to execute ICMP requests as non-root a recent kernel on the K8s Hosts is required.
+#   For H24+, to force OpenNMS to run as root, add the following to the container template:
+#   securityContext:
+#     runAsUser: 0
 #
 # Java 8 Issues:
 # - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
@@ -74,6 +78,15 @@ spec:
     spec:
       terminationGracePeriodSeconds: 120
       initContainers:
+      # Requires a fairly recent Kernel on the K8s host
+      - name: init-sysctl
+        image: busybox
+        command: # Allow ICMP as non-root
+        - sysctl
+        - -w
+        - net.ipv4.ping_group_range=0 429496729
+        securityContext:
+          privileged: true
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
