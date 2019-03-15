@@ -81,7 +81,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:10.7-alpine
+        image: postgres:10.7
         imagePullPolicy: IfNotPresent
         args:
           - postgres
