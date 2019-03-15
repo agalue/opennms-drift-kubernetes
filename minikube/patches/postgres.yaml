@@ -9,12 +9,6 @@
       memory: 128Mi
 
 - op: replace
-  path: /spec/template/spec/containers/0/command
-  value:
-   - docker-entrypoint.sh
-   - postgres
-
-- op: replace
   path: /spec/volumeClaimTemplates/0/spec/storageClassName
   value: standard
 
