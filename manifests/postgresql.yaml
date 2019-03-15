@@ -1,7 +1,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - Make sure the to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
+# - Make sure to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
+# - Make sure to tune the rest of the settings based on https://pgtune.leopard.in.ua/#/
+#   Speaking about shared_buffers, it is expected to be 25% of the requested memory.
 # - The postgres user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 #
 # TODO:
@@ -52,13 +54,39 @@ spec:
       - name: postgres
         image: postgres:10.7-alpine
         imagePullPolicy: IfNotPresent
-        command:
+        command: # Settings for 2GB of RAM and 2 CPU
         - docker-entrypoint.sh
         - postgres
         - -c
         - 'shared_buffers=512MB'
         - -c
         - 'max_connections=300'
+        - -c
+        - 'effective_cache_size=1536MB'
+        - -c
+        - 'maintenance_work_mem=128MB'
+        - -c
+        - 'checkpoint_completion_target=0.9'
+        - -c
+        - 'wal_buffers=16MB'
+        - -c
+        - '''default_statistics_target=100'
+        - -c
+        - 'random_page_cost=1.1'
+        - -c
+        - 'effective_io_concurrency=300'
+        - -c
+        - 'work_mem=873kB'
+        - -c
+        - 'min_wal_size=1GB'
+        - -c
+        - 'max_wal_size=2GB'
+        - -c
+        - 'max_worker_processes=2'
+        - -c
+        - 'max_parallel_workers_per_gather=1'
+        - -c
+        - 'max_parallel_workers=2'
         env:
         - name: TZ
           valueFrom:

@@ -1,6 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # NOTES:
+# - This manifest is designed to work with the unaltered version of the image from:
+#   https://hub.docker.com/r/opennms/horizon-core-web
+#   https://github.com/opennms-forge/docker-horizon-core-web
+#
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 #   That said, without the intelligence to guard against upgrades through the initContainer
@@ -115,7 +119,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-core-init.sh
-      # Initializes Newts keyspace on Cassandra/ScyllaDB (requires newts.cql)
+      # Initializes Newts keyspace on Cassandra/ScyllaDB through CQLSH (requires newts.cql)
       - name: init-newts
         image: cassandra:3.11.4
         imagePullPolicy: IfNotPresent
@@ -157,10 +161,6 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
-        - name: CPU_TOTAL
-          valueFrom:
-            resourceFieldRef:
-              resource: requests.cpu
         - name: JAVA_OPTS # Preferred way instead of opennms.conf
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: POSTGRES_HOST
@@ -211,7 +211,7 @@ spec:
               command:
               - bash
               - -c
-              - 'echo "Shutting down minion..." && echo 1 > /opt/opennms/logs/opennms.pid && /opt/opennms/bin/opennms stop'
+              - 'echo "Shutting down opennms..." && echo 1 > /opt/opennms/logs/opennms.pid && /opt/opennms/bin/opennms stop'
       # Optional image to share configuration directory through NFS (required by external UI servers)
       - name: nfs
         image: itsthenetwork/nfs-server-alpine:11

@@ -4,6 +4,9 @@
 # This Pod includes 2 containers, one for the Minion and one for the GRPC Server for NX-OS
 #
 # NOTES:
+# - This manifest is designed to work with the unaltered version of the image from:
+#   https://hub.docker.com/r/opennms/minion
+#   https://github.com/opennms-forge/docker-minion
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 #

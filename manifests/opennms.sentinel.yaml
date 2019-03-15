@@ -3,6 +3,9 @@
 # Sentinel is required only for Processing Flows and Telemetry Data.
 #
 # NOTES:
+# - This manifest is designed to work with the unaltered version of the image from:
+#   https://hub.docker.com/r/opennms/sentinel
+#   https://github.com/opennms-forge/docker-sentinel
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 # - Using a Deployment instead of StatefulSet, as the Sentinel ID is not used at the moment.

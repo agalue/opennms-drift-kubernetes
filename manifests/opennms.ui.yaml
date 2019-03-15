@@ -1,5 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# NOTES:
+# - This manifest is designed to work with the unaltered version of the image from:
+#   https://hub.docker.com/r/opennms/horizon-core-web
+#   https://github.com/opennms-forge/docker-horizon-core-web
+#
 # WARNING:
 # - The opennms process runs as root, which is not allowed on OpenShift
 # - NRTG won't work on the UI servers.
