@@ -128,6 +128,7 @@ spec:
             configMapKeyRef:
               key: CASSANDRA_CLUSTER_NAME
               name: common-settings
+        # The following 3 variables are required to use NetworkTopologyStrategy with the Newts keyspace
         - name: CASSANDRA_ENDPOINT_SNITCH
           value: GossipingPropertyFileSnitch
         - name: CASSANDRA_DC
