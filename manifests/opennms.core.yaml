@@ -219,7 +219,7 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 60
         lifecycle:
-          preStop: # Required as the Java process doesn't handle SIGTERM
+          preStop: # Required as the Java process doesn't handle SIGTERM: https://issues.opennms.org/browse/NMS-10581
             exec:
               command:
               - bash

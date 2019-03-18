@@ -223,6 +223,11 @@ org.opennms.newts.config.ring_buffer_size=8192
 org.opennms.newts.config.cache.max_entries=8192
 org.opennms.newts.config.cache.priming.enable=true
 org.opennms.newts.config.cache.priming.block_ms=60000
+EOF
+
+  # Required only when collecting data every 30 seconds
+  echo "Configuring Optional Newts Settings..."
+  cat <<EOF >> $CONFIG_DIR/opennms.properties.d/newts.properties
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
