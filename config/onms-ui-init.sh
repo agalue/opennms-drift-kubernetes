@@ -137,13 +137,8 @@ sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' $SECURITY_CONFIG
 if [[ $CASSANDRA_SERVER ]]; then
   echo "Configuring Cassandra..."
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
-# About the properties:
-# - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
-# - ring_buffer_size and cache.max_entries should be consistent with the expected load
-#
-# About the keyspace:
-# - The value of compaction_window_size should be consistent with the chosen TTL
-# - The number of SSTables will be the TTL/compaction_window_size (52 for 1 year)
+# Warning:
+# - Make sure the properties match the content of the core OpenNMS server
 
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
@@ -153,18 +148,16 @@ org.opennms.newts.config.hostname=${CASSANDRA_SERVER}
 org.opennms.newts.config.keyspace=${KEYSPACE}
 org.opennms.newts.config.port=9042
 org.opennms.newts.config.read_consistency=ONE
-org.opennms.newts.config.write_consistency=ANY
-
 org.opennms.newts.config.resource_shard=604800
-org.opennms.newts.config.ttl=31540000
-org.opennms.newts.config.writer_threads=2
-org.opennms.newts.config.ring_buffer_size=8192
-org.opennms.newts.config.cache.max_entries=8192
-org.opennms.newts.config.cache.priming.enable=true
-org.opennms.newts.config.cache.priming.block_ms=60000
+EOF
+
+  # Required only when collecting data every 30 seconds
+  echo "Configuring Optional Newts Settings..."
+  cat <<EOF >> $CONFIG_DIR/opennms.properties.d/newts.properties
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
+
 fi
 
 # Configure Elasticsearch for Flow processing

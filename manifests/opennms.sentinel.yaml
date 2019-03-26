@@ -105,6 +105,11 @@ spec:
             secretKeyRef:
               key: OPENNMS_UI_ADMIN_PASSWORD
               name: onms-passwords
+        - name: NUM_LISTENER_THREADS
+          valueFrom:
+            configMapKeyRef:
+              key: KAFKA_NUM_PARTITIONS
+              name: common-settings
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay

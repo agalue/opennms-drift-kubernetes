@@ -227,6 +227,7 @@ kubectl create configmap common-settings \
  --from-literal MINION_LOCATION=Kubernetes \
  --from-literal CASSANDRA_CLUSTER_NAME=OpenNMS \
  --from-literal CASSANDRA_REPLICATION_FACTOR=2 \
+ --from-literal KAFKA_NUM_PARTITIONS=6 \
  --namespace opennms --dry-run -o yaml | kubectl apply -f -
 ```
 

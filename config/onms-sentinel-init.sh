@@ -9,6 +9,7 @@
 # - Horizon 23 or newer is required (if H23 is used, features.xml must be mounted on the Sentinel Pods)
 #   The reason for this is that H23 doesn't support featuresBoot.d/, so features.xml should be used
 #   to start the desired features.
+# - NUM_LISTENER_THREADS (i.e. queue.threads) should be consistent with the amount of partitions on Kafka
 #
 # Purpose:
 # - Configure instance ID and the Telemetry adapters only if Elasticsearch is provided.
@@ -24,11 +25,13 @@
 # - CASSANDRA_SERVER
 # - OPENNMS_HTTP_USER
 # - OPENNMS_HTTP_PASS
+# - NUM_LISTENER_THREADS
 
 # To avoid issues with OpenShift
 umask 002
 
-GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
+NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
+KAFKA_GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-sentinel)
@@ -43,8 +46,8 @@ if [[ $INSTANCE_ID ]]; then
 # Used for Kafka Topics
 org.opennms.instance.id=$INSTANCE_ID
 EOF
-  cp $SYSTEM_CFG $OVERLAY
 fi
+cp $SYSTEM_CFG $OVERLAY
 
 # Configuring SCV credentials to access the OpenNMS ReST API
 if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
@@ -85,22 +88,26 @@ if [[ $ELASTIC_SERVER ]]; then
     cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-sflow.cfg
 name = SFlow
 class-name = $SFLOW_CLASS
+queue.threads = $NUM_LISTENER_THREADS
 EOF
   fi
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-ipfix.cfg
 name = IPFIX
 class-name = $IPFIX_CLASS
+queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-netflow5.cfg
 name = Netflow-5
 class-name = $NETFLOW5_CLASS
+queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-netflow9.cfg
 name = Netflow-9
 class-name = $NETFLOW9_CLASS
+queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.flows.persistence.elastic.cfg
@@ -119,9 +126,9 @@ if [[ $KAFKA_SERVER ]]; then
   echo "sentinel-kafka" > $FEATURES_DIR/kafka.boot
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.consumer.cfg
-group.id = $GROUP_ID
+group.id = $KAFKA_GROUP_ID
 bootstrap.servers = $KAFKA_SERVER:9092
-max.partition.fetch.bytes=5000000
+max.partition.fetch.bytes = 5000000
 EOF
 fi
 
@@ -161,18 +168,21 @@ adapters.1.class-name = $SFLOW_CLASS
 adapters.2.name = SFlow-Telemetry
 adapters.2.class-name = $SFLOW_TELEMETRY_CLASS
 adapters.2.parameters.script = $SENTINEL_HOME/etc/sflow-host.groovy
+queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-nxos.cfg
 name = NXOS
 class-name = $NXOS_TELEMETRY_CLASS
 parameters.script = $SENTINEL_HOME/etc/cisco-nxos-telemetry-interface.groovy
+queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-jti.cfg
 name = JTI
 class-name = $JTI_TELEMETRY_CLASS
 parameters.script = $SENTINEL_HOME/etc/junos-telemetry-interface.groovy
+queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/datacollection-config.xml

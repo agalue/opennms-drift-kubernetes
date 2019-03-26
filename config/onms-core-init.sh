@@ -176,6 +176,7 @@ timeout.ms=30000
 max.request.size=5000000
 EOF
 
+  # Make sure to enable only what's needed for your use case
   cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
 suppressIncrementalAlarms=true
 forward.metrics=true
@@ -188,6 +189,7 @@ metricTopic=${INSTANCE_ID}_metrics
 EOF
 
   if [[ $VERSION != "23"* ]]; then
+    # Make sure to apply the following only when needed
     cat <<EOF >> $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
 topologyProtocols=bridge,cdp,isis,lldp,ospf
 topologyVertexTopic=${INSTANCE_ID}_topology_vertex
@@ -205,7 +207,7 @@ if [[ $CASSANDRA_SERVER ]]; then
 # - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
 # - ring_buffer_size and cache.max_entries should be consistent with the expected load
 #
-# About the keyspace:
+# About the keyspace (CQL schema):
 # - The value of compaction_window_size should be consistent with the chosen TTL
 # - The number of SSTables will be the TTL/compaction_window_size (52 for 1 year)
 
@@ -218,11 +220,14 @@ org.opennms.newts.config.write_consistency=ANY
 
 org.opennms.newts.config.resource_shard=604800
 org.opennms.newts.config.ttl=31540000
+
+org.opennms.newts.config.cache.priming.enable=true
+org.opennms.newts.config.cache.priming.block_ms=60000
+
+# The following settings most be tuned in production
 org.opennms.newts.config.writer_threads=2
 org.opennms.newts.config.ring_buffer_size=8192
 org.opennms.newts.config.cache.max_entries=8192
-org.opennms.newts.config.cache.priming.enable=true
-org.opennms.newts.config.cache.priming.block_ms=60000
 EOF
 
   # Required only when collecting data every 30 seconds

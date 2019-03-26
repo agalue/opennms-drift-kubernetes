@@ -37,6 +37,7 @@ configMapGenerator:
   - OPENNMS_INSTANCE_ID=OpenNMS
   - CASSANDRA_CLUSTER_NAME=OpenNMS
   - CASSANDRA_REPLICATION_FACTOR="1"
+  - KAFKA_NUM_PARTITIONS="1"
 
 generatorOptions:
   disableNameSuffixHash: true
