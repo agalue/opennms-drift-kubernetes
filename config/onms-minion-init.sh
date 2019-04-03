@@ -7,7 +7,8 @@
 # - Horizon 23 or newer is required.
 #
 # Purpose:
-# - Configure instance ID and the Telemetry listeners (on fixed ports)
+# - Configure the instance ID, SNMP4J and Kafka (for RPC and Sink)
+# - Configure listeneres for Traps, Syslog, and Telemetry (on fixed ports)
 #
 # Environment variables:
 # - INSTANCE_ID
@@ -62,6 +63,7 @@ if [[ $KAFKA_SERVER ]]; then
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
+acks=1
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.rpc.kafka.cfg

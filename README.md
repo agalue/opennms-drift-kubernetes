@@ -80,7 +80,7 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.11.8 \
+  --kubernetes-version 1.11.9 \
   --networking calico
 ```
 

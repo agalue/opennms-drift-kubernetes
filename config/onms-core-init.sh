@@ -166,6 +166,7 @@ org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
 org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=5000000
 
 # RPC Producer (verify Kafka broker configuration)
+org.opennms.core.ipc.rpc.kafka.acks=1
 org.opennms.core.ipc.rpc.kafka.max.request.size=5000000
 EOF
 
@@ -293,6 +294,11 @@ elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
 elasticIndexStrategy=daily
+connTimeout=30000
+readTimeout=300000
+# The following settings should be consistent with your ES cluster
+settings.index.number_of_shards=6
+settings.index.number_of_replicas=2
 EOF
 
   echo "Configuring Elasticsearch Event Forwarder..."
@@ -300,12 +306,18 @@ EOF
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
+elasticIndexStrategy=monthly
+groupOidParameters=true
 archiveRawEvents=true
 archiveAlarms=false
 archiveAlarmChangeEvents=false
 logAllEvents=false
 retries=1
-connTimeout=3000
+connTimeout=30000
+readTimeout=300000
+# The following settings should be consistent with your ES cluster
+settings.index.number_of_shards=6
+settings.index.number_of_replicas=2
 EOF
 
   if [[ $VERSION != "23"* ]]; then
@@ -314,6 +326,13 @@ EOF
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
+elasticIndexStrategy=monthly
+connTimeout=30000
+readTimeout=300000
+# The following settings should be consistent with your ES cluster
+settings.index.number_of_shards=6
+settings.index.number_of_replicas=2
+
 EOF
   fi
 fi

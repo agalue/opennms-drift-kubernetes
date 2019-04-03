@@ -68,7 +68,7 @@ spec:
             value: '2181'
       containers:
       - name: kafka
-        image: wurstmeister/kafka:2.12-2.1.1
+        image: wurstmeister/kafka:2.12-2.2.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9092

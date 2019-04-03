@@ -2,7 +2,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Purpose:
-# - Create a PostgreSQL database for grafana only if it doesn't exist
+# - Create a PostgreSQL database and user for grafana, if it doesn't exist.
 #
 # Mandatory Environment variables:
 # - PGHOST

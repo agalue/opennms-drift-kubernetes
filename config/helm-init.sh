@@ -2,7 +2,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Purpose:
-# - Enable and initialize Helm data sources only when Helm is disable.
+# - Enable the Helm plugin and initialize the data sources, if Helm is disable.
 #
 # Mandatory Environment variables:
 # - GF_SECURITY_ADMIN_PASSWORD

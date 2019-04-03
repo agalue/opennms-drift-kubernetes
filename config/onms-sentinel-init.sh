@@ -12,7 +12,8 @@
 # - NUM_LISTENER_THREADS (i.e. queue.threads) should be consistent with the amount of partitions on Kafka
 #
 # Purpose:
-# - Configure instance ID and the Telemetry adapters only if Elasticsearch is provided.
+# - Configure instance ID
+# - Configure Telemetry adapters only if Elasticsearch is provided.
 # - Configure the Kafka consumers only if Kafka is provided.
 # - Configure the Telemetry persistence only if Cassandra is provided.
 #
