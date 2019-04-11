@@ -57,7 +57,7 @@ spec:
           value: '600'
       # Patch the database for Hasura
       - name: init-database
-        image: postgres:10.7-alpine
+        image: postgres:11-alpine
         imagePullPolicy: IfNotPresent
         command:
         - sh
@@ -85,7 +85,7 @@ spec:
           subPath: hasura-init.sh
       containers:
       - name: hasura
-        image: hasura/graphql-engine:v1.0.0-alpha39
+        image: hasura/graphql-engine:latest
         imagePullPolicy: IfNotPresent
         env:
         - name: PG_PASSWD

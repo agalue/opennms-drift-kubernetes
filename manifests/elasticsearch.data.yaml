@@ -5,8 +5,11 @@
 # - Elasticsearch expects to have very fast disks for the PVC to avoid performance issues.
 #
 # TODO:
-# - Install the OpenNMS Elasticsearch Plugin required for the Flows Deep Dive Tool
-#   Plugin Version 1.0.0 requires ES 6.2.4, Version 1.1.0 requires ES 6.5.4
+# - Compile the OpenNMS Elasticsearch Plugin required for the Flows Deep Dive Tool
+#   Plugin Version 1.0.0 requires ES 6.2.4
+#   Plugin Version 1.1.0 requires ES 6.5.4
+#   Plugin Version 1.2.0 requires ES 6.7.0
+#   This is required as there is no release scheme for this mandatory plugin.
 
 ---
 apiVersion: v1

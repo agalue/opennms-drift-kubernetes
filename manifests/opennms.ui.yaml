@@ -4,6 +4,8 @@
 # - This manifest is designed to work with the unaltered version of the image from:
 #   https://hub.docker.com/r/opennms/horizon-core-web
 #   https://github.com/opennms-forge/docker-horizon-core-web
+# - I'm not a fan of this use case, and can only embrace it as either to provide additional
+#   horsepower for the ReST API, or as a limited WebUI (not all features available).
 #
 # WARNING:
 # - The opennms process runs as root (for H23 or older), which is not allowed on OpenShift.

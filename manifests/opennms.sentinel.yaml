@@ -200,13 +200,13 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 60
           timeoutSeconds: 15
-        lifecycle:
-          preStop: # Required for H23 only. H24 can handle SIGTERM.
-            exec:
-              command:
-              - bash
-              - -c
-              - 'echo "Shutting down sentinel..." && /opt/sentinel/bin/karaf stop'
+        #lifecycle:
+        #  preStop: # Required for H23 or older
+        #    exec:
+        #      command:
+        #      - bash
+        #      - -c
+        #      - 'echo "Shutting down sentinel..." && /opt/sentinel/bin/karaf stop'
       volumes:
       - name: etc-overlay
         emptyDir: {}

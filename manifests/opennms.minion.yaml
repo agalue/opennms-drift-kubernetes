@@ -222,13 +222,13 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 60
           timeoutSeconds: 15
-        lifecycle:
-          preStop: # Required for H23 only. H24 can handle SIGTERM.
-            exec:
-              command:
-              - bash
-              - -c
-              - 'echo "Shutting down minion..." && /opt/minion/bin/karaf stop'
+        #lifecycle:
+        #  preStop: # Required for H23 or older
+        #    exec:
+        #      command:
+        #      - bash
+        #      - -c
+        #      - 'echo "Shutting down minion..." && /opt/minion/bin/karaf stop'
       # Use the following only when NX-OS Telemetry over gRPC is required.
       - name: nxos-grpc
         image: agalue/opennms-nxos-grpc:latest

@@ -48,7 +48,7 @@ spec:
         - name: TIMEOUT
           value: '600'
       - name: init-database
-        image: postgres:10.7-alpine
+        image: postgres:11-alpine
         imagePullPolicy: IfNotPresent
         command:
         - sh
@@ -77,7 +77,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        #image: opennms/helm:3.0.0
+        #image: opennms/helm:3.0.1
         image: opennms/helm:bleeding # Not good for production
         imagePullPolicy: IfNotPresent
         ports:

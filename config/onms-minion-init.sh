@@ -10,6 +10,11 @@
 # - Configure the instance ID, SNMP4J and Kafka (for RPC and Sink)
 # - Configure listeneres for Traps, Syslog, and Telemetry (on fixed ports)
 #
+# Warnings:
+# - Even if the Kafka cluster is configured to manage large messages,
+#   another source of big messages is the "batch.size" on Sink topics.
+#   On large deployments, this might have to be reduced.
+#
 # Environment variables:
 # - INSTANCE_ID
 # - OPENNMS_HTTP_USER
