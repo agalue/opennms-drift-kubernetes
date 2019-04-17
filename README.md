@@ -24,7 +24,7 @@ Of course, there are more features in this particular solution compared with the
 
 Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), and make sure it works prior start the cluster; for example:
 
-```shell
+```bash
 dig ns k8s.opennms.org
 ```
 
@@ -56,7 +56,7 @@ k8s.opennms.org.	21478	IN	NS	ns-1922.awsdns-48.co.uk.
 
 Create an S3 bucket to hold the `kops` configuration; for example:
 
-```shell
+```bash
 aws s3api create-bucket \
   --bucket k8s.opennms.org \
   --create-bucket-configuration LocationConstraint=us-east-2
@@ -68,7 +68,7 @@ aws s3api put-bucket-versioning \
 
 Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `k8s.opennms.org`, and the S3 bucked created above:
 
-```shell
+```bash
 export KOPS_CLUSTER_NAME="k8s.opennms.org"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 kops create cluster \
@@ -88,7 +88,7 @@ kops create cluster \
 
 Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
-```shell
+```bash
 kops edit cluster
 ```
 
@@ -110,13 +110,13 @@ spec:
 
 Finally, apply the changes to create the cluster:
 
-```shell
+```bash
 kops update cluster --yes
 ```
 
 It takes a few minutes to have the cluster ready. Verify the cluster statue using `kubectl` and `kops`:
 
-```shell
+```bash
 kops validate cluster
 ```
 
@@ -144,7 +144,7 @@ Your cluster k8s.opennms.org is ready
 
 Or,
 
-```shell
+```bash
 kubectl cluster-info
 ```
 
@@ -163,7 +163,7 @@ When configuring Kafka, the `hostPort` is used in order to configure the `advert
 
 Make sure `terraform` it installed on your system, and then execute the following:
 
-```shell
+```bash
 terraform init
 terraform apply -auto-approve
 ```
@@ -178,7 +178,7 @@ terraform apply -auto-approve
 
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
-```shell
+```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/ingress-nginx/v1.6.0.yaml
 ```
 
@@ -186,7 +186,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
 
-```shell
+```bash
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.6.2/deploy/manifests/cert-manager.yaml --validate=false
 ```
 
@@ -196,7 +196,7 @@ kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.6.2/
 
 From the directory on which this repository has been checked out:
 
-```shell
+```bash
 kubectl apply -f ./namespace
 ```
 
@@ -204,7 +204,7 @@ This will additionally add some complementary RBAC permissions, in case there is
 
 As a side note, instead of providing the namespace for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
 
-```shell
+```bash
 kubectl config set-context $(kubectl config current-context) --namespace=opennms
 ```
 
@@ -214,13 +214,13 @@ kubectl config set-context $(kubectl config current-context) --namespace=opennms
 
 From the directory on which this repository has been checked out, execute the following to build a config-map based on the files inside the `config` directory:
 
-```shell
+```bash
 kubectl create configmap opennms-config --from-file=config/ --namespace opennms --dry-run -o yaml | kubectl apply -f -
 ```
 
 Then, create the common settings shared across multiple services, to have then on a central place.
 
-```shell
+```bash
 kubectl create configmap common-settings \
  --from-literal TIMEZONE=America/New_York \
  --from-literal OPENNMS_INSTANCE_ID=OpenNMS \
@@ -235,7 +235,7 @@ kubectl create configmap common-settings \
 
 From the directory on which this repository has been checked out, create a secret object for all the custom secrets that are going to be used with this solution:
 
-```shell
+```bash
 kubectl create secret generic onms-passwords \
  --from-literal POSTGRES_PASSWORD=postgres \
  --from-literal OPENNMS_DB_PASSWORD=opennms \
@@ -257,7 +257,7 @@ Feel free to change them.
 
 From the directory on which this repository has been checked out:
 
-```shell
+```bash
 kubectl apply -f ./storage
 ```
 
@@ -269,13 +269,13 @@ The applications will wait for their respective dependencies to be ready prior s
 
 From the directory on which this repository has been checked out:
 
-```shell
+```bash
 kubectl apply -f ./manifests
 ```
 
 Use the following to check whether or not all the resources have been created:
 
-```shell
+```bash
 kubectl get all --namespace opennms
 ```
 
@@ -288,7 +288,7 @@ This deployment already contains Minions inside the opennms namespace for monito
 
 For example, here is the minimum configuration (without flow listeners):
 
-```shell
+```bash
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg
 location=Apex
 id=onms-minion.local
@@ -311,7 +311,7 @@ opennms-core-ipc-rpc-kafka
 
 With Docker:
 
-```shell
+```bash
 docker run -it --name minion \
  -e MINION_ID=docker-minion-1 \
  -e MINION_LOCATION=Apex \
@@ -354,7 +354,7 @@ Click [here](https://github.com/kubernetes/kops/blob/master/docs/addons.md) for 
 
 To install the dashboard:
 
-```shell
+```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.10.1.yaml
 ```
 
@@ -379,13 +379,13 @@ subjects:
 
 To get the password of the `admin` account for the dashboard:
 
-```shell
+```bash
 kops get secrets kube --type secret -oplaintext --state s3://k8s.opennms.org
 ```
 
 Or,
 
-```shell
+```bash
 kubectl config view --minify
 ```
 
@@ -393,7 +393,7 @@ kubectl config view --minify
 
 To install the standalone Heapster monitoring (required for the `kubectl top` command):
 
-```shell
+```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.11.0.yaml
 ```
 
@@ -401,7 +401,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 
 To install Prometheus Operator for monitoring:
 
-```shell
+```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.26.0.yaml
 ```
 
@@ -411,7 +411,7 @@ Click [here](https://github.com/coreos/prometheus-operator/blob/master/contrib/k
 
 To remove the Kubernetes cluster, do the following:
 
-```shell
+```bash
 kubectl delete ingress ingress-rules --namespace opennms
 kubectl delete service ext-kafka --namespace opennms
 kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
