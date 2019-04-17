@@ -2,7 +2,7 @@
 
 OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/) through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/).
 
-This is basically the `Kubernetes` version of the work done [here](https://github.com/OpenNMS/opennms-drift-aws/). For learning purposes, `Helm` charts and `operators` are avoided for this solution. In the future, that might change to take advantage of these technologies.
+This is basically the `Kubernetes` version of the work done [here](https://github.com/OpenNMS/opennms-drift-aws/) for OpenNMS Horizon 23. For learning purposes, `Helm` charts and `operators` are avoided for this solution. In the future, that might change to take advantage of these technologies.
 
 Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
 
