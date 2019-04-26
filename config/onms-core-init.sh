@@ -4,10 +4,10 @@
 # Requirements:
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
-# - Horizon 23 or newer is required.
-# - The rsync and git command are required, and they are installed through YUM
-#   at runtime, so Internet access is required to use this script.
-# - Must run as root (to fix permissions if necessary)
+# - Horizon 24 or newer is required.
+# - Must run as root
+# - The rsync command is required, and it is installed through YUM at runtime.
+#   Internet access is required to use this script.
 #
 # Purpose:
 # - Initialize the config directory on the volume only once.
@@ -26,7 +26,8 @@
 # - FEATURES_LIST
 # - KAFKA_SERVER
 # - CASSANDRA_SERVER
-# - CASSANDRA_REPFACTOR
+# - CASSANDRA_DC
+# - CASSANDRA_REPLICATION_FACTOR
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
 
@@ -49,21 +50,13 @@ KARAF_FILES=( \
 "org.ops4j.pax.url.mvn.cfg" \
 )
 
-# Install missing tools (requires Internet access)
-yum install -y -q rsync git
+# Install missing tools (requires Internet access, and root privileges)
+yum install -y -q rsync
 
 # Initialize configuration directory
 if [ ! -f $CONFIG_DIR/configured ]; then
   echo "Initializing configuration directory for the first time ..."
   rsync -ar $BACKUP_ETC/ $CONFIG_DIR/
-
-  echo "Initializing GIT on the configuration directory"
-  cd $CONFIG_DIR
-  git config --global user.name "Kubernetes"
-  git config --global user.email "root@localhost"
-  git init .
-  git add .
-  git commit -m "Fresh OpenNMS configuration"
 
   echo "Disabling data choices"
   cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
@@ -187,17 +180,11 @@ nodeTopic=${INSTANCE_ID}_nodes
 alarmTopic=${INSTANCE_ID}_alarms
 eventTopic=${INSTANCE_ID}_events
 metricTopic=${INSTANCE_ID}_metrics
-EOF
-
-  if [[ $VERSION != "23"* ]]; then
-    # Make sure to apply the following only when needed
-    cat <<EOF >> $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
 topologyProtocols=bridge,cdp,isis,lldp,ospf
 topologyVertexTopic=${INSTANCE_ID}_topology_vertex
 topologyEdgeTopic=${INSTANCE_ID}_topology_edge
 alarmFeedbackTopic=${INSTANCE_ID}_alarm_feedback
 EOF
-  fi
 fi
 
 # Configure Newts (works with either Cassandra or ScyllaDB)
@@ -239,10 +226,10 @@ org.opennms.newts.query.heartbeat=450000
 EOF
 fi
 
-if [[ $CASSANDRA_REPFACTOR ]]; then
+if [[ $CASSANDRA_REPLICATION_FACTOR ]]; then
   echo "Building Newts Schema for Cassandra/ScyllaDB..."
   cat <<EOF > $CONFIG_DIR/newts.cql
-CREATE KEYSPACE IF NOT EXISTS ${KEYSPACE} WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $CASSANDRA_REPFACTOR };
+CREATE KEYSPACE IF NOT EXISTS ${KEYSPACE} WITH replication = {'class' : 'NetworkTopologyStrategy', '$CASSANDRA_DC' : $CASSANDRA_REPLICATION_FACTOR };
 
 CREATE TABLE IF NOT EXISTS ${KEYSPACE}.samples (
   context text,
@@ -320,9 +307,8 @@ settings.index.number_of_shards=6
 settings.index.number_of_replicas=2
 EOF
 
-  if [[ $VERSION != "23"* ]]; then
-    echo "Configuring Alarm History Forwarder..."
-    cat <<EOF > $CONFIG_DIR/org.opennms.features.alarms.history.elastic.cfg
+  echo "Configuring Alarm History Forwarder..."
+  cat <<EOF > $CONFIG_DIR/org.opennms.features.alarms.history.elastic.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
@@ -332,9 +318,7 @@ readTimeout=300000
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=6
 settings.index.number_of_replicas=2
-
 EOF
-  fi
 fi
 
 # Cleanup temporary requisition files:

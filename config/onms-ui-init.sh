@@ -4,7 +4,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
-# - Horizon 23 or newer is required.
+# - Horizon 24 or newer is required.
 # - The jq command is required, and it is installed through YUM at runtime,
 #   so Internet access is required to use this script.
 #

@@ -1,7 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - CASSANDRA_DC should match config/opennms-core/newts.cql
 # - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 # - Make sure to take appropriate actions when stopping or decomissioning (shrink cluster).
 # - Cassandra expects to have very fast disks for the PVC to avoid performance issues.
@@ -132,7 +131,10 @@ spec:
         - name: CASSANDRA_ENDPOINT_SNITCH
           value: GossipingPropertyFileSnitch
         - name: CASSANDRA_DC
-          value: Main
+          valueFrom:
+            configMapKeyRef:
+              key: CASSANDRA_DC
+              name: common-settings
         - name: CASSANDRA_RACK
           valueFrom:
             fieldRef:

@@ -12,23 +12,12 @@
 #
 # WARNING:
 # - This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
-# - The opennms process runs as root (for H23 or older), which is not allowed on OpenShift.
-# - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable).
-# - In order to execute ICMP requests as non-root a recent kernel on the K8s Hosts is required.
-#   For H24+, to force OpenNMS to run as root, add the following to the container template:
-#   securityContext:
-#     runAsUser: 0
-#
-# Java 8 Issues:
-# - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
-# - -XX:ParallelGCThreads and -XX:ConcGCThreads might require to be updated.
-#    Although, Runtime.getRuntime().availableProcessors() seems to respect the CPU limitations.
 #
 # TODO:
 # - Potential tools for managing /opt/opennms/etc:
 #   https://vapor-ware.github.io/ksync/
-#   https://github.com//kubernetes/git-sync
+#   https://github.com/kubernetes/git-sync
 #   https://gitkube.sh
 # - Add a lifecycle.preStart to execute a "git commit" of the current state of the configuration,
 #   in order to track what has been changed between since the last time the Pod was running.
@@ -77,23 +66,13 @@ spec:
     spec:
       terminationGracePeriodSeconds: 120
       initContainers:
-      # Requires a fairly recent Kernel on the K8s host
-      - name: init-sysctl
-        image: busybox
-        command: # Allow ICMP as non-root
-        - sysctl
-        - -w
-        - net.ipv4.ping_group_range=0 429496729
-        securityContext:
-          privileged: true
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        #image: opennms/horizon-core-web:23.0.3-1
-        image: opennms/horizon-core-web:24.0.0-rc # Not ready for production
+        image: opennms/horizon-core-web:24.0.0-rc
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
-        securityContext: # Required to fix ownership when OpenNMS is not running as root
+        securityContext: # Required by onms-core-init.sh
           runAsUser: 0
         env:
         - name: TZ
@@ -108,13 +87,17 @@ spec:
               name: common-settings
         - name: FEATURES_LIST
           value: opennms-alarm-history-elastic,opennms-es-rest,opennms-kafka-producer # For H24+
-          #value: opennms-es-rest,opennms-kafka-producer # For H23
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
-        - name: CASSANDRA_REPFACTOR
+        - name: CASSANDRA_REPLICATION_FACTOR
           valueFrom:
             configMapKeyRef:
               key: CASSANDRA_REPLICATION_FACTOR
+              name: common-settings
+        - name: CASSANDRA_DC
+          valueFrom:
+            configMapKeyRef:
+              key: CASSANDRA_DC
               name: common-settings
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
@@ -152,8 +135,7 @@ spec:
           value: '600'
       containers:
       - name: onms
-        #image: opennms/horizon-core-web:23.0.3-1
-        image: opennms/horizon-core-web:24.0.0-rc # Not ready for production
+        image: opennms/horizon-core-web:24.0.0-rc
         imagePullPolicy: IfNotPresent
         args:
         - -s
@@ -174,7 +156,7 @@ spec:
               resource: requests.memory
               divisor: 1Mi
         - name: JAVA_OPTS # Preferred way instead of opennms.conf
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
@@ -217,13 +199,6 @@ spec:
             port: http
           initialDelaySeconds: 30
           periodSeconds: 60
-        #lifecycle:
-        #  preStop: # Required for H23 or older
-        #    exec:
-        #      command:
-        #      - bash
-        #      - -c
-        #      - 'echo "Shutting down opennms..." && echo 1 > /opt/opennms/logs/opennms.pid && /opt/opennms/bin/opennms stop'
       # Optional image to share configuration directory through NFS (required by external UI servers)
       - name: nfs
         image: itsthenetwork/nfs-server-alpine:11

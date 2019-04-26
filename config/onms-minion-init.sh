@@ -4,7 +4,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/minion.
 #   Version must match the runtime container.
-# - Horizon 23 or newer is required.
+# - Horizon 24 or newer is required.
 #
 # Purpose:
 # - Configure the instance ID, SNMP4J and Kafka (for RPC and Sink)
@@ -20,6 +20,7 @@
 # - OPENNMS_HTTP_USER
 # - OPENNMS_HTTP_PASS
 # - KAFKA_SERVER
+# - SINGLE_PORT
 
 # To avoid issues with OpenShift
 umask 002
@@ -111,52 +112,30 @@ EOF
 
 ### Optional Settings, only relevant for processing Flows and Telemetry data
 
-if [[ $VERSION == "23"* ]]; then
-  echo "Configuring listeners for Horizon $VERSION"
+if [[ $SINGLE_PORT != "" ]]; then
+  echo "Configuring listeners for Horizon on port $SINGLE_PORT"
 
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-50001.cfg
-name=NXOS
-class-name=org.opennms.netmgt.telemetry.listeners.udp.UdpListener
-host=0.0.0.0
-port=50001
-maxPacketSize=16192
-EOF
-
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-8877.cfg
-name=Netflow-5
-class-name=org.opennms.netmgt.telemetry.listeners.udp.UdpListener
-host=0.0.0.0
-port=8877
-maxPacketSize=8096
-EOF
-
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-4729.cfg
-name=Netflow-9
-class-name=org.opennms.netmgt.telemetry.listeners.flow.netflow9.UdpListener
-host=0.0.0.0
-port=4729
-maxPacketSize=8096
-EOF
-
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-6343.cfg
-name=SFlow
-class-name=org.opennms.netmgt.telemetry.listeners.sflow.Listener
-host=0.0.0.0
-port=6343
-maxPacketSize=8096
-EOF
-
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-4738.cfg
-name=IPFIX
-class-name=org.opennms.netmgt.telemetry.listeners.flow.ipfix.UdpListener
-host=0.0.0.0
-port=4738
-maxPacketSize=8096
+  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-$SINGLE_PORT.cfg
+name=Single-Port-Listener
+class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
+parameters.host=0.0.0.0
+parameters.port=$SINGLE_PORT
+parameters.maxPacketSize=16192
+parsers.0.name=NXOS
+parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.common.parser.ForwardParser
+parsers.1.name=Netflow-5
+parsers.1.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser
+parsers.2.name=Netflow-9
+parsers.2.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser
+parsers.3.name=SFlow
+parsers.3.class-name=org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParser
+parsers.4.name=IPFIX
+parsers.4.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser
 EOF
 
 else
 
-  echo "Configuring listeners for Horizon $VERSION"
+  echo "Configuring listeners on default ports"
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-50001.cfg
 name=NXOS-Listener

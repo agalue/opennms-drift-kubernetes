@@ -6,7 +6,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
-# - Horizon 23 or newer is required (if H23 is used, features.xml must be mounted on the Sentinel Pods)
+# - Horizon 24 or newer is required (if H23 is used, features.xml must be mounted on the Sentinel Pods)
 #   The reason for this is that H23 doesn't support featuresBoot.d/, so features.xml should be used
 #   to start the desired features.
 # - NUM_LISTENER_THREADS (i.e. queue.threads) should be consistent with the amount of partitions on Kafka
@@ -68,17 +68,6 @@ NETFLOW9_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.N
 SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowTelemetryAdapter
 NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
 JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
-
-# Horizon 24 Classes for Flows
-if [[ $VERSION == "23"* ]]; then
-  SFLOW_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowAdapter
-  IPFIX_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.ipfix.IpfixAdapter
-  NETFLOW5_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.v5.Netflow5Adapter
-  NETFLOW9_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.v9.Netflow9Adapter
-  SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.netflow.sflow.SFlowTelemetryAdapter
-  NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbAdapter
-  JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.adapters.jti.JtiGpbAdapter
-fi
 
 if [[ $ELASTIC_SERVER ]]; then
   echo "Configuring Elasticsearch..."
@@ -234,20 +223,10 @@ EOF
 </datacollection-group>
 EOF
 
-  if [[ $VERSION == "23"* ]]; then
-    cat <<EOF > $OVERLAY/sflow-host.groovy
-import static org.opennms.netmgt.telemetry.adapters.netflow.BsonUtils.get
-import static org.opennms.netmgt.telemetry.adapters.netflow.BsonUtils.getDouble
-import static org.opennms.netmgt.telemetry.adapters.netflow.BsonUtils.getInt64
-EOF
-  else
-    cat <<EOF > $OVERLAY/sflow-host.groovy
+  cat <<EOF > $OVERLAY/sflow-host.groovy
 import static org.opennms.netmgt.telemetry.protocols.common.utils.BsonUtils.get
 import static org.opennms.netmgt.telemetry.protocols.common.utils.BsonUtils.getDouble
 import static org.opennms.netmgt.telemetry.protocols.common.utils.BsonUtils.getInt64
-EOF
-  fi
-  cat <<EOF >> $OVERLAY/sflow-host.groovy
 import org.opennms.netmgt.collection.support.builder.NodeLevelResource
 
 NodeLevelResource nodeLevelResource = new NodeLevelResource(agent.getNodeId())
@@ -267,18 +246,9 @@ get(msg, "counters", "0:2004").ifPresent { doc ->
 }
 EOF
 
-  if [[ $VERSION == "23"* ]]; then
-    cat <<EOF > $OVERLAY/junos-telemetry-interface.groovy
-import org.opennms.netmgt.telemetry.adapters.jti.proto.Port
-import org.opennms.netmgt.telemetry.adapters.jti.proto.TelemetryTop
-EOF
-  else
-    cat <<EOF > $OVERLAY/junos-telemetry-interface.groovy
+  cat <<EOF > $OVERLAY/junos-telemetry-interface.groovy
 import org.opennms.netmgt.telemetry.protocols.jti.adapter.proto.Port
 import org.opennms.netmgt.telemetry.protocols.jti.adapter.proto.TelemetryTop
-EOF
-  fi
-  cat <<EOF >> $OVERLAY/junos-telemetry-interface.groovy
 import groovy.util.logging.Slf4j
 import org.opennms.core.utils.RrdLabelUtils
 import org.opennms.netmgt.collection.api.AttributeType
@@ -306,18 +276,9 @@ TelemetryTop.TelemetryStream jtiMsg = msg
 CollectionSetGenerator.generate(agent, builder, jtiMsg)
 EOF
 
-  if [[ $VERSION == "23"* ]]; then
-    cat <<EOF > $OVERLAY/cisco-nxos-telemetry-interface.groovy
-import org.opennms.netmgt.telemetry.adapters.nxos.proto.TelemetryBis
-import org.opennms.netmgt.telemetry.adapters.nxos.NxosGpbParserUtil
-EOF
-  else
-    cat <<EOF > $OVERLAY/cisco-nxos-telemetry-interface.groovy
+  cat <<EOF > $OVERLAY/cisco-nxos-telemetry-interface.groovy
 import org.opennms.netmgt.telemetry.protocols.nxos.adapter.proto.TelemetryBis
 import org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbParserUtil
-EOF
-  fi
-  cat <<EOF >> $OVERLAY/cisco-nxos-telemetry-interface.groovy
 import groovy.util.logging.Slf4j
 import java.util.List
 import java.util.Objects

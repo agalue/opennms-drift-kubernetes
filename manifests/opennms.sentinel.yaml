@@ -11,13 +11,7 @@
 # - Using a Deployment instead of StatefulSet, as the Sentinel ID is not used at the moment.
 #
 # WARNING:
-# - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
-#
-# Java 8 Issues:
-# - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
-# - -XX:ParallelGCThreads and -XX:ConcGCThreads might require to be updated.
-#    Although, Runtime.getRuntime().availableProcessors() seems to respect the CPU limitations.
 
 ---
 apiVersion: autoscaling/v1
@@ -70,8 +64,7 @@ spec:
       initContainers:
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        #image: opennms/sentinel:23.0.3-1
-        image: opennms/sentinel:24.0.0-rc # Not ready for production
+        image: opennms/sentinel:24.0.0-rc
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -126,8 +119,7 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        #image: opennms/sentinel:23.0.3-1
-        image: opennms/sentinel:24.0.0-rc # Not ready for production
+        image: opennms/sentinel:24.0.0-rc
         imagePullPolicy: IfNotPresent
         args:
           - -f
@@ -176,9 +168,6 @@ spec:
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/sentinel-etc-overlay
-        #- name: opennms-config # WARNING: This is for H23 only. Do not use it with H24+
-        #  mountPath: /opt/sentinel/deploy/features.xml
-        #  subPath: onms-sentinel-features.xml
         resources:
           limits:
             cpu: 1
@@ -200,13 +189,6 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 60
           timeoutSeconds: 15
-        #lifecycle:
-        #  preStop: # Required for H23 or older
-        #    exec:
-        #      command:
-        #      - bash
-        #      - -c
-        #      - 'echo "Shutting down sentinel..." && /opt/sentinel/bin/karaf stop'
       volumes:
       - name: etc-overlay
         emptyDir: {}

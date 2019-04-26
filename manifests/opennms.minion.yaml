@@ -13,17 +13,7 @@
 # WARNING:
 # - HorizontalPodAutoscaling is not recommended unless external intelligence is implemented,
 #   to avoid zombie entries on the Minions requisitions, that can lead to outages.
-# - The default images are based on OpenJDK, but Oracle JDK is recommended for production.
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
-# - In order to execute ICMP requests as non-root a recent kernel on the K8s Hosts is required.
-#   To force Minion to run as root, add the following to the container template:
-#   securityContext:
-#     runAsUser: 0
-#
-# Java 8 Issues:
-# - -XX:+UnlockExperimentalVMOptions and -XX:+UseCGroupMemoryLimitForHeap won't work
-# - -XX:ParallelGCThreads and -XX:ConcGCThreads might require to be updated.
-#    Although, Runtime.getRuntime().availableProcessors() seems to respect the CPU limitations.
 
 ---
 apiVersion: v1
@@ -90,19 +80,9 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       initContainers:
-      # Requires a fairly recent Kernel on the K8s host
-      - name: init-sysctl
-        image: busybox
-        command: # Allow ICMP as non-root
-        - sysctl
-        - -w
-        - net.ipv4.ping_group_range=0 429496729
-        securityContext:
-          privileged: true
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        #image: opennms/minion:23.0.3-1
-        image: opennms/minion:24.0.0-rc # Not ready for production
+        image: opennms/minion:24.0.0-rc
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -141,8 +121,7 @@ spec:
           value: '600'
       containers:
       - name: minion
-        #image: opennms/minion:23.0.3-1
-        image: opennms/minion:24.0.0-rc # Not ready for production
+        image: opennms/minion:24.0.0-rc
         imagePullPolicy: IfNotPresent
         args:
         - -f
@@ -167,7 +146,7 @@ spec:
               key: MINION_LOCATION
               name: common-settings
         - name: JAVA_OPTS
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: OPENNMS_HTTP_URL
           value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
         ports:
@@ -222,13 +201,6 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 60
           timeoutSeconds: 15
-        #lifecycle:
-        #  preStop: # Required for H23 or older
-        #    exec:
-        #      command:
-        #      - bash
-        #      - -c
-        #      - 'echo "Shutting down minion..." && /opt/minion/bin/karaf stop'
       # Use the following only when NX-OS Telemetry over gRPC is required.
       - name: nxos-grpc
         image: agalue/opennms-nxos-grpc:latest

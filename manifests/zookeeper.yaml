@@ -61,7 +61,7 @@ spec:
           mountPath: /data
       containers:
       - name: zk
-        image: zookeeper:3.4.14
+        image: zookeeper:3.4
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

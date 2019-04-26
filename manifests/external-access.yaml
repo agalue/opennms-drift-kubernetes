@@ -1,8 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# The dns-controller will automatically create a CNAME for each host pointing to the Ingress ELB when --watch-ingress=true is applied.
-# Warning: please use your own domains.
-#          this is not intended to be used by any user.
+# The dns-controller will automatically create a CNAME for each host pointing to the Ingress ELB
+# when --watch-ingress=true is applied.
+#
+# WARNING:
+# Please use your own domains. This is not intended to be used by any user.
 
 ---
 apiVersion: certmanager.k8s.io/v1alpha1

@@ -2,7 +2,7 @@
 
 OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/) through [Kops](https://github.com/kubernetes/kops) and [AWS](https://aws.amazon.com/).
 
-This is basically the `Kubernetes` version of the work done [here](https://github.com/OpenNMS/opennms-drift-aws/). For learning purposes, `Helm` charts and `operators` are avoided for this solution. In the future, that might change to take advantage of these technologies.
+This is basically the `Kubernetes` version of the work done [here](https://github.com/OpenNMS/opennms-drift-aws/) for OpenNMS Horizon 24. For learning purposes, `Helm` charts and `operators` are avoided for this solution. In the future, that might change to take advantage of these technologies.
 
 Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
 
@@ -14,10 +14,10 @@ Of course, there are more features in this particular solution compared with the
 
 ## Requirements
 
+* Install the [AWS CLI](https://aws.amazon.com/cli/)
 * Have your AWS account configured on your system (`~/.aws/credentials`)
 * Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary
 * Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary
-* Install the [AWS CLI](https://aws.amazon.com/cli/)
 * Install the [terraform](https://www.terraform.io) binary [Optional. See security groups]
 
 ## Cluster Configuration
@@ -187,7 +187,9 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.6.2/deploy/manifests/cert-manager.yaml --validate=false
+kubectl create namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
+kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.7/deploy/manifests/cert-manager.yaml
 ```
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
@@ -225,6 +227,7 @@ kubectl create configmap common-settings \
  --from-literal TIMEZONE=America/New_York \
  --from-literal OPENNMS_INSTANCE_ID=OpenNMS \
  --from-literal MINION_LOCATION=Kubernetes \
+ --from-literal CASSANDRA_DC=Main \
  --from-literal CASSANDRA_CLUSTER_NAME=OpenNMS \
  --from-literal CASSANDRA_REPLICATION_FACTOR=2 \
  --from-literal KAFKA_NUM_PARTITIONS=6 \
@@ -324,8 +327,7 @@ docker run -it --name minion \
  -p 8201:8201 \
  -p 1514:1514 \
  -p 1162:1162 \
- --sysctl "net.ipv4.ping_group_range=0 429496729" \
- opennms/minion:23.0.3-1 -c
+ opennms/minion:24.0.0-rc -c
 ```
 
 > IMPORTANT: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.

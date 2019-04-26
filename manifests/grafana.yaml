@@ -1,7 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# WARNING:
-# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 
 ---
 apiVersion: v1
@@ -77,8 +74,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        #image: opennms/helm:3.0.1
-        image: opennms/helm:bleeding # Not good for production
+        image: opennms/helm:3.0.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
