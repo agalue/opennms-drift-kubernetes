@@ -20,11 +20,12 @@ Of course, there are more features in this particular solution compared with the
 
 ## Cluster Configuration
 
-Proceed with the preffered cluster technology:
+Proceed with the preferred cluster technology:
 
 * Using [Kops](README.kops.md)
 * Using [EKS](README.eks.md)
 * Using [GCE](README.gce.md)
+* Using [Minikube](README.minikube.md)
 
 ## Deployment
 

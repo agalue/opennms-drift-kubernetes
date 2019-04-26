@@ -1,4 +1,4 @@
-# Minikube
+# Setup Cluster with Minikube
 
 For testing purposes, it would be nice to be able to start a reduced version of this lab through `minikube`.
 
