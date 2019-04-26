@@ -6,13 +6,11 @@
 # Requirements:
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
-# - Horizon 24 or newer is required (if H23 is used, features.xml must be mounted on the Sentinel Pods)
-#   The reason for this is that H23 doesn't support featuresBoot.d/, so features.xml should be used
-#   to start the desired features.
+# - Horizon 24 or newer is required.
 # - NUM_LISTENER_THREADS (i.e. queue.threads) should be consistent with the amount of partitions on Kafka
 #
 # Purpose:
-# - Configure instance ID
+# - Configure instance ID.
 # - Configure Telemetry adapters only if Elasticsearch is provided.
 # - Configure the Kafka consumers only if Kafka is provided.
 # - Configure the Telemetry persistence only if Cassandra is provided.
@@ -56,18 +54,8 @@ if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
   cp $SENTINEL_HOME/etc/scv.jce $OVERLAY
 fi
 
-# WARNING: The following directory only exist on H24. For H23 create $MINION_HOME/deploy/features.xml
 FEATURES_DIR=$OVERLAY/featuresBoot.d
 mkdir -p $FEATURES_DIR
-
-# Horizon 24+ Classes for Flows
-SFLOW_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
-IPFIX_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
-NETFLOW5_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
-NETFLOW9_CLASS=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
-SFLOW_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowTelemetryAdapter
-NXOS_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
-JTI_TELEMETRY_CLASS=org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
 
 if [[ $ELASTIC_SERVER ]]; then
   echo "Configuring Elasticsearch..."
@@ -77,26 +65,26 @@ if [[ $ELASTIC_SERVER ]]; then
   if [[ ! $CASSANDRA_SERVER ]]; then
     cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-sflow.cfg
 name = SFlow
-class-name = $SFLOW_CLASS
+class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
   fi
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-ipfix.cfg
 name = IPFIX
-class-name = $IPFIX_CLASS
+class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-netflow5.cfg
 name = Netflow-5
-class-name = $NETFLOW5_CLASS
+class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-netflow9.cfg
 name = Netflow-9
-class-name = $NETFLOW9_CLASS
+class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
@@ -154,23 +142,23 @@ EOF
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-sflow-telemetry.cfg
 name = SFlow
 adapters.1.name = SFlow-Adapter
-adapters.1.class-name = $SFLOW_CLASS
+adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
 adapters.2.name = SFlow-Telemetry
-adapters.2.class-name = $SFLOW_TELEMETRY_CLASS
+adapters.2.class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowTelemetryAdapter
 adapters.2.parameters.script = $SENTINEL_HOME/etc/sflow-host.groovy
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-nxos.cfg
 name = NXOS
-class-name = $NXOS_TELEMETRY_CLASS
+class-name = org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
 parameters.script = $SENTINEL_HOME/etc/cisco-nxos-telemetry-interface.groovy
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-jti.cfg
 name = JTI
-class-name = $JTI_TELEMETRY_CLASS
+class-name = org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
 parameters.script = $SENTINEL_HOME/etc/junos-telemetry-interface.groovy
 queue.threads = $NUM_LISTENER_THREADS
 EOF
