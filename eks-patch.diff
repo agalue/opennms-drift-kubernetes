@@ -1,0 +1,26 @@
+diff --git a/manifests/external-access.yaml b/manifests/external-access.yaml
+index 53eb9da..287bb2d 100644
+--- a/manifests/external-access.yaml
++++ b/manifests/external-access.yaml
+@@ -30,10 +30,10 @@ metadata:
+   labels:
+     deployment: drift
+   annotations:
+-    kubernetes.io/ingress.class: nginx
++    kubernetes.io/ingress.class: alb
+     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+     certmanager.k8s.io/acme-http01-edit-in-place: 'true'
+-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
++    alb.ingress.kubernetes.io/scheme: internet-facing
+ spec:
+   tls:
+     - secretName: k8s-opennms-org-ingress
+@@ -111,7 +111,7 @@ metadata:
+     app: kafka
+     deployment: drift
+   annotations:
+-    dns.alpha.kubernetes.io/external: kafka.k8s.opennms.org.
++    external-dns.alpha.kubernetes.io/hostname: kafka.k8s.opennms.org.
+ spec:
+   type: LoadBalancer
+   ports:
