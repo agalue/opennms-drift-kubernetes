@@ -5,8 +5,6 @@
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
 * Have your AWS account configured on your system (`~/.aws/credentials`)
 * Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary
-* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary
-* Install the [terraform](https://www.terraform.io) binary [Optional. See security groups]
 
 ## Cluster Configuration
 
@@ -180,7 +178,17 @@ kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cer
 
 ## Manifets
 
-Go back to the main [README](README.md) and follow the steps to configure OpenNMS and the dependencies.
+To apply all the manifests:
+
+```bash
+kubectl apply -k manifests
+```
+
+If you're not running `kubectl` version 1.14, the following is an alternative:
+
+```bash
+kustomize build manifests | kubectl apply -f
+```
 
 ## Optional Kubernetes Addons
 

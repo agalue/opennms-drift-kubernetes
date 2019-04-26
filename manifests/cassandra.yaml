@@ -192,7 +192,7 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: ssd
+      storageClassName: standard
       resources:
         requests:
           storage: 20Gi

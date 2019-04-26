@@ -132,7 +132,7 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: ssd
+      storageClassName: standard
       resources:
         requests:
           storage: 4Gi

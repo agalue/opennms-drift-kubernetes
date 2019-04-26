@@ -7,8 +7,6 @@
 * Install the [AWS CLI](https://aws.amazon.com/cli/)
 * Have your AWS account configured on your system (`~/.aws/credentials`)
 * Install the [eksctl](https://eksctl.io/) binary
-* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary
-* Install the [terraform](https://www.terraform.io) binary [Optional. See security groups]
 
 ## Cluster Configuration
 
@@ -137,42 +135,17 @@ kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cer
 
 ## Manifets
 
-A change is required on `manifests/external-access.yaml`, in order to use the `ALB Ingress`:
+To apply all the manifests:
 
-```diff
-diff --git a/manifests/external-access.yaml b/manifests/external-access.yaml
-index 53eb9da..287bb2d 100644
---- a/manifests/external-access.yaml
-+++ b/manifests/external-access.yaml
-@@ -30,10 +30,10 @@ metadata:
-   labels:
-     deployment: drift
-   annotations:
--    kubernetes.io/ingress.class: nginx
-+    kubernetes.io/ingress.class: alb
-     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
-     certmanager.k8s.io/acme-http01-edit-in-place: 'true'
--    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-+    alb.ingress.kubernetes.io/scheme: internet-facing
- spec:
-   tls:
-     - secretName: k8s-opennms-org-ingress
-@@ -111,7 +111,7 @@ metadata:
-     app: kafka
-     deployment: drift
-   annotations:
--    dns.alpha.kubernetes.io/external: kafka.k8s.opennms.org.
-+    external-dns.alpha.kubernetes.io/hostname: kafka.k8s.opennms.org.
- spec:
-   type: LoadBalancer
-   ports:
+```bash
+kubectl apply -k eks
 ```
 
-A patch file with the above content was create at [eks-patch.diff](eks-patch.diff).
+If you're not running `kubectl` version 1.14, the following is an alternative:
 
-Go back to the main [README](README.md) and follow the steps to configure OpenNMS and the dependencies.
-
-Go back to the main `README` and follow the steps to configure OpenNMS and the dependencies.
+```bash
+kustomize build eks | kubectl apply -f
+```
 
 ## Cleanup
 

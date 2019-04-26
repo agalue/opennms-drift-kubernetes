@@ -1,0 +1,18 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-rules
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ext-kafka
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: kafka.k8s.opennms.org.

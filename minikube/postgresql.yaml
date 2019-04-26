@@ -1,0 +1,36 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  template:
+    spec:
+      containers:
+      - name: postgres
+        args:
+          - postgres
+        volumeMounts:
+        - mountPath: /etc/postgresql.conf
+          $patch: delete
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 128Mi
+          $patch: replace
+      volumes:
+      - name: postgresql-config
+        $patch: delete
+  volumeClaimTemplates:
+  - metadata:
+      name: pg-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 500Mi

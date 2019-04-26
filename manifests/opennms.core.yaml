@@ -224,7 +224,7 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: ssd
+      storageClassName: standard
       resources:
         requests:
           storage: 1Gi # Cannnot be less than that in AWS for an EBS Volume

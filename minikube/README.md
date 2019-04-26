@@ -7,7 +7,7 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 ## Requirements
 
 * Install the [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) binary on your machine.
-* Install the [kustomize](https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md) binary on your machine.
+* Install the [kustomize](https://kustomize.io/) binary on your machine.
 
 ## Cluster Configuration
 
@@ -21,7 +21,6 @@ minikube config view
 - dashboard: true
 - heapster: false
 - ingress: true
-- kubernetes-version: v1.13.3
 - memory: 8192
 ```
 
@@ -31,7 +30,7 @@ Once `minikube` is running, execute the following to modify the original YAML fi
 
 ```shell
 cd ..
-kustomize build | kubectl apply -f -
+kustomize build minikube | sed 's/[{}]*//' | kubectl apply -f -
 ```
 
-Of course, the ingresses, and the cert-manager are not going to run here for obviuos reasons.
+> **WARNING**: There are a few issues when deleting resources, hance the patch with `sed`. There are going to be warnings, specially with CRDs like `cert-manager`, but the solution should work.

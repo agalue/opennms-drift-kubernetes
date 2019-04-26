@@ -1,0 +1,36 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: kafka
+        env:
+        - name: HOSTNAME_COMMAND
+          value: echo ${K8S_HOST}
+        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+          value: '1'
+        - name: KAFKA_MIN_INSYNC_REPLICAS
+          value: '1'
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            memory: 512Mi
+          $patch: replace
+  volumeClaimTemplates:
+  - metadata:
+      name: kafka-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 500Mi

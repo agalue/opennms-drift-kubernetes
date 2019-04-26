@@ -12,6 +12,12 @@ Of course, there are more features in this particular solution compared with the
 
 `Kafka` uses the `hostPort` feature to expose the advertise external listeners on port 9094, so applications outside `Kubernetes` like `Minion` can access it. For this reason, `Kafka` can be scaled up to the number of worker nodes on the `Kubernetes` cluster.
 
+## Requirements
+
+* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary. Make sure to have version 1.14 to use the `kustomize` integration.
+* Install the [kustomize](https://kustomize.io/) binary on your machine [Optional, but good to have for troubleshooting]
+* Install the [terraform](https://www.terraform.io) binary [Optional. See security groups]
+
 ## Cluster Configuration
 
 Proceed with the preffered cluster technology:
@@ -22,87 +28,15 @@ Proceed with the preffered cluster technology:
 
 ## Deployment
 
-### Namespace
+To facilicate the process, everything is done through `kustomize`.
 
-From the directory on which this repository has been checked out:
+To update the default settings, check [kustomization.yaml](manifests/kustomization.yaml).
 
-```bash
-kubectl apply -f ./namespace
-```
+To update the passwords, check [_passwords.env](manifests/_passwords.env).
+
+Each cluster technology explains how to deploy the manifets.
 
 This will additionally add some complementary RBAC permissions, in case there is a need of adding operators and/or administrators to the OpenNMS namespace.
-
-As a side note, instead of providing the namespace for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
-
-```bash
-kubectl config set-context $(kubectl config current-context) --namespace=opennms
-```
-
-### ConfigMaps/Secrets
-
-#### ConfigMaps
-
-From the directory on which this repository has been checked out, execute the following to build a config-map based on the files inside the `config` directory:
-
-```bash
-kubectl create configmap opennms-config --from-file=config/ --namespace opennms --dry-run -o yaml | kubectl apply -f -
-```
-
-Then, create the common settings shared across multiple services, to have then on a central place.
-
-```bash
-kubectl create configmap common-settings \
- --from-literal TIMEZONE=America/New_York \
- --from-literal OPENNMS_INSTANCE_ID=OpenNMS \
- --from-literal MINION_LOCATION=Kubernetes \
- --from-literal CASSANDRA_DC=Main \
- --from-literal CASSANDRA_CLUSTER_NAME=OpenNMS \
- --from-literal CASSANDRA_REPLICATION_FACTOR=2 \
- --from-literal KAFKA_NUM_PARTITIONS=6 \
- --namespace opennms --dry-run -o yaml | kubectl apply -f -
-```
-
-#### Secrets
-
-From the directory on which this repository has been checked out, create a secret object for all the custom secrets that are going to be used with this solution:
-
-```bash
-kubectl create secret generic onms-passwords \
- --from-literal POSTGRES_PASSWORD=postgres \
- --from-literal OPENNMS_DB_PASSWORD=opennms \
- --from-literal OPENNMS_UI_ADMIN_PASSWORD=admin \
- --from-literal GRAFANA_UI_ADMIN_PASSWORD=opennms \
- --from-literal GRAFANA_DB_USERNAME=grafana \
- --from-literal GRAFANA_DB_PASSWORD=grafana \
- --from-literal ELASTICSEARCH_PASSWORD=elastic \
- --from-literal KAFKA_MANAGER_APPLICATION_SECRET=0p3nNMS \
- --from-literal KAFKA_MANAGER_USERNAME=opennms \
- --from-literal KAFKA_MANAGER_PASSWORD=0p3nNMS \
- --from-literal HASURA_GRAPHQL_ACCESS_KEY=0p3nNMS \
- --namespace opennms --dry-run -o yaml | kubectl apply -f -
-```
-
-Feel free to change them.
-
-### Storage Classes
-
-From the directory on which this repository has been checked out:
-
-```bash
-kubectl apply -f ./storage
-```
-
-Volumes for `StatefulSets` are going to be automatically created.
-
-### Services, Deployments and StatefulSets
-
-The applications will wait for their respective dependencies to be ready prior start (a feature implemented through `initContainers`), so there is no need to start them on a specific order.
-
-From the directory on which this repository has been checked out:
-
-```bash
-kubectl apply -f ./manifests
-```
 
 Use the following to check whether or not all the resources have been created:
 
