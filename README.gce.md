@@ -1,3 +1,5 @@
 # Setup Cluster with GCE
 
-COMMING SOON!
+COMING SOON!
+
+I'm working on it ;)
