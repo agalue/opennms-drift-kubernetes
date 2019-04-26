@@ -38,6 +38,7 @@ spec:
   tls:
     - secretName: k8s-opennms-org-ingress
       hosts:
+        - k8s.opennms.org
         - cassandra-reaper.k8s.opennms.org
         - grafana.k8s.opennms.org
         - hasura.k8s.opennms.org
