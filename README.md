@@ -25,6 +25,7 @@ Proceed with the preferred cluster technology:
 * Using [Kops](README.kops.md)
 * Using [EKS](README.eks.md)
 * Using [GCE](README.gce.md)
+* Using [Azure](README.azure.md)
 * Using [Minikube](README.minikube.md)
 
 ## Deployment

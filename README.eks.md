@@ -8,7 +8,7 @@
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
 * Install the [eksctl](https://eksctl.io/) binary.
 
-## Cluster Configuration
+## DNS Configuration
 
 Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), and make sure it works prior start the cluster; for example:
 
@@ -43,6 +43,8 @@ aws.agalue.net.		172800	IN	NS	ns-144.awsdns-18.com.
 ```
 
 > **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is used, replace it with yours.
+
+## Cluster Creation
 
 Create the Kubernetes cluster using `eksctl`. The following example creates a cluster with 1 master node and 5 worker nodes:
 
@@ -110,7 +112,7 @@ terraform apply -auto-approve
 
 > NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
 
-## NGinx Ingress Controller:
+## NGinx Ingress Controller
 
 This is compatible with the original solution:
 

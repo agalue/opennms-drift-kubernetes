@@ -6,7 +6,7 @@
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
 * Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary.
 
-## Cluster Configuration
+## DNS Configuration
 
 Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), and make sure it works prior start the cluster; for example:
 
@@ -41,6 +41,8 @@ aws.agalue.net.		172800	IN	NS	ns-144.awsdns-18.com.
 ```
 
 > **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is used, replace it with yours.
+
+## Cluster Creation
 
 Create an S3 bucket to hold the `kops` configuration; for example:
 
