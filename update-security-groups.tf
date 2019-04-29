@@ -1,13 +1,21 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
+variable "region" {
+  description = "AWS Region"
+}
+
+variable "domain" {
+  description = "Domain Name (e.x. aws.agalue.net)"
+}
+
 provider "aws" {
-  region = "us-east-2"
+  region = "${var.region}"
 }
 
 data "aws_security_group" "nodes" {
   filter {
     name   = "tag:Name"
-    values = ["nodes.k8s.opennms.org", "eksctl-opennms-cluster/ClusterSharedNodeSecurityGroup"]
+    values = ["nodes.${var.domain}", "eksctl-opennms-cluster/ClusterSharedNodeSecurityGroup"]
   }
 }
 

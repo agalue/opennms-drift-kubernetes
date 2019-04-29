@@ -4,43 +4,45 @@
 
 ## Requirements
 
-* Install the [AWS CLI](https://aws.amazon.com/cli/)
-* Have your AWS account configured on your system (`~/.aws/credentials`)
-* Install the [eksctl](https://eksctl.io/) binary
+* Install the [AWS CLI](https://aws.amazon.com/cli/).
+* Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
+* Install the [eksctl](https://eksctl.io/) binary.
 
 ## Cluster Configuration
 
 Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), and make sure it works prior start the cluster; for example:
 
 ```bash
-dig ns k8s.opennms.org
+dig ns aws.agalue.net
 ```
 
 The output should look like this:
 
 ```text
-; <<>> DiG 9.10.6 <<>> ns k8s.opennms.org
+; <<>> DiG 9.10.6 <<>> ns aws.agalue.net
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 42795
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 46163
 ;; flags: qr rd ra; QUERY: 1, ANSWER: 4, AUTHORITY: 0, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
 ; EDNS: version: 0, flags:; udp: 4096
 ;; QUESTION SECTION:
-;k8s.opennms.org.		IN	NS
+;aws.agalue.net.			IN	NS
 
 ;; ANSWER SECTION:
-k8s.opennms.org.	21478	IN	NS	ns-402.awsdns-50.com.
-k8s.opennms.org.	21478	IN	NS	ns-927.awsdns-51.net.
-k8s.opennms.org.	21478	IN	NS	ns-1146.awsdns-15.org.
-k8s.opennms.org.	21478	IN	NS	ns-1922.awsdns-48.co.uk.
+aws.agalue.net.		172800	IN	NS	ns-1821.awsdns-35.co.uk.
+aws.agalue.net.		172800	IN	NS	ns-718.awsdns-25.net.
+aws.agalue.net.		172800	IN	NS	ns-1512.awsdns-61.org.
+aws.agalue.net.		172800	IN	NS	ns-144.awsdns-18.com.
 
-;; Query time: 31 msec
+;; Query time: 85 msec
 ;; SERVER: 172.20.1.9#53(172.20.1.9)
-;; WHEN: Mon Jul 16 10:29:19 EDT 2018
-;; MSG SIZE  rcvd: 181
+;; WHEN: Mon Apr 29 14:16:37 EDT 2019
+;; MSG SIZE  rcvd: 180
 ```
+
+> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is used, replace it with yours.
 
 Create the Kubernetes cluster using `eksctl`. The following example creates a cluster with 1 master node and 5 worker nodes:
 
@@ -48,7 +50,7 @@ Create the Kubernetes cluster using `eksctl`. The following example creates a cl
 eksctl create cluster \
   --version 1.12 \
   --name opennms \
-  --nodegroup-name opennms-fleet \
+  --nodegroup-name onms-fleet \
   --tags Environment=Test,Department=Support \
   --region us-east-2 \
   --node-type t2.2xlarge \
@@ -108,21 +110,13 @@ terraform apply -auto-approve
 
 > NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
 
-## ALB Ingress Controller
+## NGinx Ingress Controller:
 
-This add-on is required in order to avoid having a LoadBalancer per external service.
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.0/docs/examples/rbac-role.yaml
-curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.0/docs/examples/alb-ingress-controller.yaml 2>/dev/null | sed 's/devCluster/opennms/' | kubectl apply -f -
-```
-
-For Route53 mapping:
+This is compatible with the original solution:
 
 ```bash
-DOMAIN=k8s.opennms.org
-OWNER=agalue
-curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.0/docs/examples/external-dns.yaml 2>/dev/null | sed "s/--domain-filter=.*/--domain-filter=$DOMAIN" | sed "s/--txt-owner-id=.*/--txt-owner-id=$OWNER/" | kubectl apply -f -
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/aws/service-l7.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/aws/patch-configmap-l7.yaml
 ```
 
 ## Cert-Manager

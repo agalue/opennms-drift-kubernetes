@@ -47,10 +47,12 @@ kubectl get all --namespace opennms
 
 ## Minion
 
-This deployment already contains Minions inside the opennms namespace for monitoring devices within the cluster. In order to have Minions outside the Kubernetes cluster, they should use the following resources in order to connect to OpenNMS and the dependent applications:
+This deployment already contains Minions inside the opennms namespace for monitoring devices within the cluster. In order to have Minions outside the Kubernetes cluster, they should use the following resources in order to connect to OpenNMS and the dependent applications.
 
-* OpenNMS Core: `https://onms.k8s.opennms.org/opennms`
-* Kafka: `kafka.k8s.opennms.org:9094`
+For `AWS` using the domain `aws.agalue.net`, the resources should be:
+
+* OpenNMS Core: `https://onms.aws.agalue.net/opennms`
+* Kafka: `kafka.aws.agalue.net:9094`
 
 For example, here is the minimum configuration (without flow listeners):
 
@@ -58,13 +60,13 @@ For example, here is the minimum configuration (without flow listeners):
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg
 location=Apex
 id=onms-minion.local
-http-url=https://onms.k8s.opennms.org/opennms
+http-url=https://onms.aws.agalue.net/opennms
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg
-bootstrap.servers=kafka.k8s.opennms.org:9094
+bootstrap.servers=kafka.aws.agalue.net:9094
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.rpc.kafka.cfg
-bootstrap.servers=kafka.k8s.opennms.org:9094
+bootstrap.servers=kafka.aws.agalue.net:9094
 acks=1
 
 [root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot
@@ -78,15 +80,17 @@ opennms-core-ipc-rpc-kafka
 With Docker:
 
 ```bash
+DOMAIN="aws.agalue.net"
+
 docker run -it --name minion \
  -e MINION_ID=docker-minion-1 \
  -e MINION_LOCATION=Apex \
- -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms \
+ -e OPENNMS_HTTP_URL=https://onms.$DOMAIN/opennms \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
  -e KAFKA_RPC_ACKS=1 \
- -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
- -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
+ -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
+ -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
  -p 8201:8201 \
  -p 1514:1514 \
  -p 1162:1162 \
@@ -99,17 +103,17 @@ docker run -it --name minion \
 
 > NOTE: The above samples are not including information about the Flow listeners. Check the [Minion's config](config/onms-minion-init.sh) for more details.
 
-## Users
+## Users Resources
 
-* OpenNMS Core: `https://onms.k8s.opennms.org/opennms` (for administrative tasks)
-* OpenNMS UI: `https://onmsui.k8s.opennms.org/opennms` (for users/operators)
-* Grafana: `https://grafana.k8s.opennms.org/`
-* Kibana: `https://kibana.k8s.opennms.org/` (remember to enable monitoring)
-* Kafka Manager: `https://kaffa-manager.k8s.opennms.org/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
-* Hasura GraphQL API: `https://hasura.k8s.opennms.org/v1alpha1/graphql`
-* Hasura GraphQL Console: `https://hasura.k8s.opennms.org/console`
+* OpenNMS Core: `https://onms.aws.agalue.net/opennms` (for administrative tasks)
+* OpenNMS UI: `https://onmsui.aws.agalue.net/opennms` (for users/operators)
+* Grafana: `https://grafana.aws.agalue.net/`
+* Kibana: `https://kibana.aws.agalue.net/` (remember to enable monitoring)
+* Kafka Manager: `https://kaffa-manager.aws.agalue.net/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
+* Hasura GraphQL API: `https://hasura.aws.agalue.net/v1alpha1/graphql`
+* Hasura GraphQL Console: `https://hasura.aws.agalue.net/console`
 
-> NOTE: Make sure to use your own Domain.
+> **WARNING**: Make sure to use your own Domain.
 
 ## Future Enhancements
 

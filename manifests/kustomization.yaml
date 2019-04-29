@@ -43,6 +43,7 @@ configMapGenerator:
   - CASSANDRA_REPLICATION_FACTOR=2
   - KAFKA_NUM_PARTITIONS=6
   - MINION_LOCATION=Kubernetes
+  - DOMAIN=aws.agalue.net
 
 secretGenerator:
 - name: onms-passwords

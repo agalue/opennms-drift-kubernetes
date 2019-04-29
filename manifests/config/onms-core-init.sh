@@ -5,7 +5,6 @@
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
 # - Horizon 24 or newer is required.
-# - Must run as root
 # - The rsync command is required, and it is installed through YUM at runtime.
 #   Internet access is required to use this script.
 #
@@ -49,9 +48,6 @@ KARAF_FILES=( \
 "org.apache.karaf.*" \
 "org.ops4j.pax.url.mvn.cfg" \
 )
-
-# Install missing tools (requires Internet access, and root privileges)
-yum install -y -q rsync
 
 # Initialize configuration directory
 if [ ! -f $CONFIG_DIR/configured ]; then
@@ -328,8 +324,3 @@ rm -f $CONFIG_DIR/foreign-sources/pending/*.xml.*
 # Force to execute runjava and the install script
 touch $CONFIG_DIR/do-upgrade
 
-# Fix ownership
-if grep -q opennms /etc/passwd; then
-  echo "Fixing ownership ..."
-  chown -R opennms $CONFIG_DIR
-fi

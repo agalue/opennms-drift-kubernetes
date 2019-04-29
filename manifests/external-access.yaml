@@ -1,7 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# The dns-controller will automatically create a CNAME for each host pointing to the Ingress ELB
-# when --watch-ingress=true is applied.
+# With Kops, the dns-controller will automatically create entries on Route53 when --watch-ingress=true is applied.
+# For EKS, GKE or AKS, a DNS record for the Ingress controller might be required.
 #
 # WARNING:
 # Please use your own domains. This is not intended to be used by any user.
@@ -22,6 +22,21 @@ spec:
     http01: {}
 
 ---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  labels:
+    deployment: drift
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: agalue@opennms.org
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    http01: {}
+
+---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -31,65 +46,64 @@ metadata:
     deployment: drift
   annotations:
     kubernetes.io/ingress.class: nginx
-    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
-    certmanager.k8s.io/acme-http01-edit-in-place: 'true'
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    certmanager.k8s.io/cluster-issuer: letsencrypt-staging
+    certmanager.k8s.io/acme-http01-edit-in-place: 'true'
 spec:
   tls:
-    - secretName: k8s-opennms-org-ingress
+    - secretName: opennms-ingress
       hosts:
-        - k8s.opennms.org
-        - cassandra-reaper.k8s.opennms.org
-        - grafana.k8s.opennms.org
-        - hasura.k8s.opennms.org
-        - kafka-manager.k8s.opennms.org
-        - kibana.k8s.opennms.org
-        - onms.k8s.opennms.org
-        - onmsui.k8s.opennms.org
+        - onms.aws.agalue.net
+        - cassandra-reaper.aws.agalue.net
+        - grafana.aws.agalue.net
+        - hasura.aws.agalue.net
+        - kibana.aws.agalue.net
+        - kafka-manager.aws.agalue.net
+        - onmsui.aws.agalue.net
   rules:
-    - host: cassandra-reaper.k8s.opennms.org
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: cassandra-reaper
-              servicePort: 8080
-    - host: grafana.k8s.opennms.org
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: grafana
-              servicePort: 3000
-    - host: hasura.k8s.opennms.org
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: hasura
-              servicePort: 8080
-    - host: kafka-manager.k8s.opennms.org
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: kafka-manager
-              servicePort: 9000
-    - host: kibana.k8s.opennms.org
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: kibana
-              servicePort: 5601
-    - host: onms.k8s.opennms.org
+    - host: onms.aws.agalue.net
       http:
         paths:
           - path: /
             backend:
               serviceName: opennms-core
               servicePort: 8980
-    - host: onmsui.k8s.opennms.org
+    - host: cassandra-reaper.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: cassandra-reaper
+              servicePort: 8080
+    - host: grafana.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grafana
+              servicePort: 3000
+    - host: hasura.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: hasura
+              servicePort: 8080
+    - host: kafka-manager.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kafka-manager
+              servicePort: 9000
+    - host: kibana.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kibana
+              servicePort: 5601
+    - host: onmsui.aws.agalue.net
       http:
         paths:
           - path: /
@@ -112,7 +126,7 @@ metadata:
     app: kafka
     deployment: drift
   annotations:
-    dns.alpha.kubernetes.io/external: kafka.k8s.opennms.org.
+    dns.alpha.kubernetes.io/external: kafka.aws.agalue.net.
 spec:
   type: LoadBalancer
   ports:

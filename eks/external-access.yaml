@@ -15,4 +15,4 @@ kind: Service
 metadata:
   name: ext-kafka
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: kafka.k8s.opennms.org.
+    external-dns.alpha.kubernetes.io/hostname: kafka.aws.agalue.net.
