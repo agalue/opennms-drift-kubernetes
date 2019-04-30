@@ -5,4 +5,5 @@ bases:
  - ../manifests
 
 patches:
+- common-settings.yaml
 - external-access.yaml
