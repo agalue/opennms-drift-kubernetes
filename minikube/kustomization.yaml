@@ -4,22 +4,11 @@
 
 ---
 bases:
- - ../manifests
+ - ../reduced
 
 patches:
-- cassandra.reaper.yaml
 - cassandra.yaml
-- elasticsearch.master.yaml
-- elasticsearch.data.yaml
-- grafana.yaml
-- hasura.yaml
-- kafka.yaml
 - kafka.manager.yaml
-- kibana.yaml
-- opennms.ui.yaml
-- postgresql.yaml
-- zookeeper.yaml
 - opennms.core.yaml
-- opennms.minion.yaml
 - opennms.sentinel.yaml
 - external-access.yaml

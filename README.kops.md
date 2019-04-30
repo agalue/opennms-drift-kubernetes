@@ -8,7 +8,7 @@
 
 ## DNS Configuration
 
-Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), and make sure it works prior start the cluster; for example:
+Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), register it as an `NS` entry on your registrar matching the name servers from the sub-domain, and make sure it works prior start the cluster; for example:
 
 ```bash
 dig ns aws.agalue.net
@@ -40,7 +40,7 @@ aws.agalue.net.		172800	IN	NS	ns-144.awsdns-18.com.
 ;; MSG SIZE  rcvd: 180
 ```
 
-> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is used, replace it with yours.
+> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is mentioned or used, replace it with your own.
 
 ## Cluster Creation
 
@@ -151,23 +151,7 @@ CoreDNS is running at https://api.aws.agalue.net/api/v1/namespaces/kube-system/s
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.aws.agalue.net`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
-
-Make sure `terraform` it installed on your system, and then execute the following:
-
-```bash
-export DOMAIN_NAME="aws.agalue.net"
-export AWS_REGION="us-east-2"
-
-terraform init
-terraform apply -var "region=$AWS_REGION" -var "domain=$DOMAIN_NAME" -auto-approve
-```
-
-> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
-
-## Install the NGinx Ingress Controller
+## Install the Ingress Controller
 
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
@@ -201,6 +185,24 @@ If you're not running `kubectl` version 1.14, the following is an alternative:
 kustomize build manifests | kubectl apply -f
 ```
 
+## Security Groups
+
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.aws.agalue.net`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
+
+Make sure `terraform` it installed on your system, and then execute the following:
+
+```bash
+export DOMAIN_NAME="aws.agalue.net"
+export AWS_REGION="us-east-2"
+
+pushd kops
+terraform init
+terraform apply -var "region=$AWS_REGION" -var "domain=$DOMAIN_NAME" -auto-approve
+popd
+```
+
+> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
+
 ## Cleanup
 
 To remove the Kubernetes cluster, do the following:
@@ -214,4 +216,4 @@ kubectl delete service ext-kafka --namespace opennms
 kops delete cluster --yes
 ```
 
-The first 2 `kubectl` commands will trigger the removal of the Route 53 CNAMEs associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).
+The first 2 commands will trigger the removal of the Route 53 entries associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).

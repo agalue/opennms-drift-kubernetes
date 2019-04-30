@@ -13,19 +13,19 @@
 To simplify further commands, configure your default project and zone:
 
 ```bash
-export PROJECT_ID="alejandro-playground"
+export PROJECT_ID="opennms-k8s"
+export PROJECT_DESCR="OpenNMS Kubernetes"
 export ZONE="us-central1-a"
 
 gcloud auth login
+gcloud projects create $PROJECT_ID --name="$PROJECT_DESCR"
 gcloud config set project $PROJECT_ID
 gcloud config set compute/zone $ZONE
 ```
 
-> **WARNING**: Make sure to use your project and your zone.
-
 ## DNS Configuration
 
-Make sure you have a Cloud DNS Zone configured on your Registrar.
+Make sure you have a Cloud DNS Zone configured, and it has an `NS` entry your registrar matching the name servers from the zone.
 
 ```bash
 gcloud dns managed-zones describe gce | grep dnsName
@@ -66,11 +66,15 @@ gce.agalue.net.		300	IN	SOA	ns-cloud-a1.googledomains.com. cloud-dns-hostmaster.
 ;; MSG SIZE  rcvd: 136
 ```
 
-> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is used, replace it with yours.
+> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is mentioned or used, replace it with your own.
 
 ## Cluster Creation
 
 Create the Kubernetes Cluster
+
+> **WARNING**: Make sure you have enough quota on your Google Cloud account to create all the resources. Without alterations, this deployment requires `CPUS_ALL_REGIONS=40`. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment.
+
+With enough quota:
 
 ```bash
 gcloud container clusters create opennms \
@@ -79,28 +83,31 @@ gcloud container clusters create opennms \
   --machine-type=n1-standard-8
 ```
 
-Once the cluster is running, configure `kubectl` from your own machine or through Google Shell:
+With reduced quota:
 
 ```bash
-gcloud container clusters get-credentials opennms
+gcloud container clusters create opennms \
+  --num-nodes=2 \
+  --cluster-version=1.12.7-gke.10 \
+  --machine-type=n1-standard-4
 ```
 
-## Helm
-
-Install Helm, if it is not installed on your machine or Google Shell:
+Then,
 
 ```bash
-curl -o get_helm.sh https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
-chmod +x get_helm.sh
-./get_helm.sh
+kubectl cluster-info
 ```
 
-Initialize it with RBAC:
+The output should be something like this:
 
-```bash
-kubectl create serviceaccount --namespace kube-system tiller
-kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-helm init --service-account tiller
+```text
+Kubernetes master is running at https://34.66.138.146
+GLBCDefaultBackend is running at https://34.66.138.146/api/v1/namespaces/kube-system/services/default-http-backend:http/proxy
+Heapster is running at https://34.66.138.146/api/v1/namespaces/kube-system/services/heapster/proxy
+KubeDNS is running at https://34.66.138.146/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Metrics-server is running at https://34.66.138.146/api/v1/namespaces/kube-system/services/https:metrics-server:/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
 ## Install the NGinx Ingress Controller
@@ -108,36 +115,41 @@ helm init --service-account tiller
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-helm install --name nginx-ingress stable/nginx-ingress --set rbac.create=true
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
 ```
 
 ## Install the CertManager
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.7/deploy/manifests/00-crds.yaml
 kubectl create namespace cert-manager
 kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
-helm repo add jetstack https://charts.jetstack.io
-helm repo update
-helm install --name cert-manager --namespace cert-manager --version v0.7.1 jetstack/cert-manager
+kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.7/deploy/manifests/cert-manager.yaml
 ```
 
 ## Configure DNS Entry for the Ingress Controller
 
-Wait until the Ingress Controller is active and have aan external IP:
+With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach, as having external-dns working with GCE is challenging.
+
+Find out the external IP of the Ingress Controller (wait for it, in case it is not there):
 
 ```bash
-kubectl get service nginx-ingress-controller
-NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)                      AGE
-nginx-ingress-controller   LoadBalancer   10.23.246.178   35.239.78.96   80:30658/TCP,443:32196/TCP   6m8s
+kubectl get svc ingress-nginx -n ingress-nginx
+```
+
+The output should be something like this:
+
+```text
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+ingress-nginx   LoadBalancer   10.51.248.125   35.239.225.26   80:31039/TCP,443:31186/TCP   103s
 ```
 
 Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`, for example:
 
 ```bash
-EXTERNAL_IP=$(kubectl get service nginx-ingress-controller -o json | jq -r .status.loadBalancer.ingress[0].ip)
-DOMAIN="gce.agalue.net"
-ZONE="gce"
+export EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r .status.loadBalancer.ingress[0].ip)
+export DOMAIN="gce.agalue.net"
+export ZONE="gce"
 
 cat <<EOF > /tmp/ingress.yaml
 kind: dns#resourceRecordSet
@@ -153,16 +165,28 @@ gcloud dns record-sets import /tmp/ingress.yaml --zone $ZONE
 
 ## Manifets
 
-To apply all the manifests:
+To apply all the manifests with enough quota:
 
 ```bash
-kubectl apply -k manifests
+kubectl apply -k gce
+```
+
+With reduced quota:
+
+```bash
+kubectl apply -k gce-reduced
 ```
 
 If you're not running `kubectl` version 1.14, the following is an alternative:
 
 ```bash
-kustomize build manifests | kubectl apply -f
+kustomize build gce | kubectl apply -f
+```
+
+Or,
+
+```bash
+kustomize build gce-reduced | kubectl apply -f
 ```
 
 ## Cleanup

@@ -1,0 +1,36 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-rules
+spec:
+  tls:
+    - secretName: opennms-ingress
+      hosts:
+        - onms.gce.agalue.net
+        - grafana.gce.agalue.net
+        - kafka-manager.gce.agalue.net
+  rules:
+    - host: onms.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: opennms-core
+              servicePort: 8980
+    - host: grafana.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grafana
+              servicePort: 3000
+    - host: kafka-manager.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kafka-manager
+              servicePort: 9000

@@ -1,7 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # With Kops, the dns-controller will automatically create entries on Route53 when --watch-ingress=true is applied.
-# For EKS, GKE or AKS, a DNS record for the Ingress controller might be required.
+# With EKS, GKE and AKS, external-dns will create entries on Route53.
 #
 # WARNING:
 # Please use your own domains. This is not intended to be used by any user.
@@ -126,7 +126,10 @@ metadata:
     app: kafka
     deployment: drift
   annotations:
+    # For Kops
     dns.alpha.kubernetes.io/external: kafka.aws.agalue.net.
+    # For External-DNS on EKS
+    external-dns.alpha.kubernetes.io/hostname: kafka.aws.agalue.net.
 spec:
   type: LoadBalancer
   ports:

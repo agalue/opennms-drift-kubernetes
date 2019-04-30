@@ -23,23 +23,3 @@ spec:
         env:
         - name: TARGETS
           value: postgresql.opennms.svc.cluster.local:5432,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
-      containers:
-      - name: onms
-        resources:
-          limits:
-            memory: 2Gi
-          requests:
-            memory: 1Gi
-          $patch: replace
-      - name: nfs
-        $patch: delete
-  volumeClaimTemplates:
-  - metadata:
-      name: opennms-etc
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      storageClassName: standard
-      resources:
-        requests:
-          storage: 64Mi

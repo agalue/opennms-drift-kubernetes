@@ -15,7 +15,7 @@ provider "aws" {
 data "aws_security_group" "nodes" {
   filter {
     name   = "tag:Name"
-    values = ["nodes.${var.domain}", "eksctl-opennms-cluster/ClusterSharedNodeSecurityGroup"]
+    values = ["nodes.${var.domain}"]
   }
 }
 

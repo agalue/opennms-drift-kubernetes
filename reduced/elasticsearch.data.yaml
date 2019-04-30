@@ -33,13 +33,3 @@ spec:
           requests:
             memory: 1Gi
           $patch: replace
-  volumeClaimTemplates:
-  - metadata:
-      name: es-data
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      storageClassName: standard
-      resources:
-        requests:
-          storage: 500Mi

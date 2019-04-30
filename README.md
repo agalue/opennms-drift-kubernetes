@@ -12,33 +12,34 @@ Of course, there are more features in this particular solution compared with the
 
 `Kafka` uses the `hostPort` feature to expose the advertise external listeners on port 9094, so applications outside `Kubernetes` like `Minion` can access it. For this reason, `Kafka` can be scaled up to the number of worker nodes on the `Kubernetes` cluster.
 
-## Requirements
+## Minimum Requirements
 
 * Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary. Make sure to have version 1.14 to use the `kustomize` integration.
 * Install the [kustomize](https://kustomize.io/) binary on your machine [Optional, but good to have for troubleshooting]
-* Install the [terraform](https://www.terraform.io) binary [Optional. See security groups]
+
+> **NOTE**: Depending on the chosen platform, additional requirements might be needed. Check the respective `README` files for more information.
 
 ## Cluster Configuration
 
 Proceed with the preferred cluster technology:
 
-* Using [Kops](README.kops.md)
-* Using [EKS](README.eks.md)
-* Using [GCE](README.gce.md)
-* Using [Azure](README.azure.md)
-* Using [Minikube](README.minikube.md)
+* Using [Kops](README.kops.md) on AWS.
+* Using [EKS](README.eks.md) on AWS.
+* Using [Google Compute Platform](README.gce.md).
+* Using [Microsoft Azure](README.azure.md).
+* Using [Minikube](README.minikube.md) on your machine (with restrictions).
 
 ## Deployment
 
 To facilicate the process, everything is done through `kustomize`.
 
-To update the default settings, check [kustomization.yaml](manifests/kustomization.yaml).
+To update the default settings, check [kustomization.yaml](manifests/kustomization.yaml). Find the config-map section for the common environment variables.
 
 To update the passwords, check [_passwords.env](manifests/_passwords.env).
 
-Each cluster technology explains how to deploy the manifets.
+Each cluster technology explains how to deploy the manifests.
 
-This will additionally add some complementary RBAC permissions, in case there is a need of adding operators and/or administrators to the OpenNMS namespace.
+As part of the deployment, some complementary RBAC permissions will be added, in case there is a need for adding operators and/or administrators to the OpenNMS namespace. Check [namespace.yaml](manifests/namespace.yaml) for more details.
 
 Use the following to check whether or not all the resources have been created:
 

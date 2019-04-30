@@ -1,0 +1,23 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# Warning: this excludes Cassandra to reduce the overhead on Minikube
+
+---
+bases:
+ - ../manifests
+
+patches:
+- cassandra.reaper.yaml
+- cassandra.yaml
+- elasticsearch.master.yaml
+- elasticsearch.data.yaml
+- grafana.yaml
+- hasura.yaml
+- kafka.yaml
+- kibana.yaml
+- opennms.core.yaml
+- opennms.minion.yaml
+- opennms.sentinel.yaml
+- opennms.ui.yaml
+- postgresql.yaml
+- zookeeper.yaml

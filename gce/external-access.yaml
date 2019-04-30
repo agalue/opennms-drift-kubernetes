@@ -1,0 +1,73 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-rules
+spec:
+  tls:
+    - secretName: opennms-ingress
+      hosts:
+        - onms.gce.agalue.net
+        - cassandra-reaper.gce.agalue.net
+        - grafana.gce.agalue.net
+        - hasura.gce.agalue.net
+        - kibana.gce.agalue.net
+        - kafka-manager.gce.agalue.net
+        - onmsui.gce.agalue.net
+  rules:
+    - host: onms.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: opennms-core
+              servicePort: 8980
+    - host: cassandra-reaper.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: cassandra-reaper
+              servicePort: 8080
+    - host: grafana.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grafana
+              servicePort: 3000
+    - host: hasura.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: hasura
+              servicePort: 8080
+    - host: kafka-manager.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kafka-manager
+              servicePort: 9000
+    - host: kibana.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kibana
+              servicePort: 5601
+    - host: onmsui.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: opennms-ui
+              servicePort: 8980
+          - path: /opennms/nrt
+            backend:
+              serviceName: opennms-core
+              servicePort: 8980
+

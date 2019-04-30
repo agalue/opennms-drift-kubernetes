@@ -1,9 +1,0 @@
-Need to create a DNS entry for the Ingress  LB (this is even part of the cert-manager documentation).
-Kops does that for you, but for other backends you must have it.
-
-It is possible to install the standard NGInx Ingress Controller instead of the ALB Ingress Controller.
-Maybe there are some advantages, but this can simplify the deployment.
-
-NGinx Ingress:
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/aws/service-l7.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/aws/patch-configmap-l7.yaml
