@@ -7,7 +7,6 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 ## Requirements
 
 * Install the [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) binary on your machine.
-* Install the [kustomize](https://kustomize.io/) binary on your machine.
 
 ## Cluster Configuration
 
@@ -26,10 +25,10 @@ minikube config view
 
 ## Deploy the applications
 
-Once `minikube` is running, execute the following to modify the original YAML files designed for `kops` in order to run a reduced version of the environment here:
+Once `minikube` is running, execute the following to apply a reduced version of the original YAML files located at the [manifests](manifests) directory, that fits the suggested settings.
 
 ```shell
 kustomize build minikube | sed 's/[{}]*//' | kubectl apply -f -
 ```
 
-> **WARNING**: There are a few issues when deleting resources, hance the patch with `sed`. There are going to be warnings, specially with CRDs like `cert-manager`, but the solution should work.
+> **WARNING**: There are a few issues when deleting resources, hance the patch with `sed`.
