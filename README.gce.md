@@ -147,20 +147,13 @@ ingress-nginx   LoadBalancer   10.51.248.125   35.239.225.26   80:31039/TCP,443:
 Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`, for example:
 
 ```bash
-export EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r .status.loadBalancer.ingress[0].ip)
-export DOMAIN="gce.agalue.net"
 export ZONE="gce"
+export DOMAIN="gce.agalue.net"
+export EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r .status.loadBalancer.ingress[0].ip)
 
-cat <<EOF > /tmp/ingress.yaml
-kind: dns#resourceRecordSet
-name: '*.${DOMAIN}.'
-rrdatas:
-- ${EXTERNAL_IP}
-ttl: 300
-type: A
-EOF
-
-gcloud dns record-sets import /tmp/ingress.yaml --zone $ZONE
+gcloud dns record-sets transaction start --zone $ZONE
+gcloud dns record-sets transaction add "$EXTERNAL_IP" --zone $ZONE --name "*.$DOMAIN." --ttl 300 --type A
+gcloud dns record-sets transaction execute --zone $ZONE
 ```
 
 ## Manifets
@@ -193,7 +186,17 @@ kustomize build gce-reduced | sed 's/[{}]*//' | kubectl apply -f -
 gcloud container clusters delete opennms
 ```
 
-Also, remember to remove the A Record from the Cloud DNS Zone, as this won't happen automatically.
+Also, remember to remove the A Record from the Cloud DNS Zone:
+
+```bash
+export ZONE="gce"
+export DOMAIN="gce.agalue.net"
+export EXTERNAL_IP=$(gcloud dns record-sets list --zone $ZONE | grep "\*.$DOMAIN" | awk '{ print $4 }')
+
+gcloud dns record-sets transaction start --zone $ZONE
+gcloud dns record-sets transaction remove --zone $ZONE --name "*.$DOMAIN" --ttl 300 --type A "$EXTERNAL_IP"
+gcloud dns record-sets transaction execute --zone $ZONE
+```
 
 ## TODO
 
