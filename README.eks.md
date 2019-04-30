@@ -186,7 +186,3 @@ caused by: context deadline exceeded
 ```
 
 Make sure to manually clean up, or find the CloudFormation entry called `eksctl-opennms-cluster` if exist and delete it.
-
-## TODO
-
-* Verify that everything works, including the Ingress Controller with Cert-Manager.
