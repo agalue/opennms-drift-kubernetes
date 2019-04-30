@@ -5,12 +5,10 @@
 ## Requirements
 
 * Install the [Google Cloud CLI](https://cloud.google.com/sdk/).
-* Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [helm](https://helm.sh) binary.
 
 ## Configure the Google Cloud CLI
 
-To simplify further commands, configure your default project and zone:
+Create a project and make it the default:
 
 ```bash
 export PROJECT_ID="opennms-k8s"
@@ -22,6 +20,8 @@ gcloud projects create $PROJECT_ID --name="$PROJECT_DESCR"
 gcloud config set project $PROJECT_ID
 gcloud config set compute/zone $ZONE
 ```
+
+> **NOTE**: An existing project can be used. The following commands will use the default one.
 
 ## DNS Configuration
 
@@ -192,3 +192,8 @@ gcloud container clusters delete opennms
 ```
 
 Also, remember to remove the A Record from the Cloud DNS Zone, as this won't happen automatically.
+
+## TODO
+
+* Create a firewall rule for Kafka, to allow external access through TCP 9094.
+* Create a public DNS entry for Kafka, to facilite external Minions configuration.
