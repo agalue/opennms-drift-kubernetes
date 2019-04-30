@@ -29,7 +29,6 @@ minikube config view
 Once `minikube` is running, execute the following to modify the original YAML files designed for `kops` in order to run a reduced version of the environment here:
 
 ```shell
-cd ..
 kustomize build minikube | sed 's/[{}]*//' | kubectl apply -f -
 ```
 

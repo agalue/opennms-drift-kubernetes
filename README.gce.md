@@ -87,9 +87,9 @@ With reduced quota:
 
 ```bash
 gcloud container clusters create opennms \
-  --num-nodes=2 \
+  --num-nodes=3 \
   --cluster-version=1.12.7-gke.10 \
-  --machine-type=n1-standard-4
+  --machine-type=n1-standard-2
 ```
 
 Then,
@@ -171,23 +171,19 @@ To apply all the manifests with enough quota:
 kubectl apply -k gce
 ```
 
-With reduced quota:
-
-```bash
-kubectl apply -k gce-reduced
-```
-
-If you're not running `kubectl` version 1.14, the following is an alternative:
+Or,
 
 ```bash
 kustomize build gce | kubectl apply -f
 ```
 
-Or,
+With reduced quota:
 
 ```bash
-kustomize build gce-reduced | kubectl apply -f
+kustomize build gce-reduced | sed 's/[{}]*//' | kubectl apply -f -
 ```
+
+> **NOTE**: Depending on the available resources, it is possible to remove some of the restrictions, to have more instances for the clusters, and/or OpenNMS.
 
 ## Cleanup
 
