@@ -9,3 +9,5 @@ bases:
 patches:
 - common-settings.yaml
 - external-access.yaml
+- kafka.yaml
+
