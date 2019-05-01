@@ -1,0 +1,11 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# Warning: uses a single instance per cluster.
+
+---
+bases:
+ - ../reduced
+
+patches:
+- common-settings.yaml
+- external-access.yaml

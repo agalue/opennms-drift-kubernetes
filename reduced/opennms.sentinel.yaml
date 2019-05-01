@@ -1,0 +1,29 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sentinel
+  namespace: opennms
+$patch: delete
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinel
+spec:
+  replicas: 1
+  template:
+    spec:
+      affinity:
+        $patch: delete
+      containers:
+      - name: sentinel
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            memory: 512Mi
+          $patch: replace

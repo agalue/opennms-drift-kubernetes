@@ -1,0 +1,56 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+namespace: opennms
+
+resources:
+- namespace.yaml
+- postgresql.yaml
+- zookeeper.yaml
+- kafka.yaml
+- kafka.manager.yaml
+- cassandra.yaml
+- cassandra.reaper.yaml
+- elasticsearch.master.yaml
+- elasticsearch.data.yaml
+- kibana.yaml
+- opennms.core.yaml
+- opennms.minion.yaml
+- opennms.sentinel.yaml
+- opennms.ui.yaml
+- grafana.yaml
+- grafana.helm.yaml
+- hasura.yaml
+- external-access.yaml
+
+configMapGenerator:
+- name: opennms-config
+  files:
+  - config/grafana-init.sh
+  - config/hasura-init.sh
+  - config/helm-init.sh
+  - config/onms-core-init.sh
+  - config/onms-minion-init.sh
+  - config/onms-sentinel-init.sh
+  - config/onms-ui-init.sh
+  - config/onms-ui-nfs.sh
+- name: common-settings
+  literals:
+  - DOMAIN=aws.agalue.net
+  - TIMEZONE=America/New_York
+  - OPENNMS_INSTANCE_ID=OpenNMS
+  - CASSANDRA_CLUSTER_NAME=OpenNMS
+  - CASSANDRA_DC=Main
+  - CASSANDRA_REPLICATION_FACTOR=2
+  - KAFKA_NUM_PARTITIONS=6
+  - MINION_LOCATION=Kubernetes
+
+secretGenerator:
+- name: onms-passwords
+  env: _passwords.env
+  type: Opaque
+
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    owner: agalue@opennms.org

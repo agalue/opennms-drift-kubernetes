@@ -2,63 +2,69 @@
 
 ## Requirements
 
-* Install the [AWS CLI](https://aws.amazon.com/cli/)
-* Have your AWS account configured on your system (`~/.aws/credentials`)
-* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary
-* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary
-* Install the [terraform](https://www.terraform.io) binary [Optional. See security groups]
+* Install the [AWS CLI](https://aws.amazon.com/cli/).
+* Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
+* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary.
 
-## Cluster Configuration
+## DNS Configuration
 
-Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), and make sure it works prior start the cluster; for example:
+Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), register it as an `NS` entry on your registrar matching the name servers from the sub-domain, and make sure it works prior start the cluster; for example:
 
 ```bash
-dig ns k8s.opennms.org
+dig ns aws.agalue.net
 ```
 
 The output should look like this:
 
 ```text
-; <<>> DiG 9.10.6 <<>> ns k8s.opennms.org
+; <<>> DiG 9.10.6 <<>> ns aws.agalue.net
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 42795
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 46163
 ;; flags: qr rd ra; QUERY: 1, ANSWER: 4, AUTHORITY: 0, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
 ; EDNS: version: 0, flags:; udp: 4096
 ;; QUESTION SECTION:
-;k8s.opennms.org.		IN	NS
+;aws.agalue.net.			IN	NS
 
 ;; ANSWER SECTION:
-k8s.opennms.org.	21478	IN	NS	ns-402.awsdns-50.com.
-k8s.opennms.org.	21478	IN	NS	ns-927.awsdns-51.net.
-k8s.opennms.org.	21478	IN	NS	ns-1146.awsdns-15.org.
-k8s.opennms.org.	21478	IN	NS	ns-1922.awsdns-48.co.uk.
+aws.agalue.net.		172800	IN	NS	ns-1821.awsdns-35.co.uk.
+aws.agalue.net.		172800	IN	NS	ns-718.awsdns-25.net.
+aws.agalue.net.		172800	IN	NS	ns-1512.awsdns-61.org.
+aws.agalue.net.		172800	IN	NS	ns-144.awsdns-18.com.
 
-;; Query time: 31 msec
+;; Query time: 85 msec
 ;; SERVER: 172.20.1.9#53(172.20.1.9)
-;; WHEN: Mon Jul 16 10:29:19 EDT 2018
-;; MSG SIZE  rcvd: 181
+;; WHEN: Mon Apr 29 14:16:37 EDT 2019
+;; MSG SIZE  rcvd: 180
 ```
+
+> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is mentioned or used, replace it with your own.
+
+## Cluster Creation
 
 Create an S3 bucket to hold the `kops` configuration; for example:
 
 ```bash
+export KOPS_CLUSTER_NAME="aws.agalue.net"
+export AWS_REGION=us-east-2
+
 aws s3api create-bucket \
-  --bucket k8s.opennms.org \
-  --create-bucket-configuration LocationConstraint=us-east-2
+  --bucket $KOPS_CLUSTER_NAME \
+  --create-bucket-configuration LocationConstraint=$AWS_REGION
 
 aws s3api put-bucket-versioning \
-  --bucket k8s.opennms.org \
+  --bucket $KOPS_CLUSTER_NAME \
   --versioning-configuration Status=Enabled
 ```
 
-Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `k8s.opennms.org`, and the S3 bucked created above:
+Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `aws.agalue.net`, and the S3 bucked created above:
 
 ```bash
-export KOPS_CLUSTER_NAME="k8s.opennms.org"
+export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
+
 kops create cluster \
   --dns-zone $KOPS_CLUSTER_NAME \
   --master-size t2.medium \
@@ -72,7 +78,7 @@ kops create cluster \
   --networking calico
 ```
 
-> **IMPORTANT: Remember to change the settings to reflect your desired environment.**
+> **IMPORTANT:** Remember to change the settings to reflect your desired environment.
 
 Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
@@ -111,7 +117,7 @@ kops validate cluster
 The output should be something like this:
 
 ```text
-Validating cluster k8s.opennms.org
+Validating cluster aws.agalue.net
 
 INSTANCE GROUPS
 NAME			ROLE	MACHINETYPE	MIN	MAX	SUBNETS
@@ -120,14 +126,14 @@ nodes			Node	t2.2xlarge	5	5	us-east-2a
 
 NODE STATUS
 NAME						ROLE	READY
-ip-172-20-37-147.us-east-2.compute.internal	node	True
-ip-172-20-40-60.us-east-2.compute.internal	node	True
-ip-172-20-46-131.us-east-2.compute.internal	node	True
-ip-172-20-48-40.us-east-2.compute.internal	node	True
-ip-172-20-53-105.us-east-2.compute.internal	master	True
-ip-172-20-63-49.us-east-2.compute.internal	node	True
+ip-172-20-34-142.us-east-2.compute.internal	node	True
+ip-172-20-40-103.us-east-2.compute.internal	master	True
+ip-172-20-41-96.us-east-2.compute.internal	node	True
+ip-172-20-43-40.us-east-2.compute.internal	node	True
+ip-172-20-44-179.us-east-2.compute.internal	node	True
+ip-172-20-62-60.us-east-2.compute.internal	node	True
 
-Your cluster k8s.opennms.org is ready
+Your cluster aws.agalue.net is ready
 ```
 
 Or,
@@ -139,26 +145,13 @@ kubectl cluster-info
 The output should be:
 
 ```text
-Kubernetes master is running at https://api.k8s.opennms.org
-CoreDNS is running at https://api.k8s.opennms.org/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Kubernetes master is running at https://api.aws.agalue.net
+CoreDNS is running at https://api.aws.agalue.net/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.k8s.opennms.org`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
-
-Make sure `terraform` it installed on your system, and then execute the following:
-
-```bash
-terraform init
-terraform apply -auto-approve
-```
-
-> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
-
-## Install the NGinx Ingress Controller
+## Install the Ingress Controller
 
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
@@ -180,77 +173,47 @@ kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cer
 
 ## Manifets
 
-Go back to the main [README](README.md) and follow the steps to configure OpenNMS and the dependencies.
-
-## Optional Kubernetes Addons
-
-Click [here](https://github.com/kubernetes/kops/blob/master/docs/addons.md) for more information.
-
-### Dashboard
-
-To install the dashboard:
+To apply all the manifests:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.10.1.yaml
+kubectl apply -k manifests
 ```
 
-To provide access to the dashboard, apply the following YAML:
-
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: kubernetes-dashboard
-  labels:
-    k8s-app: kubernetes-dashboard
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: kubernetes-dashboard
-  namespace: kube-system
-```
-
-To get the password of the `admin` account for the dashboard:
+If you're not running `kubectl` version 1.14, the following is an alternative:
 
 ```bash
-kops get secrets kube --type secret -oplaintext --state s3://k8s.opennms.org
+kustomize build manifests | kubectl apply -f
 ```
 
-Or,
+## Security Groups
+
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.aws.agalue.net`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
+
+Make sure `terraform` it installed on your system, and then execute the following:
 
 ```bash
-kubectl config view --minify
+export DOMAIN_NAME="aws.agalue.net"
+export AWS_REGION="us-east-2"
+
+pushd kops
+terraform init
+terraform apply -var "region=$AWS_REGION" -var "domain=$DOMAIN_NAME" -auto-approve
+popd
 ```
 
-### Heapster
-
-To install the standalone Heapster monitoring (required for the `kubectl top` command):
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.11.0.yaml
-```
-
-### Prometheus
-
-To install Prometheus Operator for monitoring:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/prometheus-operator/v0.26.0.yaml
-```
-
-Click [here](https://github.com/coreos/prometheus-operator/blob/master/contrib/kube-prometheus/README.md) for more information.
+> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
 
 ## Cleanup
 
 To remove the Kubernetes cluster, do the following:
 
 ```bash
+export KOPS_CLUSTER_NAME="aws.agalue.net"
+export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
+
 kubectl delete ingress ingress-rules --namespace opennms
 kubectl delete service ext-kafka --namespace opennms
-kops delete cluster --name k8s.opennms.org --state s3://k8s.opennms.org --yes
+kops delete cluster --yes
 ```
 
-The first 2 will trigger the removal of the Route 53 CNAMEs associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).
+The first 2 commands will trigger the removal of the Route 53 entries associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).

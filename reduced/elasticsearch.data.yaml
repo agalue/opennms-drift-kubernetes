@@ -1,0 +1,35 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: esdata
+spec:
+  replicas: 1
+  template:
+    spec:
+      initContainers:
+      - name: dependencies
+        $patch: delete
+      containers:
+      - name: esdata
+        env:
+        - name: xpack.security.enabled
+          $patch: delete
+        - name: discovery.zen.ping.unicast.hosts
+          $patch: delete
+        - name: discovery.zen.minimum_master_nodes
+          $patch: delete
+        - name: node.master
+          value: 'true'
+        - name: discovery.type
+          value: single-node
+        - name: bootstrap.memory_lock
+          value: 'false'
+        resources:
+          limits:
+            memory: 2Gi
+          requests:
+            memory: 1Gi
+          $patch: replace

@@ -48,8 +48,8 @@ spec:
         role: esmaster
     spec:
       terminationGracePeriodSeconds: 300
-      securityContext:
-        fsGroup: 1000
+      securityContext: # In order to be able to write data as non-root on the volumes
+        fsGroup: 1000 # Default elasticsearch user
       initContainers:
       - name: init-sysctl
         image: busybox
@@ -136,7 +136,6 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: ssd
       resources:
         requests:
           storage: 5Gi

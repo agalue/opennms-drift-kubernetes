@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-settings
+  namespace: opennms
+data:
+  CASSANDRA_CLUSTER_NAME: OpenNMS
+  CASSANDRA_DC: Main
+  CASSANDRA_REPLICATION_FACTOR: "1"
+  DOMAIN: gce.agalue.net
+  KAFKA_NUM_PARTITIONS: "1"
+  MINION_LOCATION: Kubernetes
+  OPENNMS_INSTANCE_ID: OpenNMS
+  TIMEZONE: America/New_York

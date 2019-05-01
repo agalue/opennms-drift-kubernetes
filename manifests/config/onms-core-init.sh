@@ -5,9 +5,6 @@
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
 # - Horizon 24 or newer is required.
-# - Must run as root
-# - The rsync command is required, and it is installed through YUM at runtime.
-#   Internet access is required to use this script.
 #
 # Purpose:
 # - Initialize the config directory on the volume only once.
@@ -50,13 +47,13 @@ KARAF_FILES=( \
 "org.ops4j.pax.url.mvn.cfg" \
 )
 
-# Install missing tools (requires Internet access, and root privileges)
-yum install -y -q rsync
+# Show permissions (debug purposes)
+ls -ld $CONFIG_DIR
 
 # Initialize configuration directory
 if [ ! -f $CONFIG_DIR/configured ]; then
   echo "Initializing configuration directory for the first time ..."
-  rsync -ar $BACKUP_ETC/ $CONFIG_DIR/
+  rsync -arO --no-perms $BACKUP_ETC/ $CONFIG_DIR/
 
   echo "Disabling data choices"
   cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
@@ -88,7 +85,7 @@ EOF
 EOF
 else
   echo "Previous configuration found. Synchronizing only new files..."
-  rsync -aru $BACKUP_ETC/ $CONFIG_DIR/
+  rsync -aruO --no-perms $BACKUP_ETC/ $CONFIG_DIR/
 fi
 
 # Guard against application upgrades
@@ -99,7 +96,7 @@ for file in "${KARAF_FILES[@]}"; do
   cp --force $BACKUP_ETC/$file $MANDATORY/
 done
 echo "Overriding mandatory files from $MANDATORY..."
-rsync -a $MANDATORY/ $CONFIG_DIR/
+rsync -aO --no-perms $MANDATORY/ $CONFIG_DIR/
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
@@ -328,8 +325,3 @@ rm -f $CONFIG_DIR/foreign-sources/pending/*.xml.*
 # Force to execute runjava and the install script
 touch $CONFIG_DIR/do-upgrade
 
-# Fix ownership
-if grep -q opennms /etc/passwd; then
-  echo "Fixing ownership ..."
-  chown -R opennms $CONFIG_DIR
-fi

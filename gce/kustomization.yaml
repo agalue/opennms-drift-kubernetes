@@ -1,0 +1,9 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+bases:
+ - ../manifests
+
+patches:
+- common-settings.yaml
+- external-access.yaml

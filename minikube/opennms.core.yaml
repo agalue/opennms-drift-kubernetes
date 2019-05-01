@@ -1,0 +1,25 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: onms
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: init-config
+        env:
+        - name: CASSANDRA_SERVER
+          $patch: delete
+        - name: CASSANDRA_DC
+          $patch: delete
+        - name: CASSANDRA_REPLICATION_FACTOR
+          $patch: delete
+      - name: init-newts
+        $patch: delete
+      - name: dependencies
+        env:
+        - name: TARGETS
+          value: postgresql.opennms.svc.cluster.local:5432,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200

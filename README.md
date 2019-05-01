@@ -12,97 +12,34 @@ Of course, there are more features in this particular solution compared with the
 
 `Kafka` uses the `hostPort` feature to expose the advertise external listeners on port 9094, so applications outside `Kubernetes` like `Minion` can access it. For this reason, `Kafka` can be scaled up to the number of worker nodes on the `Kubernetes` cluster.
 
+## Minimum Requirements
+
+* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary. Make sure to have version 1.14 to use the `kustomize` integration.
+* Install the [kustomize](https://kustomize.io/) binary on your machine [Optional, but good to have for troubleshooting]
+
+> **NOTE**: Depending on the chosen platform, additional requirements might be needed. Check the respective `README` files for more information.
+
 ## Cluster Configuration
 
 Proceed with the preferred cluster technology:
 
-* Using [Kops](README.kops.md)
-* Using [EKS](README.eks.md)
-* Using [GCE](README.gce.md)
+* Using [Kops](README.kops.md) on AWS.
+* Using [EKS](README.eks.md) on AWS.
+* Using [Google Compute Platform](README.gce.md).
+* Using [Microsoft Azure](README.azure.md).
+* Using [Minikube](README.minikube.md) on your machine (with restrictions).
 
 ## Deployment
 
-### Namespace
+To facilicate the process, everything is done through `kustomize`.
 
-From the directory on which this repository has been checked out:
+To update the default settings, check [kustomization.yaml](manifests/kustomization.yaml). Find the config-map section for the common environment variables.
 
-```bash
-kubectl apply -f ./namespace
-```
+To update the passwords, check [_passwords.env](manifests/_passwords.env).
 
-This will additionally add some complementary RBAC permissions, in case there is a need of adding operators and/or administrators to the OpenNMS namespace.
+Each cluster technology explains how to deploy the manifests.
 
-As a side note, instead of providing the namespace for all the kubectl commands every single time, you can make the `opennms` namespace as the default one, by running the following command:
-
-```bash
-kubectl config set-context $(kubectl config current-context) --namespace=opennms
-```
-
-### ConfigMaps/Secrets
-
-#### ConfigMaps
-
-From the directory on which this repository has been checked out, execute the following to build a config-map based on the files inside the `config` directory:
-
-```bash
-kubectl create configmap opennms-config --from-file=config/ --namespace opennms --dry-run -o yaml | kubectl apply -f -
-```
-
-Then, create the common settings shared across multiple services, to have then on a central place.
-
-```bash
-kubectl create configmap common-settings \
- --from-literal TIMEZONE=America/New_York \
- --from-literal OPENNMS_INSTANCE_ID=OpenNMS \
- --from-literal MINION_LOCATION=Kubernetes \
- --from-literal CASSANDRA_DC=Main \
- --from-literal CASSANDRA_CLUSTER_NAME=OpenNMS \
- --from-literal CASSANDRA_REPLICATION_FACTOR=2 \
- --from-literal KAFKA_NUM_PARTITIONS=6 \
- --namespace opennms --dry-run -o yaml | kubectl apply -f -
-```
-
-#### Secrets
-
-From the directory on which this repository has been checked out, create a secret object for all the custom secrets that are going to be used with this solution:
-
-```bash
-kubectl create secret generic onms-passwords \
- --from-literal POSTGRES_PASSWORD=postgres \
- --from-literal OPENNMS_DB_PASSWORD=opennms \
- --from-literal OPENNMS_UI_ADMIN_PASSWORD=admin \
- --from-literal GRAFANA_UI_ADMIN_PASSWORD=opennms \
- --from-literal GRAFANA_DB_USERNAME=grafana \
- --from-literal GRAFANA_DB_PASSWORD=grafana \
- --from-literal ELASTICSEARCH_PASSWORD=elastic \
- --from-literal KAFKA_MANAGER_APPLICATION_SECRET=0p3nNMS \
- --from-literal KAFKA_MANAGER_USERNAME=opennms \
- --from-literal KAFKA_MANAGER_PASSWORD=0p3nNMS \
- --from-literal HASURA_GRAPHQL_ACCESS_KEY=0p3nNMS \
- --namespace opennms --dry-run -o yaml | kubectl apply -f -
-```
-
-Feel free to change them.
-
-### Storage Classes
-
-From the directory on which this repository has been checked out:
-
-```bash
-kubectl apply -f ./storage
-```
-
-Volumes for `StatefulSets` are going to be automatically created.
-
-### Services, Deployments and StatefulSets
-
-The applications will wait for their respective dependencies to be ready prior start (a feature implemented through `initContainers`), so there is no need to start them on a specific order.
-
-From the directory on which this repository has been checked out:
-
-```bash
-kubectl apply -f ./manifests
-```
+As part of the deployment, some complementary RBAC permissions will be added, in case there is a need for adding operators and/or administrators to the OpenNMS namespace. Check [namespace.yaml](manifests/namespace.yaml) for more details.
 
 Use the following to check whether or not all the resources have been created:
 
@@ -112,10 +49,12 @@ kubectl get all --namespace opennms
 
 ## Minion
 
-This deployment already contains Minions inside the opennms namespace for monitoring devices within the cluster. In order to have Minions outside the Kubernetes cluster, they should use the following resources in order to connect to OpenNMS and the dependent applications:
+This deployment already contains Minions inside the opennms namespace for monitoring devices within the cluster. In order to have Minions outside the Kubernetes cluster, they should use the following resources in order to connect to OpenNMS and the dependent applications.
 
-* OpenNMS Core: `https://onms.k8s.opennms.org/opennms`
-* Kafka: `kafka.k8s.opennms.org:9094`
+For `AWS` using the domain `aws.agalue.net`, the resources should be:
+
+* OpenNMS Core: `https://onms.aws.agalue.net/opennms`
+* Kafka: `kafka.aws.agalue.net:9094`
 
 For example, here is the minimum configuration (without flow listeners):
 
@@ -123,13 +62,13 @@ For example, here is the minimum configuration (without flow listeners):
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg
 location=Apex
 id=onms-minion.local
-http-url=https://onms.k8s.opennms.org/opennms
+http-url=https://onms.aws.agalue.net/opennms
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg
-bootstrap.servers=kafka.k8s.opennms.org:9094
+bootstrap.servers=kafka.aws.agalue.net:9094
 
 [root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.rpc.kafka.cfg
-bootstrap.servers=kafka.k8s.opennms.org:9094
+bootstrap.servers=kafka.aws.agalue.net:9094
 acks=1
 
 [root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot
@@ -143,15 +82,17 @@ opennms-core-ipc-rpc-kafka
 With Docker:
 
 ```bash
+DOMAIN="aws.agalue.net"
+
 docker run -it --name minion \
  -e MINION_ID=docker-minion-1 \
  -e MINION_LOCATION=Apex \
- -e OPENNMS_HTTP_URL=https://onms.k8s.opennms.org/opennms \
+ -e OPENNMS_HTTP_URL=https://onms.$DOMAIN/opennms \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
  -e KAFKA_RPC_ACKS=1 \
- -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
- -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.k8s.opennms.org:9094 \
+ -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
+ -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
  -p 8201:8201 \
  -p 1514:1514 \
  -p 1162:1162 \
@@ -164,17 +105,17 @@ docker run -it --name minion \
 
 > NOTE: The above samples are not including information about the Flow listeners. Check the [Minion's config](config/onms-minion-init.sh) for more details.
 
-## Users
+## Users Resources
 
-* OpenNMS Core: `https://onms.k8s.opennms.org/opennms` (for administrative tasks)
-* OpenNMS UI: `https://onmsui.k8s.opennms.org/opennms` (for users/operators)
-* Grafana: `https://grafana.k8s.opennms.org/`
-* Kibana: `https://kibana.k8s.opennms.org/` (remember to enable monitoring)
-* Kafka Manager: `https://kaffa-manager.k8s.opennms.org/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
-* Hasura GraphQL API: `https://hasura.k8s.opennms.org/v1alpha1/graphql`
-* Hasura GraphQL Console: `https://hasura.k8s.opennms.org/console`
+* OpenNMS Core: `https://onms.aws.agalue.net/opennms` (for administrative tasks)
+* OpenNMS UI: `https://onmsui.aws.agalue.net/opennms` (for users/operators)
+* Grafana: `https://grafana.aws.agalue.net/`
+* Kibana: `https://kibana.aws.agalue.net/` (remember to enable monitoring)
+* Kafka Manager: `https://kaffa-manager.aws.agalue.net/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
+* Hasura GraphQL API: `https://hasura.aws.agalue.net/v1alpha1/graphql`
+* Hasura GraphQL Console: `https://hasura.aws.agalue.net/console`
 
-> NOTE: Make sure to use your own Domain.
+> **WARNING**: Make sure to use your own Domain.
 
 ## Future Enhancements
 

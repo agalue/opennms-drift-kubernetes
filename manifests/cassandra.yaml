@@ -97,8 +97,8 @@ spec:
         deployment: drift
     spec:
       terminationGracePeriodSeconds: 600
-      securityContext:
-        fsGroup: 999
+      securityContext: # In order to be able to write data as non-root on the volumes
+        fsGroup: 999 # Default cassandra user
       containers:
       - name: cassandra
         image: cassandra:3.11.4
@@ -192,7 +192,6 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: ssd
       resources:
         requests:
           storage: 20Gi

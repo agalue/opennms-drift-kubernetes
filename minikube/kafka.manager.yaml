@@ -1,0 +1,15 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-manager
+$patch: delete
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-manager
+$patch: delete

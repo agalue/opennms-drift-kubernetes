@@ -28,6 +28,11 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
+        - name: DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              key: DOMAIN
+              name: common-settings
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -36,7 +41,7 @@ spec:
         - name: GRAFANA_URL
           value: http://grafana.opennms.svc.cluster.local:3000
         - name: ONMS_URL
-          value: https://onmsui.k8s.opennms.org/opennms
+          value: https://onmsui.$(DOMAIN)/opennms
         - name: ONMS_USER
           value: admin
         - name: ONMS_PASSWD

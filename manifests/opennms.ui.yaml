@@ -90,6 +90,11 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
+        - name: DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              key: DOMAIN
+              name: common-settings
         - name: INSTANCE_ID
           valueFrom:
             configMapKeyRef:
@@ -112,7 +117,7 @@ spec:
         - name: GRAFANA_URL
           value: http://grafana.opennms.svc.cluster.local:3000
         - name: GRAFANA_PUBLIC_URL
-          value: https://grafana.k8s.opennms.org
+          value: https://grafana.$(DOMAIN)
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/opennms-etc-overlay

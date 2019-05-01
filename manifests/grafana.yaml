@@ -65,9 +65,15 @@ spec:
         - name: GF_DATABASE_NAME
           value: grafana
         - name: GF_DATABASE_USER
-          value: grafana
+          valueFrom:
+            secretKeyRef:
+              key: GRAFANA_DB_USERNAME
+              name: onms-passwords
         - name: GF_DATABASE_PASSWORD
-          value: grafana
+          valueFrom:
+            secretKeyRef:
+              key: GRAFANA_DB_PASSWORD
+              name: onms-passwords
         volumeMounts:
         - name: opennms-config
           mountPath: /bin/grafana-init.sh

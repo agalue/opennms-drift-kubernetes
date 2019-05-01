@@ -1,0 +1,14 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# Warning: this excludes Cassandra to reduce the overhead on Minikube
+
+---
+bases:
+ - ../reduced
+
+patches:
+- cassandra.yaml
+- kafka.manager.yaml
+- opennms.core.yaml
+- opennms.sentinel.yaml
+- external-access.yaml

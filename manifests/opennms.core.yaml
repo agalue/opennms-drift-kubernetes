@@ -65,6 +65,8 @@ spec:
         deployment: drift
     spec:
       terminationGracePeriodSeconds: 120
+      securityContext: # In order to be able to write data as non-root on the volumes
+        fsGroup: 10001 # Default opennms user
       initContainers:
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
@@ -72,8 +74,6 @@ spec:
         image: opennms/horizon-core-web:24.0.0-rc
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
-        securityContext: # Required by onms-core-init.sh
-          runAsUser: 0
         env:
         - name: TZ
           valueFrom:
@@ -203,8 +203,6 @@ spec:
       - name: nfs
         image: itsthenetwork/nfs-server-alpine:11
         imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
         env:
         - name: SHARED_DIRECTORY
           value: /opennms-etc
@@ -224,7 +222,6 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
-      storageClassName: ssd
       resources:
         requests:
           storage: 1Gi # Cannnot be less than that in AWS for an EBS Volume
