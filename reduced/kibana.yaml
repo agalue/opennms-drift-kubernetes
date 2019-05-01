@@ -5,4 +5,5 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kibana
-$patch: delete
+spec:
+  replicas: 0

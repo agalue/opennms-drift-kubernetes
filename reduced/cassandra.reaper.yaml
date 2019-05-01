@@ -12,4 +12,5 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cassandra-reaper
-$patch: delete
+spec:
+  replicas: 0

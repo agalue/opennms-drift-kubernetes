@@ -12,4 +12,5 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hasura
-$patch: delete
+spec:
+  replicas: 0
