@@ -1,0 +1,9 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hasura
+spec:
+  replicas: 0

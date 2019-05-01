@@ -1,0 +1,30 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: esmaster
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: esmaster
+        env:
+        - name: xpack.security.enabled
+          $patch: delete
+        - name: discovery.zen.ping.unicast.hosts
+          $patch: delete
+        - name: discovery.zen.minimum_master_nodes
+          $patch: delete
+        - name: discovery.type
+          value: single-node
+        - name: bootstrap.memory_lock
+          value: 'false'
+        resources:
+          limits:
+            memory: 2Gi
+          requests:
+            memory: 1Gi
+          $patch: replace

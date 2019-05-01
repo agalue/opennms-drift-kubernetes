@@ -1,0 +1,22 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+bases:
+ - ../manifests
+
+patches:
+- common-settings.yaml
+- external-access.yaml
+- cassandra.yaml
+- cassandra.reaper.yaml
+- elasticsearch.data.yaml
+- elasticsearch.master.yaml
+- grafana.yaml
+- hasura.yaml
+- kafka.yaml
+- opennms.core.yaml
+- opennms.minion.yaml
+- opennms.sentinel.yaml
+- opennms.ui.yaml
+- postgresql.yaml
+- zookeeper.yaml

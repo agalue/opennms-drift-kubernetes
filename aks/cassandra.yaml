@@ -1,0 +1,18 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cassandra
+spec:
+  template:
+    spec:
+      containers:
+      - name: cassandra
+        resources:
+          limits:
+            memory: 2Gi
+          requests:
+            memory: 1Gi
+          $patch: replace

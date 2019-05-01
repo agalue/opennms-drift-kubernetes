@@ -1,0 +1,19 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minion
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: minion
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            memory: 512Mi
+          $patch: replace
