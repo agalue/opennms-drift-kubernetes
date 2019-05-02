@@ -175,12 +175,10 @@ kustomize build gce | kubectl apply -f
 With reduced quota:
 
 ```bash
-kustomize build gce-reduced | sed 's/[{}]*//' | kubectl apply -f -
+kustomize apply -k gce-reduced
 ```
 
 > **NOTE**: Depending on the available resources, it is possible to remove some of the restrictions, to have more instances for the clusters, and/or OpenNMS.
-
-> **WARNING**: There are a few issues when deleting resources, hance the patch with `sed`.
 
 ## Security Groups
 

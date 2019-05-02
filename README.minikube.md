@@ -23,12 +23,10 @@ minikube config view
 - memory: 8192
 ```
 
-## Deploy the applications
+## Manifets
 
 Once `minikube` is running, execute the following to apply a reduced version of the original YAML files located at the [manifests](manifests) directory, that fits the suggested settings.
 
 ```shell
-kustomize build minikube | sed 's/[{}]*//' | kubectl apply -f -
+kubectl apply -k minikube
 ```
-
-> **WARNING**: There are a few issues when deleting resources, hance the patch with `sed`.
