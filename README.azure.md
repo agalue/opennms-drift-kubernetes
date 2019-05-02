@@ -91,7 +91,7 @@ kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
 kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.7/deploy/manifests/cert-manager.yaml
 ```
 
-## Configure DNS Entry for the Ingress Controller
+## Configure DNS Entry for the Ingress Controller and Kafka
 
 With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach.
 
@@ -108,16 +108,22 @@ NAME            TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)           
 ingress-nginx   LoadBalancer   10.0.83.198   40.117.237.217   80:30664/TCP,443:30213/TCP   9m58s
 ```
 
-Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`, for example:
+Something similar can be done for Kafka:
 
-Create record for the Ingress Controller
+```bash
+kubectl get svc ext-kafka -n opennms
+```
+
+Create a wildcard DNS entry on your DNS Zone to point to the `EXTERNAL-IP`; and create an A record for `kafka`. For example:
 
 ```bash
 export GROUP="Kubernetes"
 export DOMAIN="azure.agalue.net"
-export EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r .status.loadBalancer.ingress[0].ip)
+export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
-az network dns record-set a add-record -g $GROUP -z $DOMAIN -n '*' -a $EXTERNAL_IP
+az network dns record-set a add-record -g $GROUP -z $DOMAIN -n '*' -a $NGINX_EXTERNAL_IP
+az network dns record-set a add-record -g $GROUP -z $DOMAIN -n 'kafka' -a $KAFKA_EXTERNAL_IP
 ```
 
 ## Manifets
@@ -130,20 +136,21 @@ kubectl apply -k aks
 
 > **NOTE**: The amount of resources has been reduced to avoid quota issues.
 
+## Security Groups
+
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened. Fortunately, AKS does that auto-magically for you, so there is no need for changes.
+
 ## Cleanup
 
 ```bash
 export GROUP="Kubernetes"
 export DOMAIN="azure.agalue.net"
-export EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r .status.loadBalancer.ingress[0].ip)
+export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
-az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n '*' -a $EXTERNAL_IP
+az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n '*' -a $NGINX_EXTERNAL_IP
+az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n 'kafka' -a $KAFKA_EXTERNAL_IP
 az aks delete --name opennms --resource-group $GROUP
 ```
 
 > **WARNING**: Deleting the cluster can take a long time.
-
-## TODO
-
-* Create a firewall rule for Kafka, to allow external access through TCP 9094.
-* Create a public DNS entry for Kafka, to facilite external Minions configuration.

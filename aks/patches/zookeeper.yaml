@@ -6,17 +6,13 @@ kind: StatefulSet
 metadata:
   name: zk
 spec:
-  replicas: 1
   template:
     spec:
       containers:
       - name: zk
-        env:
-        - name: ZOO_SERVERS
-          value: server.1=zk-0.zookeeper.opennms.svc.cluster.local:2888:3888
         resources:
           limits:
-            memory: 256Mi
+            memory: 512Mi
           requests:
-            memory: 128Mi
+            memory: 256Mi
           $patch: replace

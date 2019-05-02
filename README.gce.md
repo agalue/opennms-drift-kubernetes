@@ -127,7 +127,7 @@ kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
 kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.7/deploy/manifests/cert-manager.yaml
 ```
 
-## Configure DNS Entry for the Ingress Controller
+## Configure DNS Entry for the Ingress Controller and Kafka
 
 With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach, as having external-dns working with GCE is challenging.
 
@@ -144,15 +144,17 @@ NAME            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)          
 ingress-nginx   LoadBalancer   10.51.248.125   35.239.225.26   80:31039/TCP,443:31186/TCP   103s
 ```
 
-Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`, for example:
+Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`; and create an A record for `kafka`. For example:
 
 ```bash
 export ZONE="gce"
 export DOMAIN="gce.agalue.net"
-export EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r .status.loadBalancer.ingress[0].ip)
+export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
 gcloud dns record-sets transaction start --zone $ZONE
-gcloud dns record-sets transaction add "$EXTERNAL_IP" --zone $ZONE --name "*.$DOMAIN." --ttl 300 --type A
+gcloud dns record-sets transaction add "$NGINX_EXTERNAL_IP" --zone $ZONE --name "*.$DOMAIN." --ttl 300 --type A
+gcloud dns record-sets transaction add "$KAFKA_EXTERNAL_IP" --zone $ZONE --name "kafka.$DOMAIN." --ttl 300 --type A
 gcloud dns record-sets transaction execute --zone $ZONE
 ```
 
@@ -180,6 +182,10 @@ kustomize build gce-reduced | sed 's/[{}]*//' | kubectl apply -f -
 
 > **WARNING**: There are a few issues when deleting resources, hance the patch with `sed`.
 
+## Security Groups
+
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened. Fortunately, GKS does that auto-magically for you, so there is no need for changes.
+
 ## Cleanup
 
 ```bash
@@ -191,14 +197,11 @@ Also, remember to remove the A Record from the Cloud DNS Zone:
 ```bash
 export ZONE="gce"
 export DOMAIN="gce.agalue.net"
-export EXTERNAL_IP=$(gcloud dns record-sets list --zone $ZONE | grep "\*.$DOMAIN" | awk '{ print $4 }')
+export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
 gcloud dns record-sets transaction start --zone $ZONE
-gcloud dns record-sets transaction remove --zone $ZONE --name "*.$DOMAIN" --ttl 300 --type A "$EXTERNAL_IP"
+gcloud dns record-sets transaction remove --zone $ZONE --name "*.$DOMAIN" --ttl 300 --type A "$NGINX_EXTERNAL_IP"
+gcloud dns record-sets transaction remove --zone $ZONE --name "kafka.$DOMAIN" --ttl 300 --type A "$KAFKA_EXTERNAL_IP"
 gcloud dns record-sets transaction execute --zone $ZONE
 ```
-
-## TODO
-
-* Create a firewall rule for Kafka, to allow external access through TCP 9094.
-* Create a public DNS entry for Kafka, to facilite external Minions configuration.

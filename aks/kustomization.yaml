@@ -2,21 +2,21 @@
 
 ---
 bases:
- - ../manifests
+- ../manifests
 
 patches:
-- common-settings.yaml
-- external-access.yaml
-- cassandra.yaml
-- cassandra.reaper.yaml
-- elasticsearch.data.yaml
-- elasticsearch.master.yaml
-- grafana.yaml
-- hasura.yaml
-- kafka.yaml
-- opennms.core.yaml
-- opennms.minion.yaml
-- opennms.sentinel.yaml
-- opennms.ui.yaml
-- postgresql.yaml
-- zookeeper.yaml
+- patches/common-settings.yaml
+- patches/cassandra.reaper.yaml
+- patches/cassandra.yaml
+- patches/elasticsearch.data.yaml
+- patches/elasticsearch.master.yaml
+- patches/grafana.yaml
+- patches/hasura.yaml
+- patches/kafka.yaml
+- patches/opennms.core.yaml
+- patches/opennms.minion.yaml
+- patches/opennms.sentinel.yaml
+- patches/opennms.ui.yaml
+- patches/postgresql.yaml
+- patches/zookeeper.yaml
+- patches/external-access.yaml

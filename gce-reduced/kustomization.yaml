@@ -4,10 +4,10 @@
 
 ---
 bases:
- - ../reduced
+- ../reduced
 
 patches:
-- common-settings.yaml
-- external-access.yaml
-- kafka.yaml
+- patches/common-settings.yaml
+- patches/kafka.yaml
+- patches/external-access.yaml
 

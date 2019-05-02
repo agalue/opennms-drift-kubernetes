@@ -4,11 +4,11 @@
 
 ---
 bases:
- - ../reduced
+- ../reduced
 
 patches:
-- cassandra.yaml
-- kafka.manager.yaml
-- opennms.core.yaml
-- opennms.sentinel.yaml
-- external-access.yaml
+- patches/cassandra.yaml
+- patches/kafka.manager.yaml
+- patches/opennms.core.yaml
+- patches/opennms.sentinel.yaml
+- patches/external-access.yaml

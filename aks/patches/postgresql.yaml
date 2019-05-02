@@ -17,9 +17,9 @@ spec:
           $patch: delete
         resources:
           limits:
-            memory: 256Mi
+            memory: 512Mi
           requests:
-            memory: 128Mi
+            memory: 256Mi
           $patch: replace
       volumes:
       - name: postgresql-config
