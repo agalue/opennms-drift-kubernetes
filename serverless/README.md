@@ -23,7 +23,7 @@ https://github.com/agalue/OpenNMS-Kafka-Converter
 
 The avoid repository contains all the details to to generate a Docker image for the application, and also has an example YAML file to deploy the converter to Kubernetes. The example content of the provided YAML file can be used in this environment:
 
-```shell
+```bash
 kubectl apply -f https://raw.githubusercontent.com/agalue/OpenNMS-Kafka-Converter/master/k8s-converter.yaml
 ```
 

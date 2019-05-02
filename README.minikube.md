@@ -12,7 +12,7 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 
 In order to do that, just start minikube, and make sure it has at least 2 Cores and 8GB of RAM:
 
-```shell
+```bash
 minikube config view
 - metrics-server: true
 - WantReportError: true
@@ -27,6 +27,6 @@ minikube config view
 
 Once `minikube` is running, execute the following to apply a reduced version of the original YAML files located at the [manifests](manifests) directory, that fits the suggested settings.
 
-```shell
+```bash
 kubectl apply -k minikube
 ```
