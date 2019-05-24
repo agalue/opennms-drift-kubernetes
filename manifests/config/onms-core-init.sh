@@ -27,9 +27,16 @@
 # - CASSANDRA_REPLICATION_FACTOR
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
+# - ELASTIC_INDEX_STRATEGY_FLOWS
+# - ELASTIC_INDEX_STRATEGY_REST
+# - ELASTIC_INDEX_STRATEGY_ALARMS
 
 # To avoid issues with OpenShift
 umask 002
+
+ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
+ELASTIC_INDEX_STRATEGY_REST=${ELASTIC_INDEX_STRATEGY_REST-monthly}
+ELASTIC_INDEX_STRATEGY_ALARMS=${ELASTIC_INDEX_STRATEGY_ALARMS-monthly}
 
 CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
@@ -154,6 +161,7 @@ org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
 
 # RPC Consumer (verify Kafka broker configuration)
 org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=5000000
+org.opennms.core.ipc.rpc.kafka.auto.offset.reset=latest
 
 # RPC Producer (verify Kafka broker configuration)
 org.opennms.core.ipc.rpc.kafka.acks=1
@@ -277,7 +285,7 @@ if [[ $ELASTIC_SERVER ]]; then
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
-elasticIndexStrategy=daily
+elasticIndexStrategy=$ELASTIC_INDEX_STRATEGY_FLOWS
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
@@ -290,7 +298,7 @@ EOF
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
-elasticIndexStrategy=monthly
+elasticIndexStrategy=$ELASTIC_INDEX_STRATEGY_REST
 groupOidParameters=true
 archiveRawEvents=true
 archiveAlarms=false
@@ -309,7 +317,7 @@ EOF
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
-elasticIndexStrategy=monthly
+elasticIndexStrategy=$ELASTIC_INDEX_STRATEGY_ALARMS
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster

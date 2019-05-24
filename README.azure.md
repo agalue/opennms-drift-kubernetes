@@ -53,6 +53,7 @@ az aks create --name opennms \
   --node-count 4 \
   --node-vm-size Standard_DS3_v2 \
   --nodepool-name onms-pool \
+  --generate-ssh-keys \
   --tags "Department=Support Environment=Test"
 ```
 

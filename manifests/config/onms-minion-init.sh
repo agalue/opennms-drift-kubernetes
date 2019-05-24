@@ -79,6 +79,7 @@ compression.type=gzip
 request.timeout.ms=30000
 # Consumer
 max.partition.fetch.bytes=5000000
+auto.offset.reset=latest
 # Producer
 max.request.size=5000000
 EOF

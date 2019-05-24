@@ -19,6 +19,7 @@
 # - INSTANCE_ID
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
+# - ELASTIC_INDEX_STRATEGY_FLOWS
 # - KAFKA_SERVER
 # - KAFKA_GROUP_ID
 # - CASSANDRA_SERVER
@@ -31,6 +32,7 @@ umask 002
 
 NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
 KAFKA_GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
+ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-sentinel)
@@ -92,7 +94,7 @@ EOF
 elasticUrl = http://$ELASTIC_SERVER:9200
 globalElasticUser = elastic
 globalElasticPassword = $ELASTIC_PASSWORD
-elasticIndexStrategy = daily
+elasticIndexStrategy = $ELASTIC_INDEX_STRATEGY_FLOWS
 settings.index.number_of_shards = 6
 settings.index.number_of_replicas = 1
 EOF

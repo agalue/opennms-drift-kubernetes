@@ -44,6 +44,7 @@ metadata:
 rules:
 - apiGroups:
   - ""
+  - apps
   resources:
   - configmaps
   - pods
@@ -80,34 +81,19 @@ metadata:
 rules:
 - apiGroups:
   - ""
-  - batch
-  - apps
   - extensions
+  - apps
   resources:
-  - configmaps
-  - pods
-  - pods/log
-  - services
-  - ingresses
-  - endpoints
-  - secrets
-  - jobs
-  - deployments
-  - deployments/rollback
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - statefulsets
-  - statefulsets/scale
+  - "*"
   verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-  - deletecollection
+  - "*"
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  - cronjobs
+  verbs:
+  - "*"
 
 # RBAC RoleBinding opennms-admin: to associate the users of group "admin" to the "onms-admin" role.
 ---

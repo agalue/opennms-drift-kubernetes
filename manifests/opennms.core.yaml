@@ -71,7 +71,7 @@ spec:
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: opennms/horizon-core-web:24.0.0-rc
+        image: opennms/horizon-core-web:24.1.0-1
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -108,6 +108,11 @@ spec:
             secretKeyRef:
               key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
+        - name: ELASTIC_INDEX_STRATEGY_FLOWS
+          valueFrom:
+            configMapKeyRef:
+              key: ELASTIC_INDEX_STRATEGY_FLOWS
+              name: common-settings
         volumeMounts:
         - name: opennms-etc # Persistent volume for OpenNMS Configuration
           mountPath: /opennms-etc
@@ -135,7 +140,7 @@ spec:
           value: '600'
       containers:
       - name: onms
-        image: opennms/horizon-core-web:24.0.0-rc
+        image: opennms/horizon-core-web:24.1.0-1
         imagePullPolicy: IfNotPresent
         args:
         - -s

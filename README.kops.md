@@ -67,14 +67,14 @@ export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
 kops create cluster \
   --dns-zone $KOPS_CLUSTER_NAME \
-  --master-size t2.medium \
+  --master-size t2.large \
   --master-count 1 \
   --master-zones us-east-2a \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.11.9 \
+  --kubernetes-version 1.12.8 \
   --networking calico
 ```
 

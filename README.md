@@ -6,7 +6,7 @@ This is basically the `Kubernetes` version of the work done [here](https://githu
 
 Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
 
-Of course, there are more features in this particular solution compared with the original one, like dealing with additional features like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/kafka-manager) is easier when using containers.
+In this case, there are some additional features available in this particular solution compared with the original one, like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/kafka-manager).
 
 ## Limitations
 
@@ -33,7 +33,7 @@ Proceed with the preferred cluster technology:
 
 To facilicate the process, everything is done through `kustomize`.
 
-To update the default settings, check [kustomization.yaml](manifests/kustomization.yaml). Find the config-map section for the common environment variables.
+To update the default settings, find the `config-map` called `common-settings` under `configMapGenerator` inside [kustomization.yaml](manifests/kustomization.yaml).
 
 To update the passwords, check [_passwords.env](manifests/_passwords.env).
 
@@ -92,18 +92,21 @@ docker run -it --name minion \
  -e OPENNMS_HTTP_PASS=admin \
  -e KAFKA_RPC_ACKS=1 \
  -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
+ -e KAFKA_RPC_AUTO_OFFSET_RESET=latest \
+ -e KAFKA_RPC_COMPRESSION_TYPE=gzip \
  -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
+ -e KAFKA_SINK_ACKS=1 \
  -p 8201:8201 \
  -p 1514:1514 \
  -p 1162:1162 \
- opennms/minion:24.0.0-rc -c
+ opennms/minion:24.1.0-1 -c
 ```
 
-> IMPORTANT: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
+> **IMPORTANT**: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
 
-> NOTE: Make sure to use your own Domain, and use the same version tag as OpenNMS.
+> **WARNING**: Make sure to use your own Domain, and use the same version tag as the OpenNMS manifests.
 
-> NOTE: The above samples are not including information about the Flow listeners. Check the [Minion's config](config/onms-minion-init.sh) for more details.
+> **WARNING**: The above samples are not including information about the Flow listeners. Check the [Minion's config](config/onms-minion-init.sh) for more details.
 
 ## Users Resources
 
