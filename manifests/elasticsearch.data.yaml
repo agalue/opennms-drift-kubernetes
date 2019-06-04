@@ -3,13 +3,6 @@
 # WARNING:
 # - The elasticsearch user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 # - Elasticsearch expects to have very fast disks for the PVC to avoid performance issues.
-#
-# TODO:
-# - Compile the OpenNMS Elasticsearch Plugin required for the Flows Deep Dive Tool
-#   Plugin Version 1.0.0 requires ES 6.2.4
-#   Plugin Version 1.1.0 requires ES 6.5.4
-#   Plugin Version 1.2.0 requires ES 6.7.0
-#   This is required as there is no release scheme for this mandatory plugin.
 
 ---
 apiVersion: v1
@@ -69,12 +62,12 @@ spec:
       - name: onms-plugin
         image: busybox
         command: [ sh, -c ]
-        args: [ "wget $(PLUGIN_URL) && unzip elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip && mv elasticsearch/* plugin/" ]
+        args: [ "wget $(PLUGIN_URL) && unzip elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip -d /plugin/" ]
         env:
           - name: PLUGIN_VERSION
-            value: 1.1.0-SNAPSHOT
+            value: '6.7.0'
           - name: PLUGIN_URL
-            value: https://github.com/OpenNMS/elasticsearch-drift-plugin/releases/download/$(PLUGIN_VERSION)/elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip
+            value: https://github.com/OpenNMS/elasticsearch-drift-plugin/releases/download/v$(PLUGIN_VERSION)/elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip
         volumeMounts:
         - name: onms-plugin-dir
           mountPath: /plugin
@@ -88,7 +81,7 @@ spec:
           value: '600'
       containers:
       - name: esdata
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.5.4
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 1000
