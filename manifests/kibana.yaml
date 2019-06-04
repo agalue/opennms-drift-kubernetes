@@ -49,7 +49,7 @@ spec:
           value: '600'
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana:6.7.0
+        image: docker.elastic.co/kibana/kibana:6.7.2
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

@@ -65,7 +65,7 @@ spec:
         args: [ "wget $(PLUGIN_URL) && unzip elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip -d /plugin/" ]
         env:
           - name: PLUGIN_VERSION
-            value: '6.7.0'
+            value: '6.7.2'
           - name: PLUGIN_URL
             value: https://github.com/OpenNMS/elasticsearch-drift-plugin/releases/download/v$(PLUGIN_VERSION)/elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip
         volumeMounts:
@@ -81,7 +81,7 @@ spec:
           value: '600'
       containers:
       - name: esdata
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.7.2
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 1000
