@@ -27,13 +27,22 @@ kubectl -n opennms create secret generic serverless-config \
 ## Create the function
 
 ```bash
-kubeless function deploy alarm2slack --namespace opennms --runtime nodejs8 --dependencies ./slack-forwarder/package.json --from-file ./slack-forwarder/alarm2slack.js --handler alarm2slack.kubeless --secrets serverless-config
+kubeless function deploy alarm2slack \
+--namespace opennms \
+--runtime nodejs8 \
+--dependencies ./slack-forwarder/package.json \
+--from-file ./slack-forwarder/alarm2slack.js \
+--handler alarm2slack.kubeless \
+--secrets serverless-config
 ```
 
 ## Create the function trigger based on a Kafka Topic
 
 ```bash
-kubeless trigger kafka create alarm2slack --namespace opennms --function-selector created-by=kubeless,function=alarm2slack --trigger-topic opennms_alarms_json
+kubeless trigger kafka create alarm2slack \
+ --namespace opennms \
+ --function-selector created-by=kubeless,function=alarm2slack \
+ --trigger-topic opennms_alarms_json
 ```
 
 The name of the topic relies on the Kafka Converter YAML file.
@@ -43,5 +52,14 @@ Use `kubeless function list` to check whether the function is ready to use.
 ## Testing
 
 ```bash
-kubeless function call alarm2slack -n opennms --data '{"uei":"uei.jigsaw/test", "id":666, "logMessage":"I want to play a game", "description":"<p>Hope to hear from your soon!</p>"}'
+kubeless function call alarm2slack \
+ -n opennms \
+ --data '{
+  "id": 666,
+  "uei": "uei.jigsaw/test",
+  "severity": "WARNING",
+  "lastEventTime": 1560438592000,
+  "logMessage": "I want to play a game",
+  "description": "<p>Hope to hear from your soon!</p>"
+ }'
 ```

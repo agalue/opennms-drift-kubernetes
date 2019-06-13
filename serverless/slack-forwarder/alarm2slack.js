@@ -79,6 +79,7 @@ function buildMessage(alarm) {
 }
 
 async function sendAlarm(alarm) {
+  console.log('Reveived: ', JSON.stringify(alarm, null, 2));
   if (!globalSlackUrl) {
     return { status: 400, body: 'Missing Slack Webhook URL.' };
   }
@@ -92,13 +93,12 @@ async function sendAlarm(alarm) {
     }
   }
   try {
-    console.log(alarm);
     const response = await axios.post(globalSlackUrl, buildMessage(alarm));
     console.log(response.statusText);
     return { status: 200, body: response.statusText };
   } catch (error) {
     console.error(error);
-    return { status: 500, body: 'ERROR: something went wrong. ' + error };
+    return { status: 500, body: `ERROR: something went wrong. ${error}` };
   }
 }
 
