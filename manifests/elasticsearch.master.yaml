@@ -61,7 +61,7 @@ spec:
           privileged: true
       containers:
       - name: esmaster
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.7.2
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 1000

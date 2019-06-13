@@ -47,19 +47,19 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    certmanager.k8s.io/cluster-issuer: letsencrypt-staging
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
     certmanager.k8s.io/acme-http01-edit-in-place: 'true'
 spec:
   tls:
     - secretName: opennms-ingress
       hosts:
         - onms.aws.agalue.net
+        - onmsui.aws.agalue.net
         - cassandra-reaper.aws.agalue.net
         - grafana.aws.agalue.net
         - hasura.aws.agalue.net
         - kibana.aws.agalue.net
         - kafka-manager.aws.agalue.net
-        - onmsui.aws.agalue.net
   rules:
     - host: onms.aws.agalue.net
       http:
