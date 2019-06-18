@@ -49,7 +49,7 @@ spec:
           value: '600'
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana:7.1.1
+        image: docker.elastic.co/kibana/kibana:6.7.2
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
@@ -61,7 +61,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        - name: ELASTICSEARCH_HOSTS
+        - name: ELASTICSEARCH_URL
           value: http://esdata.opennms.svc.cluster.local:9200
         - name: ELASTICSEARCH_USERNAME
           value: elastic

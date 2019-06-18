@@ -65,7 +65,7 @@ spec:
         args: [ "wget $(PLUGIN_URL) && unzip elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip -d /plugin/" ]
         env:
           - name: PLUGIN_VERSION
-            value: '7.1.1'
+            value: '6.7.2'
           - name: PLUGIN_URL
             value: https://github.com/OpenNMS/elasticsearch-drift-plugin/releases/download/v$(PLUGIN_VERSION)/elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip
         volumeMounts:
@@ -81,7 +81,7 @@ spec:
           value: '600'
       containers:
       - name: esdata
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.7.2
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 1000
@@ -108,8 +108,10 @@ spec:
               fieldPath: metadata.name
         - name: xpack.security.enabled
           value: 'false' # Enabling security requires a license
-        - name: discovery.seed_hosts
+        - name: discovery.zen.ping.unicast.hosts
           value: esmaster.opennms.svc.cluster.local
+        - name: discovery.zen.minimum_master_nodes
+          value: '2' # Requires a minimum of 3 replicas
         - name: node.master
           value: 'false'
         - name: node.data
