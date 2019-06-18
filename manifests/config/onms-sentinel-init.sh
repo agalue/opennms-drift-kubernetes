@@ -67,26 +67,30 @@ if [[ $ELASTIC_SERVER ]]; then
   if [[ ! $CASSANDRA_SERVER ]]; then
     cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-sflow.cfg
 name = SFlow
-class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
+adapters.0.name = SFlow-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
   fi
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-ipfix.cfg
 name = IPFIX
-class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
+adapters.0.name = IPFIX-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-netflow5.cfg
 name = Netflow-5
-class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
+adapters.0.name = Netflow-5-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-netflow9.cfg
 name = Netflow-9
-class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
+adapters.0.name = Netflow-9-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
@@ -153,15 +157,17 @@ EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-nxos.cfg
 name = NXOS
-class-name = org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
-parameters.script = $SENTINEL_HOME/etc/cisco-nxos-telemetry-interface.groovy
+adapters.0.name = NXOS-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
+adapters.0.parameters.script = $SENTINEL_HOME/etc/cisco-nxos-telemetry-interface.groovy
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.features.telemetry.adapters-jti.cfg
 name = JTI
-class-name = org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
-parameters.script = $SENTINEL_HOME/etc/junos-telemetry-interface.groovy
+adapters.0.name = JTI-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
+adapters.0.parameters.script = $SENTINEL_HOME/etc/junos-telemetry-interface.groovy
 queue.threads = $NUM_LISTENER_THREADS
 EOF
 

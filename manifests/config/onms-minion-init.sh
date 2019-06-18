@@ -153,7 +153,7 @@ name=Netflow-5-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
 parameters.port=8877
-parameters.maxPacketSize=8096
+parameters.maxPacketSize=16192
 parsers.0.name=Netflow-5
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser
 EOF
@@ -163,7 +163,7 @@ name=Netflow-9-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
 parameters.port=4729
-parameters.maxPacketSize=8096
+parameters.maxPacketSize=16192
 parsers.0.name=Netflow-9
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser
 EOF
@@ -173,7 +173,7 @@ name=SFlow-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
 parameters.port=6343
-parameters.maxPacketSize=8096
+parameters.maxPacketSize=16192
 parsers.0.name=SFlow
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParser
 EOF
@@ -183,7 +183,7 @@ name=IPFIX-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
 parameters.port=4738
-parameters.maxPacketSize=8096
+parameters.maxPacketSize=16192
 parsers.0.name=IPFIX
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser
 EOF
