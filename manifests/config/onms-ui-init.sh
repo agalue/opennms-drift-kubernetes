@@ -174,6 +174,7 @@ fi
 
 # Configure NXOS Resource Types
 echo "Configuring NXOS resource types..."
+mkdir -p $CONFIG_DIR/resource-types.d/
 cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
 <?xml version="1.0"?>
 <resource-types>
@@ -200,7 +201,8 @@ EOF
   KEY_ID=$(curl -u $GRAFANA_AUTH "$GRAFANA_URL/api/auth/keys" 2>/dev/null | jq '.[] | select(.name="opennms-ui") | .id')
   if [ "$KEY_ID" != "" ]; then
     echo "WARNING: API Key exist, deleting it prior re-creating it again"
-    curl -XDELETE -u $GRAFANA_AUTH "$GRAFANA_URL/api/auth/keys/$KEY_ID"
+    curl -XDELETE -u $GRAFANA_AUTH "$GRAFANA_URL/api/auth/keys/$KEY_ID" 2>/dev/null
+    echo ""
   fi
   GRAFANA_KEY=$(curl -u $GRAFANA_AUTH -X POST -H "Content-Type: application/json" -d '{"name":"opennms-ui", "role": "Viewer"}' "$GRAFANA_URL/api/auth/keys" 2>/dev/null | jq .key - | sed 's/"//g')
   if [ "$GRAFANA_KEY" != "null" ]; then
