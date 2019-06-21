@@ -18,7 +18,6 @@ metadata:
   namespace: opennms
   labels:
     app: hasura
-    deployment: drift
 spec:
   ports:
   - port: 8080
@@ -33,7 +32,6 @@ metadata:
   namespace: opennms
   labels:
     app: hasura
-    deployment: drift
 spec:
   replicas: 1
   selector:
@@ -43,7 +41,6 @@ spec:
     metadata:
       labels:
         app: hasura
-        deployment: drift
     spec:
       initContainers:
       # Make sure that the OpenNMS database exist
@@ -85,7 +82,7 @@ spec:
           subPath: hasura-init.sh
       containers:
       - name: hasura
-        image: hasura/graphql-engine:latest
+        image: hasura/graphql-engine:v1.0.0-beta.2
         imagePullPolicy: IfNotPresent
         env:
         - name: PG_PASSWD

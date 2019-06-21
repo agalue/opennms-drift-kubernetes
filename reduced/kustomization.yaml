@@ -6,7 +6,7 @@
 bases:
 - ../manifests
 
-patches:
+patchesStrategicMerge:
 - patches/cassandra.reaper.yaml
 - patches/cassandra.yaml
 - patches/elasticsearch.data.yaml

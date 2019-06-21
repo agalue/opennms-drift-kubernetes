@@ -23,7 +23,6 @@ metadata:
   namespace: opennms
   labels:
     app: minion
-    deployment: drift
 spec:
   clusterIP: None
   ports:
@@ -64,7 +63,6 @@ metadata:
   namespace: opennms
   labels:
     app: minion
-    deployment: drift
 spec:
   serviceName: minion
   replicas: 2
@@ -76,13 +74,12 @@ spec:
     metadata:
       labels:
         app: minion
-        deployment: drift
     spec:
       terminationGracePeriodSeconds: 60
       initContainers:
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: opennms/minion:24.1.0-1
+        image: agalue/minion:24.1.1-1
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -121,7 +118,7 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: opennms/minion:24.1.0-1
+        image: agalue/minion:24.1.1-1
         imagePullPolicy: IfNotPresent
         args:
         - -f
@@ -190,20 +187,22 @@ spec:
         readinessProbe:
           tcpSocket:
             port: karaf
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
           exec:
             command:
-            - bash
+            - sh
             - -c
-            - 'if /opt/minion/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
+            - 'if sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8201 admin@localhost health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
+            # https://issues.opennms.org/browse/NMS-12120
+            # - 'if /opt/minion/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
           initialDelaySeconds: 60
           periodSeconds: 60
-          timeoutSeconds: 15
+          timeoutSeconds: 20
       # Use the following only when NX-OS Telemetry over gRPC is required.
       - name: nxos-grpc
-        image: agalue/opennms-nxos-grpc:latest
+        image: agalue/opennms-nxos-grpc:horizon-24
         env:
         - name: TZ
           valueFrom:

@@ -10,7 +10,6 @@ metadata:
   namespace: opennms
   labels:
     app: cassandra-reaper
-    deployment: drift
 spec:
   clusterIP: None
   ports:
@@ -27,7 +26,6 @@ metadata:
   namespace: opennms
   labels:
     app: cassandra-reaper
-    deployment: drift
 spec:
   replicas: 1
   selector:
@@ -37,7 +35,6 @@ spec:
     metadata:
       labels:
         app: cassandra-reaper
-        deployment: drift
     spec:
       initContainers:
       - name: dependencies
@@ -64,7 +61,7 @@ spec:
           value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REPFACTOR) };"
       containers:
       - name: cassandra-reaper
-        image: thelastpickle/cassandra-reaper:1.4.1
+        image: thelastpickle/cassandra-reaper:1.4.4
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
@@ -93,10 +90,10 @@ spec:
         resources:
           limits:
             cpu: 200m
-            memory: 512Mi
+            memory: 1Gi
           requests:
             cpu: 50m
-            memory: 128Mi
+            memory: 512Mi
         readinessProbe:
           tcpSocket:
             port: http

@@ -17,7 +17,6 @@ metadata:
   namespace: opennms
   labels:
     app: cassandra
-    deployment: drift
 data:
   # Be able to access Cassandra through JMX (for cassandra-reaper and for monitoring purposes)
   jmxremote.password: |+
@@ -60,7 +59,6 @@ metadata:
   namespace: opennms
   labels:
     app: cassandra
-    deployment: drift
 spec:
   clusterIP: None
   ports:
@@ -83,7 +81,6 @@ metadata:
   namespace: opennms
   labels:
     app: cassandra
-    deployment: drift
 spec:
   serviceName: cassandra
   replicas: 3
@@ -94,7 +91,6 @@ spec:
     metadata:
       labels:
         app: cassandra
-        deployment: drift
     spec:
       terminationGracePeriodSeconds: 600
       securityContext: # In order to be able to write data as non-root on the volumes
@@ -149,7 +145,7 @@ spec:
         - containerPort: 9042
           name: cql
         volumeMounts:
-        - name: cassandra-data
+        - name: data
           mountPath: /cassandra_data
         - name: cassandra-config
           mountPath: /etc/cassandra/jmxremote.password
@@ -188,7 +184,7 @@ spec:
           name: cassandra-config
   volumeClaimTemplates:
   - metadata:
-      name: cassandra-data
+      name: data
     spec:
       accessModes:
       - ReadWriteOnce

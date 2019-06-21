@@ -11,7 +11,6 @@ metadata:
   namespace: opennms
   labels:
     app: kibana
-    deployment: drift
 spec:
   ports:
   - port: 5601
@@ -26,7 +25,6 @@ metadata:
   namespace: opennms
   labels:
     app: kibana
-    deployment: drift
 spec:
   replicas: 1
   selector:
@@ -36,7 +34,6 @@ spec:
     metadata:
       labels:
         app: kibana
-        deployment: drift
     spec:
       initContainers:
       - name: dependencies
@@ -49,7 +46,7 @@ spec:
           value: '600'
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana:6.7.2
+        image: docker.elastic.co/kibana/kibana:6.8.0
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

@@ -19,7 +19,6 @@ metadata:
   namespace: opennms
   labels:
     app: postgresql
-    deployment: drift
 data:
   # Based on https://pgtune.leopard.in.ua/#/ for the configured requested limits
   postgresql.conf: |+
@@ -48,7 +47,6 @@ metadata:
   namespace: opennms
   labels:
     app: postgres
-    deployment: drift
 spec:
   clusterIP: None
   ports:
@@ -65,7 +63,6 @@ metadata:
   labels:
     app: postgres
     role: master
-    deployment: drift
 spec:
   serviceName: postgresql
   replicas: 1 # The solution only allows 1 instance
@@ -77,7 +74,6 @@ spec:
       labels:
         app: postgres
         role: master
-        deployment: drift
     spec:
       containers:
       - name: postgres
@@ -108,7 +104,7 @@ spec:
         - containerPort: 5432
           name: pg
         volumeMounts:
-        - name: pg-data
+        - name: data
           mountPath: /var/lib/postgresql/data
         - name: postgresql-config
           mountPath: /etc/postgresql.conf
@@ -142,7 +138,7 @@ spec:
           name: postgresql-config
   volumeClaimTemplates:
   - metadata:
-      name: pg-data
+      name: data
     spec:
       accessModes:
       - ReadWriteOnce

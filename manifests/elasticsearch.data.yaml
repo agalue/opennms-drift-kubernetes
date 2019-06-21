@@ -12,7 +12,6 @@ metadata:
   namespace: opennms
   labels:
     app: elasticsearch
-    deployment: drift
     role: esdata
 spec:
   clusterIP: None
@@ -32,7 +31,6 @@ metadata:
   namespace: opennms
   labels:
     app: elasticsearch
-    deployment: drift
     role: esdata
 spec:
   serviceName: esdata
@@ -44,7 +42,6 @@ spec:
     metadata:
       labels:
         app: elasticsearch
-        deployment: drift
         role: esdata
     spec:
       terminationGracePeriodSeconds: 300
@@ -65,7 +62,7 @@ spec:
         args: [ "wget $(PLUGIN_URL) && unzip elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip -d /plugin/" ]
         env:
           - name: PLUGIN_VERSION
-            value: '6.7.2'
+            value: '6.8.0'
           - name: PLUGIN_URL
             value: https://github.com/OpenNMS/elasticsearch-drift-plugin/releases/download/v$(PLUGIN_VERSION)/elasticsearch-drift-plugin-$(PLUGIN_VERSION).zip
         volumeMounts:
@@ -81,7 +78,7 @@ spec:
           value: '600'
       containers:
       - name: esdata
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.7.2
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.8.0
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 1000
@@ -135,7 +132,7 @@ spec:
               key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
         volumeMounts:
-        - name: es-data
+        - name: data
           mountPath: /usr/share/elasticsearch/data
         - name: onms-plugin-dir
           mountPath: /usr/share/elasticsearch/plugins/drift
@@ -161,7 +158,7 @@ spec:
         emptyDir: {}
   volumeClaimTemplates:
   - metadata:
-      name: es-data
+      name: data
     spec:
       accessModes:
       - ReadWriteOnce

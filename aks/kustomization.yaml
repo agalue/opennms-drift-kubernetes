@@ -4,7 +4,7 @@
 bases:
 - ../manifests
 
-patches:
+patchesStrategicMerge:
 - patches/common-settings.yaml
 - patches/cassandra.reaper.yaml
 - patches/cassandra.yaml

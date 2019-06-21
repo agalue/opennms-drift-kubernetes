@@ -6,7 +6,7 @@
 bases:
 - ../reduced
 
-patches:
+patchesStrategicMerge:
 - patches/cassandra.yaml
 - patches/kafka.manager.yaml
 - patches/opennms.core.yaml

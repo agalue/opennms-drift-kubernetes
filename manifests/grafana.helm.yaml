@@ -10,8 +10,8 @@ metadata:
   namespace: opennms
   labels:
     app: grafana
-    deployment: drift
 spec:
+  ttlSecondsAfterFinished: 120
   template:
     spec:
       restartPolicy: Never

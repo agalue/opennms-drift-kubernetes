@@ -11,7 +11,6 @@ metadata:
   namespace: opennms
   labels:
     app: elasticsearch
-    deployment: drift
     role: esmaster
 spec:
   clusterIP: None
@@ -31,7 +30,6 @@ metadata:
   namespace: opennms
   labels:
     app: elasticsearch
-    deployment: drift
     role: esmaster
 spec:
   serviceName: esmaster
@@ -44,7 +42,6 @@ spec:
     metadata:
       labels:
         app: elasticsearch
-        deployment: drift
         role: esmaster
     spec:
       terminationGracePeriodSeconds: 300
@@ -61,7 +58,7 @@ spec:
           privileged: true
       containers:
       - name: esmaster
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.7.2
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.8.0
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 1000
@@ -111,7 +108,7 @@ spec:
               key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
         volumeMounts:
-        - name: es-data
+        - name: data
           mountPath: /usr/share/elasticsearch/data
         resources:
           limits:
@@ -132,7 +129,7 @@ spec:
           periodSeconds: 60
   volumeClaimTemplates:
   - metadata:
-      name: es-data
+      name: data
     spec:
       accessModes:
       - ReadWriteOnce

@@ -28,8 +28,6 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: opennms
-  labels:
-    deployment: drift
 
 # The following is optional.
 # It is here as a template in case other admin/operators have to interact with the cluster.

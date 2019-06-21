@@ -13,13 +13,12 @@
 # - The image tag bleeding refers to the upcoming version of OpenNMS (unstable).
 #
 # TODO:
-# - Share /opt/opennms/etc from the Core server as read only, to share:
+# - Mount /opt/opennms/etc via NFS from the Core server:
 #   * Graph templates
 #   * Data Collection configuration
 #   * Resource Types configuration
 #   * Jasper and KSC Reports
 #   * Users/Groups
-# - Use the Ingress controller to redirect NRTG Controller requests to Core server.
 
 ---
 apiVersion: v1
@@ -29,7 +28,6 @@ metadata:
   namespace: opennms
   labels:
     app: onms-ui
-    deployment: drift
 spec:
   ports:
   - port: 8980
@@ -47,7 +45,6 @@ metadata:
   namespace: opennms
   labels:
     app: onms-ui
-    deployment: drift
 spec:
   replicas: 2
   selector:
@@ -57,7 +54,6 @@ spec:
     metadata:
       labels:
         app: onms-ui
-        deployment: drift
     spec:
       affinity:
         podAntiAffinity:
@@ -81,7 +77,7 @@ spec:
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: opennms/horizon-core-web:24.1.0-1
+        image: agalue/horizon-core-web:24.1.1-1
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -128,7 +124,7 @@ spec:
           subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
-        image: opennms/horizon-core-web:24.1.0-1
+        image: agalue/horizon-core-web:24.1.1-1
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:

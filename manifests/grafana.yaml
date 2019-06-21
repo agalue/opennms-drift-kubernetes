@@ -8,7 +8,6 @@ metadata:
   namespace: opennms
   labels:
     app: grafana
-    deployment: drift
 spec:
   ports:
   - port: 3000
@@ -23,7 +22,6 @@ metadata:
   namespace: opennms
   labels:
     app: grafana
-    deployment: drift
 spec:
   replicas: 2
   selector:
@@ -33,7 +31,6 @@ spec:
     metadata:
       labels:
         app: grafana
-        deployment: drift
     spec:
       initContainers:
       - name: dependencies

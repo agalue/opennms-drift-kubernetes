@@ -11,7 +11,6 @@ metadata:
   namespace: opennms
   labels:
     app: zk
-    deployment: drift
 spec:
   ports:
   - port: 2888
@@ -34,7 +33,6 @@ metadata:
   namespace: opennms
   labels:
     app: zk
-    deployment: drift
 spec:
   serviceName: zookeeper
   replicas: 3 # The solution is designed for 3 instances
@@ -46,7 +44,6 @@ spec:
     metadata:
       labels:
         app: zk
-        deployment: drift
     spec:
       terminationGracePeriodSeconds: 300
       initContainers:
@@ -57,7 +54,7 @@ spec:
         - -c
         - ORD=${HOSTNAME##*-}; MYID=$((ORD+1)); echo $MYID > /data/myid
         volumeMounts:
-        - name: zk-data
+        - name: data
           mountPath: /data
       containers:
       - name: zk
@@ -104,7 +101,7 @@ spec:
         - containerPort: 9998
           name: jmx
         volumeMounts:
-        - name: zk-data
+        - name: data
           mountPath: /data
         resources:
           limits:
@@ -128,7 +125,7 @@ spec:
           periodSeconds: 60
   volumeClaimTemplates:
   - metadata:
-      name: zk-data
+      name: data
     spec:
       accessModes:
       - ReadWriteOnce

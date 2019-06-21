@@ -173,16 +173,16 @@ EOF
 
   cat <<EOF > $OVERLAY/datacollection-config.xml
 <datacollection-config xmlns="http://xmlns.opennms.org/xsd/config/datacollection" rrdRepository="/var/opennms/rrd/snmp/">
-   <snmp-collection name="default" snmpStorageFlag="select">
-      <rrd step="300">
-         <rra>RRA:AVERAGE:0.5:1:2016</rra>
-         <rra>RRA:AVERAGE:0.5:12:1488</rra>
-         <rra>RRA:AVERAGE:0.5:288:366</rra>
-         <rra>RRA:MAX:0.5:288:366</rra>
-         <rra>RRA:MIN:0.5:288:366</rra>
-      </rrd>
-      <include-collection dataCollectionGroup="MIB2"/>
-   </snmp-collection>
+  <snmp-collection name="default" snmpStorageFlag="select">
+    <rrd step="300">
+      <rra>RRA:AVERAGE:0.5:1:2016</rra>
+      <rra>RRA:AVERAGE:0.5:12:1488</rra>
+      <rra>RRA:AVERAGE:0.5:288:366</rra>
+      <rra>RRA:MAX:0.5:288:366</rra>
+      <rra>RRA:MIN:0.5:288:366</rra>
+    </rrd>
+    <include-collection dataCollectionGroup="MIB2"/>
+  </snmp-collection>
 </datacollection-config>
 EOF
 

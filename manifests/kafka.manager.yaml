@@ -8,7 +8,6 @@ metadata:
   namespace: opennms
   labels:
     app: kafka-manager
-    deployment: drift
 spec:
   ports:
   - port: 9000
@@ -23,7 +22,6 @@ metadata:
   namespace: opennms
   labels:
     app: kafka-manager
-    deployment: drift
 spec:
   replicas: 1
   selector:
@@ -33,7 +31,6 @@ spec:
     metadata:
       labels:
         app: kafka-manager
-        deployment: drift
     spec:
       initContainers:
       - name: dependencies
@@ -46,7 +43,7 @@ spec:
           value: '600'
       containers:
       - name: kafka-manager
-        image: hlebalbau/kafka-manager:stable
+        image: hlebalbau/kafka-manager:2.0.0.2
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

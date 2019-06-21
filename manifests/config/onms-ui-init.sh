@@ -5,8 +5,7 @@
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
 # - Horizon 24 or newer is required.
-# - The jq command is required, and it is installed through YUM at runtime,
-#   so Internet access is required to use this script.
+# - The jq command is required, and it should be pre-installed on the chosen image.
 #
 # Purpose:
 # - Apply recommended changes to force OpenNMS to be a read-only WebUI server.
@@ -24,6 +23,8 @@
 
 # To avoid issues with OpenShift
 umask 002
+
+command -v jq >/dev/null 2>&1 || { echo >&2 "jq is required but it's not installed. Aborting."; exit 1; }
 
 CONFIG_DIR=/opt/opennms-etc-overlay
 WEB_DIR=/opt/opennms-jetty-webinf-overlay
@@ -171,14 +172,23 @@ elasticIndexStrategy=daily
 EOF
 fi
 
+# Configure NXOS Resource Types
+echo "Configuring NXOS resource types..."
+cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
+<?xml version="1.0"?>
+<resource-types>
+  <resourceType name="nxosIntf" label="Nxos Interface" resourceLabel="\${index}">
+    <persistenceSelectorStrategy class="org.opennms.netmgt.collection.support.PersistAllSelectorStrategy"/>
+    <storageStrategy class="org.opennms.netmgt.collection.support.IndexStorageStrategy"/>
+  </resourceType>
+</resource-types>
+EOF
+
 # Enable Grafana features
 if [[ $GRAFANA_PUBLIC_URL ]] && [[ $GRAFANA_URL ]] && [[ $GF_SECURITY_ADMIN_PASSWORD ]]; then
   GRAFANA_AUTH="admin:$GF_SECURITY_ADMIN_PASSWORD"
-
-  yum -q -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  yum -q -y install jq
-
   FLOW_DASHBOARD=$(curl -u $GRAFANA_AUTH "$GRAFANA_URL/api/search?query=flow" 2>/dev/null | jq '.[0].url' | sed 's/"//g')
+  echo "Flow Dashboard: $FLOW_DASHBOARD"
   if [ "$FLOW_DASHBOARD" != "null" ]; then
     cat <<EOF > $CONFIG_DIR/org.opennms.netmgt.flows.rest.cfg
 flowGraphUrl=$GRAFANA_PUBLIC_URL$FLOW_DASHBOARD?node=\$nodeId&interface=\$ifIndex

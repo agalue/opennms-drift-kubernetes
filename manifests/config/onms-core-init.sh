@@ -5,6 +5,7 @@
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
 # - Horizon 24 or newer is required.
+# - The rsync command is required, and it should be pre-installed on the chosen image.
 #
 # Purpose:
 # - Initialize the config directory on the volume only once.
@@ -33,6 +34,8 @@
 
 # To avoid issues with OpenShift
 umask 002
+
+command -v rsync >/dev/null 2>&1 || { echo >&2 "rsync is required but it's not installed. Aborting."; exit 1; }
 
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_INDEX_STRATEGY_REST=${ELASTIC_INDEX_STRATEGY_REST-monthly}
@@ -325,6 +328,18 @@ settings.index.number_of_shards=6
 settings.index.number_of_replicas=2
 EOF
 fi
+
+# Configure NXOS Resource Types
+echo "Configuring NXOS resource types..."
+cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
+<?xml version="1.0"?>
+<resource-types>
+  <resourceType name="nxosIntf" label="Nxos Interface" resourceLabel="\${index}">
+    <persistenceSelectorStrategy class="org.opennms.netmgt.collection.support.PersistAllSelectorStrategy"/>
+    <storageStrategy class="org.opennms.netmgt.collection.support.IndexStorageStrategy"/>
+  </resourceType>
+</resource-types>
+EOF
 
 # Cleanup temporary requisition files:
 rm -f $CONFIG_DIR/imports/pending/*.xml.*

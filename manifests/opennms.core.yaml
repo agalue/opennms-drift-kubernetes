@@ -30,7 +30,6 @@ metadata:
   namespace: opennms
   labels:
     app: onms
-    deployment: drift
 spec:
   clusterIP: None
   ports:
@@ -51,7 +50,6 @@ metadata:
   namespace: opennms
   labels:
     app: onms
-    deployment: drift
 spec:
   serviceName: opennms-core
   replicas: 1 # The solution only allows 1 instance
@@ -62,7 +60,6 @@ spec:
     metadata:
       labels:
         app: onms
-        deployment: drift
     spec:
       terminationGracePeriodSeconds: 120
       securityContext: # In order to be able to write data as non-root on the volumes
@@ -71,7 +68,7 @@ spec:
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: opennms/horizon-core-web:24.1.0-1
+        image: agalue/horizon-core-web:24.1.1-1
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -114,7 +111,7 @@ spec:
               key: ELASTIC_INDEX_STRATEGY_FLOWS
               name: common-settings
         volumeMounts:
-        - name: opennms-etc # Persistent volume for OpenNMS Configuration
+        - name: etc # Persistent volume for OpenNMS Configuration
           mountPath: /opennms-etc
         - name: opennms-config
           mountPath: /init.sh
@@ -128,7 +125,7 @@ spec:
         - name: CASSANDRA_HOST
           value: cassandra.opennms.svc.cluster.local
         volumeMounts:
-        - name: opennms-etc
+        - name: etc
           mountPath: /opennms-etc
       - name: dependencies
         image: waisbrot/wait
@@ -140,7 +137,7 @@ spec:
           value: '600'
       containers:
       - name: onms
-        image: opennms/horizon-core-web:24.1.0-1
+        image: agalue/horizon-core-web:24.1.1-1
         imagePullPolicy: IfNotPresent
         args:
         - -s
@@ -183,7 +180,7 @@ spec:
               key: OPENNMS_DB_PASSWORD
               name: onms-passwords
         volumeMounts:
-        - name: opennms-etc
+        - name: etc
           mountPath: /opt/opennms/etc
         resources:
           limits:
@@ -206,16 +203,18 @@ spec:
           periodSeconds: 60
       # Optional image to share configuration directory through NFS (required by external UI servers)
       - name: nfs
-        image: itsthenetwork/nfs-server-alpine:11
+        image: itsthenetwork/nfs-server-alpine:12
         imagePullPolicy: IfNotPresent
         env:
         - name: SHARED_DIRECTORY
           value: /opennms-etc
+        - name: READ_ONLY
+          value: 'true'
         ports:
         - containerPort: 2049
           name: nfs
         volumeMounts:
-        - name: opennms-etc
+        - name: etc
           mountPath: /opennms-etc
       volumes:
       - name: opennms-config
@@ -223,7 +222,7 @@ spec:
           name: opennms-config
   volumeClaimTemplates:
   - metadata:
-      name: opennms-etc
+      name: etc
     spec:
       accessModes:
       - ReadWriteOnce
