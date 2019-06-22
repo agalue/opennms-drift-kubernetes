@@ -8,6 +8,15 @@ ARG OPENNMS_UID=10001
 
 ENV OPENNMS_KARAF_SSH_HOST 0.0.0.0
 ENV OPENNMS_KARAF_SSH_PORT 8101
+ENV OPENNMS_DBNAME opennms
+ENV POSTGRES_HOST localhost
+ENV POSTGRES_PORT 5432
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD postgres
+ENV OPENNMS_DBNAME opennms
+ENV OPENNMS_DBUSER opennms
+ENV OPENNMS_DBPASS opennms
+
 ENV JAVA_OPTS="-Xmx1024m -XX:MaxMetaspaceSize=512m"
 
 RUN yum -y --setopt=tsflags=nodocs update && \
@@ -80,7 +89,7 @@ USER ${OPENNMS_UID}
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
-CMD [ "-f" ]
+CMD [ "-s" ]
 
 ##------------------------------------------------------------------------------
 ## EXPOSED PORTS
