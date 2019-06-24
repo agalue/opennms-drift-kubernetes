@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # http://cassandra-reaper.io/docs/configuration/docker_vars/
+# Main UI: https://cassandra-reaper.aws.agalue.net/webui/
 
 ---
 apiVersion: v1
@@ -54,13 +55,13 @@ spec:
         env:
         - name: CASSANDRA_HOST
           value: cassandra.opennms.svc.cluster.local
-        - name: REPFACTOR
+        - name: REP_FACTOR
           valueFrom:
             configMapKeyRef:
               key: CASSANDRA_REPLICATION_FACTOR
               name: common-settings
         - name: CQL
-          value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REPFACTOR) };"
+          value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REP_FACTOR) };"
       containers:
       - name: cassandra-reaper
         image: thelastpickle/cassandra-reaper:1.4.4
