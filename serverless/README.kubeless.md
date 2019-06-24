@@ -20,7 +20,7 @@ Once you have the WebHook URL, add it to a `secret`, as well as the OpenNMS WebU
 ```bash
 kubectl -n opennms create secret generic serverless-config \
  --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
- --from-literal=ONMS_URL="https://onmsui.k8s.opennms.org/opennms" \
+ --from-literal=ONMS_URL="https://onmsui.aws.agalue.net/opennms" \
  --dry-run -o yaml | kubectl apply -f -
 ```
 
