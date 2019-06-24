@@ -1,23 +1,20 @@
 FROM opennms/openjdk:11.0.3.7-b1
 
-LABEL maintainer "Alejandro Galue <agalue@opennms.org>"
-
 ARG OPENNMS_VERSION="stable"
 ARG MIRROR_HOST=yum.opennms.org
 ARG OPENNMS_UID=10001
 
-ENV OPENNMS_KARAF_SSH_HOST 0.0.0.0
-ENV OPENNMS_KARAF_SSH_PORT 8101
-ENV OPENNMS_DBNAME opennms
-ENV POSTGRES_HOST localhost
-ENV POSTGRES_PORT 5432
-ENV POSTGRES_USER postgres
-ENV POSTGRES_PASSWORD postgres
-ENV OPENNMS_DBNAME opennms
-ENV OPENNMS_DBUSER opennms
-ENV OPENNMS_DBPASS opennms
-
-ENV JAVA_OPTS="-Xmx1024m -XX:MaxMetaspaceSize=512m"
+ENV OPENNMS_KARAF_SSH_HOST="0.0.0.0" \
+    OPENNMS_KARAF_SSH_PORT="8101" \
+    OPENNMS_DBNAME="opennms" \
+    POSTGRES_HOST="database" \
+    POSTGRES_PORT="5432" \
+    POSTGRES_USER="postgres" \
+    POSTGRES_PASSWORD="postgres" \
+    OPENNMS_DBNAME="opennms" \
+    OPENNMS_DBUSER="opennms" \
+    OPENNMS_DBPASS="opennms" \
+    JAVA_OPTS="-Xmx1024m -XX:MaxMetaspaceSize=512m"
 
 RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${OPENNMS_VERSION/\//-}-rhel7.noarch.rpm && \
@@ -79,7 +76,8 @@ COPY ./assets/newts.properties.tpl /opt/opennms/assets
 
 COPY ./docker-entrypoint.sh /
 
-LABEL license="AGPLv3" \
+LABEL maintainer="Alejandro Galue <agalue@opennms.org>" \
+      license="AGPLv3" \
       org.opennms.horizon.version="${OPENNMS_VERSION}" \
       vendor="OpenNMS Community" \
       name="Horizon"
@@ -95,11 +93,9 @@ CMD [ "-s" ]
 ## EXPOSED PORTS
 ##------------------------------------------------------------------------------
 ## -- OpenNMS HTTP        8980/TCP
-## -- OpenNMS JMX        18980/TCP
-## -- OpenNMS KARAF RMI   1099/TCP
 ## -- OpenNMS KARAF SSH   8101/TCP
 ## -- OpenNMS MQ         61616/TCP
 ## -- OpenNMS Eventd      5817/TCP
 ## -- SNMP Trapd          1162/UDP
 ## -- Syslog Receiver    10514/UDP
-EXPOSE 8980 8101 1162/udp
+EXPOSE 8980 8101 61616 1162/udp 10514/udp

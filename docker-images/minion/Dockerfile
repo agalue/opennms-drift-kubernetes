@@ -1,22 +1,17 @@
 FROM opennms/openjdk:1.8.0
 
-LABEL maintainer "Alejandro Galue <agalue@opennms.org>"
-
 ARG MINION_VERSION=stable
 
-ENV MINION_HOME /opt/minion
-ENV MINION_CONFIG /opt/minion/etc/org.opennms.minion.controller.cfg
-
-ENV MINION_ID 00000000-0000-0000-0000-deadbeef0001
-ENV MINION_LOCATION MINION
-
-ENV OPENNMS_BROKER_URL tcp://127.0.0.1:61616
-ENV OPENNMS_HTTP_URL http://127.0.0.1:8980/opennms
-
-ENV OPENNMS_HTTP_USER minion
-ENV OPENNMS_HTTP_PASS minion
-ENV OPENNMS_BROKER_USER minion
-ENV OPENNMS_BROKER_PASS minion
+ENV MINION_HOME="/opt/minion" \
+    MINION_CONFIG="/opt/minion/etc/org.opennms.minion.controller.cfg" \
+    MINION_ID="00000000-0000-0000-0000-deadbeef0001" \
+    MINION_LOCATION="Docker" \
+    OPENNMS_BROKER_URL="tcp://127.0.0.1:61616" \
+    OPENNMS_HTTP_URL="http://127.0.0.1:8980/opennms" \
+    OPENNMS_HTTP_USER="minion" \
+    OPENNMS_HTTP_PASS="minion" \
+    OPENNMS_BROKER_USER="minion" \
+    OPENNMS_BROKER_PASS="minion"
 
 RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh http://yum.opennms.org/repofiles/opennms-repo-${MINION_VERSION}-rhel7.noarch.rpm && \
@@ -38,7 +33,8 @@ USER 999
 
 COPY ./docker-entrypoint.sh /
 
-LABEL license="AGPLv3" \
+LABEL maintainer="Alejandro Galue <agalue@opennms.org>" \
+      license="AGPLv3" \
       org.opennms.horizon.version="${MINION_VERSION}" \
       vendor="OpenNMS Community" \
       name="Minion"
@@ -50,8 +46,7 @@ CMD [ "-f" ]
 ##------------------------------------------------------------------------------
 ## EXPOSED PORTS
 ##------------------------------------------------------------------------------
-## -- OpenNMS KARAF SSH   8201/TCP
-## -- OpenNMS JMX        18980/TCP
-## -- SNMP Trapd          1162/UDP
-## -- Syslog              1514/UDP
+## -- OpenNMS KARAF SSH  8201/TCP
+## -- SNMP Trapd         1162/UDP
+## -- Syslog             1514/UDP
 EXPOSE 8201 1162/udp 1514/udp
