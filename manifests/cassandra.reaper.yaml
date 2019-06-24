@@ -15,6 +15,8 @@ spec:
   ports:
   - port: 8080
     name: http
+  - port: 8081
+    name: http-admin
   selector:
     app: cassandra-reaper
 
@@ -82,6 +84,8 @@ spec:
           value: cassandra
         - name: REAPER_JMX_AUTH_PASSWORD # See ConfigMap/cassandra-config from cassandra.yaml
           value: cassandra
+        - name: REAPER_CASS_KEYSPACE # See initContainers:init-database
+          value: reaper_db
         ports:
         - containerPort: 8080
           name: http
