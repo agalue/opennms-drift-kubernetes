@@ -1,7 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING: To avoid issues, use PostgreSQL 11.1
-#          Tested Grafana Versions: 6.1.4 or 6.2.5 (Helm image can be used)
+#          Tested Grafana Versions: 6.1.4 or 6.2.4+ (Helm image can be used)
 #          There are schema conflicts during DB creation/migration,
 #          when using different version combinations.
 

@@ -26,5 +26,8 @@ if ! psql -lqt | cut -d \| -f 1 | grep -qw $GF_DATABASE_NAME; then
   psql -c "alter user $GF_DATABASE_USER set search_path to $GF_DATABASE_NAME,public;"
   psql -c "grant all on database $GF_DATABASE_NAME to $GF_DATABASE_USER;"
 else
-  echo "Grafana database already created on $PGHOST, skipping..."
+  TABLES=$(psql -qtAX -d $GF_DATABASE_NAME -c "select count(*) from  pg_stat_user_tables;")
+  echo "Grafana database already exists on $PGHOST."
+  echo "There are $TABLES tables on it, skipping..."
+  sleep 10
 fi
