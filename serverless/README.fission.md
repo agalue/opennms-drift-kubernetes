@@ -7,8 +7,9 @@ Make sure to install the fission CLI on your own computer, as explained on the [
 For the manifets, it is enough to have the core functionality, with the Kafka Listener implemented. As Helm is not used here, this can easily be done by executing the following commands:
 
 ```bash
+export RELEASE=$(curl -s https://api.github.com/repos/fission/fission/releases/latest | grep tag_name | cut -d '"' -f 4)
 kubectl config set-context $(kubectl config current-context) --namespace=default
-kubectl apply -f https://github.com/fission/fission/releases/download/1.2.1/fission-core-1.2.1.yaml
+kubectl apply -f https://github.com/fission/fission/releases/download/$RELEASE/fission-core-$RELEASE.yaml
 kubectl apply -f fission-mqtrigger-kafka.yaml
 ```
 
