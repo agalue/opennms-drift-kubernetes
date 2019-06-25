@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNING: To avoid issues, use PostgreSQL 11.1 and Grafana 6.1.4
+# WARNING: To avoid issues, use PostgreSQL 11.1
+#          Tested Grafana Versions: 6.1.4 or 6.2.5 (Helm image can be used)
 #          There are schema conflicts during DB creation/migration,
 #          when using different version combinations.
 
@@ -81,7 +82,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        image: grafana/grafana:6.1.4
+        image: opennms/helm:3.0.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -97,8 +98,6 @@ spec:
             secretKeyRef:
               key: GRAFANA_UI_ADMIN_PASSWORD
               name: onms-passwords
-        - name: GF_INSTALL_PLUGINS
-          value: opennms-helm-app
         - name: GF_SERVER_DOMAIN
           value: grafana.aws.agalue.net
         - name: GF_SERVER_ROOT_URL
