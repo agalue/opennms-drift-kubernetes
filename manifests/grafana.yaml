@@ -42,7 +42,7 @@ spec:
         - name: TIMEOUT
           value: '600'
       - name: init-database
-        image: postgres:11-alpine
+        image: postgres:11
         imagePullPolicy: IfNotPresent
         command:
         - sh
@@ -93,10 +93,14 @@ spec:
             secretKeyRef:
               key: GRAFANA_UI_ADMIN_PASSWORD
               name: onms-passwords
+        - name: PGHOST
+          value: postgresql.opennms.svc.cluster.local
+        - name: PGPORT
+          value: '5432'
         - name: GF_DATABASE_TYPE
           value: postgres
         - name: GF_DATABASE_HOST
-          value: postgresql.opennms.svc.cluster.local:5432
+          value: $(PGHOST):$(PGPORT)
         - name: GF_DATABASE_NAME
           value: grafana
         - name: GF_DATABASE_USER
@@ -112,7 +116,7 @@ spec:
         - name: GF_SESSION_PROVIDER
           value: postgres
         - name: GF_SESSION_PROVIDER_CONFIG
-          value: dbname=$(GF_DATABASE_NAME) user=$(GF_DATABASE_USER) password=$(GF_DATABASE_PASSWORD) host=postgresql.opennms.svc.cluster.local port=5432 sslmode=disable
+          value: dbname=$(GF_DATABASE_NAME) user=$(GF_DATABASE_USER) password=$(GF_DATABASE_PASSWORD) host=$(PGHOST) port=$(PGPORT) sslmode=disable
         readinessProbe:
           httpGet:
             path: /

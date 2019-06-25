@@ -40,6 +40,9 @@ metadata:
   namespace: opennms
   annotations:
     kubernetes.io/ingress.class: nginx
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: route
+    ingress.kubernetes.io/session-cookie-hash: sha1
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
     certmanager.k8s.io/acme-http01-edit-in-place: 'true'

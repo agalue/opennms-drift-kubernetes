@@ -54,7 +54,7 @@ spec:
           value: '600'
       # Patch the database for Hasura
       - name: init-database
-        image: postgres:11-alpine
+        image: postgres:11
         imagePullPolicy: IfNotPresent
         command:
         - sh
