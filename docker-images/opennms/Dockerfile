@@ -1,6 +1,6 @@
 FROM opennms/openjdk:11.0.3.7-b1
 
-ARG OPENNMS_VERSION="stable"
+ARG OPENNMS_VERSION="bleeding"
 ARG MIRROR_HOST=yum.opennms.org
 ARG OPENNMS_UID=10001
 

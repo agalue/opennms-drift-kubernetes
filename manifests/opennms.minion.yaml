@@ -79,7 +79,7 @@ spec:
       initContainers:
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: agalue/minion:24.1.1-1
+        image: agalue/minion:develop-b44
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -118,7 +118,7 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: agalue/minion:24.1.1-1
+        image: agalue/minion:develop-b44
         imagePullPolicy: IfNotPresent
         args:
         - -f

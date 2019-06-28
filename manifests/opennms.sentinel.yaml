@@ -62,7 +62,7 @@ spec:
       initContainers:
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: agalue/sentinel:24.1.1-1
+        image: agalue/sentinel:develop-b44
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -122,7 +122,7 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        image: agalue/sentinel:24.1.1-1
+        image: agalue/sentinel:develop-b44
         imagePullPolicy: IfNotPresent
         args:
           - -c

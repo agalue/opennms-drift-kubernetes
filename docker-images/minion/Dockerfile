@@ -1,6 +1,6 @@
 FROM opennms/openjdk:1.8.0
 
-ARG MINION_VERSION=stable
+ARG MINION_VERSION=bleeding
 
 ENV MINION_HOME="/opt/minion" \
     MINION_CONFIG="/opt/minion/etc/org.opennms.minion.controller.cfg" \
