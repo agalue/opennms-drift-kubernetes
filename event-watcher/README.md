@@ -36,11 +36,15 @@ docker push agalue/onms-k8s-watcher-go:1.0-SNAPSHOT
 
 > *NOTE*: Please use your own Docker Hub account or use the image provided on my account.
 
-To build the controller localy for testing:
+To build the controller locally for testing:
 
 ```bash
+export GO111MODULE="on"
+export ONMS_URL="https://onms.aws.agalue.net/opennms"
+
 go mod init github.com/agalue/event-watcher
 go build
+./event-watcher
 ```
 
 > *NOTE*: Please use your own GitHub account.
@@ -69,7 +73,6 @@ rules:
   - ""
   resources:
   - pods
-  - namespaces
   - services
   - events
   verbs:
