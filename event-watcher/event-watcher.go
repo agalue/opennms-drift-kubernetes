@@ -4,7 +4,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -247,9 +246,8 @@ func sendEventToOnms(event Event) {
 		fmt.Println(err)
 		return
 	}
-
 	post.Header.Set("Content-Type", "application/json")
-	post.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(user+":"+passwd)))
+	post.SetBasicAuth(user, passwd)
 
 	client := &http.Client{}
 	out, err := client.Do(post)
