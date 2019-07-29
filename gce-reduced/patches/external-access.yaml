@@ -5,6 +5,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-rules
+  namespace: opennms
 spec:
   tls:
     - secretName: opennms-ingress

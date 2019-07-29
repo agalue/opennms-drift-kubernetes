@@ -5,6 +5,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-rules
+  namespace: opennms
   annotations:
     $patch: delete
 spec:
