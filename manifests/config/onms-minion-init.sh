@@ -74,7 +74,6 @@ EOF
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.rpc.kafka.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
-acks=1
 compression.type=gzip
 request.timeout.ms=30000
 # Consumer
