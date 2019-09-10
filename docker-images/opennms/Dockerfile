@@ -1,4 +1,4 @@
-FROM opennms/openjdk:11.0.3.7-b1
+FROM opennms/openjdk:11.0.4.11
 
 ARG OPENNMS_VERSION="stable"
 ARG MIRROR_HOST=yum.opennms.org
@@ -94,6 +94,8 @@ CMD [ "-s" ]
 ## EXPOSED PORTS
 ##------------------------------------------------------------------------------
 ## -- OpenNMS HTTP        8980/TCP
+## -- OpenNMS JMX        18980/TCP
+## -- OpenNMS KARAF RMI   1099/TCP
 ## -- OpenNMS KARAF SSH   8101/TCP
 ## -- OpenNMS MQ         61616/TCP
 ## -- OpenNMS Eventd      5817/TCP
