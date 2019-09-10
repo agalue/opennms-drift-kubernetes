@@ -17,6 +17,7 @@ List of changes:
 * Use OpenJDK 8 for Minion and Sentinel to avoid JAXB related issues found when testing H24.
 * Default entry point parameter to be `-s` instead of `-f`.
 * Added netcap/jli changes for OpenJDK 8, to run as non-root on Minion and Sentinel.
+* Copy `/etc/skel/.bash*` to have a nice shell when accessing the containers as non-root.
 
 Notes:
 
