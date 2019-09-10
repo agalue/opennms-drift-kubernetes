@@ -46,7 +46,8 @@ CMD [ "-f" ]
 ##------------------------------------------------------------------------------
 ## EXPOSED PORTS
 ##------------------------------------------------------------------------------
-## -- OpenNMS KARAF SSH  8201/TCP
-## -- SNMP Trapd         1162/UDP
-## -- Syslog             1514/UDP
+## -- OpenNMS KARAF SSH   8201/TCP
+## -- OpenNMS JMX        18980/TCP
+## -- SNMP Trapd          1162/UDP
+## -- Syslog              1514/UDP
 EXPOSE 8201 1162/udp 1514/udp

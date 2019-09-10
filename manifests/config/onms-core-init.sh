@@ -341,6 +341,48 @@ cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
 </resource-types>
 EOF
 
+# Configure K8s Event Watcher
+cat <<EOF > $CONFIG_DIR/events/kubernetes.events.xml
+<events xmlns="http://xmlns.opennms.org/xsd/eventconf">
+  <event>
+    <uei>uei.opennms.org/kubernetes/event/Warning</uei>
+    <event-label>Kubernetes Warning Event</event-label>
+    <descr>Received event %parm[reason]% on %parm[kind]% %parm[name]% from namespace %parm[namespace]% at %parm[creationTimestamp]%, originated on worker node %parm[nodeName]%: %parm[message]%</descr>
+    <logmsg dest="logndisplay">%parm[message]%</logmsg>
+    <severity>Minor</severity>
+  </event>
+  <event>
+    <uei>uei.opennms.org/kubernetes/pod/ADDED</uei>
+    <event-label>Kubernetes Pod Added Event</event-label>
+    <descr>Pod %parm[name]% has been added to namespace %parm[namespace]% at %parm[creationTimestamp]%</descr>
+    <logmsg dest="logndisplay">Pod %parm[name]% added to namespace %parm[namespace]%</logmsg>
+    <severity>Normal</severity>
+  </event>
+  <event>
+    <uei>uei.opennms.org/kubernetes/pod/DELETED</uei>
+    <event-label>Kubernetes Pod Deleted Event</event-label>
+    <descr>Pod %parm[name]% has been removed from namespace %parm[namespace]% at %parm[creationTimestamp]%</descr>
+    <logmsg dest="logndisplay">Pod %parm[name]% removed from namespace %parm[namespace]%</logmsg>
+    <severity>Warning</severity>
+  </event>
+  <event>
+    <uei>uei.opennms.org/kubernetes/service/ADDED</uei>
+    <event-label>Kubernetes Service Added Event</event-label>
+    <descr>Service %parm[name]% has been added to namespace %parm[namespace]% at %parm[creationTimestamp]%</descr>
+    <logmsg dest="logndisplay">Service %parm[name]% added to namespace %parm[namespace]%</logmsg>
+    <severity>Normal</severity>
+  </event>
+  <event>
+    <uei>uei.opennms.org/kubernetes/service/DELETED</uei>
+    <event-label>Kubernetes Service Deleted Event</event-label>
+    <descr>Service %parm[name]% has been removed from namespace %parm[namespace]% at %parm[creationTimestamp]%</descr>
+    <logmsg dest="logndisplay">Service %parm[name]% removed from namespace %parm[namespace]%</logmsg>
+    <severity>Warning</severity>
+  </event>
+</events>
+EOF
+sed -r -i '/[<].global[>]/a <event-file>events/kubernetes.events.xml</event-file>' $CONFIG_DIR/eventconf.xml
+
 # Cleanup temporary requisition files:
 rm -f $CONFIG_DIR/imports/pending/*.xml.*
 rm -f $CONFIG_DIR/foreign-sources/pending/*.xml.*

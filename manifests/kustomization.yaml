@@ -22,6 +22,7 @@ resources:
 - grafana.helm.yaml
 - hasura.yaml
 - external-access.yaml
+- event-watcher.yaml
 
 configMapGenerator:
 - name: opennms-config

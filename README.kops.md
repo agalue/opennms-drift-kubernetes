@@ -74,7 +74,7 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.12.9 \
+  --kubernetes-version 1.13.10 \
   --networking calico
 ```
 
@@ -92,14 +92,6 @@ Then, add:
 spec:
   externalDns:
     watchIngress: true
-```
-
-While on edit mode, instruct `kops` to use `CoreDNS` instead, by adding:
-
-```yaml
-spec:
-  kubeDNS:
-    provider: CoreDNS
 ```
 
 Finally, apply the changes to create the cluster:
