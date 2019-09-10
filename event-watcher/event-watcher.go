@@ -41,8 +41,9 @@ type Param struct {
 
 // Event represents an OpenNMS event
 type Event struct {
-	UEI   string  `json:"uei"`
-	Parms []Param `json:"parms"`
+	UEI    string  `json:"uei"`
+	Source string  `json:"source"`
+	Parms  []Param `json:"parms"`
 }
 
 // ToJSON converts an OpenNMS Event to JSON as string
@@ -136,7 +137,7 @@ func main() {
 
 	// Wait for Cache
 	if !cache.WaitForCacheSync(stopper, podInformer.HasSynced, svcInformer.HasSynced, eventInformer.HasSynced) {
-		runtime.HandleError(fmt.Errorf("Timed out waiting for cache to sync"))
+		runtime.HandleError(fmt.Errorf("Timed response waiting for cache to sync"))
 		return
 	}
 
@@ -170,13 +171,17 @@ func getBaseUEI() string {
 }
 
 func onAddPod(obj interface{}) {
-	pod := obj.(*v1.Pod)
-	onPodChange("ADDED", *pod)
+	pod, ok := obj.(*v1.Pod)
+	if ok {
+		onPodChange("ADDED", *pod)
+	}
 }
 
 func onDeletePod(obj interface{}) {
-	pod := obj.(*v1.Pod)
-	onPodChange("DELETED", *pod)
+	pod, ok := obj.(*v1.Pod)
+	if ok {
+		onPodChange("DELETED", *pod)
+	}
 }
 
 func onPodChange(action string, pod v1.Pod) {
@@ -193,13 +198,17 @@ func onPodChange(action string, pod v1.Pod) {
 }
 
 func onAddService(obj interface{}) {
-	svc := obj.(*v1.Service)
-	onServiceChange("ADDED", *svc)
+	svc, ok := obj.(*v1.Service)
+	if ok {
+		onServiceChange("ADDED", *svc)
+	}
 }
 
 func onDeleteService(obj interface{}) {
-	svc := obj.(*v1.Service)
-	onServiceChange("DELETED", *svc)
+	svc, ok := obj.(*v1.Service)
+	if ok {
+		onServiceChange("DELETED", *svc)
+	}
 }
 
 func onServiceChange(action string, svc v1.Service) {
@@ -216,8 +225,8 @@ func onServiceChange(action string, svc v1.Service) {
 }
 
 func onAddEvent(obj interface{}) {
-	event := obj.(*v1.Event)
-	if event.Type != "Normal" {
+	event, ok := obj.(*v1.Event)
+	if ok && event.Type != "Normal" {
 		fmt.Printf("%s[%s] %s event %s at %s!\n", event.Type, event.ResourceVersion, event.Reason, event.Message, event.CreationTimestamp)
 		var onmsEvent = Event{
 			UEI: getBaseUEI() + "/event/" + event.Type,
@@ -241,23 +250,23 @@ func sendEventToOnms(event Event) {
 	user := getEnv("ONMS_USER", "admin")
 	passwd := getEnv("ONMS_PASSWD", "admin")
 
-	post, err := http.NewRequest("POST", url, bytes.NewBufferString(event.ToJSON()))
+	event.Source = "Kubernetes"
+	request, err := http.NewRequest("POST", url, bytes.NewBufferString(event.ToJSON()))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	post.Header.Set("Content-Type", "application/json")
-	post.SetBasicAuth(user, passwd)
+	request.Header.Set("Content-Type", "application/json")
+	request.SetBasicAuth(user, passwd)
 
-	client := &http.Client{}
-	out, err := client.Do(post)
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	if out.StatusCode == http.StatusNoContent {
-		fmt.Printf("OpenNMS event %s has been event.\n", event.UEI)
+	if response.StatusCode == http.StatusNoContent {
+		fmt.Printf("OpenNMS event %s has been event at %s.\n", event.UEI, time.Now())
 	} else {
 		fmt.Println("There was a problem sending event to OpenNMS")
 	}
