@@ -1,4 +1,4 @@
-FROM opennms/openjdk:1.8.0
+FROM opennms/openjdk:11.0.4.11
 
 ARG MINION_VERSION=bleeding
 
@@ -17,6 +17,8 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh http://yum.opennms.org/repofiles/opennms-repo-${MINION_VERSION}-rhel7.noarch.rpm && \
     rpm --import http://yum.opennms.org/OPENNMS-GPG-KEY && \
     yum -y install net-tools sshpass openssh-clients && \
+    yum -y install https://yum.opennms.org/stable/rhel7/jicmp/jicmp-2.0.5-1.el7.centos.x86_64.rpm && \
+    yum -y install https://yum.opennms.org/stable/rhel7/jicmp6/jicmp6-2.0.4-1.el7.centos.x86_64.rpm && \
     yum -y install opennms-minion-container opennms-minion-features-core opennms-minion-features-default && \
     yum clean all && \
     rm -rf /var/cache/yum && \
@@ -25,8 +27,8 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     chgrp -R 0 /opt/minion && \
     chmod -R g=u /opt/minion && \
     cp /etc/skel/.bash* /opt/minion/ && \
-    setcap cap_net_raw+ep /usr/lib/jvm/java/bin/java && \
-    echo /usr/lib/jvm/java/lib/amd64/jli > /etc/ld.so.conf.d/java-latest.conf && \
+    setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
+    echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig
 
 USER 999

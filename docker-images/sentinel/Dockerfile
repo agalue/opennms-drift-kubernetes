@@ -1,4 +1,4 @@
-FROM opennms/openjdk:1.8.0
+FROM opennms/openjdk:11.0.4.11
 
 ARG SENTINEL_VERSION=bleeding
 ARG MIRROR_HOST=yum.opennms.org
@@ -28,8 +28,8 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     chgrp -R 0 /opt/sentinel && \
     chmod -R g=u /opt/sentinel && \
     cp /etc/skel/.bash* /opt/sentinel/ && \
-    setcap cap_net_raw+ep /usr/lib/jvm/java/bin/java && \
-    echo /usr/lib/jvm/java/lib/amd64/jli > /etc/ld.so.conf.d/java-latest.conf && \
+    setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
+    echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig
 
 USER 999
