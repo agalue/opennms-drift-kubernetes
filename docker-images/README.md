@@ -17,8 +17,9 @@ List of changes:
 * Use OpenJDK 8 for Minion and Sentinel to avoid JAXB related issues found when testing H24.
 * Default entry point parameter to be `-s` instead of `-f`.
 * Added netcap/jli changes for OpenJDK 8, to run as non-root on Minion and Sentinel.
-* Copy `/etc/skel/.bash*` to have a nice shell when accessing the containers as non-root.
-
+* Copy `/etc/skel/.bash*` to have a nice shell when accessing the containers as non-root on Minion and Sentinel.
+* Added `jicmp` and `jicmp6` to Minion.
+* Adding `umask 002` to Minion's docker-entrypoint.sh
 Notes:
 
 * The SSH packages are a workaround to have access to the Karaf shell for the readiness/lifeness probes.
