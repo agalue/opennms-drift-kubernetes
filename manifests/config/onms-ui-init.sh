@@ -63,15 +63,16 @@ cat <<EOF > $CONFIG_DIR/eventconf.xml
       <doNotOverride>script</doNotOverride>
     </security>
   </global>
+  <event-file>events/opennms.snmp.trap.translator.events.xml</event-file>
   <event-file>events/opennms.ackd.events.xml</event-file>
   <event-file>events/opennms.alarm.events.xml</event-file>
-  <event-file>events/opennms.alarmChangeNotifier.events.xml</event-file>
   <event-file>events/opennms.bsm.events.xml</event-file>
   <event-file>events/opennms.capsd.events.xml</event-file>
   <event-file>events/opennms.config.events.xml</event-file>
   <event-file>events/opennms.correlation.events.xml</event-file>
   <event-file>events/opennms.default.threshold.events.xml</event-file>
   <event-file>events/opennms.discovery.events.xml</event-file>
+  <event-file>events/opennms.hyperic.events.xml</event-file>
   <event-file>events/opennms.internal.events.xml</event-file>
   <event-file>events/opennms.linkd.events.xml</event-file>
   <event-file>events/opennms.mib.events.xml</event-file>

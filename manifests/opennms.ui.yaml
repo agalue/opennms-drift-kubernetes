@@ -77,7 +77,7 @@ spec:
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: agalue/horizon-core-web:h25-b67
+        image: agalue/horizon-core-web:h25-b77
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -124,7 +124,7 @@ spec:
           subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
-        image: agalue/horizon-core-web:h25-b67
+        image: agalue/horizon-core-web:h25-b77
         imagePullPolicy: IfNotPresent
         command: [ /docker-entrypoint.sh, -s ]
         ports:
