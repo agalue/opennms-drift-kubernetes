@@ -124,7 +124,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mast
 ```bash
 kubectl create namespace cert-manager
 kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.8.0/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.10.0/cert-manager.yaml
 ```
 
 ## Configure DNS Entry for the Ingress Controller and Kafka

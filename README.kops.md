@@ -94,6 +94,14 @@ spec:
     watchIngress: true
 ```
 
+While on edit mode, instruct `kops` to use `CoreDNS` instead, by adding:
+
+```yaml
+spec:
+  kubeDNS:
+    provider: CoreDNS
+```
+
 Finally, apply the changes to create the cluster:
 
 ```bash
@@ -158,7 +166,7 @@ The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is req
 ```bash
 kubectl create namespace cert-manager
 kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.8.0/cert-manager.yaml
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.10.0/cert-manager.yaml
 ```
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
