@@ -79,7 +79,7 @@ spec:
       initContainers:
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: agalue/minion:h25-b67
+        image: agalue/minion:h25-b77
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -102,6 +102,11 @@ spec:
               name: onms-passwords
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
+        - name: ENABLE_TRACING
+          valueFrom:
+            configMapKeyRef:
+              key: ENABLE_TRACING
+              name: common-settings
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
@@ -118,7 +123,7 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: agalue/minion:h25-b67
+        image: agalue/minion:h25-b77
         imagePullPolicy: IfNotPresent
         args:
         - -f

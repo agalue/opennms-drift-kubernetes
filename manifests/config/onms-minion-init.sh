@@ -21,6 +21,7 @@
 # - OPENNMS_HTTP_PASS
 # - KAFKA_SERVER
 # - SINGLE_PORT
+# - ENABLE_TRACING
 
 # To avoid issues with OpenShift
 umask 002
@@ -30,6 +31,9 @@ MINION_HOME=/opt/minion
 VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
 ### Basic Settings
+
+FEATURES_DIR=$OVERLAY/featuresBoot.d
+mkdir -p $FEATURES_DIR
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
@@ -83,8 +87,6 @@ auto.offset.reset=latest
 max.request.size=5000000
 EOF
 
-  FEATURES_DIR=$OVERLAY/featuresBoot.d
-  mkdir -p $FEATURES_DIR
   cat <<EOF > $FEATURES_DIR/kafka.boot
 !minion-jms
 !opennms-core-ipc-sink-camel
@@ -92,6 +94,11 @@ EOF
 opennms-core-ipc-sink-kafka
 opennms-core-ipc-rpc-kafka
 EOF
+fi
+
+# Enable tracing with jaeger
+if [[ $ENABLE_TRACING == "true" ]]; then
+  echo "opennms-core-tracing-jaeger" > $FEATURES_DIR/jaeger.boot
 fi
 
 # Configure SNMP Trap reception

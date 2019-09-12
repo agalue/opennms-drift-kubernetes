@@ -26,6 +26,7 @@
 # - OPENNMS_HTTP_USER
 # - OPENNMS_HTTP_PASS
 # - NUM_LISTENER_THREADS
+# - ENABLE_TRACING
 
 # To avoid issues with OpenShift
 umask 002
@@ -58,6 +59,12 @@ fi
 
 FEATURES_DIR=$OVERLAY/featuresBoot.d
 mkdir -p $FEATURES_DIR
+echo "sentinel-core" > $FEATURES_DIR/sentinel.boot
+
+# Enable tracing with jaeger
+if [[ $ENABLE_TRACING == "true" ]]; then
+  echo "opennms-core-tracing-jaeger" > $FEATURES_DIR/jaeger.boot
+fi
 
 if [[ $ELASTIC_SERVER ]]; then
   echo "Configuring Elasticsearch..."
@@ -108,6 +115,11 @@ if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
 
   echo "sentinel-kafka" > $FEATURES_DIR/kafka.boot
+
+  cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.cfg
+bootstrap.servers = $KAFKA_SERVER:9092
+group.id = $KAFKA_GROUP_ID
+EOF
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.consumer.cfg
 group.id = $KAFKA_GROUP_ID

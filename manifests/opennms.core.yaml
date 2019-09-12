@@ -68,7 +68,7 @@ spec:
       # Initialize OpenNMS Common Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
-        image: agalue/horizon-core-web:h25-b67
+        image: agalue/horizon-core-web:h25-b77
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -110,6 +110,11 @@ spec:
             configMapKeyRef:
               key: ELASTIC_INDEX_STRATEGY_FLOWS
               name: common-settings
+        - name: ENABLE_TRACING
+          valueFrom:
+            configMapKeyRef:
+              key: ENABLE_TRACING
+              name: common-settings
         volumeMounts:
         - name: etc # Persistent volume for OpenNMS Configuration
           mountPath: /opennms-etc
@@ -137,7 +142,7 @@ spec:
           value: '600'
       containers:
       - name: onms
-        image: agalue/horizon-core-web:h25-b67
+        image: agalue/horizon-core-web:h25-b77
         imagePullPolicy: IfNotPresent
         args:
         - -s

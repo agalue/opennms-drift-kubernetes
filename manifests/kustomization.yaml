@@ -46,6 +46,7 @@ configMapGenerator:
   - ELASTIC_INDEX_STRATEGY_FLOWS=daily
   - KAFKA_NUM_PARTITIONS=6
   - MINION_LOCATION=Kubernetes
+  - ENABLE_TRACING=true
 
 secretGenerator:
 - name: onms-passwords
