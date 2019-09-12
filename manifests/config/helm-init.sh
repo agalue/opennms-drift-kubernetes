@@ -38,11 +38,11 @@ if curl -u $GRAFANA_AUTH "$HELM_URL" 2>/dev/null | grep -q '"enabled":false'; th
   echo
   echo "$(date) Adding data source for performance metrics..."
   curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL 2>/dev/null
-  sed -i -r 's/-performance/-fault/g' $JSON_FILE
+  sed -i -r 's/-performance/-entity/g' $JSON_FILE
   echo
   echo "$(date) Adding data source for alarms..."
   curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL 2>/dev/null
-  sed -i -r 's/-fault/-flow/g' $JSON_FILE
+  sed -i -r 's/-entity/-flow/g' $JSON_FILE
   echo
   echo "$(date) Adding data source for flows..."
   curl -u $GRAFANA_AUTH -H 'Content-Type: application/json' -XPOST -d @$JSON_FILE $DS_URL 2>/dev/null
