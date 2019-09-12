@@ -18,9 +18,9 @@ spec:
         env:
         - name: xpack.security.enabled
           $patch: delete
-        - name: discovery.zen.ping.unicast.hosts
-          $patch: delete
-        - name: discovery.zen.minimum_master_nodes
+        - name: cluster.initial_master_nodes
+          value: esmaster-0
+        - name: discovery.seed_hosts
           $patch: delete
         - name: node.master
           value: 'true'
