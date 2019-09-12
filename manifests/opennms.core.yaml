@@ -110,11 +110,8 @@ spec:
             configMapKeyRef:
               key: ELASTIC_INDEX_STRATEGY_FLOWS
               name: common-settings
-        - name: ENABLE_TRACING
-          valueFrom:
-            configMapKeyRef:
-              key: ENABLE_TRACING
-              name: common-settings
+        - name: JAEGER_AGENT_HOST
+          value: jaeger-agent.opennms.svc.cluster.local
         volumeMounts:
         - name: etc # Persistent volume for OpenNMS Configuration
           mountPath: /opennms-etc

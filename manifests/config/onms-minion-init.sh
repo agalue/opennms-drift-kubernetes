@@ -21,7 +21,7 @@
 # - OPENNMS_HTTP_PASS
 # - KAFKA_SERVER
 # - SINGLE_PORT
-# - ENABLE_TRACING
+# - JAEGER_AGENT_HOST
 
 # To avoid issues with OpenShift
 umask 002
@@ -97,7 +97,11 @@ EOF
 fi
 
 # Enable tracing with jaeger
-if [[ $ENABLE_TRACING == "true" ]]; then
+if [[ $JAEGER_AGENT_HOST ]]; then
+  cat <<EOF >> $OVERLAY/system.properties
+# Enable Tracing
+JAEGER_AGENT_HOST=$JAEGER_AGENT_HOST
+EOF
   echo "opennms-core-tracing-jaeger" > $FEATURES_DIR/jaeger.boot
 fi
 

@@ -26,7 +26,7 @@
 # - OPENNMS_HTTP_USER
 # - OPENNMS_HTTP_PASS
 # - NUM_LISTENER_THREADS
-# - ENABLE_TRACING
+# - JAEGER_AGENT_HOST
 
 # To avoid issues with OpenShift
 umask 002
@@ -59,10 +59,14 @@ fi
 
 FEATURES_DIR=$OVERLAY/featuresBoot.d
 mkdir -p $FEATURES_DIR
-echo "sentinel-core" > $FEATURES_DIR/sentinel.boot
+echo "sentinel-jsonstore-postgres" > $FEATURES_DIR/store.boot
 
 # Enable tracing with jaeger
-if [[ $ENABLE_TRACING == "true" ]]; then
+if [[ $JAEGER_AGENT_HOST ]]; then
+  cat <<EOF >> $OVERLAY/system.properties
+# Enable Tracing
+JAEGER_AGENT_HOST=$JAEGER_AGENT_HOST
+EOF
   echo "opennms-core-tracing-jaeger" > $FEATURES_DIR/jaeger.boot
 fi
 
@@ -135,6 +139,7 @@ if [[ $CASSANDRA_SERVER ]]; then
 sentinel-newts
 sentinel-telemetry-nxos
 sentinel-telemetry-jti
+sentinel-blobstore-cassandra
 EOF
 
   cat <<EOF >> $OVERLAY/system.properties

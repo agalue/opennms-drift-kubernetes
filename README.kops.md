@@ -171,6 +171,17 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.1
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
 
+## Install Jaeger Tracing
+
+```bash
+kubectl create namespace observability
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing_v1_jaeger_crd.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
+```
+
 ## Manifets
 
 To apply all the manifests:

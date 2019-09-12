@@ -57,6 +57,7 @@ spec:
         - hasura.aws.agalue.net
         - kibana.aws.agalue.net
         - kafka-manager.aws.agalue.net
+        - tracing.aws.agalue.net
   rules:
     - host: onms.aws.agalue.net
       http:
@@ -111,6 +112,13 @@ spec:
             backend:
               serviceName: opennms-core
               servicePort: 8980
+    - host: tracing.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: jaeger-query
+              servicePort: 16686
 
 # The following is the entry point needed for external Minions
 ---

@@ -31,7 +31,7 @@
 # - ELASTIC_INDEX_STRATEGY_FLOWS
 # - ELASTIC_INDEX_STRATEGY_REST
 # - ELASTIC_INDEX_STRATEGY_ALARMS
-# - ENABLE_TRACING
+# - JAEGER_AGENT_HOST
 
 # To avoid issues with OpenShift
 umask 002
@@ -142,8 +142,11 @@ if [[ $FEATURES_LIST ]]; then
 fi
 
 # Enable tracing with jaeger
-if [[ $ENABLE_TRACING == "true" ]]; then
-  echo "org.opennms.core.tracer=jaeger" > $CONFIG_DIR/opennms.properties.d/jaeger.properties
+if [[ $JAEGER_AGENT_HOST ]]; then
+  cat <<EOF > $CONFIG_DIR/opennms.properties.d/jaeger.properties
+org.opennms.core.tracer=jaeger
+JAEGER_AGENT_HOST=$JAEGER_AGENT_HOST
+EOF
   echo "opennms-core-tracing-jaeger" > $CONFIG_DIR/featuresBoot.d/jaeger.boot
 fi
 

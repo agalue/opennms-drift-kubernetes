@@ -102,11 +102,8 @@ spec:
               name: onms-passwords
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
-        - name: ENABLE_TRACING
-          valueFrom:
-            configMapKeyRef:
-              key: ENABLE_TRACING
-              name: common-settings
+        - name: JAEGER_AGENT_HOST
+          value: jaeger-agent.opennms.svc.cluster.local
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay

@@ -21,6 +21,7 @@ resources:
 - grafana.yaml
 - grafana.helm.yaml
 - hasura.yaml
+- jaeger.yaml
 - external-access.yaml
 - event-watcher.yaml
 
@@ -46,7 +47,6 @@ configMapGenerator:
   - ELASTIC_INDEX_STRATEGY_FLOWS=daily
   - KAFKA_NUM_PARTITIONS=6
   - MINION_LOCATION=Kubernetes
-  - ENABLE_TRACING=true
 
 secretGenerator:
 - name: onms-passwords

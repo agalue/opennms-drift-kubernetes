@@ -106,11 +106,8 @@ spec:
             configMapKeyRef:
               key: KAFKA_NUM_PARTITIONS
               name: common-settings
-        - name: ENABLE_TRACING
-          valueFrom:
-            configMapKeyRef:
-              key: ENABLE_TRACING
-              name: common-settings
+        - name: JAEGER_AGENT_HOST
+          value: jaeger-agent.opennms.svc.cluster.local
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
