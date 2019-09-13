@@ -188,11 +188,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - sh
-            - -c
-            - 'if sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8301 admin@localhost health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
-            # https://issues.opennms.org/browse/NMS-12120
-            # - 'if /opt/sentinel/bin/client health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
+            - /health.sh
           initialDelaySeconds: 60
           periodSeconds: 60
           timeoutSeconds: 20

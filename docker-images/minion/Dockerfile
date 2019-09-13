@@ -16,7 +16,6 @@ ENV MINION_HOME="/opt/minion" \
 RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh http://yum.opennms.org/repofiles/opennms-repo-${MINION_VERSION}-rhel7.noarch.rpm && \
     rpm --import http://yum.opennms.org/OPENNMS-GPG-KEY && \
-    yum -y install net-tools sshpass openssh-clients && \
     yum -y install https://yum.opennms.org/stable/rhel7/jicmp/jicmp-2.0.5-1.el7.centos.x86_64.rpm && \
     yum -y install https://yum.opennms.org/stable/rhel7/jicmp6/jicmp6-2.0.4-1.el7.centos.x86_64.rpm && \
     yum -y install opennms-minion-container opennms-minion-features-core opennms-minion-features-default && \
@@ -34,6 +33,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
 USER 999
 
 COPY ./docker-entrypoint.sh /
+COPY ./health.sh /
 
 LABEL maintainer="Alejandro Galue <agalue@opennms.org>" \
       license="AGPLv3" \

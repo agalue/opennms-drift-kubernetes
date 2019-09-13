@@ -22,7 +22,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     yum -y install https://yum.opennms.org/stable/rhel7/jicmp/jicmp-2.0.5-1.el7.centos.x86_64.rpm && \
     yum -y install https://yum.opennms.org/stable/rhel7/jicmp6/jicmp6-2.0.4-1.el7.centos.x86_64.rpm && \
     yum -y install epel-release && \
-    yum -y install rsync jq sshpass openssh-clients && \
+    yum -y install rsync jq && \
     yum -y install 'perl(LWP)' 'perl(XML::Twig)' && \
     yum -y install gettext \
                    iplike \

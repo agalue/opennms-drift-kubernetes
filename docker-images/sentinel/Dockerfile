@@ -21,7 +21,7 @@ ENV SENTINEL_HOME="/opt/sentinel" \
 RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${SENTINEL_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
-    yum -y install net-tools sshpass openssh-clients opennms-sentinel && \
+    yum -y install opennms-sentinel && \
     yum clean all && \
     rm -rf /var/cache/yum && \
     chown -R sentinel:sentinel /opt/sentinel && \
@@ -35,6 +35,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
 USER 999
 
 COPY ./docker-entrypoint.sh /
+COPY ./health.sh /
 
 LABEL maintainer="Alejandro Galue <agalue@opennms.org>" \
       license="AGPLv3" \

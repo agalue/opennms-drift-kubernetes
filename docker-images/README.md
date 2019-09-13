@@ -11,16 +11,13 @@ List of changes:
 
 * Reorganize environment variables and the defaults to avoid extra layers, and simplify deployment.
 * Re-group labels
-* Install additional packages
-  * For OpenNMS: `epel-release`, `jq`, `sshpass`, `openssh-clients`, `perl(LWP)`, `perl(XML::Twig)`
-  * For Minion and Sentinel: `net-tools`, `sshpass`, `openssh-clients`
-* Use OpenJDK 8 for Minion and Sentinel to avoid JAXB related issues found when testing H24.
+* Install additional packages for OpenNMS: `epel-release`, `jq`, `perl(LWP)`, `perl(XML::Twig)`
 * Default entry point parameter to be `-s` instead of `-f`.
-* Added netcap/jli changes for OpenJDK 8, to run as non-root on Minion and Sentinel.
+* Added netcap/jli changes for OpenJDK 11, to run as non-root on Minion and Sentinel.
 * Copy `/etc/skel/.bash*` to have a nice shell when accessing the containers as non-root on Minion and Sentinel.
 * Added `jicmp` and `jicmp6` to Minion.
 * Adding `umask 002` to Minion's docker-entrypoint.sh
+
 Notes:
 
-* The SSH packages are a workaround to have access to the Karaf shell for the readiness/lifeness probes.
 * The perl packages are requires to use provision.pl within the OpenNMS image.
