@@ -90,7 +90,6 @@ docker run -it --name minion \
  -e OPENNMS_HTTP_URL=https://onms.$DOMAIN/opennms \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
- -e KAFKA_RPC_ACKS=1 \
  -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
  -e KAFKA_RPC_AUTO_OFFSET_RESET=latest \
  -e KAFKA_RPC_COMPRESSION_TYPE=gzip \

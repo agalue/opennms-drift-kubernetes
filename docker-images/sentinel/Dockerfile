@@ -22,6 +22,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${SENTINEL_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
     yum -y install opennms-sentinel && \
+    yum -y install net-tools sshpass openssh-clients && \
     yum clean all && \
     rm -rf /var/cache/yum && \
     chown -R sentinel:sentinel /opt/sentinel && \

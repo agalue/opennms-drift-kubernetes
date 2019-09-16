@@ -1,9 +1,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # NOTES:
-# - This manifest is designed to work with the unaltered version of the image from:
-#   https://hub.docker.com/r/opennms/horizon-core-web
-#   https://github.com/opennms-forge/docker-horizon-core-web
+# - This manifest is designed to work with the version of the image from:
+#   https://hub.docker.com/r/agalue/horizon-core-web
+#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/horizon-25/docker-images/opennms
 # - I'm not a fan of this use case, and can only embrace it as either to provide additional
 #   horsepower for the ReST API, or as a limited WebUI (not all features available).
 #

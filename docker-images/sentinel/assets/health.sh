@@ -1,6 +1,3 @@
 #!/usr/bin/env bash
-TMP_FILE="/tmp/health"
-SENTINEL_HOME="/opt/sentinel"
 
-${SENTINEL_HOME}/bin/client "health:check | tac ${TMP_FILE}"
-grep "Everything is awesome" ${TMP_FILE}
+if sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8301 admin@localhost health:check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi

@@ -177,7 +177,6 @@ org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=5000000
 org.opennms.core.ipc.rpc.kafka.auto.offset.reset=latest
 
 # RPC Producer (verify Kafka broker configuration)
-org.opennms.core.ipc.rpc.kafka.acks=1
 org.opennms.core.ipc.rpc.kafka.max.request.size=5000000
 EOF
 

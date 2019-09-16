@@ -1,11 +1,13 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Sentinel is required only for Processing Flows and Telemetry Data.
+# Using StatefulSets for Sentinels only to have a unique and immutable SENTINEL_ID.
+# SENTINEL_ID is required for tracing.
 #
 # NOTES:
-# - This manifest is designed to work with the unaltered version of the image from:
-#   https://hub.docker.com/r/opennms/sentinel
-#   https://github.com/opennms-forge/docker-sentinel
+# - This manifest is designed to work with the version of the image from:
+#   https://hub.docker.com/r/agalue/sentinel
+#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/horizon-25/docker-images/sentinel
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 # - Using a Deployment instead of StatefulSet, as the Sentinel ID is not used at the moment.
@@ -24,20 +26,22 @@ spec:
   minReplicas: 2
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: Deployment
+    kind: StatefulSet
     name: sentinel
   targetCPUUtilizationPercentage: 80
 
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: sentinel
   namespace: opennms
   labels:
     app: sentinel
 spec:
+  serviceName: sentinel
   replicas: 2
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       app: sentinel
@@ -139,6 +143,10 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
+        - name: SENTINEL_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -191,7 +199,7 @@ spec:
             - /health.sh
           initialDelaySeconds: 60
           periodSeconds: 60
-          timeoutSeconds: 20
+          timeoutSeconds: 15
       volumes:
       - name: etc-overlay
         emptyDir: {}
