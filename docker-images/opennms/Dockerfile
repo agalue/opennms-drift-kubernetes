@@ -69,10 +69,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig
 
-COPY ./assets/opennms-datasources.xml.tpl /opt/opennms/assets
-COPY ./assets/org.apache.karaf.shell.cfg.tpl /opt/opennms/assets
-COPY ./assets/newts.properties.tpl /opt/opennms/assets
-
+COPY ./assets/* /opt/opennms/assets/
 COPY ./docker-entrypoint.sh /
 
 LABEL maintainer="Alejandro Galue <agalue@opennms.org>" \

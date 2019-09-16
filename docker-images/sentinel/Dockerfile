@@ -34,8 +34,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
 
 USER 999
 
-COPY ./docker-entrypoint.sh /
-COPY ./health.sh /
+COPY ./assets/* /
 
 LABEL maintainer="Alejandro Galue <agalue@opennms.org>" \
       license="AGPLv3" \
