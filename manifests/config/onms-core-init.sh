@@ -19,6 +19,10 @@
 #   to represent customers/users needs. The configuration directory will be
 #   behind a persistent volume, precisely to save user changes.
 #
+# Pending:
+# - If the name of the newts keyspace is changed, poller-configuration.xml and the JMX
+#   mbeans must be updated as well.
+#
 # External Environment variables:
 # - INSTANCE_ID
 # - FEATURES_LIST
@@ -241,6 +245,14 @@ EOF
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
+
+  # Fixing polling/collection settings
+  sed -r -i "s/keyspace=newts/keyspace=${KEYSPACE}/" $CONFIG_DIR/jmx-datacollection-config.d/cassandra30x-newts.xml
+  sed -r -i "s/keyspace=newts/keyspace=${KEYSPACE}/" $CONFIG_DIR/poller-configuration.xml
+  sed -r -i "s/cassandra-username/cassandra/" $CONFIG_DIR/poller-configuration.xml
+  sed -r -i "s/cassandra-password/cassandra/" $CONFIG_DIR/poller-configuration.xml
+  sed -r -i "s/cassandra-username/cassandra/" $CONFIG_DIR/collectd-configuration.xml
+  sed -r -i "s/cassandra-password/cassandra/" $CONFIG_DIR/collectd-configuration.xml
 fi
 
 if [[ $CASSANDRA_REPLICATION_FACTOR ]]; then
