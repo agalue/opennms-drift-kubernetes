@@ -120,18 +120,18 @@ The output should be something like this:
 Validating cluster aws.agalue.net
 
 INSTANCE GROUPS
-NAME			ROLE	MACHINETYPE	MIN	MAX	SUBNETS
-master-us-east-2a	Master	t2.medium	1	1	us-east-2a
-nodes			Node	t2.2xlarge	5	5	us-east-2a
+NAME                ROLE      MACHINETYPE    MIN    MAX    SUBNETS
+master-us-east-2a   Master    t2.large       1      1      us-east-2a
+nodes               Node      t2.2xlarge     5      5      us-east-2a
 
 NODE STATUS
-NAME						ROLE	READY
-ip-172-20-34-142.us-east-2.compute.internal	node	True
-ip-172-20-40-103.us-east-2.compute.internal	master	True
-ip-172-20-41-96.us-east-2.compute.internal	node	True
-ip-172-20-43-40.us-east-2.compute.internal	node	True
-ip-172-20-44-179.us-east-2.compute.internal	node	True
-ip-172-20-62-60.us-east-2.compute.internal	node	True
+NAME                                         ROLE   READY
+ip-172-20-34-142.us-east-2.compute.internal  node   True
+ip-172-20-40-103.us-east-2.compute.internal  master True
+ip-172-20-41-96.us-east-2.compute.internal   node   True
+ip-172-20-43-40.us-east-2.compute.internal   node   True
+ip-172-20-44-179.us-east-2.compute.internal  node   True
+ip-172-20-62-60.us-east-2.compute.internal   node   True
 
 Your cluster aws.agalue.net is ready
 ```

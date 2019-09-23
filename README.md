@@ -95,27 +95,36 @@ docker run -it --name minion \
  -e KAFKA_RPC_COMPRESSION_TYPE=gzip \
  -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
  -e KAFKA_SINK_ACKS=1 \
+ -e UDP_4729_NAME=Netflow-9-Listener \
+ -e UDP_4729_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.UdpListener \
+ -e UDP_4729_PARAMETERS_PORT=4729 \
+ -e UDP_4729_PARAMETERS_HOST=0.0.0.0 \
+ -e UDP_4729_PARAMETERS_MAX_PACKET_SIZE=16192 \
+ -e UDP_4729_PARSERS_0_NAME=Netflow-9 \
+ -e UDP_4729_PARSERS_0_CLASS_NAME=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser \
  -p 8201:8201 \
  -p 1514:1514 \
  -p 1162:1162 \
- agalue/minion:24.1.1-1 -c
+ agalue/minion:h25-b96 -f
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
 
-> **WARNING**: Make sure to use your own Domain, and use the same version tag as the OpenNMS manifests.
+> **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
 
-> **WARNING**: The above samples are not including information about the Flow listeners. Check the [Minion's config](config/onms-minion-init.sh) for more details.
+> **WARNING**: The above samples include one Flow listener for NetFlow. Check the [Minion's config](config/onms-minion-init.sh) for more details.
 
 ## Users Resources
 
-* OpenNMS Core: `https://onms.aws.agalue.net/opennms` (for administrative tasks)
-* OpenNMS UI: `https://onmsui.aws.agalue.net/opennms` (for users/operators)
+* OpenNMS Core: `https://onms.aws.agalue.net/opennms/` (for administrative tasks)
+* OpenNMS UI: `https://onmsui.aws.agalue.net/opennms/` (for users/operators)
 * Grafana: `https://grafana.aws.agalue.net/`
 * Kibana: `https://kibana.aws.agalue.net/` (remember to enable monitoring)
-* Kafka Manager: `https://kaffa-manager.aws.agalue.net/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
+* Kafka Manager: `https://kafka-manager.aws.agalue.net/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
 * Hasura GraphQL API: `https://hasura.aws.agalue.net/v1alpha1/graphql`
 * Hasura GraphQL Console: `https://hasura.aws.agalue.net/console`
+* Jaeger UI: `https://tracing.aws.agalue.net/`
+* Cassandra Reaper: `https://cassandra-reaper.aws.agalue.net/webui/`
 
 > **WARNING**: Make sure to use your own Domain.
 
