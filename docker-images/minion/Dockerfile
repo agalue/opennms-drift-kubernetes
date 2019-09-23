@@ -18,7 +18,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     rpm --import http://yum.opennms.org/OPENNMS-GPG-KEY && \
     yum -y install https://yum.opennms.org/stable/rhel7/jicmp/jicmp-2.0.5-1.el7.centos.x86_64.rpm && \
     yum -y install https://yum.opennms.org/stable/rhel7/jicmp6/jicmp6-2.0.4-1.el7.centos.x86_64.rpm && \
-    yum -y install opennms-minion-container opennms-minion-features-core opennms-minion-features-default && \
+    yum -y install opennms-minion && \
     yum -y install net-tools sshpass openssh-clients && \
     yum clean all && \
     rm -rf /var/cache/yum && \
