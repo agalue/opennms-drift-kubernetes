@@ -6,7 +6,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
-# - Horizon 24 or newer is required.
+# - Horizon 25 or newer is required.
 # - NUM_LISTENER_THREADS (i.e. queue.threads) should be consistent with the amount of partitions on Kafka
 #
 # Purpose:
@@ -121,11 +121,12 @@ if [[ $KAFKA_SERVER ]]; then
   echo "sentinel-kafka" > $FEATURES_DIR/kafka.boot
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.cfg
+# Producers
 bootstrap.servers = $KAFKA_SERVER:9092
-group.id = $KAFKA_GROUP_ID
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.consumer.cfg
+# Consumers
 group.id = $KAFKA_GROUP_ID
 bootstrap.servers = $KAFKA_SERVER:9092
 max.partition.fetch.bytes = 5000000

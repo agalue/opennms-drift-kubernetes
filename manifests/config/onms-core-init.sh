@@ -4,7 +4,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/horizon-core-web.
 #   Version must match the runtime container.
-# - Horizon 24 or newer is required.
+# - Horizon 25 or newer is required.
 # - The rsync command is required, and it should be pre-installed on the chosen image.
 #
 # Purpose:

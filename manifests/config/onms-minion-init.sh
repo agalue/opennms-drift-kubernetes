@@ -4,7 +4,7 @@
 # Requirements:
 # - Must run within a init-container based on opennms/minion.
 #   Version must match the runtime container.
-# - Horizon 24 or newer is required.
+# - Horizon 25 or newer is required.
 #
 # Purpose:
 # - Configure the instance ID, SNMP4J and Kafka (for RPC and Sink)
