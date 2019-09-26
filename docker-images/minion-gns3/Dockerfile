@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ENV MINION_SOURCE=branches/release-25.0.0
+ENV MINION_SOURCE=stable
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y && \

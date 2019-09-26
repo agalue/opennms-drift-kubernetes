@@ -1,6 +1,6 @@
 FROM opennms/openjdk:11.0.4.11
 
-ARG SENTINEL_VERSION=bleeding
+ARG SENTINEL_VERSION=stable
 ARG MIRROR_HOST=yum.opennms.org
 
 ENV SENTINEL_HOME="/opt/sentinel" \

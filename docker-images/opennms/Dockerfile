@@ -1,6 +1,6 @@
 FROM opennms/openjdk:11.0.4.11
 
-ARG OPENNMS_VERSION="bleeding"
+ARG OPENNMS_VERSION="stable"
 ARG MIRROR_HOST=yum.opennms.org
 ARG OPENNMS_UID=10001
 
@@ -19,13 +19,10 @@ ENV OPENNMS_KARAF_SSH_HOST="0.0.0.0" \
 RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${OPENNMS_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
-    yum -y install https://yum.opennms.org/stable/rhel7/jicmp/jicmp-2.0.5-1.el7.centos.x86_64.rpm && \
-    yum -y install https://yum.opennms.org/stable/rhel7/jicmp6/jicmp6-2.0.4-1.el7.centos.x86_64.rpm && \
     yum -y install epel-release && \
     yum -y install rsync jq && \
     yum -y install 'perl(LWP)' 'perl(XML::Twig)' && \
     yum -y install gettext \
-                   iplike \
                    rrdtool \
                    jrrd2 \
                    opennms-core \

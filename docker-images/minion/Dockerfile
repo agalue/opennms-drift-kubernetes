@@ -1,6 +1,6 @@
 FROM opennms/openjdk:11.0.4.11
 
-ARG MINION_VERSION=bleeding
+ARG MINION_VERSION=stable
 
 ENV MINION_HOME="/opt/minion" \
     MINION_CONFIG="/opt/minion/etc/org.opennms.minion.controller.cfg" \
@@ -16,8 +16,6 @@ ENV MINION_HOME="/opt/minion" \
 RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh http://yum.opennms.org/repofiles/opennms-repo-${MINION_VERSION}-rhel7.noarch.rpm && \
     rpm --import http://yum.opennms.org/OPENNMS-GPG-KEY && \
-    yum -y install https://yum.opennms.org/stable/rhel7/jicmp/jicmp-2.0.5-1.el7.centos.x86_64.rpm && \
-    yum -y install https://yum.opennms.org/stable/rhel7/jicmp6/jicmp6-2.0.4-1.el7.centos.x86_64.rpm && \
     yum -y install opennms-minion && \
     yum -y install net-tools sshpass openssh-clients && \
     yum clean all && \
