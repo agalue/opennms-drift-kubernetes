@@ -199,7 +199,7 @@ spec:
           timeoutSeconds: 15
       # Use the following only when NX-OS Telemetry over gRPC is required.
       - name: nxos-grpc
-        image: agalue/opennms-nxos-grpc:horizon-24
+        image: agalue/opennms-nxos-grpc:horizon-25
         env:
         - name: TZ
           valueFrom:
