@@ -8,10 +8,10 @@ ENV MINION_HOME="/opt/minion" \
     MINION_LOCATION="Docker" \
     OPENNMS_BROKER_URL="tcp://127.0.0.1:61616" \
     OPENNMS_HTTP_URL="http://127.0.0.1:8980/opennms" \
-    OPENNMS_HTTP_USER="minion" \
-    OPENNMS_HTTP_PASS="minion" \
-    OPENNMS_BROKER_USER="minion" \
-    OPENNMS_BROKER_PASS="minion"
+    OPENNMS_HTTP_USER="admin" \
+    OPENNMS_HTTP_PASS="admin" \
+    OPENNMS_BROKER_USER="admin" \
+    OPENNMS_BROKER_PASS="admin"
 
 RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh http://yum.opennms.org/repofiles/opennms-repo-${MINION_VERSION}-rhel7.noarch.rpm && \
