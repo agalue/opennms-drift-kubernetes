@@ -20,7 +20,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${OPENNMS_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
     yum -y install epel-release && \
-    yum -y install rsync jq && \
+    yum -y install net-tools openssh-clients rsync jq && \
     yum -y install 'perl(LWP)' 'perl(XML::Twig)' && \
     yum -y install gettext \
                    rrdtool \
