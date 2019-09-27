@@ -82,8 +82,8 @@ opennms-core-ipc-rpc-kafka
 With Docker:
 
 ```bash
-DOMAIN="aws.agalue.net"
-LOCATION="Apex"
+export DOMAIN="aws.agalue.net"
+export LOCATION="Apex"
 
 docker run -it --name minion \
  -e MINION_ID=$LOCATION-minion-1 \

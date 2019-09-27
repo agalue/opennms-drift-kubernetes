@@ -3,7 +3,7 @@
 # NOTES:
 # - This manifest is designed to work with the version of the image from:
 #   https://hub.docker.com/r/agalue/horizon-core-web
-#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/horizon-25/docker-images/opennms
+#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/master/docker-images/opennms
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 #   That said, without the intelligence to guard against upgrades through the initContainer
@@ -12,7 +12,6 @@
 #
 # WARNING:
 # - This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
-# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable).
 #
 # TODO:
 # - Potential tools for managing /opt/opennms/etc:

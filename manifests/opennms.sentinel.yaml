@@ -7,12 +7,9 @@
 # NOTES:
 # - This manifest is designed to work with the version of the image from:
 #   https://hub.docker.com/r/agalue/sentinel
-#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/horizon-25/docker-images/sentinel
+#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/master/docker-images/sentinel
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
-#
-# WARNING:
-# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 
 ---
 apiVersion: autoscaling/v1

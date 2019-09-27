@@ -6,14 +6,13 @@
 # NOTES:
 # - This manifest is designed to work with the version of the image from:
 #   https://hub.docker.com/r/agalue/minion
-#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/horizon-25/docker-images/minion
+#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/masterdocker-images/minion
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 #
 # WARNING:
 # - HorizontalPodAutoscaling is not recommended unless external intelligence is implemented,
 #   to avoid zombie entries on the Minions requisitions, that can lead to outages.
-# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable)
 
 ---
 apiVersion: v1

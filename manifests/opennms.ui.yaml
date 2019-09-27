@@ -3,14 +3,13 @@
 # NOTES:
 # - This manifest is designed to work with the version of the image from:
 #   https://hub.docker.com/r/agalue/horizon-core-web
-#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/horizon-25/docker-images/opennms
+#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/master/docker-images/opennms
 # - I'm not a fan of this use case, and can only embrace it as either to provide additional
 #   horsepower for the ReST API, or as a limited WebUI (not all features available).
 #
 # WARNING:
 # - NRTG won't work on the UI servers (currently it redirects to the core server through Ingress).
 # - Jasper and KSC Reports will partially work on the UI servers.
-# - The image tag bleeding refers to the upcoming version of OpenNMS (unstable).
 #
 # TODO:
 # - Mount /opt/opennms/etc via NFS from the Core server:
@@ -126,7 +125,8 @@ spec:
       - name: onms-ui
         image: agalue/horizon-core-web:25.0.0-1
         imagePullPolicy: IfNotPresent
-        command: [ /docker-entrypoint.sh, -s ]
+        args:
+        - -s
         ports:
         - containerPort: 8101
           name: karaf
