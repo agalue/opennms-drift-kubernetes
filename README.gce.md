@@ -45,7 +45,7 @@ dig gce.agalue.net.
 
 The output would be:
 
-```
+```text
 ; <<>> DiG 9.10.6 <<>> gce.agalue.net.
 ;; global options: +cmd
 ;; Got answer:
@@ -55,10 +55,10 @@ The output would be:
 ;; OPT PSEUDOSECTION:
 ; EDNS: version: 0, flags:; udp: 4096
 ;; QUESTION SECTION:
-;gce.agalue.net.			IN	A
+;gce.agalue.net.      IN  A
 
 ;; AUTHORITY SECTION:
-gce.agalue.net.		300	IN	SOA	ns-cloud-a1.googledomains.com. cloud-dns-hostmaster.google.com. 1 21600 3600 259200 300
+gce.agalue.net.   300 IN  SOA ns-cloud-a1.googledomains.com. cloud-dns-hostmaster.google.com. 1 21600 3600 259200 300
 
 ;; Query time: 89 msec
 ;; SERVER: 172.20.1.9#53(172.20.1.9)

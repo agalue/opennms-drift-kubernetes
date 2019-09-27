@@ -28,13 +28,13 @@ The output should look like this:
 ;; OPT PSEUDOSECTION:
 ; EDNS: version: 0, flags:; udp: 4096
 ;; QUESTION SECTION:
-;aws.agalue.net.			IN	NS
+;aws.agalue.net.      IN  NS
 
 ;; ANSWER SECTION:
-aws.agalue.net.		172800	IN	NS	ns-1821.awsdns-35.co.uk.
-aws.agalue.net.		172800	IN	NS	ns-718.awsdns-25.net.
-aws.agalue.net.		172800	IN	NS	ns-1512.awsdns-61.org.
-aws.agalue.net.		172800	IN	NS	ns-144.awsdns-18.com.
+aws.agalue.net.   172800  IN  NS  ns-1821.awsdns-35.co.uk.
+aws.agalue.net.   172800  IN  NS  ns-718.awsdns-25.net.
+aws.agalue.net.   172800  IN  NS  ns-1512.awsdns-61.org.
+aws.agalue.net.   172800  IN  NS  ns-144.awsdns-18.com.
 
 ;; Query time: 85 msec
 ;; SERVER: 172.20.1.9#53(172.20.1.9)
