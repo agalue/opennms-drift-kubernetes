@@ -1,7 +1,8 @@
-FROM opennms/openjdk:11.0.4.11
+FROM opennms/openjdk:11
 
-ARG SENTINEL_VERSION=stable
 ARG MIRROR_HOST=yum.opennms.org
+ARG SENTINEL_VERSION=stable
+ARG SENTINEL_UID=10001
 
 ENV SENTINEL_HOME="/opt/sentinel" \
     SENTINEL_ID="" \
@@ -19,6 +20,11 @@ ENV SENTINEL_HOME="/opt/sentinel" \
     POSTGRES_DB="opennms"
 
 RUN yum -y --setopt=tsflags=nodocs update && \
+    groupadd -g ${SENTINEL_UID} sentinel && \
+    useradd -u ${SENTINEL_UID} -g ${SENTINEL_UID} -d /opt/sentinel -s /usr/bin/bash sentinel && \
+    setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
+    echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
+    ldconfig && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${SENTINEL_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
     yum -y install opennms-sentinel && \
@@ -26,20 +32,18 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     yum clean all && \
     rm -rf /var/cache/yum && \
     chown -R sentinel:sentinel /opt/sentinel && \
+    sed -r -i '/RUNAS/s/.*/export RUNAS=sentinel/' /etc/sysconfig/sentinel && \
     chgrp -R 0 /opt/sentinel && \
-    chmod -R g=u /opt/sentinel && \
-    cp /etc/skel/.bash* /opt/sentinel/ && \
-    setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
-    echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
-    ldconfig
-
-USER 999
+    chmod -R g=u /opt/sentinel
 
 COPY ./assets/* /
 
+WORKDIR /opt/sentinel
+USER ${SENTINEL_UID}
+
 LABEL maintainer="Alejandro Galue <agalue@opennms.org>" \
       license="AGPLv3" \
-      org.opennms.horizon.version="${SENTINEL_VERSION}" \
+      org.opennms.sentinel.version="${SENTINEL_VERSION}" \
       vendor="OpenNMS Community" \
       name="Sentinel"
 
