@@ -5,6 +5,11 @@
 
 MINION_HOME="/usr/share/minion"
 MINION_OVERLAY_ETC="$MINION_HOME/etc-overlay"
+MINION_CFG=${MINION_HOME}/etc/org.opennms.minion.controller.cfg
+
+LOCATION=${LOCATION-GNS3}
+ONMS_URL=${ONMS_URL-https://onms.aws.agalue.net/opennms}
+KAFKA_SRV=${KAFKA_SRV-kafka.aws.agalue.net:9094}
 
 # Error codes
 E_ILLEGAL_ARGS=126
@@ -13,11 +18,13 @@ E_ILLEGAL_ARGS=126
 if [ -d "${MINION_OVERLAY_ETC}" ] && [ -n "$(ls -A ${MINION_OVERLAY_ETC})" ]; then
   echo "Apply custom etc configuration from ${MINION_OVERLAY_ETC}."
   rsync -avr ${MINION_OVERLAY_ETC}/ ${MINION_HOME}/etc/
-  sed -r -i "s/^id=.*/id=${HOSTNAME}/" ${MINION_HOME}/etc/org.opennms.minion.controller.cfg
+  sed -r -i "/^id/s/=.*/=${HOSTNAME}/"  ${MINION_CFG}
+  sed -r -i "s|_ONMS_URL_|${ONMS_URL}|" ${MINION_CFG}
+  sed -r -i "s|_LOCATION_|${LOCATION}|" ${MINION_CFG}
+  sed -r -i "s|_KAFKA_SRV_|${KAFKA_SRV}|" ${MINION_HOME}/etc/org.opennms.core.ipc.rpc.kafka.cfg
+  sed -r -i "s|_KAFKA_SRV_|${KAFKA_SRV}|" ${MINION_HOME}/etc/org.opennms.core.ipc.sink.kafka.cfg
 else
   echo "No custom config found in ${MINION_OVERLAY_ETC}. Use default configuration."
 fi
 
-cd ${MINION_HOME}/bin
-exec ./karaf server
-
+exec ${MINION_HOME}/bin/karaf server
