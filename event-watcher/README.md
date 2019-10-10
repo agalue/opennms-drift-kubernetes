@@ -42,7 +42,6 @@ To build the controller locally for testing:
 export GO111MODULE="on"
 export ONMS_URL="https://onms.aws.agalue.net/opennms"
 
-go mod init github.com/agalue/event-watcher
 go build
 ./event-watcher
 ```
