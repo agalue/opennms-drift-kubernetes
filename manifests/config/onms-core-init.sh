@@ -27,6 +27,7 @@
 # External Environment variables:
 # - INSTANCE_ID
 # - FEATURES_LIST
+# - ENABLE_ALEC
 # - KAFKA_SERVER
 # - CASSANDRA_SERVER
 # - CASSANDRA_DC
@@ -54,6 +55,7 @@ VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-core)
 KARAF_FILES=( \
 "create.sql" \
 "config.properties" \
+"startup.properties" \
 "custom.properties" \
 "jre.properties" \
 "profile.cfg" \
@@ -146,6 +148,17 @@ if [[ $FEATURES_LIST ]]; then
   sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
 fi
 
+# Enable ALEC
+if [[ $ENABLE_ALEC ]]; then
+  echo "Enabling ALEC. .."
+  cat <<EOF > $CONFIG_DIR/featuresBoot.d/alec.boot
+alec-opennms-distributed wait-for-kar=opennms-alec-plugin
+EOF
+fi
+
+# Enable Syslogd
+sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' $CONFIG_DIR/service-configuration.xml
+
 # Enable tracing with jaeger
 if [[ $JAEGER_AGENT_HOST ]]; then
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/jaeger.properties
@@ -158,6 +171,10 @@ fi
 # Configure Sink and RPC to use Kafka, and the Kafka Producer.
 if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
+
+  cat <<EOF > $CONFIG_DIR/opennms.properties.d/event-sink.properties
+org.opennms.netmgt.eventd.sink.enable=true
+EOF
 
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/amq.properties
 org.opennms.activemq.broker.disable=true
@@ -185,28 +202,31 @@ org.opennms.core.ipc.rpc.kafka.auto.offset.reset=latest
 org.opennms.core.ipc.rpc.kafka.max.request.size=5000000
 EOF
 
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
+  if [[ $FEATURES_LIST == *"opennms-kafka-producer"* ]]; then
+    cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
 compression.type=gzip
 timeout.ms=30000
 max.request.size=5000000
 EOF
 
-  # Make sure to enable only what's needed for your use case
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
-suppressIncrementalAlarms=true
+    # Make sure to enable only what's needed for your use case
+    cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
+suppressIncrementalAlarms=false
 forward.metrics=true
 nodeRefreshTimeoutMs=300000
 alarmSyncIntervalMs=300000
 nodeTopic=${INSTANCE_ID}_nodes
 alarmTopic=${INSTANCE_ID}_alarms
+alarmFeedbackTopic=${INSTANCE_ID}_alarms_feedback
 eventTopic=${INSTANCE_ID}_events
 metricTopic=${INSTANCE_ID}_metrics
 topologyProtocols=bridge,cdp,isis,lldp,ospf
-topologyVertexTopic=${INSTANCE_ID}_topology_vertex
-topologyEdgeTopic=${INSTANCE_ID}_topology_edge
+topologyVertexTopic=${INSTANCE_ID}_topology_vertices
+topologyEdgeTopic=${INSTANCE_ID}_topology_edges
 alarmFeedbackTopic=${INSTANCE_ID}_alarm_feedback
 EOF
+  fi
 fi
 
 # Configure Newts (works with either Cassandra or ScyllaDB)
@@ -318,8 +338,9 @@ settings.index.number_of_shards=6
 settings.index.number_of_replicas=2
 EOF
 
-  echo "Configuring Elasticsearch Event Forwarder..."
-  cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
+  if [[ $FEATURES_LIST == *"opennms-es-rest"* ]]; then
+    echo "Configuring Elasticsearch Event Forwarder..."
+    cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
@@ -336,9 +357,11 @@ readTimeout=300000
 settings.index.number_of_shards=6
 settings.index.number_of_replicas=2
 EOF
+  fi
 
-  echo "Configuring Alarm History Forwarder..."
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.alarms.history.elastic.cfg
+  if [[ $FEATURES_LIST == *"opennms-alarm-history-elastic"* ]]; then
+    echo "Configuring Alarm History Forwarder..."
+    cat <<EOF > $CONFIG_DIR/org.opennms.features.alarms.history.elastic.cfg
 elasticUrl=http://$ELASTIC_SERVER:9200
 globalElasticUser=elastic
 globalElasticPassword=$ELASTIC_PASSWORD
@@ -349,6 +372,22 @@ readTimeout=300000
 settings.index.number_of_shards=6
 settings.index.number_of_replicas=2
 EOF
+  fi
+
+  if [[ $FEATURES_LIST == *"opennms-situation-feedback"* ]]; then
+    echo "Configuring Situations Feedback..."
+    cat <<EOF > $CONFIG_DIR/org.opennms.features.situation-feedback.persistence.elastic.cfg
+elasticUrl=http://$ELASTIC_SERVER:9200
+globalElasticUser=elastic
+globalElasticPassword=$ELASTIC_PASSWORD
+elasticIndexStrategy=monthly
+connTimeout=30000
+readTimeout=300000
+# The following settings should be consistent with your ES cluster
+settings.index.number_of_shards=6
+settings.index.number_of_replicas=2
+EOF
+  fi
 fi
 
 # Configure NXOS Resource Types

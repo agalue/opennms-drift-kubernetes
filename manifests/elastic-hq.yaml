@@ -1,0 +1,65 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elastichq
+  namespace: opennms
+  labels:
+    app: elastichq
+spec:
+  clusterIP: None
+  ports:
+  - port: 5000
+    name: http
+  selector:
+    app: elastichq
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elastichq
+  namespace: opennms
+  labels:
+    app: elastichq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elastichq
+  template:
+    metadata:
+      labels:
+        app: elastichq
+    spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: esdata.opennms.svc.cluster.local:9200
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: esmaster
+        image: elastichq/elasticsearch-hq:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        - name: HQ_DEFAULT_URL
+          value: http://esdata.opennms.svc.cluster.local:9200
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 15
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 60

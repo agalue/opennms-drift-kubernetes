@@ -74,11 +74,13 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.13.11 \
+  --kubernetes-version 1.14.6 \
   --networking calico
 ```
 
 > **IMPORTANT:** Remember to change the settings to reflect your desired environment.
+
+> **WARNING:** There seems to be a problem with K8s 1.14.7 and ELB creation (supposed to be fixed on 1.14.8 as of [#82923](https://github.com/kubernetes/kubernetes/issues/82923)). This leads to not having services with type LoadBalancer affecting the Ingress Controller and cert-manager.
 
 Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
@@ -166,7 +168,7 @@ The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is req
 ```bash
 kubectl create namespace cert-manager
 kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.10.0/cert-manager.yaml
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.10.1/cert-manager.yaml
 ```
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).

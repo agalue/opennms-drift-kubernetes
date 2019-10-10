@@ -81,8 +81,10 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
+        - name: ENABLE_ALEC
+          value: 'true'
         - name: FEATURES_LIST
-          value: opennms-alarm-history-elastic,opennms-es-rest,opennms-kafka-producer # For H24+
+          value: opennms-alarm-history-elastic,opennms-es-rest,opennms-kafka-producer,opennms-situation-feedback # For H24+
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
         - name: CASSANDRA_REPLICATION_FACTOR
@@ -117,6 +119,17 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-core-init.sh
+      # Install ALEC
+      - name: alec-plugin
+        image: centos:7
+        command: [ sh, -c ]
+        args: [ "yum install -y -q wget && wget --content-disposition $RPM_URL -O alec.rpm && rpm2cpio alec.rpm | cpio -idv && mv opt/opennms/deploy/opennms-alec-plugin.kar /plugin/" ]
+        env:
+        - name: RPM_URL
+          value: https://packagecloud.io/opennms/plugin-snapshot/packages/el/7/opennms-alec-plugin-1.0.2-SNAPSHOT20190923152310.noarch.rpm/download.rpm
+        volumeMounts:
+        - name: karaf-deploy
+          mountPath: /plugin
       # Initializes Newts keyspace on Cassandra/ScyllaDB through CQLSH (requires newts.cql)
       - name: init-newts
         image: cassandra:3.11.4
@@ -183,6 +196,8 @@ spec:
         volumeMounts:
         - name: etc
           mountPath: /opt/opennms/etc
+        - name: karaf-deploy
+          mountPath: /opt/opennms/deploy
         resources:
           limits:
             cpu: 4
@@ -221,6 +236,8 @@ spec:
       - name: opennms-config
         configMap:
           name: opennms-config
+      - name: karaf-deploy
+        emptyDir: {}
   volumeClaimTemplates:
   - metadata:
       name: etc

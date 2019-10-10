@@ -1,0 +1,144 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: alec
+  namespace: opennms
+  labels:
+    app: alec
+spec:
+  serviceName: alec
+  replicas: 2
+  selector:
+    matchLabels:
+      app: alec
+  template:
+    metadata:
+      labels:
+        app: alec
+    spec:
+      terminationGracePeriodSeconds: 60
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - onms
+      initContainers:
+      # Requires the same image/version used at runtime: sentinel
+      - name: init-config
+        image: agalue/sentinel:25.0.0-1
+        imagePullPolicy: IfNotPresent
+        command: [ bash, /init.sh ]
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: KAFKA_SERVER
+          value: kafka.opennms.svc.cluster.local
+        - name: ZOOKEEPER_SERVER
+          value: zookeeper.opennms.svc.cluster.local
+        volumeMounts:
+        - name: etc-overlay
+          mountPath: /etc-overlay
+        - name: opennms-config
+          mountPath: /init.sh
+          subPath: onms-alec-init.sh
+      - name: alec-plugin
+        image: centos:7
+        command: [ sh, -c ]
+        args: [ "yum install -y -q wget && wget --content-disposition $RPM_URL -O alec.rpm && rpm2cpio alec.rpm | cpio -idv && mv opt/sentinel/deploy/opennms-alec-plugin.kar /plugin/" ]
+        env:
+        - name: RPM_URL
+          value: https://packagecloud.io/opennms/plugin-snapshot/packages/el/7/sentinel-alec-plugin-1.0.2-SNAPSHOT20190923152310.noarch.rpm/download.rpm
+        volumeMounts:
+        - name: karaf-deploy
+          mountPath: /plugin
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: alec
+        image: agalue/sentinel:25.0.0-1
+        imagePullPolicy: IfNotPresent
+        args:
+          - -c
+        ports:
+        - containerPort: 8181
+          name: http
+        - containerPort: 8301
+          name: karaf
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: OPENNMS_HTTP_URL
+          value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
+        - name: OPENNMS_HTTP_USER
+          value: admin
+        - name: OPENNMS_HTTP_PASS
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_UI_ADMIN_PASSWORD
+              name: onms-passwords
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+              divisor: 1Mi
+        - name: JAVA_OPTS
+          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -Dcom.datastax.driver.FORCE_NIO=true
+        volumeMounts:
+        - name: etc-overlay
+          mountPath: /opt/sentinel-etc-overlay
+        - name: karaf-deploy
+          mountPath: /opt/sentinel/deploy
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        readinessProbe:
+          tcpSocket:
+            port: karaf
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+            - /health.sh
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 15
+      volumes:
+      - name: etc-overlay
+        emptyDir: {}
+      - name: karaf-deploy
+        emptyDir: {}
+      - name: opennms-config
+        configMap:
+          name: opennms-config

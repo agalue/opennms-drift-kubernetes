@@ -56,6 +56,7 @@ spec:
         - grafana.aws.agalue.net
         - hasura.aws.agalue.net
         - kibana.aws.agalue.net
+        - elastichq.aws.agalue.net
         - kafka-manager.aws.agalue.net
         - tracing.aws.agalue.net
   rules:
@@ -101,6 +102,13 @@ spec:
             backend:
               serviceName: kibana
               servicePort: 5601
+    - host: elastichq.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: elastichq
+              servicePort: 5000
     - host: onmsui.aws.agalue.net
       http:
         paths:

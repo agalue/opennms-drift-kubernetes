@@ -13,10 +13,12 @@ resources:
 - cassandra.reaper.yaml
 - elasticsearch.master.yaml
 - elasticsearch.data.yaml
+- elastic-hq.yaml
 - kibana.yaml
 - opennms.core.yaml
 - opennms.minion.yaml
 - opennms.sentinel.yaml
+- opennms.alec.yaml
 - opennms.ui.yaml
 - grafana.yaml
 - grafana.helm.yaml
@@ -31,6 +33,7 @@ configMapGenerator:
   - config/grafana-init.sh
   - config/hasura-init.sh
   - config/helm-init.sh
+  - config/onms-alec-init.sh
   - config/onms-core-init.sh
   - config/onms-minion-init.sh
   - config/onms-sentinel-init.sh
