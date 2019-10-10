@@ -134,6 +134,7 @@ SECURITY_CONFIG=$WEB_DIR/applicationContext-spring-security.xml
 cp /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security.xml $SECURITY_CONFIG
 sed -r -i 's/ROLE_ADMIN/ROLE_DISABLED/' $SECURITY_CONFIG
 sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' $SECURITY_CONFIG
+sed -r -i '/intercept-url.*measurements/a <intercept-url pattern="/rest/resources/generateId" method="POST" access="ROLE_REST,ROLE_DISABLED,ROLE_USER"/>' $SECURITY_CONFIG
 
 # Configure Newts (works with either Cassandra or ScyllaDB)
 # This has to match the configuration of the OpenNMS Core server.
