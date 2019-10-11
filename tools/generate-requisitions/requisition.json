@@ -1,0 +1,1269 @@
+{
+  "foreign-source": "Kubernetes",
+  "node": [
+    {
+      "node-label": "alec-0",
+      "foreign-id": "alec-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.12",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "alec",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "alec-5744574d65",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "alec-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "alec-1",
+      "foreign-id": "alec-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.2.19",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.33.34",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "alec",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "alec-5744574d65",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "alec-1",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "cassandra-0",
+      "foreign-id": "cassandra-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.10",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "JMX-Cassandra"
+            },
+            {
+              "service-name": "JMX-Cassandra-Newts"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "cassandra",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "cassandra-5775579b85",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "cassandra-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "cassandra-1",
+      "foreign-id": "cassandra-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.2.17",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "JMX-Cassandra"
+            },
+            {
+              "service-name": "JMX-Cassandra-Newts"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.33.34",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "cassandra",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "cassandra-5775579b85",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "cassandra-1",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "cassandra-2",
+      "foreign-id": "cassandra-2",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.5.11",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "JMX-Cassandra"
+            },
+            {
+              "service-name": "JMX-Cassandra-Newts"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.43.1",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "cassandra",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "cassandra-5775579b85",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "cassandra-2",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "cassandra-reaper-868c9b76bf-6qz6c",
+      "foreign-id": "cassandra-reaper-868c9b76bf-6qz6c",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.3.3",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.61.232",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "cassandra-reaper",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "868c9b76bf",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "elastichq-5fcc858589-q7mtd",
+      "foreign-id": "elastichq-5fcc858589-q7mtd",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.13",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "elastichq",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "5fcc858589",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "esdata-0",
+      "foreign-id": "esdata-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.5.9",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "Elasticsearch"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.43.1",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "elasticsearch",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "esdata-f44f9cb85",
+          "context": "requisition"
+        },
+        {
+          "key": "role",
+          "value": "esdata",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "esdata-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "esdata-1",
+      "foreign-id": "esdata-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.1.9",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "Elasticsearch"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.51.172",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "elasticsearch",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "esdata-f44f9cb85",
+          "context": "requisition"
+        },
+        {
+          "key": "role",
+          "value": "esdata",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "esdata-1",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "esdata-2",
+      "foreign-id": "esdata-2",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.2.18",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "Elasticsearch"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.33.34",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "elasticsearch",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "esdata-f44f9cb85",
+          "context": "requisition"
+        },
+        {
+          "key": "role",
+          "value": "esdata",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "esdata-2",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "esmaster-0",
+      "foreign-id": "esmaster-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.3.7",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "Elasticsearch"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.61.232",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "elasticsearch",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "esmaster-dd5ffc9b8",
+          "context": "requisition"
+        },
+        {
+          "key": "role",
+          "value": "esmaster",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "esmaster-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "esmaster-1",
+      "foreign-id": "esmaster-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.1.8",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "Elasticsearch"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.51.172",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "elasticsearch",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "esmaster-dd5ffc9b8",
+          "context": "requisition"
+        },
+        {
+          "key": "role",
+          "value": "esmaster",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "esmaster-1",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "esmaster-2",
+      "foreign-id": "esmaster-2",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.5.8",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "Elasticsearch"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.43.1",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "elasticsearch",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "esmaster-dd5ffc9b8",
+          "context": "requisition"
+        },
+        {
+          "key": "role",
+          "value": "esmaster",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "esmaster-2",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "event-watcher-7f5968bdf8-tth8p",
+      "foreign-id": "event-watcher-7f5968bdf8-tth8p",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.4",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "event-watcher",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "7f5968bdf8",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "grafana-cfdb86588-487n2",
+      "foreign-id": "grafana-cfdb86588-487n2",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.5.5",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.43.1",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "grafana",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "cfdb86588",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "grafana-cfdb86588-wls8c",
+      "foreign-id": "grafana-cfdb86588-wls8c",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.5",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "grafana",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "cfdb86588",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "hasura-59c9b44b9d-7sb5t",
+      "foreign-id": "hasura-59c9b44b9d-7sb5t",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.2.3",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.33.34",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "hasura",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "59c9b44b9d",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "helm-init-lsjtk",
+      "foreign-id": "helm-init-lsjtk",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.3.6",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.61.232",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-uid",
+          "value": "48f7da90-eb77-11e9-9e95-025e13e03f9c",
+          "context": "requisition"
+        },
+        {
+          "key": "job-name",
+          "value": "helm-init",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "jaeger-785bc7dd4c-wx5j8",
+      "foreign-id": "jaeger-785bc7dd4c-wx5j8",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.8",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app.kubernetes.io/instance",
+          "value": "jaeger",
+          "context": "requisition"
+        },
+        {
+          "key": "app.kubernetes.io/managed-by",
+          "value": "jaeger-operator",
+          "context": "requisition"
+        },
+        {
+          "key": "app.kubernetes.io/name",
+          "value": "jaeger",
+          "context": "requisition"
+        },
+        {
+          "key": "app.kubernetes.io/part-of",
+          "value": "jaeger",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "785bc7dd4c",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "jaeger",
+          "context": "requisition"
+        },
+        {
+          "key": "app.kubernetes.io/component",
+          "value": "all-in-one",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "kafka-0",
+      "foreign-id": "kafka-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.3.8",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "JMX-Kafka"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.61.232",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "kafka",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "kafka-54c964bf7b",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "kafka-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "kafka-1",
+      "foreign-id": "kafka-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.5.10",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "JMX-Kafka"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.43.1",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "kafka-54c964bf7b",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "kafka-1",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "kafka",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "kafka-2",
+      "foreign-id": "kafka-2",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.11",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "JMX-Kafka"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "kafka",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "kafka-54c964bf7b",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "kafka-2",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "kafka-manager-59985dbfb7-jd6k9",
+      "foreign-id": "kafka-manager-59985dbfb7-jd6k9",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.3.4",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.61.232",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "kafka-manager",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "59985dbfb7",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "kibana-58f744f45c-8pnb5",
+      "foreign-id": "kibana-58f744f45c-8pnb5",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.6",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "kibana",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "58f744f45c",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "minion-0",
+      "foreign-id": "minion-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.3.5",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.61.232",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "minion",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "minion-67c7c976f",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "minion-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "minion-1",
+      "foreign-id": "minion-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.5.7",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.43.1",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "minion",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "minion-67c7c976f",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "minion-1",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "onms-0",
+      "foreign-id": "onms-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.3.9",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.61.232",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "onms-0",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "onms",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "onms-7d558b5f5c",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "onms-ui-57ccf4567f-49sqr",
+      "foreign-id": "onms-ui-57ccf4567f-49sqr",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.5.12",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.43.1",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "57ccf4567f",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "onms-ui",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "onms-ui-57ccf4567f-h6fvm",
+      "foreign-id": "onms-ui-57ccf4567f-h6fvm",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.1.10",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.51.172",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "onms-ui",
+          "context": "requisition"
+        },
+        {
+          "key": "pod-template-hash",
+          "value": "57ccf4567f",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "postgres-0",
+      "foreign-id": "postgres-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.1.7",
+          "snmp-primary": "N",
+          "status": 1,
+          "monitored-service": [
+            {
+              "service-name": "PostgreSQL"
+            }
+          ]
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.51.172",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "postgres-5b4cccc4db",
+          "context": "requisition"
+        },
+        {
+          "key": "role",
+          "value": "master",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "postgres-0",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "postgres",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "sentinel-0",
+      "foreign-id": "sentinel-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.2.5",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.33.34",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "sentinel",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "sentinel-86dcf78c68",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "sentinel-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "sentinel-1",
+      "foreign-id": "sentinel-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.7",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "sentinel-86dcf78c68",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "sentinel-1",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "sentinel",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "zk-0",
+      "foreign-id": "zk-0",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.2.15",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.33.34",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "zk",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "zk-5d9c484d99",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "zk-0",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "zk-1",
+      "foreign-id": "zk-1",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.4.9",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.50.177",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "zk",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "zk-5d9c484d99",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "zk-1",
+          "context": "requisition"
+        }
+      ]
+    },
+    {
+      "node-label": "zk-2",
+      "foreign-id": "zk-2",
+      "location": "Kubernetes",
+      "interface": [
+        {
+          "ip-addr": "100.96.2.16",
+          "snmp-primary": "N",
+          "status": 1
+        }
+      ],
+      "meta-data": [
+        {
+          "key": "hostIP",
+          "value": "172.20.33.34",
+          "context": "requisition"
+        },
+        {
+          "key": "app",
+          "value": "zk",
+          "context": "requisition"
+        },
+        {
+          "key": "controller-revision-hash",
+          "value": "zk-5d9c484d99",
+          "context": "requisition"
+        },
+        {
+          "key": "statefulset.kubernetes.io/pod-name",
+          "value": "zk-2",
+          "context": "requisition"
+        }
+      ]
+    }
+  ]
+}
