@@ -198,8 +198,9 @@ spec:
           periodSeconds: 60
           timeoutSeconds: 15
       # Use the following only when NX-OS Telemetry over gRPC is required.
+      # https://github.com/agalue/nxos-telemetry-to-kafka-go
       - name: nxos-grpc
-        image: agalue/opennms-nxos-grpc:horizon-25
+        image: agalue/opennms-nxos-grpc-go:1.0.0-rc0
         env:
         - name: TZ
           valueFrom:
