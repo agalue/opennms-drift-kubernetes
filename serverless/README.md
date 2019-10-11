@@ -15,19 +15,11 @@ Of course, the events are also available through Kafka topics, but alarms are of
 
 The Kafka Producer feature of OpenNMS publishes events, alarms, metrics and nodes to topics using Google Protobuf as the payload format. The `.proto` files are defined [here](https://github.com/OpenNMS/opennms/tree/develop/features/kafka/producer/src/main/proto).
 
-Unfortunately, serverless controllers like Fission or Kubeless expect plain text or to be more presice, a JSON as the payload. For this reason, it is necessary to convert the GPB messages to JSON messages.
+Unfortunately, serverless controllers like Fission, Kubeless and Knative expect plain text or to be more presice, a JSON as the payload. For this reason, it is necessary to convert the GPB messages to JSON messages.
 
-There is an application for that:
+[Here](../tools/kafka-converter) you'll find an application implemented in Go to transform GPB payload into JSON and place it on another topic. This is an alternative to the [original](https://github.com/agalue/OpenNMS-Kafka-Converter) solution implemented in Java which is still valid.
 
-https://github.com/agalue/OpenNMS-Kafka-Converter
-
-The avoid repository contains all the details to to generate a Docker image for the application, and also has an example YAML file to deploy the converter to Kubernetes. The example content of the provided YAML file can be used in this environment:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/agalue/OpenNMS-Kafka-Converter/master/k8s-converter.yaml
-```
-
-> NOTE: Make sure the `INSTANCE_ID` has not been changed on your OpenNMS Pod and/or Minion Pod, as the above YAML assumes it should be `OpenNMS`.
+The converter directory contains all the details to to generate a Docker image for the application, and also has an example YAML file to deploy the converter to Kubernetes. The converter is already part of the [manifests](../manifests/kafka.converter.yaml).
 
 ### Create a Slack WebHook
 

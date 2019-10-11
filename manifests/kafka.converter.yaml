@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-converter
+  namespace: opennms
+  labels:
+    app: kafka-converter
+    deployment: drift
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-converter
+  template:
+    metadata:
+      labels:
+        app: kafka-converter
+        deployment: drift
+    spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: kafka-converter
+        image: agalue/kafka-converter-go:latest
+        imagePullPolicy: Always
+        env:
+          - name: JAVA_OPTS
+            value: -XX:+UseG1GC
+          - name: BOOTSTRAP_SERVERS
+            value: kafka.opennms.svc.cluster.local:9092
+          - name: APP_ID
+            value: Converter
+          - name: SOURCE_KIND
+            value: alarms
+          - name: SOURCE_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
+            value: OpenNMS_alarms
+          - name: DEST_TOPIC
+            value: opennms_alarms_json
+          - name: KAFKA_AUTO_OFFSET_RESET
+            value: latest
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 100m
