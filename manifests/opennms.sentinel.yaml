@@ -78,8 +78,6 @@ spec:
               name: common-settings
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
-        - name: KAFKA_GROUP_ID
-          value: Sentinel
         - name: CASSANDRA_SERVER
           value: cassandra.opennms.svc.cluster.local
         - name: ELASTIC_SERVER

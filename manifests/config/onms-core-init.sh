@@ -185,7 +185,7 @@ EOF
 org.opennms.core.ipc.sink.initialSleepTime=60000
 org.opennms.core.ipc.sink.strategy=kafka
 org.opennms.core.ipc.sink.kafka.bootstrap.servers=$KAFKA_SERVER:9092
-org.opennms.core.ipc.sink.kafka.group.id=OpenNMS
+org.opennms.core.ipc.sink.kafka.group.id=$INSTANCE_ID
 
 # RPC
 org.opennms.core.ipc.rpc.strategy=kafka

@@ -21,7 +21,6 @@
 # - ELASTIC_PASSWORD
 # - ELASTIC_INDEX_STRATEGY_FLOWS
 # - KAFKA_SERVER
-# - KAFKA_GROUP_ID
 # - CASSANDRA_SERVER
 # - OPENNMS_HTTP_USER
 # - OPENNMS_HTTP_PASS
@@ -32,7 +31,6 @@
 umask 002
 
 NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
-KAFKA_GROUP_ID=${KAFKA_GROUP_ID-Sentinel}
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
@@ -127,7 +125,7 @@ EOF
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.consumer.cfg
 # Consumers
-group.id = $KAFKA_GROUP_ID
+group.id = ${INSTANCE_ID}_Sentinel
 bootstrap.servers = $KAFKA_SERVER:9092
 max.partition.fetch.bytes = 5000000
 EOF
