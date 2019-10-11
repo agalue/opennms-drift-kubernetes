@@ -65,6 +65,7 @@ func main() {
 			node.AddMetaData(key, value)
 		}
 		requisition.AddNode(node)
+		fmt.Printf("adding node for pod %s\n", pod.Name)
 	}
 	svc := services.GetRequisitionsAPI(rest.Instance)
 	err = svc.SetRequisition(requisition)
