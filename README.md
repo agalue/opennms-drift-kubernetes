@@ -104,8 +104,8 @@ docker run -it --name minion \
  -e UDP_4729_PARSERS_0_NAME=Netflow-9 \
  -e UDP_4729_PARSERS_0_CLASS_NAME=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser \
  -p 8201:8201 \
- -p 1514:1514 \
- -p 1162:1162 \
+ -p 1514:1514/udp \
+ -p 1162:1162/udp \
  agalue/minion:25.0.0-1 -f
 ```
 
