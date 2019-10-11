@@ -44,8 +44,12 @@ func (cli *kafkaClient) getKafkaConfig(properties string) *kafka.ConfigMap {
 	if properties != "" {
 		for _, kv := range strings.Split(properties, ", ") {
 			array := strings.Split(kv, "=")
-			if err := config.SetKey(array[0], array[1]); err != nil {
-				fmt.Printf("invalid property %s=%s: %v", array[0], array[1], err)
+			if len(array) == 2 {
+				if err := config.SetKey(array[0], array[1]); err != nil {
+					fmt.Printf("invalid property %s=%s: %v", array[0], array[1], err)
+				}
+			} else {
+				fmt.Printf("invalid key-value pair %s", kv)
 			}
 		}
 	}
