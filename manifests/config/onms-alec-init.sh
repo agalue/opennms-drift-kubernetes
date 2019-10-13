@@ -7,6 +7,7 @@
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
 # - Horizon 25 or newer is required.
+#   This script expects ALEC 1.1.2 or newer.
 #
 # Environment variables:
 # - INSTANCE_ID
@@ -36,13 +37,10 @@ cp $SYSTEM_CFG $OVERLAY
 FEATURES_DIR=$OVERLAY/featuresBoot.d
 mkdir -p $FEATURES_DIR
 echo "Configuring Features..."
+
 cat <<EOF > $FEATURES_DIR/alec.boot
 sentinel-core
-alec-datasource-opennms-kafka wait-for-kar=opennms-alec-plugin
-alec-engine-cluster wait-for-kar=opennms-alec-plugin
-alec-processor-redundant wait-for-kar=opennms-alec-plugin
-alec-driver-main wait-for-kar=opennms-alec-plugin
-alec-features-shell wait-for-kar=opennms-alec-plugin
+alec-sentinel-distributed wait-for-kar=opennms-alec-plugin
 EOF
 
 if [[ $ZOOKEEPER_SERVER ]]; then
