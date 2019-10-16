@@ -187,6 +187,9 @@ org.opennms.core.ipc.sink.strategy=kafka
 org.opennms.core.ipc.sink.kafka.bootstrap.servers=$KAFKA_SERVER:9092
 org.opennms.core.ipc.sink.kafka.group.id=$INSTANCE_ID
 
+# Sink Consumer (verify Kafka broker configuration)
+org.opennms.core.ipc.sink.kafka.max.partition.fetch.bytes=5000000
+
 # RPC
 org.opennms.core.ipc.rpc.strategy=kafka
 org.opennms.core.ipc.rpc.kafka.bootstrap.servers=$KAFKA_SERVER:9092
