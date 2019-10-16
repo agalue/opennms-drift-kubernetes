@@ -74,13 +74,13 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.14.6 \
+  --kubernetes-version 1.14.8 \
   --networking calico
 ```
 
 > **IMPORTANT:** Remember to change the settings to reflect your desired environment.
 
-> **WARNING:** There seems to be a problem with K8s 1.14.7 and ELB creation (supposed to be fixed on 1.14.8 as of [#82923](https://github.com/kubernetes/kubernetes/issues/82923)). This leads to not having services with type LoadBalancer affecting the Ingress Controller and cert-manager.
+> **WARNING:** There are problem with K8s 1.14.7 and ELB creation (fixed on 1.14.8 as of [#82923](https://github.com/kubernetes/kubernetes/issues/82923)). This leads to not having services with type LoadBalancer affecting the Ingress Controller and cert-manager.
 
 Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
@@ -184,20 +184,6 @@ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operato
 kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
-## Manifets
-
-To apply all the manifests:
-
-```bash
-kubectl apply -k manifests
-```
-
-If you're not running `kubectl` version 1.14, the following is an alternative:
-
-```bash
-kustomize build manifests | kubectl apply -f
-```
-
 ## Security Groups
 
 When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.aws.agalue.net`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
@@ -215,6 +201,22 @@ popd
 ```
 
 > NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
+
+## Manifets
+
+To apply all the manifests:
+
+```bash
+kubectl apply -k manifests
+```
+
+If you're not running `kubectl` version 1.14, the following is an alternative:
+
+```bash
+kustomize build manifests | kubectl apply -f
+```
+
+> The main [README](README.md) offers a way to initialize an external Minion that points to this solution for testing purposes.
 
 ## Cleanup
 
