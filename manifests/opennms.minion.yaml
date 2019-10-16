@@ -76,6 +76,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       initContainers:
+      # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config
         image: agalue/minion:25.0.0-1
@@ -109,6 +110,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-minion-init.sh
+      # Wait for all the dependencies
       - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent

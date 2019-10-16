@@ -65,6 +65,7 @@ spec:
                 values:
                 - onms
       initContainers:
+      # Wait for all the dependencies
       - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent

@@ -64,7 +64,7 @@ spec:
       securityContext: # In order to be able to write data as non-root on the volumes
         fsGroup: 10001 # Default opennms user
       initContainers:
-      # Initialize OpenNMS Common Configuration
+      # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon-core-web
       - name: init-config
         image: agalue/horizon-core-web:25.0.0-1
@@ -119,7 +119,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-core-init.sh
-      # Install ALEC
+      # Install ALEC assuming it is not present on the Horizon Docker Image
       - name: alec-plugin
         image: centos:7
         command: [ sh, -c ]
@@ -141,6 +141,7 @@ spec:
         volumeMounts:
         - name: etc
           mountPath: /opennms-etc
+      # Wait for all the dependencies
       - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent

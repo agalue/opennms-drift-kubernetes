@@ -33,6 +33,7 @@ spec:
                   values:
                   - onms
       initContainers:
+      # Initialize Sentinel Configuration for ALEC in Distributed Mode
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
         image: agalue/sentinel:25.0.0-1
@@ -59,6 +60,7 @@ spec:
         - name: opennms-config
           mountPath: /init.sh
           subPath: onms-alec-init.sh
+      # Install ALEC assuming it is not present on the Sentinel Docker Image
       - name: alec-plugin
         image: centos:7
         command: [ sh, -c ]
@@ -69,6 +71,7 @@ spec:
         volumeMounts:
         - name: karaf-deploy
           mountPath: /plugin
+      # Wait for all the dependencies
       - name: dependencies
         image: waisbrot/wait
         imagePullPolicy: IfNotPresent
