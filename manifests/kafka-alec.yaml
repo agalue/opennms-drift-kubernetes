@@ -1,0 +1,56 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# A one time Job to create Kafka topics
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-topics
+  namespace: opennms
+  labels:
+    app: kafka-topics
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: init-config
+        image: wurstmeister/kafka:2.12-2.3.0
+        imagePullPolicy: IfNotPresent
+        command:
+        - bash
+        - /bin/kafka-init.sh
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: KAFKA_CREATE_TOPICS # Must match ALEC and OpenNMS settings
+          value: $(INSTANCE_ID)_nodes:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)_alarms:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)_alarm_feedback:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)_topology_edges:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID).ALEC.Inventory:$(KAFKA_NUM_PARTITIONS):2
+        - name: KAFKA_BOOTSTRAP_SERVER
+          value: kafka.opennms.svc.cluster.local:9092
+        volumeMounts:
+        - name: opennms-config
+          mountPath: /bin/kafka-init.sh
+          subPath: kafka-init.sh
+      volumes:
+      - name: opennms-config
+        configMap:
+          name: opennms-config
