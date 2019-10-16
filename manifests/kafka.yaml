@@ -121,8 +121,10 @@ spec:
           value: '5000000'
         - name: KAFKA_COMPRESSION_TYPE
           value: producer
+        - name: JMX_PORT
+          value: '9999'
         - name: KAFKA_JMX_OPTS
-          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(POD_IP) -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999
+          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(POD_IP) -Dcom.sun.management.jmxremote.rmi.port=$(JMX_PORT)
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
