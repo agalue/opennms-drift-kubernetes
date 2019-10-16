@@ -73,7 +73,8 @@ if [[ $KAFKA_SERVER ]]; then
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
-# Producer
+
+# Producer (verify Kafka broker configuration)
 acks=1
 max.request.size=5000000
 EOF
@@ -82,10 +83,12 @@ EOF
 bootstrap.servers=$KAFKA_SERVER:9092
 compression.type=gzip
 request.timeout.ms=30000
-# Consumer
+
+# Consumer (verify Kafka broker configuration)
 max.partition.fetch.bytes=5000000
 auto.offset.reset=latest
-# Producer
+
+# Producer (verify Kafka broker configuration)
 max.request.size=5000000
 EOF
 
