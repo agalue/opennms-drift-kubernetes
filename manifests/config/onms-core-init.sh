@@ -215,19 +215,19 @@ EOF
 
     # Make sure to enable only what's needed for your use case
     cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
+topologyProtocols=bridge,cdp,isis,lldp,ospf
 suppressIncrementalAlarms=false
 forward.metrics=true
 nodeRefreshTimeoutMs=300000
 alarmSyncIntervalMs=300000
-nodeTopic=${INSTANCE_ID}_nodes
-alarmTopic=${INSTANCE_ID}_alarms
-alarmFeedbackTopic=${INSTANCE_ID}_alarms_feedback
-eventTopic=${INSTANCE_ID}_events
-metricTopic=${INSTANCE_ID}_metrics
-topologyProtocols=bridge,cdp,isis,lldp,ospf
-topologyVertexTopic=${INSTANCE_ID}_topology_vertices
-topologyEdgeTopic=${INSTANCE_ID}_topology_edges
-alarmFeedbackTopic=${INSTANCE_ID}_alarm_feedback
+nodeTopic=${INSTANCE_ID}-nodes
+alarmTopic=${INSTANCE_ID}-alarms
+eventTopic=${INSTANCE_ID}-events
+metricTopic=${INSTANCE_ID}-metrics
+alarmFeedbackTopic=${INSTANCE_ID}-alarms-feedback
+topologyVertexTopic=${INSTANCE_ID}-topology-vertices
+# Using default topic for edges: https://issues.opennms.org/browse/ALEC-80
+topologyEdgeTopic=edges
 EOF
   fi
 fi

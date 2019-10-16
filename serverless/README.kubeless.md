@@ -42,10 +42,10 @@ kubeless function deploy alarm2slack \
 kubeless trigger kafka create alarm2slack \
  --namespace opennms \
  --function-selector created-by=kubeless,function=alarm2slack \
- --trigger-topic opennms_alarms_json
+ --trigger-topic OpenNMS-alarms-json
 ```
 
-The name of the topic relies on the Kafka Converter YAML file.
+> **IMPORTANT**: The name of the topic relies on the Kafka Converter YAML file.
 
 Use `kubeless function list` to check whether the function is ready to use.
 

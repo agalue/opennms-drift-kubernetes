@@ -74,10 +74,11 @@ EOF
   cat <<EOF > $OVERLAY/org.opennms.alec.datasource.opennms.kafka.cfg
 # Make sure to configure the topics on OpenNMS the same way
 eventSinkTopic=${INSTANCE_ID}.Sink.Events
-inventoryTopic=${INSTANCE_ID}.ALEC.Inventory
-nodeTopic=${INSTANCE_ID}_nodes
-alarmTopic=${INSTANCE_ID}_alarms
-edgesTopic=${INSTANCE_ID}_topology_edges
-alarmFeedbackTopic=${INSTANCE_ID}_alarm_feedback
+inventoryTopic=${INSTANCE_ID}-alec-inventory
+nodeTopic=${INSTANCE_ID}-nodes
+alarmTopic=${INSTANCE_ID}-alarms
+alarmFeedbackTopic=${INSTANCE_ID}-alarms-feedback
+# Using default topic for edges: https://issues.opennms.org/browse/ALEC-80
+edgesTopic=edges
 EOF
 fi

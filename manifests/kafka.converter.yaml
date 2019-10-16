@@ -31,20 +31,25 @@ spec:
         image: agalue/kafka-converter-go:latest
         imagePullPolicy: Always
         env:
-          - name: JAVA_OPTS
-            value: -XX:+UseG1GC
-          - name: BOOTSTRAP_SERVERS
-            value: kafka.opennms.svc.cluster.local:9092
-          - name: APP_ID
-            value: Converter
-          - name: SOURCE_KIND
-            value: alarms
-          - name: SOURCE_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
-            value: OpenNMS_alarms
-          - name: DEST_TOPIC
-            value: opennms_alarms_json
-          - name: KAFKA_AUTO_OFFSET_RESET
-            value: latest
+        - name: JAVA_OPTS
+          value: -XX:+UseG1GC
+        - name: BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: APP_ID
+          value: Converter
+        - name: SOURCE_KIND
+          value: alarms
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: SOURCE_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
+          value: $(INSTANCE_ID)-alarms
+        - name: DEST_TOPIC
+          value: $(INSTANCE_ID)-alarms-json
+        - name: KAFKA_AUTO_OFFSET_RESET
+          value: latest
         resources:
           limits:
             memory: 128Mi
