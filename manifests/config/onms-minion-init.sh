@@ -73,7 +73,9 @@ if [[ $KAFKA_SERVER ]]; then
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
+# Producer
 acks=1
+max.request.size=5000000
 EOF
 
   cat <<EOF > $OVERLAY/org.opennms.core.ipc.rpc.kafka.cfg
