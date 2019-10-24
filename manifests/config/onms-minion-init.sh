@@ -112,18 +112,20 @@ fi
 
 # Configure SNMP Trap reception
 # Port 162 cannot be used as Minion runs as non-root
+# The queue.size must be consistent with the Kafka message/buffer limits; although on H24+ messages are split.
 cat <<EOF > $OVERLAY/org.opennms.netmgt.trapd.cfg
 trapd.listen.interface=0.0.0.0
 trapd.listen.port=1162
-trapd.queue.size=100000
+trapd.queue.size=1000
 EOF
 
 # Configure Syslog reception
 # Port 514 cannot be used as Minion runs as non-root
+# The queue.size must be consistent with the Kafka message/buffer limits; although on H24+ messages are split.
 cat <<EOF > $OVERLAY/org.opennms.netmgt.syslog.cfg
 syslog.listen.interface=0.0.0.0
 syslog.listen.port=1514
-syslog.queue.size=100000
+syslog.queue.size=1000
 EOF
 
 ### Optional Settings, only relevant for processing Flows and Telemetry data

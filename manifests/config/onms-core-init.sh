@@ -280,7 +280,7 @@ EOF
 fi
 
 if [[ $CASSANDRA_REPLICATION_FACTOR ]]; then
-  echo "Building Newts Schema for Cassandra/ScyllaDB..."
+  echo "Building Newts Schema for Cassandra/ScyllaDB (assuming 1 year of retention/TTL)..."
   cat <<EOF > $CONFIG_DIR/newts.cql
 CREATE KEYSPACE IF NOT EXISTS ${KEYSPACE} WITH replication = {'class' : 'NetworkTopologyStrategy', '$CASSANDRA_DC' : $CASSANDRA_REPLICATION_FACTOR };
 
