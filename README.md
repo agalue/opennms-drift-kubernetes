@@ -110,9 +110,7 @@ docker run -it --name minion \
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
-
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
-
 > **WARNING**: The above samples include one Flow listener for NetFlow. Check the [Minion's config](config/onms-minion-init.sh) for more details.
 
 ## Users Resources
