@@ -8,14 +8,12 @@ For the manifets, it is enough to have the core functionality, with the Kafka Li
 
 ```bash
 export RELEASE=$(curl -s https://api.github.com/repos/fission/fission/releases/latest | grep tag_name | cut -d '"' -f 4)
-kubectl config set-context $(kubectl config current-context) --namespace=default
-kubectl apply -f https://github.com/fission/fission/releases/download/$RELEASE/fission-core-$RELEASE.yaml
-kubectl apply -f fission-mqtrigger-kafka.yaml
+kubectl create namespace fission
+kubectl -n fission apply -f https://github.com/fission/fission/releases/download/$RELEASE/fission-core-$RELEASE.yaml
+kubectl -n fission apply -f fission-mqtrigger-kafka.yaml
 ```
 
-The above will publish the Pods on the `default` namespace. It is required to change the above YAMLs to use a different keyspace, as the solution is intended to be installed through Helm.
-
-The second YAML contains the Kafka `mqtrigger` which is not included/enabled by default with Fission.
+The last command applies the YAML that contains the Kafka `mqtrigger` which is not included/enabled by default with Fission.
 
 It has been done this way because it doesn't look possible to use `fission-core` with `mqtrigger-kafka` through Helm, as the Kafka feature is part of `fission-all`, which contains features not required here.
 
@@ -24,7 +22,7 @@ It has been done this way because it doesn't look possible to use `fission-core`
 Once you have the WebHook URL, add it to a `secret`, as well as the OpenNMS WebUI URL; for example:
 
 ```bash
-kubectl -n default create secret generic serverless-config \
+kubectl -n fission create secret generic serverless-config \
  --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
  --from-literal=ONMS_URL="https://onmsui.aws.agalue.net/opennms" \
  --dry-run -o yaml | kubectl apply -f -

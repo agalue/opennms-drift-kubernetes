@@ -6,7 +6,8 @@ kind: Deployment
 metadata:
   name: mqtrigger-kafka
   labels:
-    chart: "fission-core-1.5.0"
+    svc: mqtrigger
+    messagequeue: kafka
 spec:
   replicas: 1
   selector:
@@ -21,10 +22,10 @@ spec:
     spec:
       containers:
       - name: mqtrigger
-        image: "index.docker.io/fission/fission-bundle:1.5.0"
+        image: "index.docker.io/fission/fission-bundle"
         imagePullPolicy: IfNotPresent
         command: ["/fission-bundle"]
-        args: ["--mqt", "--routerUrl", "http://router.default", "--collectorEndpoint", ""]
+        args: ["--mqt", "--routerUrl", "http://router.fission", "--collectorEndpoint", ""]
         env:
         - name: MESSAGE_QUEUE_TYPE
           value: kafka
