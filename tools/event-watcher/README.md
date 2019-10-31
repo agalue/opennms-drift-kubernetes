@@ -1,5 +1,4 @@
-Kubernetes Event Watcher
-====
+# Kubernetes Event Watcher
 
 This application watches core Kubernetes events and forward them to OpenNMS through its ReST API.
 
@@ -7,7 +6,7 @@ This is a PoC of having a way to export internal Kubernetes events to OpenNMS.
 
 The current implementation is very simple and doesn't have the intelligence required to avoid resending the events  when the Pod is restarted. Upcoming versions will have this fixed.
 
-# Requirements
+## Requirements
 
 * A service account with get, list and watch access to namespaces, pods, services and events.
 * `ONMS_URL` environment variable with the base URL of the OpenNMS WebUI.
@@ -15,7 +14,7 @@ The current implementation is very simple and doesn't have the intelligence requ
 * `ONMS_PASSWD` environment variable with the password for `ONMS_USER`.
 * The events definitions configured in OpenNMS.
 
-# Implemented OpenNMS Events
+## Implemented OpenNMS Events
 
 * uei.opennms.org/kubernetes/pod/ADDED
 * uei.opennms.org/kubernetes/pod/DELETED
@@ -25,7 +24,7 @@ The current implementation is very simple and doesn't have the intelligence requ
 
 The first 4 events are straight forward. The last one covers different scenarios of Warning failures detected on Pods like invalid images, resource constraints problems, etc.
 
-# Build
+## Build
 
 In order to build the application:
 
@@ -50,7 +49,7 @@ go build
 
 The controller will use `KUBECONFIG` if the environment variable exist and points to the appropriate configuration file. Otherwise it will assume it is running within Kubernetes.
 
-# Permissions
+## Permissions
 
 Do not forget to configure the service account
 
