@@ -29,8 +29,8 @@ The first 4 events are straight forward. The last one covers different scenarios
 In order to build the application:
 
 ```bash
-docker build -t agalue/onms-k8s-watcher-go:1.0-SNAPSHOT .
-docker push agalue/onms-k8s-watcher-go:1.0-SNAPSHOT
+docker build -t agalue/onms-k8s-watcher-go:latest .
+docker push agalue/onms-k8s-watcher-go:latest
 ```
 
 > *NOTE*: Please use your own Docker Hub account or use the image provided on my account.
