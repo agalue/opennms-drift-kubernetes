@@ -28,35 +28,34 @@ umask 002
 
 OVERLAY=/etc-overlay
 MINION_HOME=/opt/minion
-VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-minion)
 
 ### Basic Settings
 
-FEATURES_DIR=$OVERLAY/featuresBoot.d
-mkdir -p $FEATURES_DIR
+FEATURES_DIR=${OVERLAY}/featuresBoot.d
+mkdir -p ${FEATURES_DIR}
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-SYSTEM_CFG=$MINION_HOME/etc/system.properties
-if [[ $INSTANCE_ID ]]; then
+SYSTEM_CFG=${MINION_HOME}/etc/system.properties
+if [[ ${INSTANCE_ID} ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF >> $SYSTEM_CFG
+  cat <<EOF >> ${SYSTEM_CFG}
 
 # Used for Kafka Topics
-org.opennms.instance.id=$INSTANCE_ID
+org.opennms.instance.id=${INSTANCE_ID}
 EOF
-  cp $SYSTEM_CFG $OVERLAY
+  cp ${SYSTEM_CFG $OVERLAY}
 fi
 
 # Configuring SCV credentials to access the OpenNMS ReST API
-if [[ $OPENNMS_HTTP_USER && $OPENNMS_HTTP_PASS ]]; then
-  $MINION_HOME/bin/scvcli set opennms.http $OPENNMS_HTTP_USER $OPENNMS_HTTP_PASS
-  cp $MINION_HOME/etc/scv.jce $OVERLAY
+if [[ ${OPENNMS_HTTP_USER} && ${OPENNMS_HTTP_PASS} ]]; then
+  ${MINION_HOME}/bin/scvcli set opennms.http "${OPENNMS_HTTP_USER}" "${OPENNMS_HTTP_PASS}"
+  cp ${MINION_HOME}/etc/scv.jce ${OVERLAY}
 fi
 
 # Append the same relaxed SNMP4J options that OpenNMS has,
 # to make sure that broken SNMP devices still work with Minions.
-cat <<EOF >> $OVERLAY/system.properties
+cat <<EOF >> ${OVERLAY}/system.properties
 # Adding SNMP4J Options:
 snmp4j.LogFactory=org.snmp4j.log.Log4jLogFactory
 org.snmp4j.smisyntaxes=opennms-snmp4j-smisyntaxes.properties
@@ -68,19 +67,19 @@ org.opennms.snmp.workarounds.allowZeroLengthIpAddress=true
 EOF
 
 # Configure Sink and RPC to use Kafka
-if [[ $KAFKA_SERVER ]]; then
+if [[ ${KAFKA_SERVER} ]]; then
   echo "Configuring Kafka..."
 
-  cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.cfg
-bootstrap.servers=$KAFKA_SERVER:9092
+  cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.cfg
+bootstrap.servers=${KAFKA_SERVER}:9092
 
 # Producer (verify Kafka broker configuration)
 acks=1
 max.request.size=5000000
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.core.ipc.rpc.kafka.cfg
-bootstrap.servers=$KAFKA_SERVER:9092
+  cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.rpc.kafka.cfg
+bootstrap.servers=${KAFKA_SERVER}:9092
 compression.type=gzip
 request.timeout.ms=30000
 
@@ -92,7 +91,7 @@ auto.offset.reset=latest
 max.request.size=5000000
 EOF
 
-  cat <<EOF > $FEATURES_DIR/kafka.boot
+  cat <<EOF > ${FEATURES_DIR}/kafka.boot
 !minion-jms
 !opennms-core-ipc-sink-camel
 !opennms-core-ipc-rpc-jms
@@ -103,9 +102,9 @@ fi
 
 # Enable tracing with jaeger
 if [[ $JAEGER_AGENT_HOST ]]; then
-  cat <<EOF >> $OVERLAY/system.properties
+  cat <<EOF >> ${OVERLAY}/system.properties
 # Enable Tracing
-JAEGER_AGENT_HOST=$JAEGER_AGENT_HOST
+JAEGER_AGENT_HOST=${JAEGER_AGENT_HOST}
 EOF
   echo "opennms-core-tracing-jaeger" > $FEATURES_DIR/jaeger.boot
 fi
@@ -113,7 +112,7 @@ fi
 # Configure SNMP Trap reception
 # Port 162 cannot be used as Minion runs as non-root
 # The queue.size must be consistent with the Kafka message/buffer limits; although on H24+ messages are split.
-cat <<EOF > $OVERLAY/org.opennms.netmgt.trapd.cfg
+cat <<EOF > ${OVERLAY}/org.opennms.netmgt.trapd.cfg
 trapd.listen.interface=0.0.0.0
 trapd.listen.port=1162
 trapd.queue.size=1000
@@ -122,7 +121,7 @@ EOF
 # Configure Syslog reception
 # Port 514 cannot be used as Minion runs as non-root
 # The queue.size must be consistent with the Kafka message/buffer limits; although on H24+ messages are split.
-cat <<EOF > $OVERLAY/org.opennms.netmgt.syslog.cfg
+cat <<EOF > ${OVERLAY}/org.opennms.netmgt.syslog.cfg
 syslog.listen.interface=0.0.0.0
 syslog.listen.port=1514
 syslog.queue.size=1000
@@ -130,14 +129,14 @@ EOF
 
 ### Optional Settings, only relevant for processing Flows and Telemetry data
 
-if [[ $SINGLE_PORT != "" ]]; then
-  echo "Configuring listeners for Horizon on port $SINGLE_PORT"
+if [[ ${SINGLE_PORT} != "" ]]; then
+  echo "Configuring listeners for Horizon on port ${SINGLE_PORT}"
 
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-$SINGLE_PORT.cfg
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-"${SINGLE_PORT}".cfg
 name=Single-Port-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
-parameters.port=$SINGLE_PORT
+parameters.port=${SINGLE_PORT}
 parameters.maxPacketSize=16192
 parsers.0.name=NXOS
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.common.parser.ForwardParser
@@ -159,7 +158,7 @@ else
 
   echo "Configuring listeners on default ports"
 
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-50001.cfg
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-50001.cfg
 name=NXOS-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
@@ -169,7 +168,7 @@ parsers.0.name=NXOS
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.common.parser.ForwardParser
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-8877.cfg
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-8877.cfg
 name=Netflow-5-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
@@ -180,7 +179,7 @@ parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netfl
 parsers.0.parameters.dnsLookupsEnabled=true
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-4729.cfg
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-4729.cfg
 name=Netflow-9-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
@@ -191,7 +190,7 @@ parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netfl
 parsers.0.parameters.dnsLookupsEnabled=true
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-6343.cfg
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-6343.cfg
 name=SFlow-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0
@@ -202,7 +201,7 @@ parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUd
 parsers.0.parameters.dnsLookupsEnabled=true
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.features.telemetry.listeners-udp-4738.cfg
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-4738.cfg
 name=IPFIX-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
 parameters.host=0.0.0.0

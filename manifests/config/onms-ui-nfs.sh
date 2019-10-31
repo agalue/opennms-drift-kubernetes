@@ -8,8 +8,8 @@
 # - ONMS_SERVER
 # - NFS_MOUNT_POINT
 
-if [[ $ONMS_SERVER ]] && [[ $NFS_MOUNT_POINT ]]; then
-  mount -t $ONMS_SERVER:/opt/opennms/etc $NFS_MOUNT_POINT
+if [[ ${ONMS_SERVER} ]] && [[ ${NFS_MOUNT_POINT} ]]; then
+  mount -t "${ONMS_SERVER}":/opt/opennms/etc "${NFS_MOUNT_POINT}"
 
   SHARED_FILES=( \
     "users.xml" \
@@ -35,9 +35,9 @@ if [[ $ONMS_SERVER ]] && [[ $NFS_MOUNT_POINT ]]; then
   )
 
   for SHARED_FILE in "${SHARED_FILES[@]}"; do
-    echo "Point $OPENNMS_ETC/$SHARED_FILE to $NFS_MOUNT_POINT/$SHARED_FILE..."
-    rm -rf $OPENNMS_ETC/$SHARED_FILE
-    ln -s $NFS_MOUNT_POINT/$SHARED_FILE $OPENNMS_ETC/$SHARED_FILE
+    echo "Point ${OPENNMS_ETC}/${SHARED_FILE} to ${NFS_MOUNT_POINT}/${SHARED_FILE}..."
+    rm -rf "${OPENNMS_ETC}/${SHARED_FILE}"
+    ln -s "${NFS_MOUNT_POINT}/${SHARED_FILE}" "${OPENNMS_ETC}/${SHARED_FILE}"
   done
 
 fi

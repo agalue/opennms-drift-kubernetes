@@ -32,28 +32,28 @@ CONFIG_DIR=/opt/opennms-etc-overlay
 WEB_DIR=/opt/opennms-jetty-webinf-overlay
 KEYSPACE=${INSTANCE_ID-onms}_newts
 
-mkdir -p $CONFIG_DIR/opennms.properties.d/
-touch $CONFIG_DIR/configured
+mkdir -p ${CONFIG_DIR}/opennms.properties.d/
+touch ${CONFIG_DIR}/configured
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-if [[ $INSTANCE_ID ]]; then
+if [[ ${INSTANCE_ID} ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
+  cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/instanceid.properties
 # Used for Kafka Topics
-org.opennms.instance.id=$INSTANCE_ID
+org.opennms.instance.id=${INSTANCE_ID}
 EOF
 fi
 
 # Disable data choices (optional)
-cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
+cat <<EOF > ${CONFIG_DIR}/org.opennms.features.datachoices.cfg
 enabled=false
 acknowledged-by=admin
 acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
 EOF
 
 # Trim down the events configuration, as event processing is not required for the WebUI
-cat <<EOF > $CONFIG_DIR/eventconf.xml
+cat <<EOF > ${CONFIG_DIR}/eventconf.xml
 <?xml version="1.0"?>
 <events xmlns="http://xmlns.opennms.org/xsd/eventconf">
   <global>
@@ -91,7 +91,7 @@ cat <<EOF > $CONFIG_DIR/eventconf.xml
 EOF
 
 # Trim down the services/daemons configuration, as only the WebUI will be running
-cat <<EOF > $CONFIG_DIR/service-configuration.xml
+cat <<EOF > ${CONFIG_DIR}/service-configuration.xml
 <?xml version="1.0"?>
 <service-configuration xmlns="http://xmlns.opennms.org/xsd/config/vmmgr">
   <service>
@@ -124,24 +124,24 @@ cat <<EOF > $CONFIG_DIR/service-configuration.xml
 EOF
 
 # Required changes in order to use HTTPS through Ingress
-cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
+cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/webui.properties
 opennms.web.base-url=https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true
 org.opennms.web.console.centerUrl=/status/status-box.jsp,/geomap/map-box.jsp,/heatmap/heatmap-box.jsp
 EOF
 
 # Guard against allowing administration changes through the WebUI
-SECURITY_CONFIG=$WEB_DIR/applicationContext-spring-security.xml
-cp /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security.xml $SECURITY_CONFIG
-sed -r -i 's/ROLE_ADMIN/ROLE_DISABLED/' $SECURITY_CONFIG
-sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' $SECURITY_CONFIG
-sed -r -i -e '/intercept-url.*measurements/a\' -e '    <intercept-url pattern="/rest/resources/generateId" method="POST" access="ROLE_REST,ROLE_DISABLED,ROLE_USER"/>' $SECURITY_CONFIG
+SECURITY_CONFIG=${WEB_DIR}/applicationContext-spring-security.xml
+cp /opt/opennms/jetty-webapps/opennms/WEB-INF/applicationContext-spring-security.xml ${SECURITY_CONFIG}
+sed -r -i 's/ROLE_ADMIN/ROLE_DISABLED/' ${SECURITY_CONFIG}
+sed -r -i 's/ROLE_PROVISION/ROLE_DISABLED/' ${SECURITY_CONFIG}
+sed -r -i -e '/intercept-url.*measurements/a\' -e '    <intercept-url pattern="/rest/resources/generateId" method="POST" access="ROLE_REST,ROLE_DISABLED,ROLE_USER"/>' ${SECURITY_CONFIG}
 
 # Configure Newts (works with either Cassandra or ScyllaDB)
 # This has to match the configuration of the OpenNMS Core server.
-if [[ $CASSANDRA_SERVER ]]; then
+if [[ ${CASSANDRA_SERVER} ]]; then
   echo "Configuring Cassandra..."
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
+  cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/newts.properties
 # Warning:
 # - Make sure the properties match the content of the core OpenNMS server
 
@@ -158,7 +158,7 @@ EOF
 
   # Required only when collecting data every 30 seconds
   echo "Configuring Optional Newts Settings..."
-  cat <<EOF >> $CONFIG_DIR/opennms.properties.d/newts.properties
+  cat <<EOF >> ${CONFIG_DIR}/opennms.properties.d/newts.properties
 org.opennms.newts.query.minimum_step=30000
 org.opennms.newts.query.heartbeat=450000
 EOF
@@ -166,20 +166,20 @@ EOF
 fi
 
 # Configure Elasticsearch for Flow processing
-if [[ $ELASTIC_SERVER ]]; then
+if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch for Flows..."
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
-elasticUrl=http://$ELASTIC_SERVER:9200
+  cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
+elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
-globalElasticPassword=$ELASTIC_PASSWORD
+globalElasticPassword=${ELASTIC_PASSWORD}
 elasticIndexStrategy=daily
 EOF
 fi
 
 # Configure NXOS Resource Types
 echo "Configuring NXOS resource types..."
-mkdir -p $CONFIG_DIR/resource-types.d/
-cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
+mkdir -p ${CONFIG_DIR}/resource-types.d/
+cat <<EOF > ${CONFIG_DIR}/resource-types.d/nxos-intf-resources.xml
 <?xml version="1.0"?>
 <resource-types>
   <resourceType name="nxosIntf" label="Nxos Interface" resourceLabel="\${index}">
@@ -190,35 +190,35 @@ cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
 EOF
 
 # Enable Grafana features
-if [[ $GRAFANA_PUBLIC_URL ]] && [[ $GRAFANA_URL ]] && [[ $GF_SECURITY_ADMIN_PASSWORD ]]; then
-  GRAFANA_AUTH="admin:$GF_SECURITY_ADMIN_PASSWORD"
-  FLOW_DASHBOARD=$(curl -u $GRAFANA_AUTH "$GRAFANA_URL/api/search?query=flow" 2>/dev/null | jq '.[0].url' | sed 's/"//g')
-  echo "Flow Dashboard: $FLOW_DASHBOARD"
-  if [ "$FLOW_DASHBOARD" != "null" ]; then
-    cat <<EOF > $CONFIG_DIR/org.opennms.netmgt.flows.rest.cfg
-flowGraphUrl=$GRAFANA_PUBLIC_URL$FLOW_DASHBOARD?node=\$nodeId&interface=\$ifIndex
+if [[ ${GRAFANA_PUBLIC_URL} ]] && [[ ${GRAFANA_URL} ]] && [[ ${GF_SECURITY_ADMIN_PASSWORD} ]]; then
+  GRAFANA_AUTH="admin:${GF_SECURITY_ADMIN_PASSWORD}"
+  FLOW_DASHBOARD=$(curl -u "${GRAFANA_AUTH}" "${GRAFANA_URL}/api/search?query=flow" 2>/dev/null | jq '.[0].url' | sed 's/"//g')
+  echo "Flow Dashboard: ${FLOW_DASHBOARD}"
+  if [ "${FLOW_DASHBOARD}" != "null" ]; then
+    cat <<EOF > ${CONFIG_DIR}/org.opennms.netmgt.flows.rest.cfg
+flowGraphUrl=${GRAFANA_PUBLIC_URL}${FLOW_DASHBOARD}?node=\$nodeId&interface=\$ifIndex
 EOF
   else
     echo "WARNING: cannot get Dashboard URL for the Deep Dive Tool"
   fi
 
-  KEY_ID=$(curl -u $GRAFANA_AUTH "$GRAFANA_URL/api/auth/keys" 2>/dev/null | jq '.[] | select(.name="opennms-ui") | .id')
-  if [ "$KEY_ID" != "" ]; then
+  KEY_ID=$(curl -u "${GRAFANA_AUTH}" "${GRAFANA_URL}/api/auth/keys" 2>/dev/null | jq '.[] | select(.name="opennms-ui") | .id')
+  if [ "${KEY_ID}" != "" ]; then
     echo "WARNING: API Key exist, deleting it prior re-creating it again"
-    curl -XDELETE -u $GRAFANA_AUTH "$GRAFANA_URL/api/auth/keys/$KEY_ID" 2>/dev/null
+    curl -XDELETE -u "${GRAFANA_AUTH}" "${GRAFANA_URL}/api/auth/keys/${KEY_ID}" 2>/dev/null
     echo ""
   fi
-  GRAFANA_KEY=$(curl -u $GRAFANA_AUTH -X POST -H "Content-Type: application/json" -d '{"name":"opennms-ui", "role": "Viewer"}' "$GRAFANA_URL/api/auth/keys" 2>/dev/null | jq .key - | sed 's/"//g')
-  if [ "$GRAFANA_KEY" != "null" ]; then
+  GRAFANA_KEY=$(curl -u "${GRAFANA_AUTH}" -X POST -H "Content-Type: application/json" -d '{"name":"opennms-ui", "role": "Viewer"}' "${GRAFANA_URL}/api/auth/keys" 2>/dev/null | jq .key - | sed 's/"//g')
+  if [ "${GRAFANA_KEY}" != "null" ]; then
     echo "Configuring Grafana Box..."
-    GRAFANA_HOSTNAME=$(echo $GRAFANA_PUBLIC_URL | sed -E 's/http[s]?:|\///g')
-    mkdir -p $CONFIG_DIR/opennms.properties.d/
-    cat <<EOF > $CONFIG_DIR/opennms.properties.d/grafana.properties
+    GRAFANA_HOSTNAME=$(echo "${GRAFANA_PUBLIC_URL}" | sed -E 's/http[s]?:|\///g')
+    mkdir -p ${CONFIG_DIR}/opennms.properties.d/
+    cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/grafana.properties
 org.opennms.grafanaBox.show=true
-org.opennms.grafanaBox.hostname=$GRAFANA_HOSTNAME
+org.opennms.grafanaBox.hostname=${GRAFANA_HOSTNAME}
 org.opennms.grafanaBox.port=443
 org.opennms.grafanaBox.basePath=/
-org.opennms.grafanaBox.apiKey=$GRAFANA_KEY
+org.opennms.grafanaBox.apiKey=${GRAFANA_KEY}
 EOF
   else
     echo "WARNING: cannot get Grafana Key"

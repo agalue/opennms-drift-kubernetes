@@ -19,26 +19,25 @@ umask 002
 
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
-VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-sentinel)
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-SYSTEM_CFG=$SENTINEL_HOME/etc/system.properties
-if [[ $INSTANCE_ID ]]; then
+SYSTEM_CFG=${SENTINEL_HOME}/etc/system.properties
+if [[ ${INSTANCE_ID} ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF >> $SYSTEM_CFG
+  cat <<EOF >> ${SYSTEM_CFG}
 
 # Used for Kafka Topics
-org.opennms.instance.id=$INSTANCE_ID
+org.opennms.instance.id=${INSTANCE_ID}
 EOF
 fi
-cp $SYSTEM_CFG $OVERLAY
+cp ${SYSTEM_CFG $OVERLAY}
 
-FEATURES_DIR=$OVERLAY/featuresBoot.d
-mkdir -p $FEATURES_DIR
+FEATURES_DIR=${OVERLAY}/featuresBoot.d
+mkdir -p ${FEATURES_DIR}
 echo "Configuring Features..."
 
-cat <<EOF > $FEATURES_DIR/alec.boot
+cat <<EOF > ${FEATURES_DIR}/alec.boot
 sentinel-core
 alec-sentinel-distributed wait-for-kar=opennms-alec-plugin
 EOF
@@ -46,11 +45,11 @@ EOF
 if [[ $ZOOKEEPER_SERVER ]]; then
   echo "Configure ZooKeeper for distributed coordination..."
 
-  cat <<EOF > $OVERLAY/org.opennms.features.distributed.coordination.zookeeper.cfg
-connectString=$ZOOKEEPER_SERVER:2181
+  cat <<EOF > ${OVERLAY}/org.opennms.features.distributed.coordination.zookeeper.cfg
+connectString=${ZOOKEEPER_SERVER}:2181
 EOF
 
-  cat <<EOF > $FEATURES_DIR/zk.boot
+  cat <<EOF > ${FEATURES_DIR}/zk.boot
 sentinel-coordination-zookeeper
 EOF
 fi
@@ -58,27 +57,26 @@ fi
 if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
 
-  cat <<EOF > $OVERLAY/org.opennms.core.ipc.sink.kafka.consumer.cfg
-bootstrap.servers = $KAFKA_SERVER:9092
+  cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.consumer.cfg
+bootstrap.servers = ${KAFKA_SERVER}:9092
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.alec.datasource.opennms.kafka.producer.cfg
-bootstrap.servers = $KAFKA_SERVER:9092
+  cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.producer.cfg
+bootstrap.servers = ${KAFKA_SERVER}:9092
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.alec.datasource.opennms.kafka.streams.cfg
-bootstrap.servers = $KAFKA_SERVER:9092
+  cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.streams.cfg
+bootstrap.servers = ${KAFKA_SERVER}:9092
 commit.interval.ms=5000
 EOF
 
-  cat <<EOF > $OVERLAY/org.opennms.alec.datasource.opennms.kafka.cfg
+  cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.cfg
 # Make sure to configure the topics on OpenNMS the same way
 eventSinkTopic=${INSTANCE_ID}.Sink.Events
 inventoryTopic=${INSTANCE_ID}-alec-inventory
 nodeTopic=${INSTANCE_ID}-nodes
 alarmTopic=${INSTANCE_ID}-alarms
 alarmFeedbackTopic=${INSTANCE_ID}-alarms-feedback
-# Using default topic for edges: https://issues.opennms.org/browse/ALEC-80
-edgesTopic=edges
+edgesTopic=${INSTANCE_ID}-edges
 EOF
 fi

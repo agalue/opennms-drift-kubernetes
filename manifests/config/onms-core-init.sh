@@ -37,6 +37,7 @@
 # - ELASTIC_INDEX_STRATEGY_FLOWS
 # - ELASTIC_INDEX_STRATEGY_REST
 # - ELASTIC_INDEX_STRATEGY_ALARMS
+# - KAFKA_MAX_MESSAGE_SIZE
 # - JAEGER_AGENT_HOST
 
 # To avoid issues with OpenShift
@@ -47,11 +48,11 @@ command -v rsync >/dev/null 2>&1 || { echo >&2 "rsync is required but it's not i
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_INDEX_STRATEGY_REST=${ELASTIC_INDEX_STRATEGY_REST-monthly}
 ELASTIC_INDEX_STRATEGY_ALARMS=${ELASTIC_INDEX_STRATEGY_ALARMS-monthly}
+KAFKA_MAX_MESSAGE_SIZE=${KAFKA_MAX_MESSAGE_SIZE-5000000}
 
 CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
 KEYSPACE=${INSTANCE_ID-onms}_newts
-VERSION=$(rpm -q --queryformat '%{VERSION}' opennms-core)
 KARAF_FILES=( \
 "create.sql" \
 "config.properties" \
@@ -66,155 +67,155 @@ KARAF_FILES=( \
 )
 
 # Show permissions (debug purposes)
-ls -ld $CONFIG_DIR
+ls -ld ${CONFIG_DIR}
 
 # Initialize configuration directory
-if [ ! -f $CONFIG_DIR/configured ]; then
+if [ ! -f ${CONFIG_DIR}/configured ]; then
   echo "Initializing configuration directory for the first time ..."
-  rsync -arO --no-perms $BACKUP_ETC/ $CONFIG_DIR/
+  rsync -arO --no-perms ${BACKUP_ETC}/ ${CONFIG_DIR}/
 
   echo "Disabling data choices"
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.datachoices.cfg
+  cat <<EOF > ${CONFIG_DIR}/org.opennms.features.datachoices.cfg
 enabled=false
 acknowledged-by=admin
 acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2018
 EOF
 
   echo "Initialize default foreign source definition"
-  cat <<EOF > $CONFIG_DIR/default-foreign-source.xml
+  cat <<EOF > ${CONFIG_DIR}/default-foreign-source.xml
 <foreign-source xmlns="http://xmlns.opennms.org/xsd/config/foreign-source" name="default" date-stamp="2018-01-01T00:00:00.000-05:00">
-   <scan-interval>1d</scan-interval>
-   <detectors>
-      <detector name="ICMP" class="org.opennms.netmgt.provision.detector.icmp.IcmpDetector"/>
-      <detector name="SNMP" class="org.opennms.netmgt.provision.detector.snmp.SnmpDetector"/>
-   </detectors>
-   <policies>
-      <policy name="Do Not Persist Discovered IPs" class="org.opennms.netmgt.provision.persist.policies.MatchingIpInterfacePolicy">
-         <parameter key="action" value="DO_NOT_PERSIST"/>
-         <parameter key="matchBehavior" value="NO_PARAMETERS"/>
-      </policy>
-      <policy name="Enable Data Collection" class="org.opennms.netmgt.provision.persist.policies.MatchingSnmpInterfacePolicy">
-         <parameter key="action" value="ENABLE_COLLECTION"/>
-         <parameter key="matchBehavior" value="ANY_PARAMETER"/>
-         <parameter key="ifOperStatus" value="1"/>
-      </policy>
-   </policies>
+  <scan-interval>1d</scan-interval>
+  <detectors>
+    <detector name="ICMP" class="org.opennms.netmgt.provision.detector.icmp.IcmpDetector"/>
+    <detector name="SNMP" class="org.opennms.netmgt.provision.detector.snmp.SnmpDetector"/>
+  </detectors>
+  <policies>
+    <policy name="Do Not Persist Discovered IPs" class="org.opennms.netmgt.provision.persist.policies.MatchingIpInterfacePolicy">
+      <parameter key="action" value="DO_NOT_PERSIST"/>
+      <parameter key="matchBehavior" value="NO_PARAMETERS"/>
+    </policy>
+    <policy name="Enable Data Collection" class="org.opennms.netmgt.provision.persist.policies.MatchingSnmpInterfacePolicy">
+      <parameter key="action" value="ENABLE_COLLECTION"/>
+      <parameter key="matchBehavior" value="ANY_PARAMETER"/>
+      <parameter key="ifOperStatus" value="1"/>
+    </policy>
+  </policies>
 </foreign-source>
 EOF
 else
   echo "Previous configuration found. Synchronizing only new files..."
-  rsync -aruO --no-perms $BACKUP_ETC/ $CONFIG_DIR/
+  rsync -aruO --no-perms ${BACKUP_ETC}/ ${CONFIG_DIR}/
 fi
 
 # Guard against application upgrades
 MANDATORY=/tmp/opennms-mandatory
-mkdir -p $MANDATORY
+mkdir -p ${MANDATORY}
 for file in "${KARAF_FILES[@]}"; do
-  echo "Backing up $file to $MANDATORY..."
-  cp --force $BACKUP_ETC/$file $MANDATORY/
+  echo "Backing up $file to ${MANDATORY}..."
+  cp --force ${BACKUP_ETC}/${file} ${MANDATORY}/
 done
-echo "Overriding mandatory files from $MANDATORY..."
-rsync -aO --no-perms $MANDATORY/ $CONFIG_DIR/
+echo "Overriding mandatory files from ${MANDATORY}..."
+rsync -aO --no-perms ${MANDATORY}/ ${CONFIG_DIR}/
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-if [[ $INSTANCE_ID ]]; then
+if [[ ${INSTANCE_ID} ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/instanceid.properties
+  cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/instanceid.properties
 # Used for Kafka Topics
-org.opennms.instance.id=$INSTANCE_ID
+org.opennms.instance.id=${INSTANCE_ID}
 EOF
 fi
 
-cat <<EOF > $CONFIG_DIR/opennms.properties.d/rrd.properties
+cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/rrd.properties
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true
 EOF
 
-cat <<EOF > $CONFIG_DIR/opennms.properties.d/collectd.properties
+cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/collectd.properties
 org.opennms.netmgt.collectd.strictInterval=true
 EOF
 
 # Required changes in order to use HTTPS through Ingress
-cat <<EOF > $CONFIG_DIR/opennms.properties.d/webui.properties
+cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/webui.properties
 opennms.web.base-url=https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true
 EOF
 
 # Enable OSGi features
-if [[ $FEATURES_LIST ]]; then
-  echo "Enabling features: $FEATURES_LIST ..."
-  FEATURES_CFG=$CONFIG_DIR/org.apache.karaf.features.cfg
-  sed -r -i "s/.*opennms-bundle-refresher.*/  $FEATURES_LIST,opennms-bundle-refresher/" $FEATURES_CFG
+if [[ ${FEATURES_LIST} ]]; then
+  echo "Enabling features: ${FEATURES_LIST} ..."
+  FEATURES_CFG=${CONFIG_DIR}/org.apache.karaf.features.cfg
+  sed -r -i "s/.*opennms-bundle-refresher.*/  ${FEATURES_LIST},opennms-bundle-refresher/" ${FEATURES_CFG}
 fi
 
 # Enable ALEC
-if [[ $ENABLE_ALEC ]]; then
+if [[ ${ENABLE_ALEC} ]]; then
   echo "Enabling ALEC. .."
-  cat <<EOF > $CONFIG_DIR/featuresBoot.d/alec.boot
+  cat <<EOF > ${CONFIG_DIR}/featuresBoot.d/alec.boot
 alec-opennms-distributed wait-for-kar=opennms-alec-plugin
 EOF
 fi
 
 # Enable Syslogd
-sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' $CONFIG_DIR/service-configuration.xml
+sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' ${CONFIG_DIR}/service-configuration.xml
 
 # Enable tracing with jaeger
-if [[ $JAEGER_AGENT_HOST ]]; then
+if [[ ${JAEGER_AGENT_HOST} ]]; then
   cat <<EOF > $CONFIG_DIR/opennms.properties.d/jaeger.properties
 org.opennms.core.tracer=jaeger
-JAEGER_AGENT_HOST=$JAEGER_AGENT_HOST
+JAEGER_AGENT_HOST=${JAEGER_AGENT_HOST}
 EOF
-  echo "opennms-core-tracing-jaeger" > $CONFIG_DIR/featuresBoot.d/jaeger.boot
+  echo "opennms-core-tracing-jaeger" > ${CONFIG_DIR}/featuresBoot.d/jaeger.boot
 fi
 
 # Configure Sink and RPC to use Kafka, and the Kafka Producer.
-if [[ $KAFKA_SERVER ]]; then
+if [[ ${KAFKA_SERVER} ]]; then
   echo "Configuring Kafka..."
 
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/event-sink.properties
+  cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/event-sink.properties
 org.opennms.netmgt.eventd.sink.enable=true
 EOF
 
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/amq.properties
+  cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/amq.properties
 org.opennms.activemq.broker.disable=true
 EOF
 
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/kafka.properties
+  cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/kafka.properties
 # Sink
 org.opennms.core.ipc.sink.initialSleepTime=60000
 org.opennms.core.ipc.sink.strategy=kafka
-org.opennms.core.ipc.sink.kafka.bootstrap.servers=$KAFKA_SERVER:9092
-org.opennms.core.ipc.sink.kafka.group.id=$INSTANCE_ID
+org.opennms.core.ipc.sink.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
+org.opennms.core.ipc.sink.kafka.group.id=${INSTANCE_ID}
 
 # Sink Consumer (verify Kafka broker configuration)
-org.opennms.core.ipc.sink.kafka.max.partition.fetch.bytes=5000000
+org.opennms.core.ipc.sink.kafka.max.partition.fetch.bytes=${KAFKA_MAX_MESSAGE_SIZE}
 
 # RPC
 org.opennms.core.ipc.rpc.strategy=kafka
-org.opennms.core.ipc.rpc.kafka.bootstrap.servers=$KAFKA_SERVER:9092
+org.opennms.core.ipc.rpc.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
 org.opennms.core.ipc.rpc.kafka.ttl=30000
 org.opennms.core.ipc.rpc.kafka.compression.type=gzip
 org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
 
 # RPC Consumer (verify Kafka broker configuration)
-org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=5000000
+org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=${KAFKA_MAX_MESSAGE_SIZE}
 org.opennms.core.ipc.rpc.kafka.auto.offset.reset=latest
 
 # RPC Producer (verify Kafka broker configuration)
-org.opennms.core.ipc.rpc.kafka.max.request.size=5000000
+org.opennms.core.ipc.rpc.kafka.max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 EOF
 
-  if [[ $FEATURES_LIST == *"opennms-kafka-producer"* ]]; then
+  if [[ ${FEATURES_LIST} == *"opennms-kafka-producer"* ]]; then
     cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
 compression.type=gzip
 timeout.ms=30000
-max.request.size=5000000
+max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 EOF
 
     # Make sure to enable only what's needed for your use case
-    cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.cfg
+    cat <<EOF > ${CONFIG_DIR}/org.opennms.features.kafka.producer.cfg
 topologyProtocols=bridge,cdp,isis,lldp,ospf
 suppressIncrementalAlarms=false
 forward.metrics=true
@@ -226,16 +227,15 @@ eventTopic=${INSTANCE_ID}-events
 metricTopic=${INSTANCE_ID}-metrics
 alarmFeedbackTopic=${INSTANCE_ID}-alarms-feedback
 topologyVertexTopic=${INSTANCE_ID}-topology-vertices
-# Using default topic for edges: https://issues.opennms.org/browse/ALEC-80
-topologyEdgeTopic=edges
+topologyEdgeTopic=${INSTANCE_ID}-edges
 EOF
   fi
 fi
 
 # Configure Newts (works with either Cassandra or ScyllaDB)
-if [[ $CASSANDRA_SERVER ]]; then
+if [[ ${CASSANDRA_SERVER} ]]; then
   echo "Configuring Newts..."
-  cat <<EOF > $CONFIG_DIR/opennms.properties.d/newts.properties
+  cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/newts.properties
 # About the properties:
 # - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
 # - ring_buffer_size and cache.max_entries should be consistent with the expected load
@@ -259,8 +259,8 @@ org.opennms.newts.config.cache.priming.block_ms=60000
 
 # The following settings most be tuned in production
 org.opennms.newts.config.writer_threads=2
-org.opennms.newts.config.ring_buffer_size=8192
-org.opennms.newts.config.cache.max_entries=8192
+org.opennms.newts.config.ring_buffer_size=131072
+org.opennms.newts.config.cache.max_entries=131072
 EOF
 
   # Required only when collecting data every 30 seconds
@@ -271,18 +271,18 @@ org.opennms.newts.query.heartbeat=450000
 EOF
 
   # Fixing polling/collection settings
-  sed -r -i "s/keyspace=newts/keyspace=${KEYSPACE}/" $CONFIG_DIR/jmx-datacollection-config.d/cassandra30x-newts.xml
-  sed -r -i "s/keyspace=newts/keyspace=${KEYSPACE}/" $CONFIG_DIR/poller-configuration.xml
-  sed -r -i "s/cassandra-username/cassandra/" $CONFIG_DIR/poller-configuration.xml
-  sed -r -i "s/cassandra-password/cassandra/" $CONFIG_DIR/poller-configuration.xml
-  sed -r -i "s/cassandra-username/cassandra/" $CONFIG_DIR/collectd-configuration.xml
-  sed -r -i "s/cassandra-password/cassandra/" $CONFIG_DIR/collectd-configuration.xml
+  sed -r -i "s/keyspace=newts/keyspace=${KEYSPACE}/" ${CONFIG_DIR}/jmx-datacollection-config.d/cassandra30x-newts.xml
+  sed -r -i "s/keyspace=newts/keyspace=${KEYSPACE}/" ${CONFIG_DIR}/poller-configuration.xml
+  sed -r -i "s/cassandra-username/cassandra/" ${CONFIG_DIR}/poller-configuration.xml
+  sed -r -i "s/cassandra-password/cassandra/" ${CONFIG_DIR}/poller-configuration.xml
+  sed -r -i "s/cassandra-username/cassandra/" ${CONFIG_DIR}/collectd-configuration.xml
+  sed -r -i "s/cassandra-password/cassandra/" ${CONFIG_DIR}/collectd-configuration.xml
 fi
 
-if [[ $CASSANDRA_REPLICATION_FACTOR ]]; then
+if [[ ${CASSANDRA_REPLICATION_FACTOR} ]]; then
   echo "Building Newts Schema for Cassandra/ScyllaDB (assuming 1 year of retention/TTL)..."
-  cat <<EOF > $CONFIG_DIR/newts.cql
-CREATE KEYSPACE IF NOT EXISTS ${KEYSPACE} WITH replication = {'class' : 'NetworkTopologyStrategy', '$CASSANDRA_DC' : $CASSANDRA_REPLICATION_FACTOR };
+  cat <<EOF > ${CONFIG_DIR}/newts.cql
+CREATE KEYSPACE IF NOT EXISTS ${KEYSPACE} WITH replication = {'class' : 'NetworkTopologyStrategy', '${CASSANDRA_DC}' : ${CASSANDRA_REPLICATION_FACTOR} };
 
 CREATE TABLE IF NOT EXISTS ${KEYSPACE}.samples (
   context text,
@@ -327,13 +327,13 @@ EOF
 fi
 
 # Configure Elasticsearch for Flow processing and for the event forwarder
-if [[ $ELASTIC_SERVER ]]; then
+if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch for Flows..."
-  cat <<EOF > $CONFIG_DIR/org.opennms.features.flows.persistence.elastic.cfg
-elasticUrl=http://$ELASTIC_SERVER:9200
+  cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
+elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
-globalElasticPassword=$ELASTIC_PASSWORD
-elasticIndexStrategy=$ELASTIC_INDEX_STRATEGY_FLOWS
+globalElasticPassword=${ELASTIC_PASSWORD}
+elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
@@ -341,13 +341,13 @@ settings.index.number_of_shards=6
 settings.index.number_of_replicas=2
 EOF
 
-  if [[ $FEATURES_LIST == *"opennms-es-rest"* ]]; then
+  if [[ ${FEATURES_LIST} == *"opennms-es-rest"* ]]; then
     echo "Configuring Elasticsearch Event Forwarder..."
-    cat <<EOF > $CONFIG_DIR/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
-elasticUrl=http://$ELASTIC_SERVER:9200
+    cat <<EOF > ${CONFIG_DIR}/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
+elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
-globalElasticPassword=$ELASTIC_PASSWORD
-elasticIndexStrategy=$ELASTIC_INDEX_STRATEGY_REST
+globalElasticPassword=${ELASTIC_PASSWORD}
+elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_REST}
 groupOidParameters=true
 archiveRawEvents=true
 archiveAlarms=false
@@ -362,13 +362,13 @@ settings.index.number_of_replicas=2
 EOF
   fi
 
-  if [[ $FEATURES_LIST == *"opennms-alarm-history-elastic"* ]]; then
+  if [[ ${FEATURES_LIST} == *"opennms-alarm-history-elastic"* ]]; then
     echo "Configuring Alarm History Forwarder..."
-    cat <<EOF > $CONFIG_DIR/org.opennms.features.alarms.history.elastic.cfg
-elasticUrl=http://$ELASTIC_SERVER:9200
+    cat <<EOF > ${CONFIG_DIR}/org.opennms.features.alarms.history.elastic.cfg
+elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
-globalElasticPassword=$ELASTIC_PASSWORD
-elasticIndexStrategy=$ELASTIC_INDEX_STRATEGY_ALARMS
+globalElasticPassword=${ELASTIC_PASSWORD}
+elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_ALARMS}
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
@@ -377,12 +377,12 @@ settings.index.number_of_replicas=2
 EOF
   fi
 
-  if [[ $FEATURES_LIST == *"opennms-situation-feedback"* ]]; then
+  if [[ ${FEATURES_LIST} == *"opennms-situation-feedback"* ]]; then
     echo "Configuring Situations Feedback..."
-    cat <<EOF > $CONFIG_DIR/org.opennms.features.situation-feedback.persistence.elastic.cfg
-elasticUrl=http://$ELASTIC_SERVER:9200
+    cat <<EOF > ${CONFIG_DIR}/org.opennms.features.situation-feedback.persistence.elastic.cfg
+elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
-globalElasticPassword=$ELASTIC_PASSWORD
+globalElasticPassword=${ELASTIC_PASSWORD}
 elasticIndexStrategy=monthly
 connTimeout=30000
 readTimeout=300000
@@ -395,7 +395,7 @@ fi
 
 # Configure NXOS Resource Types
 echo "Configuring NXOS resource types..."
-cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
+cat <<EOF > ${CONFIG_DIR}/resource-types.d/nxos-intf-resources.xml
 <?xml version="1.0"?>
 <resource-types>
   <resourceType name="nxosIntf" label="Nxos Interface" resourceLabel="\${index}">
@@ -406,7 +406,7 @@ cat <<EOF > $CONFIG_DIR/resource-types.d/nxos-intf-resources.xml
 EOF
 
 # Configure K8s Event Watcher
-cat <<EOF > $CONFIG_DIR/events/kubernetes.events.xml
+cat <<EOF > ${CONFIG_DIR}/events/kubernetes.events.xml
 <events xmlns="http://xmlns.opennms.org/xsd/eventconf">
   <event>
     <uei>uei.opennms.org/kubernetes/event/Warning</uei>
@@ -445,12 +445,12 @@ cat <<EOF > $CONFIG_DIR/events/kubernetes.events.xml
   </event>
 </events>
 EOF
-sed -r -i '/[<].global[>]/a <event-file>events/kubernetes.events.xml</event-file>' $CONFIG_DIR/eventconf.xml
+sed -r -i '/[<].global[>]/a <event-file>events/kubernetes.events.xml</event-file>' ${CONFIG_DIR}/eventconf.xml
 
 # Cleanup temporary requisition files:
-rm -f $CONFIG_DIR/imports/pending/*.xml.*
-rm -f $CONFIG_DIR/foreign-sources/pending/*.xml.*
+rm -f ${CONFIG_DIR}/imports/pending/*.xml.*
+rm -f ${CONFIG_DIR}/foreign-sources/pending/*.xml.*
 
 # Force to execute runjava and the install script
-touch $CONFIG_DIR/do-upgrade
+touch ${CONFIG_DIR}/do-upgrade
 

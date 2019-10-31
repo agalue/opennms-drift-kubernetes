@@ -7,14 +7,17 @@
 #
 # Mandatory Environment variables:
 # - PGHOST
+# - PGPORT
+# - PGUSER
+# - PGPASSWORD
 
 until pg_isready; do
-  echo "$(date) Waiting for postgresql host $PGHOST..."
+  echo "$(date) Waiting for postgresql host ${PGHOST}..."
   sleep 2
 done
 
 HASURA_SQL=/hasura.sql
-cat <<EOF > $HASURA_SQL
+cat <<EOF > ${HASURA_SQL}
 -- We will create a separate user and grant permissions on hasura-specific
 -- schemas and information_schema and pg_catalog
 -- These permissions/grants are required for Hasura to work properly.
@@ -58,4 +61,4 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO hasurauser;
 -- GRANT ALL ON ALL SEQUENCES IN SCHEMA <schema-name> TO hasurauser;
 EOF
 
-psql < $HASURA_SQL
+psql < ${HASURA_SQL}
