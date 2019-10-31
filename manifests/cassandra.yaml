@@ -95,9 +95,18 @@ spec:
       terminationGracePeriodSeconds: 600
       securityContext: # In order to be able to write data as non-root on the volumes
         fsGroup: 999 # Default cassandra user
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
+        securityContext:
+          privileged: true
       containers:
       - name: cassandra
-        image: cassandra:3.11.4
+        image: cassandra:3.11.5
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

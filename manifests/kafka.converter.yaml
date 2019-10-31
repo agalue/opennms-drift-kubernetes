@@ -48,8 +48,12 @@ spec:
           value: $(INSTANCE_ID)-alarms
         - name: DEST_TOPIC
           value: $(INSTANCE_ID)-alarms-json
-        - name: KAFKA_AUTO_OFFSET_RESET
+        - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
+        - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
+          value: '5000000'
+        - name: PROCUCER_MAX_REQUEST_SIZE
+          value: '5000000'
         resources:
           limits:
             memory: 128Mi

@@ -135,20 +135,22 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        - name: MEM_TOTAL_MB
-          valueFrom:
-            resourceFieldRef:
-              resource: requests.memory
-              divisor: 1Mi
         - name: MINION_LOCATION
           valueFrom:
             configMapKeyRef:
               key: MINION_LOCATION
               name: common-settings
-        - name: JAVA_OPTS
-          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: OPENNMS_HTTP_URL
           value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+              divisor: 1Mi
+        - name: JAVA_OPTS
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
+        - name: MAX_FD # Maximum File Descriptors
+          value: 65536
         ports:
         - containerPort: 1162
           protocol: UDP

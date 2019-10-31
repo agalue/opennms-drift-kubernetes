@@ -143,13 +143,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        - name: MEM_TOTAL_MB
+        - name: SENTINEL_LOCATION
           valueFrom:
-            resourceFieldRef:
-              resource: requests.memory
-              divisor: 1Mi
-        - name: JAVA_OPTS
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -Dcom.datastax.driver.FORCE_NIO=true
+            configMapKeyRef:
+              key: MINION_LOCATION
+              name: common-settings
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
@@ -165,8 +163,6 @@ spec:
           value: opennms
         - name: OPENNMS_HTTP_URL
           value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
-        - name: SENTINEL_LOCATION
-          value: Sentinel
         - name: OPENNMS_HTTP_USER
           value: admin
         - name: OPENNMS_HTTP_PASS
@@ -174,6 +170,15 @@ spec:
             secretKeyRef:
               key: OPENNMS_UI_ADMIN_PASSWORD
               name: onms-passwords
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+              divisor: 1Mi
+        - name: JAVA_OPTS
+          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -Dcom.datastax.driver.FORCE_NIO=true
+        - name: MAX_FD # Maximum File Descriptors
+          value: 65536
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/sentinel-etc-overlay

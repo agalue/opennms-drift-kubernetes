@@ -137,8 +137,8 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
-        - name: KAFKA_CREATE_TOPICS # Must match ALEC and OpenNMS settings; careful with https://issues.opennms.org/browse/ALEC-80
-          value: $(INSTANCE_ID)-nodes:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)-alarms:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)-alarms-feedback:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)-alec-inventory:$(KAFKA_NUM_PARTITIONS):2,edges:$(KAFKA_NUM_PARTITIONS):2
+        - name: KAFKA_CREATE_TOPICS # Must match ALEC and OpenNMS settings
+          value: $(INSTANCE_ID)-nodes:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)-alarms:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)-alarms-feedback:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)-alec-inventory:$(KAFKA_NUM_PARTITIONS):2,$(INSTANCE_ID)-edges:$(KAFKA_NUM_PARTITIONS):2
         volumeMounts:
         - name: data
           mountPath: /kafka

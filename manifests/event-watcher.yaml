@@ -64,7 +64,7 @@ spec:
           value: '600'
       containers:
       - name: event-watcher
-        image: agalue/onms-k8s-watcher-go:1.0-SNAPSHOT
+        image: agalue/onms-k8s-watcher-go:latest
         imagePullPolicy: Always
         env:
         - name: ONMS_URL
