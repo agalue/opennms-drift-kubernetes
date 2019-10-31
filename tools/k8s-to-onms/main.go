@@ -18,8 +18,11 @@ func main() {
 	flag.StringVar(&rest.Instance.URL, "url", "https://onms.aws.agalue.net/opennms", "OpenNMS URL")
 	flag.StringVar(&rest.Instance.Username, "user", rest.Instance.Username, "OpenNMS Username")
 	flag.StringVar(&rest.Instance.Password, "passwd", rest.Instance.Password, "OpenNMS Password")
+	namespace := flag.String("namespace", "opennms", "The namespace where the OpenNMS resources live")
+	requisition := flag.String("requisition", "Kubernetes", "The name of the target OpenNMS requisition")
 	kubecfg := flag.String("config", os.Getenv("HOME")+"/.kube/config", "Kubernetes Configuration")
 	flag.Parse()
+
 	config, err := clientcmd.BuildConfigFromFlags("", *kubecfg)
 	if err != nil {
 		panic(err)
@@ -28,12 +31,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	pods, err := client.CoreV1().Pods("opennms").List(v1.ListOptions{})
+
+	pods, err := client.CoreV1().Pods(*namespace).List(v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
-	requisition := model.Requisition{
-		Name: "Kubernetes",
+	req := model.Requisition{
+		Name: *requisition,
 	}
 	for _, pod := range pods.Items {
 		intf := &model.RequisitionInterface{
@@ -64,15 +68,15 @@ func main() {
 		for key, value := range pod.ObjectMeta.Labels {
 			node.AddMetaData(key, value)
 		}
-		requisition.AddNode(node)
+		req.AddNode(node)
 		fmt.Printf("adding node for pod %s\n", pod.Name)
 	}
 	svc := services.GetRequisitionsAPI(rest.Instance)
-	err = svc.SetRequisition(requisition)
+	err = svc.SetRequisition(req)
 	if err != nil {
 		panic(err)
 	}
-	err = svc.ImportRequisition(requisition.Name, "true")
+	err = svc.ImportRequisition(req.Name, "true")
 	if err != nil {
 		panic(err)
 	}
