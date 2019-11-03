@@ -29,6 +29,7 @@ Follow the Slack API [documentation](https://api.slack.com/incoming-webhooks) to
 
 * Using [Fission](README.fission.md)
 * Using [Kubeless](README.kubeless.md)
+* Using [Knative](README.knative.md)
 
 ## Test
 
