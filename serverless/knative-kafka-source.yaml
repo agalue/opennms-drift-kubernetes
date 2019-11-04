@@ -1,0 +1,15 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: KafkaSource
+metadata:
+  name: kafka-source
+spec:
+  consumerGroup: knative-group
+  bootstrapServers: kafka.opennms.svc.cluster.local:9092
+  topics: OpenNMS-alarms-json
+  sink:
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    name: slack-forwarder

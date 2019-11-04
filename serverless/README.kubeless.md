@@ -24,6 +24,8 @@ kubectl -n opennms create secret generic serverless-config \
  --dry-run -o yaml | kubectl apply -f -
 ```
 
+> **WARNING**: do not forget to fix the Slack URL.
+
 ## Create the function
 
 ```bash

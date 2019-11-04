@@ -70,51 +70,31 @@ EOF
 
 ## Install the Knative Service
 
-This service represents the `function` or the code that will be executed every time a message has been sent to a specific in kafka.
+## Create the secret with configuration
+
+Once you have the Slack WebHook URL, add it to a `secret`, as well as the OpenNMS WebUI URL; for example:
 
 ```bash
-SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz"
-
-cat <<EOF | kubectl apply -f -
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: slack-forwarder
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: agalue/slack-forwarder
-            env:
-            - name: SLACK_URL
-              value: ${SLACK_URL}
-            - name: OPENNMS_URL
-              value: https://onmsui.aws.agalue.net/opennms
+kubectl create secret generic serverless-config \
+ --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
+ --from-literal=ONMS_URL="https://onmsui.aws.agalue.net/opennms" \
+ --dry-run -o yaml | kubectl apply -f -
 ```
 
 > **WARNING**: do not forget to fix the Slack URL.
+
+This service represents the `function` or the code that will be executed every time a message has been sent to a specific in kafka.
+
+```bash
+kubectl apply -f knative-service.yaml
+```
 
 ## Install and Kafka Source controller
 
 This will trigger the desired Knative service when a message is received from a given Kafka topic.
 
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: KafkaSource
-metadata:
-  name: kafka-source
-spec:
-  consumerGroup: knative-group
-  bootstrapServers: kafka.opennms.svc.cluster.local:9092
-  topics: OpenNMS-alarms-json
-  sink:
-    apiVersion: serving.knative.dev/v1alpha1
-    kind: Service
-    name: slack-forwarder
-EOF
+kubectl apply -f knative-kafka-source.yaml
 ```
 
 Note that we specify the kafka Consumer Grup, the Kafka Cluster Bootstrap Server, the Kafka Topic and the `ksvc` that will be triggered when a new messages is received from the topic.

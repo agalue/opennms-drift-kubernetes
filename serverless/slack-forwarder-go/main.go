@@ -14,7 +14,7 @@ import (
 	"knative.dev/eventing-contrib/pkg/kncloudevents"
 )
 
-var opennmsURL string
+var onmsURL string
 var slackURL string
 
 var severityColors = map[string]string{
@@ -109,7 +109,7 @@ func processAlarm(event cloudevents.Event) {
 		log.Printf("Error while parsing alarm: %v\n", err)
 		return
 	}
-	msg := convertAlarm(alarm, opennmsURL)
+	msg := convertAlarm(alarm, onmsURL)
 	jsonBytes, err := json.Marshal(msg)
 	if err != nil {
 		log.Printf("Error while converting Slack Message to JSON: %v\n", err)
@@ -134,8 +134,8 @@ func processAlarm(event cloudevents.Event) {
 
 func main() {
 	var ok bool
-	if opennmsURL, ok = os.LookupEnv("OPENNMS_URL"); !ok {
-		log.Fatal("Environment variable OPENNMS_URL must exist")
+	if onmsURL, ok = os.LookupEnv("ONMS_URL"); !ok {
+		log.Fatal("Environment variable ONMS_URL must exist")
 	}
 	if slackURL, ok = os.LookupEnv("SLACK_URL"); !ok {
 		log.Fatal("Environment variable SLACK_URL must exist")

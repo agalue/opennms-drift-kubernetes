@@ -57,39 +57,7 @@ sleep 5; while echo && kubectl get pods -n knative-eventing | grep -v -E "(Runni
 sleep 5; while echo && kubectl get pods -n knative-sources | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
 
 header_text "Launching Slack Forwarder Service"
-
-cat <<EOF | kubectl apply -f -
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: slack-forwarder
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: agalue/slack-forwarder
-            env:
-            - name: SLACK_URL
-              value: ${slack_url}
-            - name: OPENNMS_URL
-              value: https://onmsui.aws.agalue.net/opennms
-EOF
+kubectl apply -f knative-service.yaml
 
 header_text "Launching Kafka Event Source"
-cat <<EOF | kubectl apply -f -
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: KafkaSource
-metadata:
-  name: kafka-source
-spec:
-  consumerGroup: knative-group
-  bootstrapServers: ${kafka_server}
-  topics: OpenNMS-alarms-json
-  sink:
-    apiVersion: serving.knative.dev/v1alpha1
-    kind: Service
-    name: slack-forwarder
-EOF
-
+kubectl apply -f knative-kafka-source.yaml
