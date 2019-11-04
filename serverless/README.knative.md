@@ -66,6 +66,8 @@ data:
 EOF
 ```
 
+> **WARNING**: do not forget to use your own domain.
+
 ## Install the Knative Service
 
 This service represents the `function` or the code that will be executed every time a message has been sent to a specific in kafka.
@@ -88,11 +90,11 @@ spec:
             env:
             - name: SLACK_URL
               value: ${SLACK_URL}
-            - name: ONMS_URL
+            - name: OPENNMS_URL
               value: https://onmsui.aws.agalue.net/opennms
 ```
 
-> **WARNING**: please remember to fix the Slack URL.
+> **WARNING**: do not forget to fix the Slack URL.
 
 ## Install and Kafka Source controller
 

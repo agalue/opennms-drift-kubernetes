@@ -73,7 +73,7 @@ spec:
             env:
             - name: SLACK_URL
               value: ${slack_url}
-            - name: ONMS_URL
+            - name: OPENNMS_URL
               value: https://onmsui.aws.agalue.net/opennms
 EOF
 
