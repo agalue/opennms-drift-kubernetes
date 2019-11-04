@@ -135,15 +135,14 @@ func processAlarm(event cloudevents.Event) {
 func main() {
 	var ok bool
 	if opennmsURL, ok = os.LookupEnv("OPENNMS_URL"); !ok {
-		log.Println("Error while parsing environment variable OPENNMS_URL")
-		return
+		log.Fatal("Environment variable OPENNMS_URL must exist")
 	}
 	if slackURL, ok = os.LookupEnv("SLACK_URL"); !ok {
-		log.Println("Error while parsing environment variable SLACK_URL")
-		return
+		log.Fatal("Environment variable SLACK_URL must exist")
 	}
 
 	c, err := kncloudevents.NewDefaultClient()
+	log.Println("Listening for Knative cloud events")
 	if err != nil {
 		log.Fatal("Failed to create client, ", err)
 	}
