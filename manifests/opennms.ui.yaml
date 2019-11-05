@@ -4,6 +4,8 @@
 # - This manifest is designed to work with the version of the image from:
 #   https://hub.docker.com/r/agalue/horizon-core-web
 #   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/master/docker-images/opennms
+#   The image is a slight modification of the official one, which is why all the customizations
+#   have been added through initContainers instead of having them within the image.
 # - I'm not a fan of this use case, and can only embrace it as either to provide additional
 #   horsepower for the ReST API, or as a limited WebUI (not all features available).
 #

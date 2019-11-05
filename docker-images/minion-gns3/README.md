@@ -1,4 +1,4 @@
-## Minion image based on Ubuntu 18 for GNS3
+# Minion image based on Ubuntu 18 for GNS3
 
 This is a special version of the Minion image that runs as root on Ubuntu, in order to allow it to run within GNS3.
 

@@ -68,8 +68,6 @@ EOF
 
 > **WARNING**: do not forget to use your own domain.
 
-## Install the Knative Service
-
 ## Create the secret with configuration
 
 Once you have the Slack WebHook URL, add it to a `secret`, as well as the OpenNMS WebUI URL; for example:
@@ -83,11 +81,15 @@ kubectl create secret generic serverless-config \
 
 > **WARNING**: do not forget to fix the Slack URL.
 
+## Install the Knative Service
+
 This service represents the `function` or the code that will be executed every time a message has been sent to a specific in kafka.
 
 ```bash
 kubectl apply -f knative-service.yaml
 ```
+
+> **WARNING**: make sure that the image from [slack-forwarder-go](./slack-forwarder-go) has been created and uploaded to Docker Hub. If a different account is used, make sure to adjust the YAML file.
 
 ## Install and Kafka Source controller
 

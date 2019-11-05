@@ -189,20 +189,24 @@ org.opennms.core.ipc.sink.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
 org.opennms.core.ipc.sink.kafka.group.id=${INSTANCE_ID}
 
 # Sink Consumer (verify Kafka broker configuration)
+org.opennms.core.ipc.sink.kafka.session.timeout.ms=30000
+org.opennms.core.ipc.sink.kafka.max.poll.records=50
 org.opennms.core.ipc.sink.kafka.max.partition.fetch.bytes=${KAFKA_MAX_MESSAGE_SIZE}
 
 # RPC
 org.opennms.core.ipc.rpc.strategy=kafka
 org.opennms.core.ipc.rpc.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
 org.opennms.core.ipc.rpc.kafka.ttl=30000
-org.opennms.core.ipc.rpc.kafka.compression.type=gzip
-org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
 
 # RPC Consumer (verify Kafka broker configuration)
+org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
+org.opennms.core.ipc.rpc.kafka.session.timeout.ms=30000
+org.opennms.core.ipc.rpc.kafka.max.poll.records=50
 org.opennms.core.ipc.rpc.kafka.max.partition.fetch.bytes=${KAFKA_MAX_MESSAGE_SIZE}
 org.opennms.core.ipc.rpc.kafka.auto.offset.reset=latest
 
 # RPC Producer (verify Kafka broker configuration)
+org.opennms.core.ipc.rpc.kafka.compression.type=gzip
 org.opennms.core.ipc.rpc.kafka.max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 EOF
 
