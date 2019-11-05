@@ -22,9 +22,12 @@ It has been done this way because it doesn't look possible to use `fission-core`
 Once you have the WebHook URL, add it to a `secret`, as well as the OpenNMS WebUI URL; for example:
 
 ```bash
+SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz"
+ONMS_URL="https://onmsui.aws.agalue.net/opennms"
+
 kubectl -n fission create secret generic serverless-config \
- --from-literal=SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz" \
- --from-literal=ONMS_URL="https://onmsui.aws.agalue.net/opennms" \
+ --from-literal=SLACK_URL="$SLACK_URL" \
+ --from-literal=ONMS_URL="$ONMS_URL" \
  --dry-run -o yaml | kubectl apply -f -
 ```
 
