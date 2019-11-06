@@ -27,6 +27,10 @@ metadata:
 spec:
   clusterIP: None
   ports:
+  - name: http
+    protocol: TCP
+    port: 8181
+    targetPort: http
   - name: traps
     protocol: UDP
     port: 161
@@ -81,7 +85,7 @@ spec:
       # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: agalue/minion:25.0.0-1
+        image: agalue/minion:25.1.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -123,10 +127,10 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: agalue/minion:25.0.0-1
+        image: agalue/minion:25.1.0
         imagePullPolicy: IfNotPresent
         args:
-        - -f
+        - -c
         env:
         - name: TZ
           valueFrom:
@@ -154,6 +158,9 @@ spec:
         - name: MAX_FD # Maximum File Descriptors
           value: 65536
         ports:
+        - containerPort: 8181
+          protocol: TCP
+          name: http
         - containerPort: 1162
           protocol: UDP
           name: traps
@@ -206,7 +213,8 @@ spec:
       # Use the following only when NX-OS Telemetry over gRPC is required.
       # https://github.com/agalue/nxos-telemetry-to-kafka-go
       - name: nxos-grpc
-        image: agalue/opennms-nxos-grpc-go:1.0.0-rc0
+        image: agalue/opennms-nxos-grpc-go:latest
+        imagePullPolicy: Always
         env:
         - name: TZ
           valueFrom:

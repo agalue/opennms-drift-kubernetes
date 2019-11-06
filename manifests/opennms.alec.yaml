@@ -36,7 +36,7 @@ spec:
       # Initialize Sentinel Configuration for ALEC in Distributed Mode
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: agalue/sentinel:25.0.0-1
+        image: agalue/sentinel:25.1.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -82,10 +82,10 @@ spec:
           value: '600'
       containers:
       - name: alec
-        image: agalue/sentinel:25.0.0-1
+        image: agalue/sentinel:25.1.0
         imagePullPolicy: IfNotPresent
         args:
-          - -c
+        - -c
         ports:
         - containerPort: 8181
           name: http

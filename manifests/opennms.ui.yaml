@@ -2,7 +2,7 @@
 #
 # NOTES:
 # - This manifest is designed to work with the version of the image from:
-#   https://hub.docker.com/r/agalue/horizon-core-web
+#   https://hub.docker.com/r/agalue/horizon
 #   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/master/docker-images/opennms
 #   The image is a slight modification of the official one, which is why all the customizations
 #   have been added through initContainers instead of having them within the image.
@@ -77,9 +77,9 @@ spec:
         - name: TIMEOUT
           value: '600'
       # Initialize OpenNMS UI Configuration
-      # Requires the same image/version used at runtime: horizon-core-web
+      # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: agalue/horizon-core-web:25.0.0-1
+        image: agalue/horizon:25.1.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -126,10 +126,8 @@ spec:
           subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
-        image: agalue/horizon-core-web:25.0.0-1
+        image: agalue/horizon:25.1.0
         imagePullPolicy: IfNotPresent
-        args:
-        - -s
         ports:
         - containerPort: 8101
           name: karaf

@@ -29,6 +29,24 @@ spec:
   targetCPUUtilizationPercentage: 80
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel
+  namespace: opennms
+  labels:
+    app: sentinel
+spec:
+  clusterIP: None
+  ports:
+  - port: 8181
+    name: http
+  - port: 8301
+    name: karaf
+  selector:
+    app: sentinel
+
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -65,7 +83,7 @@ spec:
       # Initialize Sentinel Configuration
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: agalue/sentinel:25.0.0-1
+        image: agalue/sentinel:25.1.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -126,10 +144,10 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        image: agalue/sentinel:25.0.0-1
+        image: agalue/sentinel:25.1.0
         imagePullPolicy: IfNotPresent
         args:
-          - -c
+        - -c
         ports:
         - containerPort: 8181
           name: http
