@@ -44,7 +44,7 @@ if [[ ${INSTANCE_ID} ]]; then
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
-  cp ${SYSTEM_CFG $OVERLAY}
+  cp ${SYSTEM_CFG} ${OVERLAY}
 fi
 
 # Configuring SCV credentials to access the OpenNMS ReST API

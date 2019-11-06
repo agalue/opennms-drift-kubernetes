@@ -46,7 +46,7 @@ if [[ ${INSTANCE_ID} ]]; then
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
 fi
-cp ${SYSTEM_CFG $OVERLAY}
+cp ${SYSTEM_CFG} ${OVERLAY}
 
 # Configuring SCV credentials to access the OpenNMS ReST API
 if [[ ${OPENNMS_HTTP_USER} && ${OPENNMS_HTTP_PASS} ]]; then
