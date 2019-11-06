@@ -36,6 +36,8 @@ echo "Waiting for Knative Serving to become ready"
 sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 ```
 
+> **NOTE**: The monitoring manifets are not installed as they are not required for this solution; although, if your Kubernetes cluster has enough resources, you can give that a try.
+
 ## Install Knative Eventing
 
 ```bash
@@ -61,8 +63,7 @@ metadata:
   name: config-domain
   namespace: knative-serving
 data:
-  $DOMAIN: |
-    $DOMAIN: ""
+  $DOMAIN: ""
 EOF
 ```
 

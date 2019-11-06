@@ -16,21 +16,21 @@ if [ "${slack_url}" == "" ]; then
   exit 1
 fi
 
+function header_text {
+  echo "$header$*$reset"
+}
+
 serving_version="v0.10.0"
 eventing_version="v0.10.0"
 istio_version="1.3.3"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
-
-function header_text {
-  echo "$header$*$reset"
-}
 
 header_text "Starting Knative on minikube..."
 
 header_text "Using Knative Serving Version:  ${serving_version}"
 header_text "Using Knative Eventing Version: ${eventing_version}"
 header_text "Using Istio Version:            ${istio_version}"
-header_test "Using Kafka Server:             ${kafka_server}"
+header_text "Using Kafka Server:             ${kafka_server}"
 
 header_text "Labeling default namespace w/ istio-injection=enabled"
 kubectl label namespace default istio-injection=enabled

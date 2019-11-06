@@ -1,25 +1,23 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
-apiVersion: serving.knative.dev/v1alpha1
+apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: slack-forwarder
 spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: agalue/slack-forwarder
-            env:
-            - name: SLACK_URL
-              valueFrom:
-                secretKeyRef:
-                  key: SLACK_URL
-                  name: serverless-config
-            - name: ONMS_URL
-              valueFrom:
-                secretKeyRef:
-                  key: ONMS_URL
-                  name: serverless-config
+  template:
+    spec:
+      containers:
+      - image: agalue/slack-forwarder
+        env:
+        - name: SLACK_URL
+          valueFrom:
+            secretKeyRef:
+              key: SLACK_URL
+              name: serverless-config
+        - name: ONMS_URL
+          valueFrom:
+            secretKeyRef:
+              key: ONMS_URL
+              name: serverless-config

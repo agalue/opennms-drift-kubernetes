@@ -158,9 +158,6 @@ spec:
         - name: MAX_FD # Maximum File Descriptors
           value: '65536'
         ports:
-        - containerPort: 8181
-          protocol: TCP
-          name: http
         - containerPort: 1162
           protocol: UDP
           name: traps
