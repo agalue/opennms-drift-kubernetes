@@ -32,7 +32,6 @@ configMapGenerator:
 - name: opennms-config
   files:
   - config/grafana-init.sh
-  - config/hasura-init.sh
   - config/helm-init.sh
   - config/onms-alec-init.sh
   - config/onms-core-init.sh
