@@ -26,6 +26,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     mkdir /opt/sentinel/.ssh && \
     chmod 700 /opt/sentinel/.ssh && \
     ssh-keygen -t rsa -f /opt/sentinel/.ssh/id_rsa -q -N "" && \
+    chown -R sentinel:sentinel /opt/sentinel/.ssh && \
     setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
     echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig && \

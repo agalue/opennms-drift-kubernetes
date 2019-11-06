@@ -22,6 +22,7 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     mkdir /opt/minion/.ssh && \
     chmod 700 /opt/minion/.ssh && \
     ssh-keygen -t rsa -f /opt/minion/.ssh/id_rsa -q -N "" && \
+    chown -R minion:minion /opt/minion/.ssh && \
     setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
     echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig && \
