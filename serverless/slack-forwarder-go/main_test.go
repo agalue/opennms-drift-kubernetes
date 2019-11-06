@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	cloudevents "github.com/cloudevents/sdk-go"
 	"gotest.tools/assert"
 )
 
@@ -32,7 +31,7 @@ func TestGet(t *testing.T) {
 	defer testServer.Close()
 
 	slackURL = testServer.URL
-	opennmsURL = "https://onms.aws.agalue.net/opennms"
+	onmsURL = "https://onms.aws.agalue.net/opennms"
 	alarm := Alarm{
 		ID:            1,
 		LogMessage:    "<p>Something <b>bad</b> happened</p>",
@@ -47,11 +46,5 @@ func TestGet(t *testing.T) {
 			},
 		},
 	}
-	e := cloudevents.NewEvent()
-	e.SetID("001")
-	e.SetSource("dev.knative.eventing.samples.test")
-	e.SetType("application/json")
-	e.SetDataContentType("application/json")
-	e.SetData(alarm)
-	processAlarm(e)
+	processAlarm(alarm)
 }

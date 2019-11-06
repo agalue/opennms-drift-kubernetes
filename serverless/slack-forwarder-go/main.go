@@ -102,13 +102,7 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 	return SlackMessage{[]SlackAttachment{att}}
 }
 
-func processAlarm(event cloudevents.Event) {
-	log.Printf("Processing %s\n", event.String())
-	alarm := Alarm{}
-	if err := event.DataAs(&alarm); err != nil {
-		log.Printf("Error while parsing alarm: %v\n", err)
-		return
-	}
+func processAlarm(alarm Alarm) {
 	msg := convertAlarm(alarm, onmsURL)
 	jsonBytes, err := json.Marshal(msg)
 	if err != nil {
@@ -132,6 +126,16 @@ func processAlarm(event cloudevents.Event) {
 	}
 }
 
+func run(event cloudevents.Event) {
+	log.Printf("Processing %s\n", event.String())
+	alarm := Alarm{}
+	if err := event.DataAs(&alarm); err != nil {
+		log.Printf("Error while parsing alarm: %v\n", err)
+		return
+	}
+	processAlarm(alarm)
+}
+
 func main() {
 	var ok bool
 	if onmsURL, ok = os.LookupEnv("ONMS_URL"); !ok {
@@ -147,5 +151,5 @@ func main() {
 		log.Fatal("Failed to create client, ", err)
 	}
 
-	log.Fatal(c.StartReceiver(context.Background(), processAlarm))
+	log.Fatal(c.StartReceiver(context.Background(), run))
 }
