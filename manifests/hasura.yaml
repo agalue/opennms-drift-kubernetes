@@ -75,11 +75,13 @@ spec:
         - name: TIMEOUT
           value: '600'
       # Patch the database for Hasura
-      - name: init-database
+      - name: init-config
         image: postgres:11.1
         imagePullPolicy: IfNotPresent
         command:
-        - psql -f /hasura.sql
+        - sh
+        - -c
+        - exec psql -f /hasura.sql
         env:
         - name: TZ
           valueFrom:
