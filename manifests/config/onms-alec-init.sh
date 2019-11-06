@@ -31,7 +31,7 @@ if [[ ${INSTANCE_ID} ]]; then
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
 fi
-cp ${SYSTEM_CFG $OVERLAY}
+cp ${SYSTEM_CFG} ${OVERLAY}
 
 FEATURES_DIR=${OVERLAY}/featuresBoot.d
 mkdir -p ${FEATURES_DIR}
