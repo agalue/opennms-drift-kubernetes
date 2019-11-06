@@ -198,7 +198,7 @@ spec:
         - name: JAVA_OPTS
           value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -Dcom.datastax.driver.FORCE_NIO=true
         - name: MAX_FD # Maximum File Descriptors
-          value: 65536
+          value: '65536'
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/sentinel-etc-overlay

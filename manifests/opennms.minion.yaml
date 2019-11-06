@@ -156,7 +156,7 @@ spec:
         - name: JAVA_OPTS
           value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         - name: MAX_FD # Maximum File Descriptors
-          value: 65536
+          value: '65536'
         ports:
         - containerPort: 8181
           protocol: TCP
