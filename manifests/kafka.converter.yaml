@@ -1,3 +1,9 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# Kafka Converter Tool implemented in Go.
+# This takes a given GPB payload from a topic and puts its JSON representation into another topic
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,8 +37,6 @@ spec:
         image: agalue/kafka-converter-go:latest
         imagePullPolicy: Always
         env:
-        - name: JAVA_OPTS
-          value: -XX:+UseG1GC
         - name: BOOTSTRAP_SERVERS
           value: kafka.opennms.svc.cluster.local:9092
         - name: APP_ID

@@ -140,7 +140,7 @@ metadata:
   annotations:
     # For Kops
     dns.alpha.kubernetes.io/external: kafka.aws.agalue.net.
-    # For External-DNS on EKS
+    # For External-DNS
     external-dns.alpha.kubernetes.io/hostname: kafka.aws.agalue.net.
 spec:
   type: LoadBalancer
