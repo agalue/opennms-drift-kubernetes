@@ -11,6 +11,28 @@
 # - Where the GraphQL schema is stored ? Looks like within PostgreSQL itself.
 # - How to pass the GraphQL schema to the container ? Find a way to export/import it.
 
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hasura-config
+  namespace: opennms
+  labels:
+    app: hasura
+data:
+  hasura.sql: |+
+    CREATE USER hasurauser WITH PASSWORD 'hasurauser';
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    CREATE SCHEMA IF NOT EXISTS hdb_catalog;
+    CREATE SCHEMA IF NOT EXISTS hdb_views;
+    ALTER SCHEMA hdb_catalog OWNER TO hasurauser;
+    ALTER SCHEMA hdb_views OWNER TO hasurauser;
+    GRANT SELECT ON ALL TABLES IN SCHEMA information_schema TO hasurauser;
+    GRANT SELECT ON ALL TABLES IN SCHEMA pg_catalog TO hasurauser;
+    GRANT ALL ON ALL TABLES IN SCHEMA public TO hasurauser;
+    GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO hasurauser;
+
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -57,8 +79,7 @@ spec:
         image: postgres:11.1
         imagePullPolicy: IfNotPresent
         command:
-        - sh
-        - /init.sh
+        - psql -f /hasura.sql
         env:
         - name: TZ
           valueFrom:
@@ -77,12 +98,12 @@ spec:
               key: POSTGRES_PASSWORD
               name: onms-passwords
         volumeMounts:
-        - name: opennms-config
-          mountPath: /init.sh
-          subPath: hasura-init.sh
+        - name: hasura-config
+          mountPath: /hasura.sql
+          subPath: hasura.sql
       containers:
       - name: hasura
-        image: hasura/graphql-engine:v1.0.0-beta.6
+        image: hasura/graphql-engine:v1.0.0-beta.9
         imagePullPolicy: IfNotPresent
         env:
         - name: PG_PASSWD
@@ -122,6 +143,6 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 60
       volumes:
-      - name: opennms-config
+      - name: hasura-config
         configMap:
-          name: opennms-config
+          name: hasura-config
