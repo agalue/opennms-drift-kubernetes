@@ -16,6 +16,7 @@ ENV MINION_HOME="/opt/minion" \
     OPENNMS_BROKER_PASS="admin"
 
 RUN yum -y --setopt=tsflags=nodocs update && \
+    yum -y install net-tools openssh-clients && \
     groupadd -g ${MINION_UID} minion && \
     useradd -u ${MINION_UID} -g ${MINION_UID} -d /opt/minion -s /usr/bin/bash minion && \
     mkdir /opt/minion/.ssh && \
@@ -27,7 +28,6 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${MINION_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
     yum -y install opennms-minion && \
-    yum -y install net-tools openssh-clients && \
     yum clean all && \
     echo minion=$(cat /opt/minion/.ssh/id_rsa.pub | awk '{print $2}'),viewer > /opt/minion/etc/keys.properties && \
     echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/minion/etc/keys.properties && \

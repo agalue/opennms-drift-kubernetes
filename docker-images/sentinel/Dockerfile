@@ -20,6 +20,7 @@ ENV SENTINEL_HOME="/opt/sentinel" \
     POSTGRES_DB="opennms"
 
 RUN yum -y --setopt=tsflags=nodocs update && \
+    yum -y install net-tools openssh-clients && \
     groupadd -g ${SENTINEL_UID} sentinel && \
     useradd -u ${SENTINEL_UID} -g ${SENTINEL_UID} -d /opt/sentinel -s /usr/bin/bash sentinel && \
     mkdir /opt/sentinel/.ssh && \
@@ -31,7 +32,6 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${SENTINEL_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
     yum -y install opennms-sentinel && \
-    yum -y install net-tools openssh-clients && \
     yum clean all && \
     echo sentinel=$(cat /opt/sentinel/.ssh/id_rsa.pub | awk '{print $2}'),viewer > /opt/sentinel/etc/keys.properties && \
     echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/sentinel/etc/keys.properties && \
