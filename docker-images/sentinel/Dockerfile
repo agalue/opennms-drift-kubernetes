@@ -38,7 +38,8 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/sentinel/etc/keys.properties && \
     sed -r -i '/RUNAS/s/.*/export RUNAS=sentinel/' /etc/sysconfig/sentinel && \
     chgrp -R 0 /opt/sentinel && \
-    chmod -R g=u /opt/sentinel
+    chmod -R g=u /opt/sentinel && \
+    chmod 600 /opt/sentinel/.ssh/id_rsa
 
 COPY ./assets/* /
 

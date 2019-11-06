@@ -34,7 +34,8 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/minion/etc/keys.properties && \
     sed -r -i '/RUNAS/s/.*/export RUNAS=minion/' /etc/sysconfig/minion && \
     chgrp -R 0 /opt/minion && \
-    chmod -R g=u /opt/minion
+    chmod -R g=u /opt/minion && \
+    chmod 600 /opt/minion/.ssh/id_rsa
 
 COPY ./assets/* /
 
