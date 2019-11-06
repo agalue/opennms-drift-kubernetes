@@ -9,6 +9,6 @@ docker build -t agalue/minion:$TAG --build-arg MINION_VERSION=stable ./minion
 docker build -t agalue/minion-gns3:$TAG --build-arg MINION_SOURCE=stable ./minion-gns3
 
 docker push agalue/horizon:$TAG
-docker push agalue/sentinel:h25-$TAG
-docker push agalue/minion:h25-$TAG
+docker push agalue/sentinel:$TAG
+docker push agalue/minion:$TAG
 docker push agalue/minion-gns3:$TAG
