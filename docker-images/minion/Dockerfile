@@ -1,4 +1,4 @@
-FROM opennms/openjdk:11
+FROM opennms/openjdk:11.0.4.11
 
 ARG MIRROR_HOST=yum.opennms.org
 ARG MINION_VERSION=stable
@@ -18,16 +18,19 @@ ENV MINION_HOME="/opt/minion" \
 RUN yum -y --setopt=tsflags=nodocs update && \
     groupadd -g ${MINION_UID} minion && \
     useradd -u ${MINION_UID} -g ${MINION_UID} -d /opt/minion -s /usr/bin/bash minion && \
+    mkdir /opt/minion/.ssh && \
+    chmod 700 /opt/minion/.ssh && \
+    ssh-keygen -t rsa -f /opt/minion/.ssh/id_rsa -q -N "" && \
     setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
     echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig && \
     rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${MINION_VERSION/\//-}-rhel7.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
     yum -y install opennms-minion && \
-    yum -y install net-tools sshpass openssh-clients && \
+    yum -y install net-tools openssh-clients && \
     yum clean all && \
-    rm -rf /var/cache/yum && \
-    chown minion:minion /opt/minion && \
+    echo minion=$(cat /opt/minion/.ssh/id_rsa.pub | awk '{print $2}'),viewer > /opt/minion/etc/keys.properties && \
+    echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/minion/etc/keys.properties && \
     sed -r -i '/RUNAS/s/.*/export RUNAS=minion/' /etc/sysconfig/minion && \
     chgrp -R 0 /opt/minion && \
     chmod -R g=u /opt/minion

@@ -1,4 +1,4 @@
-FROM opennms/openjdk:11
+FROM opennms/openjdk:11.0.4.11
 
 ARG MIRROR_HOST=yum.opennms.org
 ARG OPENNMS_VERSION="stable"
