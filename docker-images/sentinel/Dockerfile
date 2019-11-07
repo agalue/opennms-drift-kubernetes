@@ -1,4 +1,4 @@
-FROM opennms/openjdk:11.0.4.11
+FROM opennms/openjdk:11.0.5.10
 
 ARG MIRROR_HOST=yum.opennms.org
 ARG SENTINEL_VERSION=stable
@@ -19,8 +19,8 @@ ENV SENTINEL_HOME="/opt/sentinel" \
     POSTGRES_PASSWORD="postgres" \
     POSTGRES_DB="opennms"
 
-RUN yum -y --setopt=tsflags=nodocs update && \
-    yum -y install net-tools openssh-clients && \
+RUN dnf -y --setopt=tsflags=nodocs update && \
+    dnf -y install net-tools openssh-clients && \
     groupadd -g ${SENTINEL_UID} sentinel && \
     useradd -u ${SENTINEL_UID} -g ${SENTINEL_UID} -d /opt/sentinel -s /usr/bin/bash sentinel && \
     mkdir /opt/sentinel/.ssh && \
@@ -30,10 +30,10 @@ RUN yum -y --setopt=tsflags=nodocs update && \
     setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
     echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig && \
-    rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${SENTINEL_VERSION/\//-}-rhel7.noarch.rpm && \
+    rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${SENTINEL_VERSION/\//-}-rhel8.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
-    yum -y install opennms-sentinel && \
-    yum clean all && \
+    dnf -y install opennms-sentinel && \
+    dnf clean all && \
     echo sentinel=$(cat /opt/sentinel/.ssh/id_rsa.pub | awk '{print $2}'),viewer > /opt/sentinel/etc/keys.properties && \
     echo "_g_\\:admingroup = group,admin,manager,viewer,systembundles,ssh" >> /opt/sentinel/etc/keys.properties && \
     sed -r -i '/RUNAS/s/.*/export RUNAS=sentinel/' /etc/sysconfig/sentinel && \

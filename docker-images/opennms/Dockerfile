@@ -1,4 +1,4 @@
-FROM opennms/openjdk:11.0.4.11
+FROM opennms/openjdk:11.0.5.10
 
 ARG MIRROR_HOST=yum.opennms.org
 ARG OPENNMS_VERSION="stable"
@@ -16,27 +16,26 @@ ENV OPENNMS_KARAF_SSH_HOST="0.0.0.0" \
     OPENNMS_DBPASS="opennms" \
     JAVA_OPTS="-Xmx1024m -XX:MaxMetaspaceSize=512m"
 
-RUN yum -y --setopt=tsflags=nodocs update && \
-    yum -y install net-tools openssh-clients && \
+RUN dnf -y --setopt=tsflags=nodocs update && \
+    dnf -y install net-tools openssh-clients && \
     groupadd -g ${OPENNMS_UID} opennms && \
     useradd -u ${OPENNMS_UID} -g ${OPENNMS_UID} -d /opt/opennms -s /usr/bin/bash opennms && \
     setcap cap_net_raw+ep ${JAVA_HOME}/bin/java && \
     echo ${JAVA_HOME}/lib/jli > /etc/ld.so.conf.d/java-latest.conf && \
     ldconfig && \
-    rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${OPENNMS_VERSION/\//-}-rhel7.noarch.rpm && \
+    rpm -Uvh https://${MIRROR_HOST}/repofiles/opennms-repo-${OPENNMS_VERSION/\//-}-rhel8.noarch.rpm && \
     rpm --import https://${MIRROR_HOST}/OPENNMS-GPG-KEY && \
-    yum -y install epel-release && \
-    yum -y install rsync jq && \
-    yum -y install 'perl(LWP)' 'perl(XML::Twig)' && \
-    yum -y install gettext \
+    dnf -y install epel-release && \
+    dnf -y install rsync jq && \
+    dnf -y install 'perl(LWP)' 'perl(XML::Twig)' && \
+    dnf -y install gettext \
                    rrdtool \
                    jrrd2 \
                    opennms-core \
                    opennms-webapp-jetty \
                    opennms-plugin-protocol-cifs \
                    opennms-webapp-hawtio && \
-    yum clean all && \
-    rm -rf /var/cache/yum && \
+    dnf clean all && \
     rm -rf /opt/opennms/logs \
            /var/opennms/rrd \
            /var/opennms/reports && \
