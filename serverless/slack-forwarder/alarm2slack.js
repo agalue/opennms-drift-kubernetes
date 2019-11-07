@@ -32,10 +32,11 @@ const severityNames = [
 
 const mandatoryFields = [
   'id',
-  'logMessage',
+  'log_message',
   'description',
   'severity',
-  'lastEventTime'
+  'last_event',
+  'last_event_time'
 ];
 
 function getConfig(attributeName) {
@@ -57,43 +58,47 @@ function getConfig(attributeName) {
 }
 
 function buildMessage(alarm) {
-  let message = {
-    attachments: [{
-      title: `Alarm ID: ${alarm.id}`,
-      title_link: `${globalOnmsUrl}/alarm/detail.htm?id=${alarm.id}`,
-      color: severityColors[alarm.severity],
-      pretext: mrkdwn(alarm.logMessage).text,
-      text: mrkdwn(alarm.description).text,
-      ts: alarm.lastEventTime/1000 | 0,
-      fields: [{
-        title: 'Severity',
-        value: severityNames[alarm.severity],
-        short: true
-      }]
+  let attachment = {
+    title: `Alarm ID: ${alarm.id}`,
+    title_link: `${globalOnmsUrl}/alarm/detail.htm?id=${alarm.id}`,
+    color: severityColors[alarm.severity],
+    pretext: mrkdwn(alarm.log_message).text,
+    text: mrkdwn(alarm.description).text,
+    ts: alarm.last_event_time/1000 | 0,
+    fields: [{
+      title: 'Severity',
+      value: severityNames[alarm.severity],
+      short: true
     }]
-  };
+  }
   if (alarm.node_criteria) {
     const c = alarm.node_criteria
     const nodeLabel = c.foreign_id ? `${c.foreign_source}:${c.foreign_id}(${c.id})` : `ID=${c.id}`;
-    message.fields.push({
+    attachment.fields.push({
       title: 'Node',
       value: nodeLabel,
       short: false
     });
   }
-  if (alarm.parameters) {
-    alarm.parameters.forEach(p => message.fields.push({
+  if (alarm.last_event) {
+    alarm.last_event.parameter.forEach(p => attachment.fields.push({
       title: p.name,
       value: p.value,
       short: false
     }));
   }
+  let message = {
+    attachments: [ attachment ]
+  };
   console.log(message);
   return message;
 }
 
 async function sendAlarm(alarm) {
   console.log('Reveived: ', JSON.stringify(alarm, null, 2));
+	if (!alarm.id) {
+    return { status: 400, body: 'Invalid alarm received, ignoring.' };
+	}
   if (!globalSlackUrl) {
     return { status: 400, body: 'Missing Slack Webhook URL.' };
   }

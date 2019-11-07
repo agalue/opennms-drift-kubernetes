@@ -13,10 +13,24 @@ test('Test message generation', async() => {
   const alarm = {
     id: 666,
     uei: 'uei.test/jigsaw',
-    logMessage: 'Hello <strong>alejandro</strong>',
+    log_message: 'Hello <strong>alejandro</strong>',
     description: '<p>I want to play a game.</p>',
     severity: 6,
-    lastEventTime: 1551640812345
+    last_event_time: 1551640812345,
+    last_event: {
+      id: 66,
+      parameter: [
+        {
+          name: "Owner",
+          value: "agalue"
+        }
+      ]
+    },
+    node_criteria: {
+      id: 6,
+      foreign_source: "hell",
+      foreign_id: "diablo"
+    }
   };
 
   const message = {
@@ -24,13 +38,21 @@ test('Test message generation', async() => {
       title: `Alarm ID: ${alarm.id}`,
       title_link: `${process.env.ONMS_URL}/alarm/detail.htm?id=${alarm.id}`,
       color: '#ff3300',
-      pretext: mrkdwn(alarm.logMessage).text,
+      pretext: mrkdwn(alarm.log_message).text,
       text: mrkdwn(alarm.description).text,
       ts: 1551640812,
       fields: [{
         title: "Severity",
         value: "Major",
         short: true
+      },{
+        title: "Node",
+        value: "hell:diablo(6)",
+        short: false
+      },{
+        title: "Owner",
+        value: "agalue",
+        short: false
       }]
     }]
   };

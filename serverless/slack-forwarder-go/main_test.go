@@ -24,8 +24,9 @@ func TestProcessAlarm(t *testing.T) {
 		assert.NilError(t, err)
 		fmt.Println(string(bytes))
 		att := msg.Attachments[0]
-		assert.Equal(t, "Alarm ID: 1", att.Title)
+		assert.Equal(t, "Alarm ID: 666", att.Title)
 		assert.Equal(t, "Something **bad** happened", att.PreText)
+		assert.Equal(t, 3, len(att.Fields))
 		res.WriteHeader(http.StatusOK)
 	}))
 	defer testServer.Close()
@@ -33,21 +34,24 @@ func TestProcessAlarm(t *testing.T) {
 	slackURL := testServer.URL
 	onmsURL := "https://onms.aws.agalue.net/opennms"
 	alarm := Alarm{
-		ID:            1,
-		UEI:           "uei.opennms.org/test",
-		LogMessage:    "<p>Something <b>bad</b> happened</p>",
-		Description:   "<p>Check just stuff</p>",
-		Severity:      6,
-		LastEventTime: 1000000,
+		ID:          666,
+		UEI:         "uei.opennms.org/test",
+		LogMessage:  "<p>Something <b>bad</b> happened</p>",
+		Description: "<p>Check your stuff</p>",
+		Severity:    6,
 		NodeCriteria: &NodeCriteria{
 			ID:            1,
 			ForeignSource: "Test",
 			ForeignID:     "001",
 		},
-		Parameters: []AlarmParameter{
-			{
-				Name:  "owner",
-				Value: "agalue",
+		LastEventTime: 1000000,
+		LastEvent: &Event{
+			ID: 66,
+			Parameters: []EventParameter{
+				{
+					Name:  "Owner",
+					Value: "agalue",
+				},
 			},
 		},
 	}

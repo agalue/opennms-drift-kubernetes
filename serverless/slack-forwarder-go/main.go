@@ -18,7 +18,7 @@ var onmsURL string
 var slackURL string
 
 var severityColors = []string{
-	"#000000",
+	"#000",
 	"#999000",
 	"#999",
 	"#336600",
@@ -39,10 +39,16 @@ var severityNames = []string{
 	"Critical",
 }
 
-// AlarmParameter represents a parameter of an OpenNMS Alarm
-type AlarmParameter struct {
+// EventParameter represents a parameter of an OpenNMS Event
+type EventParameter struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+// Event represents the simplified version of an OpenNMS Event from the Kafka Producer
+type Event struct {
+	ID         int              `json:"id"`
+	Parameters []EventParameter `json:"parameter"`
 }
 
 // NodeCriteria represents the node identifier
@@ -52,17 +58,18 @@ type NodeCriteria struct {
 	ForeignID     string `json:"foreign_id"`
 }
 
-// Alarm represents the simplified structure of an OpenNMS Alarm
+// Alarm represents the simplified version of an OpenNMS Alarm from the Kafka Producer
 type Alarm struct {
-	ID            int              `json:"id"`
-	UEI           string           `json:"uei"`
-	NodeCriteria  *NodeCriteria    `json:"node_criteria"`
-	LogMessage    string           `json:"logMessage"`
-	Description   string           `json:"description"`
-	Severity      int              `json:"severity"`
-	Type          int              `json:"type"`
-	LastEventTime int              `json:"last_event_time"`
-	Parameters    []AlarmParameter `json:"parameter"`
+	ID            int           `json:"id"`
+	UEI           string        `json:"uei"`
+	NodeCriteria  *NodeCriteria `json:"node_criteria"`
+	LogMessage    string        `json:"log_message"`
+	Description   string        `json:"description"`
+	Severity      int           `json:"severity"`
+	Type          int           `json:"type"`
+	Count         int           `json:"count"`
+	LastEventTime int           `json:"last_event_time"`
+	LastEvent     *Event        `json:"last_event"`
 }
 
 // HasNode returns true if the alarm has a valid node criteria
@@ -128,8 +135,8 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 			Short: false,
 		})
 	}
-	if len(alarm.Parameters) > 0 {
-		for _, p := range alarm.Parameters {
+	if alarm.LastEvent != nil && len(alarm.LastEvent.Parameters) > 0 {
+		for _, p := range alarm.LastEvent.Parameters {
 			att.Fields = append(att.Fields, SlackField{
 				Title: p.Name,
 				Value: p.Value,
@@ -142,6 +149,10 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 
 // ProcessAlarm build a message based on an OpenNMS alarm and sends it to Slack
 func ProcessAlarm(alarm Alarm, onmsURL, slackURL string) {
+	if alarm.ID == 0 {
+		log.Println("Invalid alarm received, ignoring")
+		return
+	}
 	msg := convertAlarm(alarm, onmsURL)
 	jsonBytes, err := json.Marshal(msg)
 	if err != nil {

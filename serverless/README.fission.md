@@ -87,9 +87,10 @@ The following alternative options are valid, but they are not working, probably 
 fission function test --name alarm2slack --body '{
   "id": 666,
   "uei": "uei.jigsaw/test",
-  "severity": "WARNING",
-  "lastEventTime": 1560438592000,
-  "logMessage": "I want to play a game",
+  "severity": 6,
+  "last_event_time": 1560438592000,
+  "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
+  "log_message": "I want to play a game",
   "description": "<p>Hope to hear from your soon!</p>"
  }'
 ```
@@ -114,9 +115,10 @@ Then,
 curl -H 'Content-Type: application/json' -v -d '{
   "id": 666,
   "uei": "uei.jigsaw/test",
-  "severity": "WARNING",
-  "lastEventTime": 1560438592000,
-  "logMessage": "I want to play a game",
+  "severity": 6,
+  "last_event_time": 1560438592000,
+  "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
+  "log_message": "I want to play a game",
   "description": "<p>Hope to hear from your soon!</p>"
  }' http://fission.$DOMAIN/alarm2slack
 ```
