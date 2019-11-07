@@ -39,8 +39,8 @@ spec:
         env:
         - name: BOOTSTRAP_SERVERS
           value: kafka.opennms.svc.cluster.local:9092
-        - name: APP_ID
-          value: Converter
+        - name: GROUP_ID
+          value: kafka-converter
         - name: SOURCE_KIND
           value: alarms
         - name: INSTANCE_ID
