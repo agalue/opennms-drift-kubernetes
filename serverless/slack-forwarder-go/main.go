@@ -17,14 +17,26 @@ import (
 var onmsURL string
 var slackURL string
 
-var severityColors = map[string]string{
-	"CRITICAL":      "#cc0000",
-	"MAJOR":         "#ff3300",
-	"MINOR":         "#ff9900",
-	"WARNING":       "#ffcc00",
-	"INDETERMINATE": "#999000",
-	"NORMAL":        "#336600",
-	"CLEARED":       "#999",
+var severityColors = []string{
+	"#000000",
+	"#999000",
+	"#999",
+	"#336600",
+	"#ffcc00",
+	"#ff9900",
+	"#ff3300",
+	"#cc0000",
+}
+
+var severityNames = []string{
+	"Unknown",
+	"Indeterminate",
+	"Cleared",
+	"Normal",
+	"Warning",
+	"Minor",
+	"Major",
+	"Critical",
 }
 
 // AlarmParameter represents a parameter of an OpenNMS Alarm
@@ -33,15 +45,41 @@ type AlarmParameter struct {
 	Value string `json:"value"`
 }
 
+// NodeCriteria represents the node identifier
+type NodeCriteria struct {
+	ID            int    `json:"id"`
+	ForeignSource string `json:"foreign_source"`
+	ForeignID     string `json:"foreign_id"`
+}
+
 // Alarm represents the simplified structure of an OpenNMS Alarm
 type Alarm struct {
 	ID            int              `json:"id"`
+	UEI           string           `json:"uei"`
+	NodeCriteria  *NodeCriteria    `json:"node_criteria"`
 	LogMessage    string           `json:"logMessage"`
 	Description   string           `json:"description"`
-	Severity      string           `json:"severity"`
-	LastEventTime int              `json:"lastEventTime"`
-	NodeLabel     string           `json:"nodeLabel"`
-	Parameters    []AlarmParameter `json:"parameters"`
+	Severity      int              `json:"severity"`
+	Type          int              `json:"type"`
+	LastEventTime int              `json:"last_event_time"`
+	Parameters    []AlarmParameter `json:"parameter"`
+}
+
+// HasNode returns true if the alarm has a valid node criteria
+func (alarm Alarm) HasNode() bool {
+	return alarm.NodeCriteria != nil && alarm.NodeCriteria.ID > 0
+}
+
+// GetNodeLabel returns the node label based on the node criteria
+func (alarm Alarm) GetNodeLabel() string {
+	nc := alarm.NodeCriteria
+	if nc == nil {
+		return "Unknown"
+	}
+	if nc.ForeignID == "" {
+		return fmt.Sprintf("ID=%d", nc.ID)
+	}
+	return fmt.Sprintf("%s:%s(%d)", nc.ForeignSource, nc.ForeignID, nc.ID)
 }
 
 // SlackField represents a field object of an attachment
@@ -78,15 +116,15 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 		Fields: []SlackField{
 			{
 				Title: "Severity",
-				Value: alarm.Severity,
+				Value: severityNames[alarm.Severity],
 				Short: true,
 			},
 		},
 	}
-	if alarm.NodeLabel != "" {
+	if alarm.HasNode() {
 		att.Fields = append(att.Fields, SlackField{
 			Title: "Node",
-			Value: alarm.NodeLabel,
+			Value: alarm.GetNodeLabel(),
 			Short: false,
 		})
 	}
@@ -102,7 +140,8 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 	return SlackMessage{[]SlackAttachment{att}}
 }
 
-func processAlarm(alarm Alarm) {
+// ProcessAlarm build a message based on an OpenNMS alarm and sends it to Slack
+func ProcessAlarm(alarm Alarm, onmsURL, slackURL string) {
 	msg := convertAlarm(alarm, onmsURL)
 	jsonBytes, err := json.Marshal(msg)
 	if err != nil {
@@ -133,7 +172,7 @@ func run(event cloudevents.Event) {
 		log.Printf("Error while parsing alarm: %v\n", err)
 		return
 	}
-	processAlarm(alarm)
+	ProcessAlarm(alarm, onmsURL, slackURL)
 }
 
 func main() {

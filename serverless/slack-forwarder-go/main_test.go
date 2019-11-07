@@ -11,7 +11,7 @@ import (
 	"gotest.tools/assert"
 )
 
-func TestGet(t *testing.T) {
+func TestProcessAlarm(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, http.MethodPost, req.Method)
 		bytes, err := ioutil.ReadAll(req.Body)
@@ -30,15 +30,20 @@ func TestGet(t *testing.T) {
 	}))
 	defer testServer.Close()
 
-	slackURL = testServer.URL
-	onmsURL = "https://onms.aws.agalue.net/opennms"
+	slackURL := testServer.URL
+	onmsURL := "https://onms.aws.agalue.net/opennms"
 	alarm := Alarm{
 		ID:            1,
+		UEI:           "uei.opennms.org/test",
 		LogMessage:    "<p>Something <b>bad</b> happened</p>",
 		Description:   "<p>Check just stuff</p>",
-		Severity:      "MAJOR",
+		Severity:      6,
 		LastEventTime: 1000000,
-		NodeLabel:     "testsrv01",
+		NodeCriteria: &NodeCriteria{
+			ID:            1,
+			ForeignSource: "Test",
+			ForeignID:     "001",
+		},
 		Parameters: []AlarmParameter{
 			{
 				Name:  "owner",
@@ -46,5 +51,6 @@ func TestGet(t *testing.T) {
 			},
 		},
 	}
-	processAlarm(alarm)
+
+	ProcessAlarm(alarm, onmsURL, slackURL)
 }
