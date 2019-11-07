@@ -29,7 +29,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TARGETS
-          value: kafka.opennms.svc.cluster.local:9092
+          value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
           value: '600'
       containers:
@@ -56,7 +56,7 @@ spec:
           value: latest
         - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
           value: '5000000'
-        - name: PROCUCER_MAX_REQUEST_SIZE
+        - name: PRODUCER_MAX_REQUEST_SIZE
           value: '5000000'
         resources:
           limits:
