@@ -6,11 +6,11 @@
   "author": "Alejandro Galue <agalue@opennms.org>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "html-to-mrkdwn": "^3.0.0"
   },
   "devDependencies": {
-    "jest": "^24.1.0"
+    "jest": "^24.9.0"
   },
   "scripts": {
     "test": "jest"

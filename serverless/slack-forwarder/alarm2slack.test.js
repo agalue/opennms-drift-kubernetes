@@ -15,7 +15,7 @@ test('Test message generation', async() => {
     uei: 'uei.test/jigsaw',
     logMessage: 'Hello <strong>alejandro</strong>',
     description: '<p>I want to play a game.</p>',
-    severity: 'MAJOR',
+    severity: 6,
     lastEventTime: 1551640812345
   };
 
@@ -29,7 +29,7 @@ test('Test message generation', async() => {
       ts: 1551640812,
       fields: [{
         title: "Severity",
-        value: alarm.severity,
+        value: "Major",
         short: true
       }]
     }]

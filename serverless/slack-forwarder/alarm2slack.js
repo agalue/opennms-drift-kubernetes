@@ -8,15 +8,27 @@ const axios = require('axios');
 const mrkdwn = require('html-to-mrkdwn');
 const fs = require('fs');
 
-const severityColors = {
-  CRITICAL:      '#cc0000',
-  MAJOR:         '#ff3300',
-  MINOR:         '#ff9900',
-  WARNING:       '#ffcc00',
-  INDETERMINATE: '#999000',
-  NORMAL:        '#336600',
-  CLEARED:       '#999'
-};
+const severityColors = [
+	'#000',
+	'#999000',
+	'#999',
+	'#336600',
+	'#ffcc00',
+	'#ff9900',
+	'#ff3300',
+	'#cc0000'
+];
+
+const severityNames = [
+	'Unknown',
+	'Indeterminate',
+	'Cleared',
+	'Normal',
+	'Warning',
+	'Minor',
+	'Major',
+	'Critical'
+];
 
 const mandatoryFields = [
   'id',
@@ -54,16 +66,18 @@ function buildMessage(alarm) {
       text: mrkdwn(alarm.description).text,
       ts: alarm.lastEventTime/1000 | 0,
       fields: [{
-        title: "Severity",
-        value: alarm.severity,
+        title: 'Severity',
+        value: severityNames[alarm.severity],
         short: true
       }]
     }]
   };
-  if (alarm.nodeLabel) {
+  if (alarm.node_criteria) {
+    const c = alarm.node_criteria
+    const nodeLabel = c.foreign_id ? `${c.foreign_source}:${c.foreign_id}(${c.id})` : `ID=${c.id}`;
     message.fields.push({
       title: 'Node',
-      value: alarm.nodeLabel,
+      value: nodeLabel,
       short: false
     });
   }
