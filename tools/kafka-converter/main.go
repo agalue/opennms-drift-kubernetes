@@ -27,20 +27,22 @@ const (
 
 var kinds = []string{ eventKind, alarmKind, nodeKind, edgeKind, metricKind, }
 
-type kafkaClient struct {
-	bootstrap        string
-	sourceTopic      string
-	destinationTopic string
-	messageKind      string
-	groupID          string
-	producerSettings string
-	consumerSettings string
+// KafkaClient represents a Kafka consumer/producer client application.
+type KafkaClient struct {
+	Bootstrap        string
+	SourceTopic      string
+	DestinationTopic string
+	MessageKind      string
+	GroupID          string
+	ProducerSettings string
+	ConsumerSettings string
+
 	producer         *kafka.Producer
 	consumer         *kafka.Consumer
 }
 
-func (cli *kafkaClient) getKafkaConfig(properties string) *kafka.ConfigMap {
-	config := &kafka.ConfigMap{"bootstrap.servers": cli.bootstrap}
+func (cli *KafkaClient) getKafkaConfig(properties string) *kafka.ConfigMap {
+	config := &kafka.ConfigMap{"bootstrap.servers": cli.Bootstrap}
 	if properties != "" {
 		for _, kv := range strings.Split(properties, ", ") {
 			array := strings.Split(kv, "=")
@@ -56,46 +58,49 @@ func (cli *kafkaClient) getKafkaConfig(properties string) *kafka.ConfigMap {
 	return config
 }
 
-func (cli *kafkaClient) validate() error {
-	if cli.sourceTopic == "" {
+func (cli *KafkaClient) validate() error {
+	if cli.SourceTopic == "" {
 		return fmt.Errorf("source topic cannot be empty")
 	}
-	if cli.destinationTopic == "" {
+	if cli.DestinationTopic == "" {
 		return fmt.Errorf("destination topic cannot be empty")
 	}
-	if cli.messageKind == "" {
+	if cli.MessageKind == "" {
 		return fmt.Errorf("message kind cannot be empty")
 	}
 	set := make(map[string]bool, len(kinds))
 	for _, s := range kinds {
 			set[s] = true
 	}
-	if _, ok := set[cli.messageKind]; !ok {
-		return fmt.Errorf("invalid message kind %s. Valid options: %s", cli.messageKind, strings.Join(kinds,", "))
+	if _, ok := set[cli.MessageKind]; !ok {
+		return fmt.Errorf("invalid message kind %s. Valid options: %s", cli.MessageKind, strings.Join(kinds,", "))
 	}
 	return nil
 }
 
-func (cli *kafkaClient) start() error {
+func (cli *KafkaClient) start() error {
 	var err error
+	jsonBytes, _ := json.MarshalIndent(cli, "", "  ")
+	log.Println(string(jsonBytes))
+
 	if err = cli.validate(); err != nil {
 		return err
 	}
 
 	// Build Producer
-	cli.producer, err = kafka.NewProducer(cli.getKafkaConfig(cli.producerSettings))
+	cli.producer, err = kafka.NewProducer(cli.getKafkaConfig(cli.ProducerSettings))
 	if err != nil {
 		return fmt.Errorf("could not create producer: %v", err)
 	}
 
 	// Build Consumer
-	config := cli.getKafkaConfig(cli.consumerSettings)
-	config.SetKey("group.id", cli.groupID)
+	config := cli.getKafkaConfig(cli.ConsumerSettings)
+	config.SetKey("group.id", cli.GroupID)
 	cli.consumer, err = kafka.NewConsumer(config)
 	if err != nil {
 		return fmt.Errorf("could not create consumer: %v", err)
 	}
-	cli.consumer.SubscribeTopics([]string{cli.sourceTopic}, nil)
+	cli.consumer.SubscribeTopics([]string{cli.SourceTopic}, nil)
 
 	// Producer messages
 	go func() {
@@ -103,9 +108,9 @@ func (cli *kafkaClient) start() error {
 			switch ev := e.(type) {
 			case *kafka.Message:
 				if ev.TopicPartition.Error != nil {
-					log.Printf("delivery failed: %v\n", ev.TopicPartition)
+					log.Printf("message delivery failed: %v\n", ev.TopicPartition.Error)
 				} else {
-					log.Printf("delivered message to %v\n", ev.TopicPartition)
+					log.Printf("message delivered to %v\n", ev.TopicPartition)
 				}
 			default:
 				log.Printf("kafka producer event: %s\n", ev)
@@ -119,7 +124,7 @@ func (cli *kafkaClient) start() error {
 			msg, err := cli.consumer.ReadMessage(-1)
 			if err == nil {
 				var data proto.Message
-				switch cli.messageKind {
+				switch cli.MessageKind {
 				case eventKind:
 					data = &producer.Event{}
 				case alarmKind:
@@ -132,12 +137,12 @@ func (cli *kafkaClient) start() error {
 					data = &producer.CollectionSet{}
 				}
 				if err := proto.Unmarshal(msg.Value, data); err != nil {
-					log.Printf("invalid %s message received: %v\n", cli.messageKind, err)
+					log.Printf("invalid %s message received: %v\n", cli.MessageKind, err)
 				}
 				jsonBytes, err := json.Marshal(data)
 				if err == nil {
 					cli.producer.Produce(&kafka.Message{
-						TopicPartition: kafka.TopicPartition{Topic: &cli.destinationTopic, Partition: kafka.PartitionAny},
+						TopicPartition: kafka.TopicPartition{Topic: &cli.DestinationTopic, Partition: kafka.PartitionAny},
 						Value:          jsonBytes,
 						Key: msg.Key,
 					}, nil)
@@ -150,24 +155,25 @@ func (cli *kafkaClient) start() error {
 		}
 	}()
 
-	log.Printf("kafka consumer/producer started against %s\n", cli.bootstrap)
+	log.Printf("kafka consumer/producer started against %s\n", cli.Bootstrap)
 	return nil
 }
 
-func (cli *kafkaClient) stop() {
+func (cli *KafkaClient) stop() {
 	cli.consumer.Close()
 	cli.producer.Close()
+	log.Println("good bye!")
 }
 
 func main() {
-	client := kafkaClient{}
-	flag.StringVar(&client.bootstrap, "bootstrap", "localhost:9092", "kafka bootstrap server")
-	flag.StringVar(&client.sourceTopic, "source-topic", "", "kafka source topic with OpenNMS Producer GPB messages")
-	flag.StringVar(&client.destinationTopic, "dest-topic", "", "kafka destination topic for JSON generated payload")
-	flag.StringVar(&client.groupID, "group-id", "opennms", "kafka consumer group ID")
-	flag.StringVar(&client.messageKind, "message-kind", alarmKind, "source topic message kind; valid options: " + strings.Join(kinds,", "))
-	flag.StringVar(&client.producerSettings, "producer-params", "", "optional kafka producer parameters as a CSV of Key-Value pairs")
-	flag.StringVar(&client.consumerSettings, "consumer-params", "", "optional kafka consumer parameters as a CSV of Key-Value pairs")
+	client := KafkaClient{}
+	flag.StringVar(&client.Bootstrap, "bootstrap", "localhost:9092", "kafka bootstrap server")
+	flag.StringVar(&client.SourceTopic, "source-topic", "", "kafka source topic with OpenNMS Producer GPB messages")
+	flag.StringVar(&client.DestinationTopic, "dest-topic", "", "kafka destination topic for JSON generated payload")
+	flag.StringVar(&client.GroupID, "group-id", "opennms", "kafka consumer group ID")
+	flag.StringVar(&client.MessageKind, "message-kind", alarmKind, "source topic message kind; valid options: " + strings.Join(kinds,", "))
+	flag.StringVar(&client.ProducerSettings, "producer-params", "", "optional kafka producer parameters as a CSV of Key-Value pairs")
+	flag.StringVar(&client.ConsumerSettings, "consumer-params", "", "optional kafka consumer parameters as a CSV of Key-Value pairs")
 	flag.Parse()
 
 	err := client.start()
