@@ -19,6 +19,8 @@ spec:
           value: '1'
         - name: KAFKA_MIN_INSYNC_REPLICAS
           value: '1'
+        - name: KAFKA_CREATE_TOPICS
+          $patch: delete
         resources:
           limits:
             memory: 1Gi
