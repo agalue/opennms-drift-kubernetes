@@ -19,7 +19,7 @@ spec:
         - name: xpack.security.enabled
           $patch: delete
         - name: cluster.initial_master_nodes
-          value: esmaster-0
+          $patch: delete
         - name: discovery.seed_hosts
           $patch: delete
         - name: node.master

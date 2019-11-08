@@ -1,14 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: opennms-ui
-  namespace: opennms
-spec:
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

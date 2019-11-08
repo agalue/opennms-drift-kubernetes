@@ -13,9 +13,9 @@ spec:
       - name: onms
         resources:
           limits:
-            memory: 2Gi
+            memory: 3Gi
           requests:
-            memory: 1Gi
+            memory: 2Gi
           $patch: replace
       - name: nfs
         $patch: delete

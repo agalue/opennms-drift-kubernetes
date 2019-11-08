@@ -79,7 +79,7 @@ With enough quota:
 ```bash
 gcloud container clusters create opennms \
   --num-nodes=5 \
-  --cluster-version=1.12.7-gke.10 \
+  --cluster-version=1.14.8-gke.2 \
   --machine-type=n1-standard-8
 ```
 
@@ -88,7 +88,7 @@ With reduced quota:
 ```bash
 gcloud container clusters create opennms \
   --num-nodes=3 \
-  --cluster-version=1.12.7-gke.10 \
+  --cluster-version=1.14.8-gke.2 \
   --machine-type=n1-standard-2
 ```
 
@@ -115,8 +115,8 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
 ```
 
 ## Install the CertManager
@@ -126,6 +126,33 @@ kubectl create namespace cert-manager
 kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
 kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.10.1/cert-manager.yaml
 ```
+
+## Install Jaeger Tracing
+
+```bash
+kubectl create namespace observability
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing_v1_jaeger_crd.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
+```
+
+## Manifets
+
+To apply all the manifests with enough quota:
+
+```bash
+kubectl apply -k gce
+```
+
+With reduced quota:
+
+```bash
+kubectl apply -k gce-reduced
+```
+
+> **NOTE**: Depending on the available resources, it is possible to remove some of the restrictions, to have more instances for the clusters, and/or OpenNMS.
 
 ## Configure DNS Entry for the Ingress Controller and Kafka
 
@@ -157,28 +184,6 @@ gcloud dns record-sets transaction add "$NGINX_EXTERNAL_IP" --zone $ZONE --name 
 gcloud dns record-sets transaction add "$KAFKA_EXTERNAL_IP" --zone $ZONE --name "kafka.$DOMAIN." --ttl 300 --type A
 gcloud dns record-sets transaction execute --zone $ZONE
 ```
-
-## Manifets
-
-To apply all the manifests with enough quota:
-
-```bash
-kubectl apply -k gce
-```
-
-Or,
-
-```bash
-kustomize build gce | kubectl apply -f
-```
-
-With reduced quota:
-
-```bash
-kustomize apply -k gce-reduced
-```
-
-> **NOTE**: Depending on the available resources, it is possible to remove some of the restrictions, to have more instances for the clusters, and/or OpenNMS.
 
 ## Security Groups
 

@@ -13,6 +13,7 @@ spec:
         - onms.gce.agalue.net
         - grafana.gce.agalue.net
         - kafka-manager.gce.agalue.net
+        - tracing.gce.agalue.net
   rules:
     - host: onms.gce.agalue.net
       http:
@@ -35,3 +36,10 @@ spec:
             backend:
               serviceName: kafka-manager
               servicePort: 9000
+    - host: tracing.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: jaeger-query
+              servicePort: 16686

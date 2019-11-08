@@ -2,9 +2,9 @@
 
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: esmaster
+  name: elastichq
   namespace: opennms
 spec:
   replicas: 0

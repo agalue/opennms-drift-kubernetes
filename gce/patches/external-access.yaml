@@ -11,12 +11,14 @@ spec:
     - secretName: opennms-ingress
       hosts:
         - onms.gce.agalue.net
+        - onmsui.gce.agalue.net
         - cassandra-reaper.gce.agalue.net
         - grafana.gce.agalue.net
         - hasura.gce.agalue.net
         - kibana.gce.agalue.net
+        - elastichq.gce.agalue.net
         - kafka-manager.gce.agalue.net
-        - onmsui.gce.agalue.net
+        - tracing.gce.agalue.net
   rules:
     - host: onms.gce.agalue.net
       http:
@@ -60,6 +62,13 @@ spec:
             backend:
               serviceName: kibana
               servicePort: 5601
+    - host: elastichq.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: elastichq
+              servicePort: 5000
     - host: onmsui.gce.agalue.net
       http:
         paths:
@@ -71,4 +80,11 @@ spec:
             backend:
               serviceName: opennms-core
               servicePort: 8980
+    - host: tracing.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: jaeger-query
+              servicePort: 16686
 
