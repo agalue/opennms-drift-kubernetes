@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"gopkg.in/yaml.v2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/OpenNMS/onmsctl/model"
@@ -22,6 +23,7 @@ func main() {
 	namespace := flag.String("namespace", "opennms", "The namespace where the OpenNMS resources live")
 	requisition := flag.String("requisition", "Kubernetes", "The name of the target OpenNMS requisition")
 	kubecfg := flag.String("config", os.Getenv("HOME")+"/.kube/config", "Kubernetes Configuration")
+	show := flag.Bool("show", false, "Show requisition in YAML")
 	flag.Parse()
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubecfg)
@@ -62,16 +64,17 @@ func main() {
 				intf.AddService(&model.RequisitionMonitoredService{Name: "PostgreSQL"})
 			case "elasticsearch":
 				intf.AddService(&model.RequisitionMonitoredService{Name: "Elasticsearch"})
+			case "onms":
+				loopback := &model.RequisitionInterface{
+					IPAddress:   "127.0.0.1",
+					SnmpPrimary: "N",
+					Status:      1,
+					Services: []model.RequisitionMonitoredService{
+						{Name: "OpenNMS-JVM"},
+					},
+				}
+				node.AddInterface(loopback)
 			}
-			loopback := &model.RequisitionInterface{
-				IPAddress:   "127.0.0.1",
-				SnmpPrimary: "N",
-				Status:      1,
-				Services: []model.RequisitionMonitoredService{
-					{Name: "OpenNMS-JVM"},
-				},
-			}
-			node.AddInterface(loopback)
 		}
 		node.AddInterface(intf)
 		node.AddMetaData("hostIP", pod.Status.HostIP)
@@ -79,7 +82,13 @@ func main() {
 			node.AddMetaData(key, value)
 		}
 		req.AddNode(node)
-		fmt.Printf("adding node for pod %s\n", pod.Name)
+		if !*show {
+			fmt.Printf("adding node for pod %s\n", pod.Name)
+		}
+	}
+	if *show {
+		yamlBytes, _ := yaml.Marshal(&req)
+		fmt.Println(string(yamlBytes))
 	}
 	svc := services.GetRequisitionsAPI(rest.Instance)
 	err = svc.SetRequisition(req)
@@ -90,5 +99,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Done!")
 }
