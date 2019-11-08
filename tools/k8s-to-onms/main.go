@@ -6,6 +6,7 @@ import (
 	"os"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -40,6 +41,11 @@ func main() {
 		Name: *requisition,
 	}
 	for _, pod := range pods.Items {
+		node := &model.RequisitionNode{
+			ForeignID: pod.Name,
+			NodeLabel: pod.Name,
+			Location:  "Kubernetes",
+		}
 		intf := &model.RequisitionInterface{
 			IPAddress:   pod.Status.PodIP,
 			SnmpPrimary: "N",
@@ -57,11 +63,15 @@ func main() {
 			case "elasticsearch":
 				intf.AddService(&model.RequisitionMonitoredService{Name: "Elasticsearch"})
 			}
-		}
-		node := &model.RequisitionNode{
-			ForeignID: pod.Name,
-			NodeLabel: pod.Name,
-			Location:  "Kubernetes",
+			loopback := &model.RequisitionInterface{
+				IPAddress:   "127.0.0.1",
+				SnmpPrimary: "N",
+				Status:      1,
+				Services: []model.RequisitionMonitoredService{
+					{Name: "OpenNMS-JVM"},
+				},
+			}
+			node.AddInterface(loopback)
 		}
 		node.AddInterface(intf)
 		node.AddMetaData("hostIP", pod.Status.HostIP)
