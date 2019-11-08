@@ -7,11 +7,12 @@ metadata:
   name: common-settings
   namespace: opennms
 data:
+  DOMAIN: azure.agalue.net
+  TIMEZONE: America/New_York
+  OPENNMS_INSTANCE_ID: OpenNMS
   CASSANDRA_CLUSTER_NAME: OpenNMS
   CASSANDRA_DC: Main
   CASSANDRA_REPLICATION_FACTOR: "2"
-  DOMAIN: azure.agalue.net
+  ELASTIC_INDEX_STRATEGY_FLOWS: daily
   KAFKA_NUM_PARTITIONS: "6"
   MINION_LOCATION: Kubernetes
-  OPENNMS_INSTANCE_ID: OpenNMS
-  TIMEZONE: America/New_York
