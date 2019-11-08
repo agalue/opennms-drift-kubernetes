@@ -143,6 +143,8 @@ When configuring Kafka, the `hostPort` is used in order to configure the `advert
 
 ## Cleanup
 
+Remove the A Records from the DNS Zone:
+
 ```bash
 export GROUP="Kubernetes"
 export DOMAIN="azure.agalue.net"
@@ -151,6 +153,13 @@ export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r 
 
 az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n '*' -a $NGINX_EXTERNAL_IP
 az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n 'kafka' -a $KAFKA_EXTERNAL_IP
+```
+
+Delete the cluster:
+
+```bash
+export GROUP="Kubernetes"
+
 az aks delete --name opennms --resource-group $GROUP
 ```
 

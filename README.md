@@ -106,7 +106,7 @@ docker run -it --name minion \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
- agalue/minion:25.0.0-1 -f
+ agalue/minion:25.1.0 -f
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.

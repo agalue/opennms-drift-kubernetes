@@ -191,11 +191,7 @@ When configuring Kafka, the `hostPort` is used in order to configure the `advert
 
 ## Cleanup
 
-```bash
-gcloud container clusters delete opennms
-```
-
-Also, remember to remove the A Record from the Cloud DNS Zone:
+Remove the A Records from the Cloud DNS Zone:
 
 ```bash
 export ZONE="gce"
@@ -207,4 +203,10 @@ gcloud dns record-sets transaction start --zone $ZONE
 gcloud dns record-sets transaction remove --zone $ZONE --name "*.$DOMAIN" --ttl 300 --type A "$NGINX_EXTERNAL_IP"
 gcloud dns record-sets transaction remove --zone $ZONE --name "kafka.$DOMAIN" --ttl 300 --type A "$KAFKA_EXTERNAL_IP"
 gcloud dns record-sets transaction execute --zone $ZONE
+```
+
+Delete the cluster:
+
+```bash
+gcloud container clusters delete opennms
 ```
