@@ -171,10 +171,10 @@ To remove the Kubernetes cluster, do the following:
 ```bash
 kubectl delete ingress ingress-rules --namespace opennms
 kubectl delete service ext-kafka --namespace opennms
-kubectl delete deployment external-dns
+sleep 10
 eksctl delete cluster --name opennms --region us-east-2 --wait
 ```
 
-The first 3 commands will trigger the removal of the Route 53 entries associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).
+The first 2 commands will trigger the removal of the Route 53 entries associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).
 
 This process could take in average between 15 to 20 minutes to complete. If wait is not feasible, remove `--wait` from the command.
