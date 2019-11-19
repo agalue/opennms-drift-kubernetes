@@ -50,18 +50,17 @@ Create the Kubernetes cluster using `eksctl`. The following example creates a cl
 
 ```bash
 eksctl create cluster \
-  --version 1.14 \
   --name opennms \
-  --nodegroup-name onms-fleet \
-  --tags Environment=Test,Department=Support \
+  --version 1.14 \
   --region us-east-2 \
+  --nodegroup-name onms-fleet \
   --node-type t2.2xlarge \
   --nodes 6 \
+  --tags Environment=Test,Department=Support \
   --ssh-access \
   --external-dns-access \
   --alb-ingress-access \
-  --auto-kubeconfig \
-  --set-kubeconfig-context
+  --managed
 ```
 
 This process could take in average between 15 to 20 minutes to complete. The above command will finish when the cluster is ready.
@@ -75,14 +74,8 @@ eksctl get cluster opennms
 The output should be something like this:
 
 ```text
-NAME	VERSION	STATUS	CREATED			VPC			SUBNETS					SECURITYGROUPS
-opennms	1.14	ACTIVE	2019-11-19T16:18:54Z	vpc-0864a46bfd0c2db9a	subnet-01aed05b4988c604c,subnet-047d4f1e4ea77c1a2,subnet-062ce7ee9df95c4a7,subnet-0714ef42f396c9812,subnet-0a348f89b84bb79f3,subnet-0eb7ab30317c139e9	sg-07c47eb6c216bd99d
-```
-
-Make the `kubeconfig` active:
-
-```bash
-eksctl utils write-kubeconfig opennms
+NAME	VERSION	STATUS	CREATED			VPC			SUBNETS										SECURITYGROUPS
+opennms	1.14	ACTIVE	2019-11-19T18:31:45Z	vpc-0ba92160c1b9c36bd	subnet-02b614a06818c80a3,subnet-03484aa51fe7d7045,subnet-07e1b1be81687054c,subnet-08663ab52ff8ee348,subnet-08c5c04a3487ed4db,subnet-0e4e3304642c52875	sg-0d2a3cac05d2b6e78
 ```
 
 Then,
@@ -105,8 +98,8 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl create namespace ingress-nginx
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/service-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+curl https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/service-l4.yaml 2>/dev/null | sed 's/idle-timeout: "60"/idle-timeout: "3600"/' | kubectl apply -f -
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/patch-configmap-l4.yaml
 ```
 
@@ -178,22 +171,10 @@ To remove the Kubernetes cluster, do the following:
 ```bash
 kubectl delete ingress ingress-rules --namespace opennms
 kubectl delete service ext-kafka --namespace opennms
-kubectl delete namespace ingress-nginx
 kubectl delete deployment external-dns
 eksctl delete cluster --name opennms --region us-east-2 --wait
 ```
 
 The first 3 commands will trigger the removal of the Route 53 entries associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).
 
-Grab another cup of coffee, as this will also take a while (at least 30min). The command will finish when the cluster is completely removed. If wait is not feasible, remove `--wait` from the command.
-
-Sometimes, it doesn't finish well:
-
-```text
-...
-[✖]  waiting for CloudFormation stack "eksctl-opennms-cluster" to reach "DELETE_COMPLETE" status: RequestCanceled: waiter context canceled
-caused by: context deadline exceeded
-[✖]  failed to delete cluster with nodegroup(s)
-```
-
-Make sure to manually clean up, or find the CloudFormation entry called `eksctl-opennms-cluster` if exist and delete it.
+This process could take in average between 15 to 20 minutes to complete. If wait is not feasible, remove `--wait` from the command.
