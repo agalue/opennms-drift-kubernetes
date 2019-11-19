@@ -9,7 +9,7 @@ variable "domain" {
 }
 
 provider "aws" {
-  region = "${var.region}"
+  region = var.region
 }
 
 data "aws_security_group" "nodes" {
@@ -25,5 +25,6 @@ resource "aws_security_group_rule" "allow_kafka" {
   to_port           = 9094
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = "${data.aws_security_group.nodes.id}"
+  security_group_id = data.aws_security_group.nodes.id
 }
+
