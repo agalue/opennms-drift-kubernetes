@@ -46,11 +46,11 @@ aws.agalue.net.   172800  IN  NS  ns-144.awsdns-18.com.
 
 ## Cluster Creation
 
-Create the Kubernetes cluster using `eksctl`. The following example creates a cluster with 1 master node and 5 worker nodes:
+Create the Kubernetes cluster using `eksctl`. The following example creates a cluster with 1 master node and 6 worker nodes:
 
 ```bash
 eksctl create cluster \
-  --version 1.12 \
+  --version 1.14 \
   --name opennms \
   --nodegroup-name onms-fleet \
   --tags Environment=Test,Department=Support \
@@ -64,7 +64,7 @@ eksctl create cluster \
   --set-kubeconfig-context
 ```
 
-Grab a cup of coffee, as this will take a while (15min in average). The command will finish when the cluster is ready.
+This process could take in average between 15 to 20 minutes to complete. The above command will finish when the cluster is ready.
 
 To check if the cluster is active:
 
@@ -75,8 +75,8 @@ eksctl get cluster opennms
 The output should be something like this:
 
 ```text
-NAME	VERSION	STATUS	CREATED			VPC			SUBNETS															SECURITYGROUPS
-opennms	1.12	ACTIVE	2019-04-30T13:28:33Z	vpc-074ba40915fb01ea3	subnet-027340da3eba788e3,subnet-059f57965f1ec5bce,subnet-062f8b26d06428601,subnet-09fcc1e6026eea6af,subnet-0c05e322db4119340,subnet-0d11e944241c425e4	sg-09e9dd2d7b9dec158
+NAME	VERSION	STATUS	CREATED			VPC			SUBNETS					SECURITYGROUPS
+opennms	1.14	ACTIVE	2019-11-19T16:18:54Z	vpc-0864a46bfd0c2db9a	subnet-01aed05b4988c604c,subnet-047d4f1e4ea77c1a2,subnet-062ce7ee9df95c4a7,subnet-0714ef42f396c9812,subnet-0a348f89b84bb79f3,subnet-0eb7ab30317c139e9	sg-07c47eb6c216bd99d
 ```
 
 Make the `kubeconfig` active:
@@ -94,8 +94,8 @@ kubectl cluster-info
 The output should be something like this:
 
 ```text
-Kubernetes master is running at https://7142C0C1EA5461E07E41E8FAA10D88F3.yl4.us-east-2.eks.amazonaws.com
-CoreDNS is running at https://7142C0C1EA5461E07E41E8FAA10D88F3.yl4.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Kubernetes master is running at https://7B58353198925AA605F877A99F3E85A2.sk1.us-east-2.eks.amazonaws.com
+CoreDNS is running at https://7B58353198925AA605F877A99F3E85A2.sk1.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
@@ -105,9 +105,9 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/aws/service-l4.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/aws/patch-configmap-l4.yaml
+kubectl create namespace ingress-nginx
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/service-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/patch-configmap-l4.yaml
 ```
 
 For Route53 mapping:
@@ -116,7 +116,7 @@ For Route53 mapping:
 export DOMAIN=aws.agalue.net
 export OWNER=agalue
 
-curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.0/docs/examples/external-dns.yaml 2>/dev/null | sed "s/--domain-filter=.*/--domain-filter=$DOMAIN/" | sed "s/--txt-owner-id=.*/--txt-owner-id=$OWNER/" | kubectl apply -f -
+curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.3/docs/examples/external-dns.yaml 2>/dev/null | sed "s/--domain-filter=.*/--domain-filter=$DOMAIN/" | sed "s/--txt-owner-id=.*/--txt-owner-id=$OWNER/" | kubectl apply -f -
 ```
 
 > **WARNING**: Please use your own domain.
@@ -129,18 +129,15 @@ kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
 kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.10.1/cert-manager.yaml
 ```
 
-## Manifets
-
-To apply all the manifests:
+## Install Jaeger Tracing
 
 ```bash
-kubectl apply -k manifests
-```
-
-If you're not running `kubectl` version 1.14, the following is an alternative:
-
-```bash
-kustomize build manifests | kubectl apply -f
+kubectl create namespace observability
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
 ## Security Groups
@@ -158,6 +155,20 @@ pushd eks
 terraform init
 terraform apply -var "region=$AWS_REGION" -auto-approve
 popd
+```
+
+## Manifets
+
+To apply all the manifests:
+
+```bash
+kubectl apply -k manifests
+```
+
+If you're not running `kubectl` version 1.14, the following is an alternative:
+
+```bash
+kustomize build manifests | kubectl apply -f
 ```
 
 ## Cleanup
