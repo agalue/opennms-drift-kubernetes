@@ -22,7 +22,7 @@ function header_text {
 
 serving_version="v0.10.0"
 eventing_version="v0.10.0"
-istio_version="1.3.3"
+istio_version="1.3.5"
 domain="aws.agalue.net"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
 onms_url="https://onmsui.$domain/opennms"
