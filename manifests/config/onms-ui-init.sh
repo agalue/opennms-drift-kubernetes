@@ -126,6 +126,7 @@ EOF
 # Required changes in order to use HTTPS through Ingress
 cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/webui.properties
 opennms.web.base-url=https://%x%c/
+opennms.report.scheduler.enabled=false
 org.opennms.security.disableLoginSuccessEvent=true
 org.opennms.web.console.centerUrl=/status/status-box.jsp,/geomap/map-box.jsp,/heatmap/heatmap-box.jsp
 EOF
