@@ -4,7 +4,7 @@
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary.
+* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.15.x.
 
 ## DNS Configuration
 
@@ -74,7 +74,7 @@ kops create cluster \
   --node-count 5 \
   --zones us-east-2a \
   --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.14.8 \
+  --kubernetes-version 1.15.6 \
   --networking calico
 ```
 
@@ -96,7 +96,9 @@ spec:
     watchIngress: true
 ```
 
-While on edit mode, instruct `kops` to use `CoreDNS` instead, by adding:
+The above is to avoid setting up `external-dns`, but if you're familiar with that controller, you're welcome to use it.
+
+While on edit mode, optionally, enable `CoreDNS` instead of `KubeDNS` (the default), by adding:
 
 ```yaml
 spec:

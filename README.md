@@ -95,14 +95,7 @@ docker run -it --name minion \
  -e KAFKA_RPC_AUTO_OFFSET_RESET=latest \
  -e KAFKA_RPC_COMPRESSION_TYPE=gzip \
  -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
- -e KAFKA_SINK_ACKS=1 \
- -e UDP_4729_NAME=Netflow-9-Listener \
- -e UDP_4729_CLASS_NAME=org.opennms.netmgt.telemetry.listeners.UdpListener \
- -e UDP_4729_PARAMETERS_PORT=4729 \
- -e UDP_4729_PARAMETERS_HOST=0.0.0.0 \
- -e UDP_4729_PARAMETERS_MAX_PACKET_SIZE=16192 \
- -e UDP_4729_PARSERS_0_NAME=Netflow-9 \
- -e UDP_4729_PARSERS_0_CLASS_NAME=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser \
+ -e KAFKA_SINK_ACKS=1
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
@@ -111,7 +104,6 @@ docker run -it --name minion \
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
-> **WARNING**: The above samples include one Flow listener for NetFlow. Check the [Minion's config](config/onms-minion-init.sh) for more details.
 
 ## Users Resources
 
