@@ -18,14 +18,14 @@ import (
 )
 
 const (
-	eventKind = "event"
-	alarmKind = "alarm"
-	nodeKind = "node"
-	edgeKind = "edge"
+	eventKind  = "event"
+	alarmKind  = "alarm"
+	nodeKind   = "node"
+	edgeKind   = "edge"
 	metricKind = "metric"
 )
 
-var kinds = []string{ eventKind, alarmKind, nodeKind, edgeKind, metricKind, }
+var kinds = []string{eventKind, alarmKind, nodeKind, edgeKind, metricKind}
 
 // KafkaClient represents a Kafka consumer/producer client application.
 type KafkaClient struct {
@@ -37,8 +37,8 @@ type KafkaClient struct {
 	ProducerSettings string
 	ConsumerSettings string
 
-	producer         *kafka.Producer
-	consumer         *kafka.Consumer
+	producer *kafka.Producer
+	consumer *kafka.Consumer
 }
 
 func (cli *KafkaClient) getKafkaConfig(properties string) *kafka.ConfigMap {
@@ -70,10 +70,10 @@ func (cli *KafkaClient) validate() error {
 	}
 	set := make(map[string]bool, len(kinds))
 	for _, s := range kinds {
-			set[s] = true
+		set[s] = true
 	}
 	if _, ok := set[cli.MessageKind]; !ok {
-		return fmt.Errorf("invalid message kind %s. Valid options: %s", cli.MessageKind, strings.Join(kinds,", "))
+		return fmt.Errorf("invalid message kind %s. Valid options: %s", cli.MessageKind, strings.Join(kinds, ", "))
 	}
 	return nil
 }
@@ -144,10 +144,10 @@ func (cli *KafkaClient) start() error {
 					cli.producer.Produce(&kafka.Message{
 						TopicPartition: kafka.TopicPartition{Topic: &cli.DestinationTopic, Partition: kafka.PartitionAny},
 						Value:          jsonBytes,
-						Key: msg.Key,
+						Key:            msg.Key,
 					}, nil)
 				} else {
-					fmt.Println("cannot convert GPB to JSON: %v\n", err)
+					fmt.Printf("cannot convert GPB to JSON: %v\n", err)
 				}
 			} else {
 				log.Printf("kafka consumer error: %v\n", err)
@@ -171,7 +171,7 @@ func main() {
 	flag.StringVar(&client.SourceTopic, "source-topic", "", "kafka source topic with OpenNMS Producer GPB messages")
 	flag.StringVar(&client.DestinationTopic, "dest-topic", "", "kafka destination topic for JSON generated payload")
 	flag.StringVar(&client.GroupID, "group-id", "opennms", "kafka consumer group ID")
-	flag.StringVar(&client.MessageKind, "message-kind", alarmKind, "source topic message kind; valid options: " + strings.Join(kinds,", "))
+	flag.StringVar(&client.MessageKind, "message-kind", alarmKind, "source topic message kind; valid options: "+strings.Join(kinds, ", "))
 	flag.StringVar(&client.ProducerSettings, "producer-params", "", "optional kafka producer parameters as a CSV of Key-Value pairs")
 	flag.StringVar(&client.ConsumerSettings, "consumer-params", "", "optional kafka consumer parameters as a CSV of Key-Value pairs")
 	flag.Parse()
