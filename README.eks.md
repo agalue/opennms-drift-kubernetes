@@ -118,8 +118,7 @@ curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controlle
 
 ```bash
 kubectl create namespace cert-manager
-kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.10.1/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.12.0/cert-manager.yaml
 ```
 
 ## Install Jaeger Tracing

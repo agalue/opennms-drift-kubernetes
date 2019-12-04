@@ -169,8 +169,7 @@ The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is req
 
 ```bash
 kubectl create namespace cert-manager
-kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.10.1/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.12.0/cert-manager.yaml
 ```
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
@@ -230,6 +229,7 @@ export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
 kubectl delete ingress ingress-rules --namespace opennms
 kubectl delete service ext-kafka --namespace opennms
+sleep 10
 kops delete cluster --yes
 ```
 
