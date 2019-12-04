@@ -95,7 +95,7 @@ docker run -it --name minion \
  -e KAFKA_RPC_AUTO_OFFSET_RESET=latest \
  -e KAFKA_RPC_COMPRESSION_TYPE=gzip \
  -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
- -e KAFKA_SINK_ACKS=1
+ -e KAFKA_SINK_ACKS=1 \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
