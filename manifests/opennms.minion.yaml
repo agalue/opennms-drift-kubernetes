@@ -4,11 +4,6 @@
 # This Pod includes 2 containers, one for the Minion and one for the GRPC Server for NX-OS
 #
 # NOTES:
-# - This manifest is designed to work with the version of the image from:
-#   https://hub.docker.com/r/agalue/minion
-#   https://github.com/OpenNMS/opennms-drift-kubernetes/tree/masterdocker-images/minion
-#   The image is a slight modification of the official one, which is why all the customizations
-#   have been added through initContainers instead of having them within the image.
 # - It is perfectly valid to have all the required configuration files on a config-map,
 #   and then mount those files to the overlay directory, instead of using an initContainer.
 #
@@ -85,7 +80,7 @@ spec:
       # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: agalue/minion:25.1.0
+        image: opennms/minion:25.1.1
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -127,7 +122,7 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: agalue/minion:25.1.0
+        image: opennms/minion:25.1.1
         imagePullPolicy: IfNotPresent
         args:
         - -c

@@ -8,7 +8,7 @@ metadata:
   namespace: opennms
 spec:
   tls:
-    - secretName: opennms-ingress
+    - secretName: opennms-ingress-cert
       hosts:
         - onms.gce.agalue.net
         - onmsui.gce.agalue.net
