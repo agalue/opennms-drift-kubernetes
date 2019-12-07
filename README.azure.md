@@ -48,7 +48,7 @@ az aks create --name opennms \
   --resource-group $GROUP \
   --dns-name-prefix opennms \
   --enable-rbac \
-  --kubernetes-version 1.12.7 \
+  --kubernetes-version 1.14.8 \
   --location "East US" \
   --node-count 4 \
   --node-vm-size Standard_DS3_v2 \
