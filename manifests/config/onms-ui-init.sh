@@ -18,6 +18,7 @@
 # - CASSANDRA_SERVER
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
+# - ELASTIC_INDEX_STRATEGY_FLOWS
 # - GRAFANA_URL
 # - GRAFANA_PUBLIC_URL
 # - GF_SECURITY_ADMIN_PASSWORD
@@ -173,7 +174,7 @@ if [[ ${ELASTIC_SERVER} ]]; then
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
-elasticIndexStrategy=daily
+elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 EOF
 fi
 

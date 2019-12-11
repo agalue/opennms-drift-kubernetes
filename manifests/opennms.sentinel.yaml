@@ -90,6 +90,11 @@ spec:
             configMapKeyRef:
               key: ELASTIC_INDEX_STRATEGY_FLOWS
               name: common-settings
+        - name: ELASTIC_REPLICATION_FACTOR
+          valueFrom:
+            configMapKeyRef:
+              key: ELASTIC_REPLICATION_FACTOR
+              name: common-settings
         - name: OPENNMS_HTTP_USER
           value: admin
         - name: OPENNMS_HTTP_PASS

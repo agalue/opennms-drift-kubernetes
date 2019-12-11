@@ -102,6 +102,11 @@ spec:
             secretKeyRef:
               key: ELASTICSEARCH_PASSWORD
               name: onms-passwords
+        - name: ELASTIC_INDEX_STRATEGY_FLOWS
+          valueFrom:
+            configMapKeyRef:
+              key: ELASTIC_INDEX_STRATEGY_FLOWS
+              name: common-settings
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:

@@ -1,3 +1,5 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
 ---
 apiVersion: v1
 kind: ConfigMap

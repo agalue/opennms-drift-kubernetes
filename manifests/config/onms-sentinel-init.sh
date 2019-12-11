@@ -108,7 +108,7 @@ globalElasticUser = elastic
 globalElasticPassword = ${ELASTIC_PASSWORD}
 elasticIndexStrategy = ${ELASTIC_INDEX_STRATEGY_FLOWS}
 settings.index.number_of_shards = 6
-settings.index.number_of_replicas = 1
+settings.index.number_of_replicas = ${ELASTIC_REPLICATION_FACTOR}
 EOF
 fi
 

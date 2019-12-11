@@ -7,4 +7,5 @@ bases:
 - ../reduced
 
 patchesStrategicMerge:
+- patches/common-settings.yaml
 - patches/external-access.yaml

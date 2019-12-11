@@ -108,6 +108,11 @@ spec:
             configMapKeyRef:
               key: ELASTIC_INDEX_STRATEGY_FLOWS
               name: common-settings
+        - name: ELASTIC_REPLICATION_FACTOR
+          valueFrom:
+            configMapKeyRef:
+              key: ELASTIC_REPLICATION_FACTOR
+              name: common-settings
         - name: JAEGER_AGENT_HOST
           value: jaeger-agent.opennms.svc.cluster.local
         volumeMounts:

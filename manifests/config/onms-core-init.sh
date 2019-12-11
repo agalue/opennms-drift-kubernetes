@@ -34,6 +34,7 @@
 # - CASSANDRA_REPLICATION_FACTOR
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
+# - ELASTIC_REPLICATION_FACTOR
 # - ELASTIC_INDEX_STRATEGY_FLOWS
 # - ELASTIC_INDEX_STRATEGY_REST
 # - ELASTIC_INDEX_STRATEGY_ALARMS
@@ -48,6 +49,7 @@ command -v rsync >/dev/null 2>&1 || { echo >&2 "rsync is required but it's not i
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_INDEX_STRATEGY_REST=${ELASTIC_INDEX_STRATEGY_REST-monthly}
 ELASTIC_INDEX_STRATEGY_ALARMS=${ELASTIC_INDEX_STRATEGY_ALARMS-monthly}
+ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
 KAFKA_MAX_MESSAGE_SIZE=${KAFKA_MAX_MESSAGE_SIZE-5000000}
 
 CONFIG_DIR=/opennms-etc
@@ -343,7 +345,7 @@ connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=6
-settings.index.number_of_replicas=2
+settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
 
   if [[ ${FEATURES_LIST} == *"opennms-es-rest"* ]]; then
@@ -363,7 +365,7 @@ connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=6
-settings.index.number_of_replicas=2
+settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 
@@ -378,7 +380,7 @@ connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=6
-settings.index.number_of_replicas=2
+settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 
@@ -393,7 +395,7 @@ connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=6
-settings.index.number_of_replicas=2
+settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 fi
