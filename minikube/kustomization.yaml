@@ -7,8 +7,4 @@ bases:
 - ../reduced
 
 patchesStrategicMerge:
-- patches/cassandra.yaml
-- patches/kafka.manager.yaml
-- patches/opennms.core.yaml
-- patches/opennms.sentinel.yaml
 - patches/external-access.yaml

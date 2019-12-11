@@ -10,17 +10,37 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 
 ## Cluster Configuration
 
-In order to do that, just start minikube, and make sure it has at least 2 Cores and 8GB of RAM:
+In order to do that, just start minikube, and make sure it has at least 4 Cores and 16GB of RAM:
 
 ```bash
 minikube config view
-- metrics-server: true
-- WantReportError: true
-- cpus: 2
-- dashboard: true
-- heapster: false
+- cpus: 4
 - ingress: true
-- memory: 8192
+- memory: 16384
+```
+
+> *NOTE*: The solution was tested with Kubernetes 1.14.8 and 1.15.6. Newer versions of Kubernetes have not been tested yet.
+
+## Install the CertManager
+
+The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
+
+```bash
+kubectl create namespace cert-manager
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.12.0/cert-manager.yaml
+```
+
+> **NOTE**: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html). For now, this is not used when using minikube.
+
+## Install Jaeger Tracing
+
+```bash
+kubectl create namespace observability
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
 ## Manifets
@@ -30,3 +50,26 @@ Once `minikube` is running, execute the following to apply a reduced version of 
 ```bash
 kubectl apply -k minikube
 ```
+
+## DNS
+
+To be able to use the Ingress controller with TLS (even if CertManager is not being in use), a good trick to test it is adding entries to `/etc/hosts` pointing to the IP of the ingress. For example:
+
+```bash
+$ kubectl get ingress -n opennms
+NAME            HOSTS                                                                                 ADDRESS          PORTS     AGE
+ingress-rules   onms.minikube.local,grafana.minikube.local,kafka-manager.minikube.local + 1 more...   192.168.99.106   80, 443   21m
+```
+
+Then,
+
+```bash
+cat <<EOF | sudo tee /etc/hosts
+192.168.99.106 onms.minikube.local
+192.168.99.106 grafana.minikube.local
+192.168.99.106 kafka-manager.minikube.local
+192.168.99.106 tracing.minikube.local
+EOF
+```
+
+> **WARNING**: Keep in mind that the certificates are self-signed.

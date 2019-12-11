@@ -6,6 +6,40 @@ kind: Ingress
 metadata:
   name: ingress-rules
   namespace: opennms
-  annotations:
-    $patch: delete
 spec:
+  tls:
+    - secretName: opennms-ingress-cert
+      hosts:
+        - onms.minikube.local
+        - grafana.minikube.local
+        - kafka-manager.minikube.local
+        - tracing.minikube.local
+  rules:
+    - host: onms.minikube.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: opennms-core
+              servicePort: 8980
+    - host: grafana.minikube.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grafana
+              servicePort: 3000
+    - host: kafka-manager.minikube.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kafka-manager
+              servicePort: 9000
+    - host: tracing.minikube.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: jaeger-query
+              servicePort: 16686
