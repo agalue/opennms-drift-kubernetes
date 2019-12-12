@@ -15,7 +15,7 @@ kubectl label namespace default istio-injection=enabled
 Install a simplified Istio from Knative source:
 
 ```bash
-serving_version="v0.10.0"
+serving_version="v0.11.0"
 istio_version="1.3.5"
 
 kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-crds.yaml"
