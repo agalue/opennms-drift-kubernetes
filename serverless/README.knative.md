@@ -15,8 +15,8 @@ kubectl label namespace default istio-injection=enabled
 Install a simplified Istio from Knative source:
 
 ```bash
-serving_version="v0.11.0"
-istio_version="1.3.5"
+export serving_version="v0.11.0"
+export istio_version="1.3.5"
 
 kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-crds.yaml"
 kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-lean.yaml"
@@ -25,11 +25,11 @@ echo "Waiting for istio to become ready"
 sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 ```
 
+> **NOTE**: [Here](https://knative.dev/docs/install/installing-istio/#installing-istio-without-sidecar-injection) you can see how to build your own `istio-lean.yaml` from the Istio GIT repository.
+
 ## Install Knative Serving
 
 ```bash
-serving_version="v0.10.0"
-
 kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving.yaml"
 
 echo "Waiting for Knative Serving to become ready"
@@ -41,8 +41,6 @@ sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Runni
 ## Install Knative Eventing
 
 ```bash
-eventing_version="v0.10.0"
-
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/release.yaml"
 kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
 
