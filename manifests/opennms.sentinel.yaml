@@ -184,7 +184,7 @@ spec:
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/sentinel-etc-overlay
-        resources:
+        resources: # When Cassandra is used, allow enough memory for the resource cache and the ring buffer
           limits:
             cpu: 1
             memory: 2Gi

@@ -147,7 +147,10 @@ org.opennms.rrd.storeByForeignSource=true
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.newts.config.cfg
-# WARNING: Must match what OpenNMS has configured for Newts
+# About the properties:
+# - Must match what OpenNMS has configured for Newts
+# - ring_buffer_size and cache.max_entries should be consistent with the expected load and heap size
+
 hostname = ${CASSANDRA_SERVER}
 keyspace = ${INSTANCE_ID}_newts
 port = 9042

@@ -245,7 +245,7 @@ if [[ ${CASSANDRA_SERVER} ]]; then
   cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/newts.properties
 # About the properties:
 # - ttl (1 year expressed in ms) should be consistent with the TWCS settings on newts.cql
-# - ring_buffer_size and cache.max_entries should be consistent with the expected load
+# - ring_buffer_size and cache.max_entries should be consistent with the expected load and heap size
 #
 # About the keyspace (CQL schema):
 # - The value of compaction_window_size should be consistent with the chosen TTL

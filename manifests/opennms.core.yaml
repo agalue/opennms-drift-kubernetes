@@ -201,7 +201,7 @@ spec:
           mountPath: /opt/opennms/etc
         - name: karaf-deploy
           mountPath: /opt/opennms/deploy
-        resources:
+        resources: # When Cassandra is used, allow enough memory for the resource cache and the ring buffer
           limits:
             cpu: 4
             memory: 6Gi
