@@ -115,7 +115,7 @@ kubectl apply -k aks
 
 When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason, the external port (i.e. `9094`) should be opened. Fortunately, AKS does that auto-magically for you, so there is no need for changes.
 
-However, by default, with AKS 0.43.0, there is no public IP for the nodes; hence, nothing is reported via metadata. For this reason, external Kafka won't work unless Azure CNI is involved.
+However, by default, with AKS there is no public IP for the nodes; hence, nothing is reported via metadata. For this reason, external Kafka won't work. There is a [feature in preview](https://docs.microsoft.com/en-us/azure/aks/use-multiple-node-pools#assign-a-public-ip-per-node-in-a-node-pool) to let AKS assign a public IP per node in a node pool.
 
 ## Configure DNS Entry for the Ingress Controller and Kafka
 
