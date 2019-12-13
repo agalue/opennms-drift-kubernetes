@@ -12,8 +12,11 @@ spec:
       hosts:
         - onms.azure.agalue.net
         - grafana.azure.agalue.net
-        - kafka-manager.azure.agalue.net
+        - hasura.azure.agalue.net
         - kibana.azure.agalue.net
+        - elastichq.azure.agalue.net
+        - kafka-manager.azure.agalue.net
+        - tracing.azure.agalue.net
   rules:
     - host: onms.azure.agalue.net
       http:
@@ -29,6 +32,13 @@ spec:
             backend:
               serviceName: grafana
               servicePort: 3000
+    - host: hasura.azure.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: hasura
+              servicePort: 8080
     - host: kafka-manager.azure.agalue.net
       http:
         paths:
@@ -43,3 +53,17 @@ spec:
             backend:
               serviceName: kibana
               servicePort: 5601
+    - host: elastichq.azure.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: elastichq
+              servicePort: 5000
+    - host: tracing.azure.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: jaeger-query
+              servicePort: 16686

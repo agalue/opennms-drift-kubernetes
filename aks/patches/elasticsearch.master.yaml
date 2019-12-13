@@ -15,12 +15,10 @@ spec:
         env:
         - name: xpack.security.enabled
           $patch: delete
-        - name: cluster.initial_master_nodes
-          $patch: delete
         - name: discovery.seed_hosts
-          $patch: delete
-        - name: discovery.type
-          value: single-node
+          value: esmaster.opennms.svc.cluster.local
+        - name: cluster.initial_master_nodes
+          value: esmaster-0
         - name: bootstrap.memory_lock
           value: 'false'
         resources:

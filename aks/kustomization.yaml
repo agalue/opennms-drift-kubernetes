@@ -11,7 +11,6 @@ patchesStrategicMerge:
 - patches/elasticsearch.data.yaml
 - patches/elasticsearch.master.yaml
 - patches/grafana.yaml
-- patches/hasura.yaml
 - patches/kafka.yaml
 - patches/opennms.core.yaml
 - patches/opennms.minion.yaml

@@ -47,17 +47,16 @@ export GROUP="Kubernetes"
 az aks create --name opennms \
   --resource-group $GROUP \
   --dns-name-prefix opennms \
-  --enable-rbac \
   --kubernetes-version 1.14.8 \
   --location "East US" \
   --node-count 4 \
   --node-vm-size Standard_DS3_v2 \
-  --nodepool-name onms-pool \
+  --nodepool-name onmspool \
   --generate-ssh-keys \
-  --tags "Department=Support Environment=Test"
+  --tags Environment=Development
 ```
 
-> **WARNING**: This operation takes about an hour, so be patient.
+> **NOTE**: Please be patient, this operation takes some time.
 
 To validate the cluster:
 
@@ -80,8 +79,8 @@ az aks get-credentials --resource-group $GROUP --name opennms
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
 ```
 
 ## Install the CertManager
@@ -101,6 +100,22 @@ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operato
 kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
 kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
+
+## Manifets
+
+To apply all the manifests:
+
+```bash
+kubectl apply -k aks
+```
+
+> **NOTE**: The amount of resources has been reduced to avoid quota issues. The limits were designed to use a `Visual Studio Enterprise` Subscription. 
+
+## Security Groups
+
+When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason, the external port (i.e. `9094`) should be opened. Fortunately, AKS does that auto-magically for you, so there is no need for changes.
+
+However, by default, with AKS 0.43.0, there is no public IP for the nodes; hence, nothing is reported via metadata. For this reason, external Kafka won't work unless Azure CNI is involved.
 
 ## Configure DNS Entry for the Ingress Controller and Kafka
 
@@ -133,23 +148,9 @@ export DOMAIN="azure.agalue.net"
 export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
-az network dns record-set a add-record -g $GROUP -z $DOMAIN -n '*' -a $NGINX_EXTERNAL_IP
 az network dns record-set a add-record -g $GROUP -z $DOMAIN -n 'kafka' -a $KAFKA_EXTERNAL_IP
+az network dns record-set a add-record -g $GROUP -z $DOMAIN -n '*' -a $NGINX_EXTERNAL_IP
 ```
-
-## Manifets
-
-To apply all the manifests:
-
-```bash
-kubectl apply -k aks
-```
-
-> **NOTE**: The amount of resources has been reduced to avoid quota issues.
-
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened. Fortunately, AKS does that auto-magically for you, so there is no need for changes.
 
 ## Cleanup
 
@@ -161,8 +162,8 @@ export DOMAIN="azure.agalue.net"
 export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
-az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n '*' -a $NGINX_EXTERNAL_IP
 az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n 'kafka' -a $KAFKA_EXTERNAL_IP
+az network dns record-set a remove-record -g $GROUP -z $DOMAIN -n '*' -a $NGINX_EXTERNAL_IP
 ```
 
 Delete the cluster:
