@@ -103,6 +103,7 @@ docker run -it --name minion \
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
+
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
 
 ## Users Resources
@@ -111,7 +112,7 @@ docker run -it --name minion \
 * OpenNMS UI: `https://onmsui.aws.agalue.net/opennms/` (for users/operators)
 * Grafana: `https://grafana.aws.agalue.net/`
 * Kibana: `https://kibana.aws.agalue.net/` (remember to enable monitoring)
-* Kafka Manager: `https://kafka-manager.aws.agalue.net/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the "Cluster Zookeeper Hosts")
+* Kafka Manager: `https://kafka-manager.aws.agalue.net/` (make sure to register the cluster using `zookeeper.opennms.svc.cluster.local:2181/kafka` for the `Cluster Zookeeper Hosts`)
 * Hasura GraphQL API: `https://hasura.aws.agalue.net/v1alpha1/graphql`
 * Hasura GraphQL Console: `https://hasura.aws.agalue.net/console`
 * Jaeger UI: `https://tracing.aws.agalue.net/`

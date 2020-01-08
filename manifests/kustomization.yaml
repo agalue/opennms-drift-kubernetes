@@ -38,7 +38,6 @@ configMapGenerator:
   - config/onms-minion-init.sh
   - config/onms-sentinel-init.sh
   - config/onms-ui-init.sh
-  - config/onms-ui-nfs.sh
 - name: common-settings
   literals:
   - DOMAIN=aws.agalue.net

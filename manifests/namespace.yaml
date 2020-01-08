@@ -12,6 +12,10 @@
 # mv ca-key/*.key ca.key
 # mv ca-crt/*.crt ca.crt
 #
+# When using a cluster created with kubeadm, the keys are available at /etc/kubernetes/pki.
+# When using an "as a service" solution like GKE, AKS or EKS, refer to their documentation to obtain
+# copies of the certificates used.
+#
 # To create user "agalue" that belongs to the group "admin":
 #
 # openssl genrsa -out agalue.pem 2048
@@ -22,6 +26,8 @@
 #
 # kubectl config set-credentials agalue --client-certificate=agalue.crt --client-key=agalue.pem
 # kubectl config set-context agalue --cluster=aws.agalue.net --user agalue
+#
+# Remember to change the cluster name.
 
 ---
 apiVersion: v1

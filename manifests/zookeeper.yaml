@@ -3,6 +3,9 @@
 # WARNING:
 # - Full FQDNs are required for ZOO_SERVERS; otherwise, the leader election fails.
 # - The zookeeper user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
+#
+# TODO:
+# - Migrate to version 3.5.6 (there are issues starting the cluster with this version).
 
 apiVersion: v1
 kind: Service

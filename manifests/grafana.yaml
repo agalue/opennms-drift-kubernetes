@@ -82,7 +82,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        image: opennms/helm:4.0.1
+        image: opennms/helm:4.0.2
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000

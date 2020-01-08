@@ -7,6 +7,7 @@
 # WARNING:
 # - NRTG won't work on the UI servers (currently it redirects to the core server through Ingress).
 # - Jasper and KSC Reports will partially work on the UI servers.
+# - Due to the read-only capabilities, external authentication system must be in-place.
 #
 # TODO:
 # - Mount /opt/opennms/etc via NFS from the Core server:

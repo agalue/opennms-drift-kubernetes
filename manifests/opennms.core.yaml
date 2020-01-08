@@ -17,6 +17,9 @@
 #   https://gitkube.sh
 # - Add a lifecycle.preStart to execute a "git commit" of the current state of the configuration,
 #   in order to track what has been changed between since the last time the Pod was running.
+# - The reason for having a container sharing NFS is because AWS EBS doesn't support ReadOnlyMany mode.
+#   Instead, using EFS could be a solution for AWS:
+#   https://github.com/kubernetes-incubator/external-storage/tree/master/aws/efs
 
 ---
 apiVersion: v1
@@ -64,7 +67,7 @@ spec:
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:25.1.1
+        image: opennms/horizon:25.1.2
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -154,7 +157,7 @@ spec:
           value: '600'
       containers:
       - name: onms
-        image: opennms/horizon:25.1.1
+        image: opennms/horizon:25.1.2
         imagePullPolicy: IfNotPresent
         args:
         - -s
@@ -220,21 +223,6 @@ spec:
             port: http
           initialDelaySeconds: 30
           periodSeconds: 60
-      # Optional image to share configuration directory through NFS (required by external UI servers)
-      - name: nfs
-        image: itsthenetwork/nfs-server-alpine
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: SHARED_DIRECTORY
-          value: /opennms-etc
-        - name: READ_ONLY
-          value: 'true'
-        ports:
-        - containerPort: 2049
-          name: nfs
-        volumeMounts:
-        - name: etc
-          mountPath: /opennms-etc
       volumes:
       - name: opennms-config
         configMap:
