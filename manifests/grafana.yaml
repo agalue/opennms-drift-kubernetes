@@ -77,7 +77,7 @@ spec:
               key: GRAFANA_DB_PASSWORD
               name: onms-passwords
         volumeMounts:
-        - name: opennms-config
+        - name: init-scripts
           mountPath: /bin/grafana-init.sh
           subPath: grafana-init.sh
       containers:
@@ -141,6 +141,6 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 60
       volumes:
-      - name: opennms-config
+      - name: init-scripts
         configMap:
-          name: opennms-config
+          name: init-scripts

@@ -29,7 +29,7 @@ resources:
 - event-watcher.yaml
 
 configMapGenerator:
-- name: opennms-config
+- name: init-scripts
   files:
   - config/grafana-init.sh
   - config/helm-init.sh

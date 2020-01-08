@@ -121,7 +121,7 @@ spec:
         volumeMounts:
         - name: etc # Persistent volume for OpenNMS Configuration
           mountPath: /opennms-etc
-        - name: opennms-config
+        - name: init-scripts
           mountPath: /init.sh
           subPath: onms-core-init.sh
       # Install ALEC assuming it is not present on the Horizon Docker Image
@@ -224,9 +224,9 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 60
       volumes:
-      - name: opennms-config
+      - name: init-scripts
         configMap:
-          name: opennms-config
+          name: init-scripts
       - name: karaf-deploy
         emptyDir: {}
   volumeClaimTemplates:

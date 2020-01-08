@@ -108,7 +108,7 @@ spec:
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
-        - name: opennms-config
+        - name: init-scripts
           mountPath: /init.sh
           subPath: onms-minion-init.sh
       # Wait for all the dependencies
@@ -250,6 +250,6 @@ spec:
       volumes:
       - name: etc-overlay
         emptyDir: {}
-      - name: opennms-config
+      - name: init-scripts
         configMap:
-          name: opennms-config
+          name: init-scripts

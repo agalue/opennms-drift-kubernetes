@@ -50,10 +50,10 @@ spec:
               key: OPENNMS_UI_ADMIN_PASSWORD
               name: onms-passwords
         volumeMounts:
-        - name: opennms-config
+        - name: init-scripts
           mountPath: /bin/helm-init.sh
           subPath: helm-init.sh
       volumes:
-      - name: opennms-config
+      - name: init-scripts
         configMap:
-          name: opennms-config
+          name: init-scripts

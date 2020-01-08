@@ -57,7 +57,7 @@ spec:
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay
-        - name: opennms-config
+        - name: init-scripts
           mountPath: /init.sh
           subPath: onms-alec-init.sh
       # Install ALEC assuming it is not present on the Sentinel Docker Image
@@ -142,6 +142,6 @@ spec:
         emptyDir: {}
       - name: karaf-deploy
         emptyDir: {}
-      - name: opennms-config
+      - name: init-scripts
         configMap:
-          name: opennms-config
+          name: init-scripts
