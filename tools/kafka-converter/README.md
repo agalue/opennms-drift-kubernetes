@@ -11,8 +11,8 @@ This repository also contains a Dockerfile to compile and build an image with th
 ## Requirements
 
 * `BOOTSTRAP_SERVERS` environment variable with Kafka Bootstrap Server (i.e. `kafka01:9092`)
-* `SOURCE_TOPIC} \
-* `DEST_TOPIC} \
+* `SOURCE_TOPIC` environment variable with the source Kafka Topic with GPB Payload
+* `DEST_TOPIC` environment variable with the destination Kafka Topic with JSON Payload
 * `GROUP_ID` \[Optional\] environment variable with the Consumer Group ID (defaults to `opennms`)
 * `MESSAGE_KIND` \[Optional\] environment variable with the payload type. Valid values are: alarm, event, node, metric, edge (defaults to `alarm`).
 * To pass producer settings, add an environment variable with the prefix `PRODUCER_`, for example: `PROCUCER_MAX_REQUEST_SIZE`.

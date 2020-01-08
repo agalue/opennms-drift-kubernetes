@@ -1,6 +1,4 @@
 // Simple consumer/producer
-// TODO - Rework the solution to use https://github.com/lovoo/goka (Kafka Streams API)
-// TODO - Rework the solution fo use KSQL instead
 package main
 
 import (
@@ -13,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/agalue/kafka-converter/api/producer"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang/protobuf/proto"
-	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
 const (
@@ -87,13 +85,13 @@ func (cli *KafkaClient) start() error {
 		return err
 	}
 
-	// Build Producer
+	// Build producer
 	cli.producer, err = kafka.NewProducer(cli.getKafkaConfig(cli.ProducerSettings))
 	if err != nil {
 		return fmt.Errorf("could not create producer: %v", err)
 	}
 
-	// Build Consumer
+	// Build consumer
 	config := cli.getKafkaConfig(cli.ConsumerSettings)
 	config.SetKey("group.id", cli.GroupID)
 	cli.consumer, err = kafka.NewConsumer(config)
@@ -102,7 +100,7 @@ func (cli *KafkaClient) start() error {
 	}
 	cli.consumer.SubscribeTopics([]string{cli.SourceTopic}, nil)
 
-	// Producer messages
+	// Start producer messages handler
 	go func() {
 		for e := range cli.producer.Events() {
 			switch ev := e.(type) {
@@ -118,7 +116,7 @@ func (cli *KafkaClient) start() error {
 		}
 	}()
 
-	// Consumer Loop
+	// Start consumer Loop
 	go func() {
 		for {
 			msg, err := cli.consumer.ReadMessage(-1)
@@ -165,12 +163,14 @@ func (cli *KafkaClient) stop() {
 	log.Println("good bye!")
 }
 
+// Bootstrap function
+
 func main() {
 	client := KafkaClient{}
 	flag.StringVar(&client.Bootstrap, "bootstrap", "localhost:9092", "kafka bootstrap server")
 	flag.StringVar(&client.SourceTopic, "source-topic", "", "kafka source topic with OpenNMS Producer GPB messages")
 	flag.StringVar(&client.DestinationTopic, "dest-topic", "", "kafka destination topic for JSON generated payload")
-	flag.StringVar(&client.GroupID, "group-id", "opennms", "kafka consumer group ID")
+	flag.StringVar(&client.GroupID, "group-id", "kafka-converter", "kafka consumer group ID")
 	flag.StringVar(&client.MessageKind, "message-kind", alarmKind, "source topic message kind; valid options: "+strings.Join(kinds, ", "))
 	flag.StringVar(&client.ProducerSettings, "producer-params", "", "optional kafka producer parameters as a CSV of Key-Value pairs")
 	flag.StringVar(&client.ConsumerSettings, "consumer-params", "", "optional kafka consumer parameters as a CSV of Key-Value pairs")
