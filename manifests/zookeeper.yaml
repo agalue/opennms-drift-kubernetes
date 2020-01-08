@@ -16,17 +16,28 @@ metadata:
     app: zk
 spec:
   ports:
+  - port: 2181
+    name: client
   - port: 2888
     name: server
   - port: 3888
     name: leader-election
-  - port: 2181
-    name: client
   - port: 9998
     name: jmx
   clusterIP: None
   selector:
     app: zk
+
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: zk-pdb
+spec:
+  selector:
+    matchLabels:
+      app: zk
+  maxUnavailable: 1
 
 ---
 apiVersion: apps/v1
@@ -39,7 +50,9 @@ metadata:
 spec:
   serviceName: zookeeper
   replicas: 3 # The solution is designed for 3 instances
-  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
   selector:
     matchLabels:
       app: zk
@@ -49,6 +62,9 @@ spec:
         app: zk
     spec:
       terminationGracePeriodSeconds: 300
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
       initContainers:
       - name: generate-zooid
         image: busybox
@@ -95,12 +111,12 @@ spec:
         - name: JVMFLAGS
           value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         ports:
-        - containerPort: 2888
-          name: peer
-        - containerPort: 3888
-          name: leader-election
         - containerPort: 2181
           name: client
+        - containerPort: 2888
+          name: server
+        - containerPort: 3888
+          name: leader-election
         - containerPort: 9998
           name: jmx
         volumeMounts:
