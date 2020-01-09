@@ -36,8 +36,6 @@ spec:
     name: http
   - port: 8101
     name: karaf
-  - port: 2049
-    name: nfs
   selector:
     app: onms
 
