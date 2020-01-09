@@ -154,7 +154,7 @@ fi
 
 # Enable ALEC
 if [[ ${ENABLE_ALEC} ]]; then
-  echo "Enabling ALEC. .."
+  echo "Enabling ALEC..."
   cat <<EOF > ${CONFIG_DIR}/featuresBoot.d/alec.boot
 alec-opennms-distributed wait-for-kar=opennms-alec-plugin
 EOF
@@ -162,6 +162,9 @@ fi
 
 # Enable Syslogd
 sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' ${CONFIG_DIR}/service-configuration.xml
+
+# Disable Telemetryd, as flows and streaming telemetry data will be handled on sentinel
+sed -r -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}service-configuration.xml
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
