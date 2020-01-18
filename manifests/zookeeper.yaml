@@ -5,7 +5,9 @@
 # - The zookeeper user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 #
 # TODO:
-# - Migrate to version 3.5.6 (there are issues starting the cluster with this version).
+# - Migrate to version 3.5.6, but watch out for:
+#   https://issues.apache.org/jira/browse/ZOOKEEPER-2343
+#   https://issues.apache.org/jira/browse/ZOOKEEPER-2982
 
 apiVersion: v1
 kind: Service
