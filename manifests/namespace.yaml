@@ -5,29 +5,51 @@
 #
 # Adding Users:
 #
-# Retrieve keys from kops (please use your own domain)
-#
-# aws s3 sync s3://aws.agalue.net/aws.agalue.net/pki/private/ca/ ca-key
-# aws s3 sync s3://aws.agalue.net/aws.agalue.net/pki/issued/ca/ ca-crt
-# mv ca-key/*.key ca.key
-# mv ca-crt/*.crt ca.crt
-#
-# When using a cluster created with kubeadm, the keys are available at /etc/kubernetes/pki.
-# When using an "as a service" solution like GKE, AKS or EKS, refer to their documentation to obtain
-# copies of the certificates used.
+# - Create a CSR with openssl or cfssl.
+# - Create a CertificateSigningRequest object.
+# - Approve the certificate using the "kubectl certificate approve" command.
+# - Download the signed certificate using the "kubectl get csr" command.
+# - Set the kubectl context with the key and the certificate.
 #
 # To create user "agalue" that belongs to the group "admin":
 #
-# openssl genrsa -out agalue.pem 2048
-# openssl req -new -key agalue.pem -out agalue-csr.pem -subj "/CN=agalue/O=admin/"
-# openssl x509 -req -in agalue-csr.pem -CA ca.crt -CAkey ca.key -CAcreateserial -out agalue.crt -days 365
+# cat <<EOF | cfssl genkey - | cfssljson -bare agalue
+# {
+#   "CN": "agalue",
+#   "names": [
+#     {
+#       "O": "admin"
+#     }
+#   ],
+#   "key": {
+#     "algo": "rsa",
+#     "size": 2048
+#   }
+# }
+# EOF
+#
+# cat <<EOF | kubectl apply -f -
+# apiVersion: certificates.k8s.io/v1beta1
+# kind: CertificateSigningRequest
+# metadata:
+#   name: agalue
+# spec:
+#   request: $(cat agalue.csr | base64 | tr -d '\n')
+#   usages:
+#   - digital signature
+# EOF
+#
+# kubectl certificate approve agalue
+#
+# kubectl get csr agalue -o jsonpath='{.status.certificate}' | base64 --decode > agalue.crt
+#
+# To create user "jdoe" that belongs to the group "operator", perform a similar operation,
+# changing 'CN' and 'O'.
 #
 # To add new context:
 #
-# kubectl config set-credentials agalue --client-certificate=agalue.crt --client-key=agalue.pem
-# kubectl config set-context agalue --cluster=aws.agalue.net --user agalue
-#
-# Remember to change the cluster name.
+# kubectl config set-credentials agalue --client-certificate=agalue.crt --client-key=agalue-key.pem
+# kubectl config set-context agalue --current --user=agalue --namespace=opennms
 
 ---
 apiVersion: v1
@@ -114,3 +136,4 @@ roleRef:
   kind: Role
   name: onms-admin
   apiGroup: rbac.authorization.k8s.io
+
