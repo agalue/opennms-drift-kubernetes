@@ -77,7 +77,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:11.1
+        image: postgres:12
         imagePullPolicy: IfNotPresent
         args:
           - postgres

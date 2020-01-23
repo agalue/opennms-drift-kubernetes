@@ -1,9 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# WARNING: To avoid issues, use PostgreSQL 11.1
-#          Tested Grafana Versions: 6.1.4 or 6.2.4+ (Helm image can be used)
-#          There are schema conflicts during DB creation/migration,
-#          when using different version combinations.
 
 ---
 apiVersion: v1
@@ -47,7 +42,7 @@ spec:
         - name: TIMEOUT
           value: '600'
       - name: init-database
-        image: postgres:11.1
+        image: postgres:12
         imagePullPolicy: IfNotPresent
         command:
         - sh
