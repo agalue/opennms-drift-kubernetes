@@ -202,6 +202,8 @@ spec:
           mountPath: /opt/opennms/etc
         - name: karaf-deploy
           mountPath: /opt/opennms/deploy
+        - name: kafka-state # Persistent volume for Kafka Streaming (required by Kafka Producer)
+          mountPath: /opennms-data/kafka
         resources: # When Cassandra is used, allow enough memory for the resource cache and the ring buffer
           limits:
             cpu: 4
@@ -236,3 +238,11 @@ spec:
       resources:
         requests:
           storage: 1Gi # Cannnot be less than that in AWS for an EBS Volume
+  - metadata:
+      name: kafka-state
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi

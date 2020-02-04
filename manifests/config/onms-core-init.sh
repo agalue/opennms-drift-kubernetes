@@ -164,7 +164,7 @@ fi
 sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' ${CONFIG_DIR}/service-configuration.xml
 
 # Disable Telemetryd, as flows and streaming telemetry data will be handled on sentinel
-sed -r -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}service-configuration.xml
+sed -r -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}/service-configuration.xml
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
@@ -222,6 +222,7 @@ bootstrap.servers=$KAFKA_SERVER:9092
 compression.type=gzip
 timeout.ms=30000
 max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
+state.dir=/opennms-data/kafka
 EOF
 
     # Make sure to enable only what's needed for your use case
