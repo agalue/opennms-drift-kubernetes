@@ -80,7 +80,7 @@ spec:
       # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: opennms/minion:25.1.2
+        image: opennms/minion:25.2.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -122,7 +122,7 @@ spec:
           value: '600'
       containers:
       - name: minion
-        image: opennms/minion:25.1.2
+        image: opennms/minion:25.2.0
         imagePullPolicy: IfNotPresent
         args:
         - -c
