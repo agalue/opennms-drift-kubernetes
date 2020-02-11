@@ -115,6 +115,9 @@ fi
 cat <<EOF > ${OVERLAY}/org.opennms.netmgt.trapd.cfg
 trapd.listen.interface=0.0.0.0
 trapd.listen.port=1162
+# To control how many traps are included in a single message sent to Kafka
+trapd.batch.size=5
+# To limit how many messages are kept in memory if Kafka is unreachable
 trapd.queue.size=1000
 EOF
 
@@ -124,7 +127,18 @@ EOF
 cat <<EOF > ${OVERLAY}/org.opennms.netmgt.syslog.cfg
 syslog.listen.interface=0.0.0.0
 syslog.listen.port=1514
+# To control how many syslog messages are included in a single package sent to Kafka
+syslog.batch.size=5
+# To limit how many syslog messages are kept in memory if Kafka is unreachable
 syslog.queue.size=1000
+EOF
+
+# Off-heap feature
+cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.offheap.cfg
+offHeapSize=1GB
+entriesAllowedOnHeap=10000
+batchSize=10
+offHeapFilePath=
 EOF
 
 ### Optional Settings, only relevant for processing Flows and Telemetry data
