@@ -1,0 +1,151 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: curator-config
+  namespace: opennms
+  labels:
+    app: curator
+data:
+  config.yaml: |+
+    client:
+      host:
+        - esdata.opennms.svc.cluster.local
+      port: 9200
+      url_prefix:
+      use_ssl: false
+      certificate:
+      client_cert:
+      client_key:
+      ssl_no_validate: False
+      http_auth:
+      timeout: 30
+      master_only: True
+    logging:
+      loglevel: INFO
+      logfile:
+      logformat: default
+      blacklist: ['elasticsearch', 'urllib3']
+  delete_indices.yaml: |+
+    actions:
+    1:
+      action: delete_indices
+      description: >-
+        Delete indices older than 30 days.
+      options:
+        ignore_empty_list: True
+        disable_action: False
+      filters:
+        - filtertype: pattern
+          kind: prefix
+          value: netflow-
+        - filtertype: age
+          source: name
+          direction: older
+          timesharing: '%Y-%m-%d-%H'
+          unit: hours
+          unit_count: 720
+  forcemerge_indices.yaml: |+
+    actions:
+    1:
+      action: forcemerge
+      description: >-
+        Force merge Netflow indices
+      options:
+        num_max_segments: 1
+        delay: 120
+        timneout_override:
+        continue_if_exeption: False
+        disable_action: False
+      filters:
+        - filtertype: pattern
+          kind: prefix
+          value: netflow-
+        - filtertype: age
+          source: name
+          direction: older
+          timesharing: '%Y-%m-%d-%H'
+          unit: hours
+          unit_count: 12
+        - filtertype: forcemerged
+          max_num_segments: 1
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: curator-delete-indices
+  namespace: opennms
+  labels:
+    app: curator
+spec:
+  schedule: '10 * * * *'
+  jobTemplate:
+    metadata:
+      name: job-delete-indices
+      labels:
+        app: curator
+    spec:
+      template:
+        metadata:
+          labels:
+            app: curator
+        spec:
+          restartPolicy: Never
+          containers:
+          - image: bobrik/curator:5.8.1
+            name: delete-indices
+            args:
+            - --config /config/config.yaml
+            - /config/delete_indices.yaml
+            env:
+            - name: TZ
+              value: America/New_York
+            volumeMounts:
+            - name: curator-config
+              mountPath: /config
+          volumes:
+          - name: curator-config
+            configMap:
+              name: curator-config
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: curator-forcemerge-indices
+  namespace: opennms
+  labels:
+    app: curator
+spec:
+  schedule: '11 * * * *'
+  jobTemplate:
+    metadata:
+      name: job-forcemerge-indices
+      labels:
+        app: curator
+    spec:
+      template:
+        metadata:
+          labels:
+            app: curator
+        spec:
+          restartPolicy: Never
+          containers:
+          - image: bobrik/curator:5.8.1
+            name: forcemerge-indices
+            args:
+            - --config /config/config.yaml
+            - /config/forcemerge_indices.yaml
+            env:
+            - name: TZ
+              value: America/New_York
+            volumeMounts:
+            - name: curator-config
+              mountPath: /config
+          volumes:
+          - name: curator-config
+            configMap:
+              name: curator-config

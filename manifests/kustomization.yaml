@@ -14,6 +14,7 @@ resources:
 - cassandra.reaper.yaml
 - elasticsearch.master.yaml
 - elasticsearch.data.yaml
+- elasticsearch.curator.yaml
 - elastic-hq.yaml
 - kibana.yaml
 - opennms.core.yaml
@@ -69,5 +70,7 @@ secretGenerator:
 
 generatorOptions:
   disableNameSuffixHash: true
+  labels:
+    target: opennms
   annotations:
     owner: agalue@opennms.org
