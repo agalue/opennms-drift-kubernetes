@@ -11,11 +11,11 @@ metadata:
 data:
   config.yaml: |+
     client:
-      host:
-        - esdata.opennms.svc.cluster.local
+      hosts:
+      - esdata.opennms.svc.cluster.local
       port: 9200
       url_prefix:
-      use_ssl: false
+      use_ssl: False
       certificate:
       client_cert:
       client_key:
@@ -28,63 +28,62 @@ data:
       logfile:
       logformat: default
       blacklist: ['elasticsearch', 'urllib3']
-  delete_indices.yaml: |+
+  actions.yaml: |+
     actions:
-    1:
-      action: delete_indices
-      description: >-
-        Delete indices older than 30 days.
-      options:
-        ignore_empty_list: True
-        disable_action: False
-      filters:
+      1:
+        action: forcemerge
+        description: Force merge Netflow indices
+        options:
+          max_num_segments: 1
+          delay: 120
+          timneout_override:
+          continue_if_exception: False
+          disable_action: False
+        filters:
         - filtertype: pattern
           kind: prefix
           value: netflow-
+          exclude:
         - filtertype: age
           source: name
           direction: older
-          timesharing: '%Y-%m-%d-%H'
-          unit: hours
-          unit_count: 720
-  forcemerge_indices.yaml: |+
-    actions:
-    1:
-      action: forcemerge
-      description: >-
-        Force merge Netflow indices
-      options:
-        num_max_segments: 1
-        delay: 120
-        timneout_override:
-        continue_if_exeption: False
-        disable_action: False
-      filters:
-        - filtertype: pattern
-          kind: prefix
-          value: netflow-
-        - filtertype: age
-          source: name
-          direction: older
-          timesharing: '%Y-%m-%d-%H'
+          timestring: '%Y-%m-%d-%H'
           unit: hours
           unit_count: 12
+          exclude:
         - filtertype: forcemerged
           max_num_segments: 1
+          exclude:
+      2:
+        action: delete_indices
+        description: Delete indices older than 30 days.
+        options:
+          ignore_empty_list: True
+          disable_action: False
+        filters:
+        - filtertype: pattern
+          kind: prefix
+          value: netflow-
+        - filtertype: age
+          source: name
+          direction: older
+          timestring: '%Y-%m-%d-%H'
+          unit: hours
+          unit_count: 720
 
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: curator-delete-indices
+  name: curator-cron
   namespace: opennms
   labels:
     app: curator
 spec:
-  schedule: '10 * * * *'
+  schedule: '0 3 * * *'
   jobTemplate:
     metadata:
-      name: job-delete-indices
+      name: curator-job
       labels:
         app: curator
     spec:
@@ -98,47 +97,9 @@ spec:
           - image: bobrik/curator:5.8.1
             name: delete-indices
             args:
-            - --config /config/config.yaml
-            - /config/delete_indices.yaml
-            env:
-            - name: TZ
-              value: America/New_York
-            volumeMounts:
-            - name: curator-config
-              mountPath: /config
-          volumes:
-          - name: curator-config
-            configMap:
-              name: curator-config
-
----
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: curator-forcemerge-indices
-  namespace: opennms
-  labels:
-    app: curator
-spec:
-  schedule: '11 * * * *'
-  jobTemplate:
-    metadata:
-      name: job-forcemerge-indices
-      labels:
-        app: curator
-    spec:
-      template:
-        metadata:
-          labels:
-            app: curator
-        spec:
-          restartPolicy: Never
-          containers:
-          - image: bobrik/curator:5.8.1
-            name: forcemerge-indices
-            args:
-            - --config /config/config.yaml
-            - /config/forcemerge_indices.yaml
+            - --config
+            - /config/config.yaml
+            - /config/actions.yaml
             env:
             - name: TZ
               value: America/New_York
