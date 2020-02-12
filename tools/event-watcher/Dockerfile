@@ -1,7 +1,7 @@
 FROM golang:alpine AS builder
 RUN mkdir /app && apk update && apk add --no-cache git
 ADD ./event-watcher.go /app/
-ADD ./go.mod /app/
+ADD ./go.* /app/
 WORKDIR /app
 RUN CGO_ENABLED=0 go build -a -o event-watcher .
 
