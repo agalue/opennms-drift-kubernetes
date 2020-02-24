@@ -10,6 +10,7 @@ spec:
   bootstrapServers: kafka.opennms.svc.cluster.local:9092
   topics: OpenNMS-alarms-json
   sink:
-    apiVersion: serving.knative.dev/v1
-    kind: Service
-    name: slack-forwarder
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: slack-forwarder

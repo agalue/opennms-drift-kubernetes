@@ -20,9 +20,9 @@ function header_text {
   echo "$header$*$reset"
 }
 
-serving_version="v0.11.0"
-eventing_version="v0.11.0"
-istio_version="1.3.5"
+serving_version="v0.12.1"
+eventing_version="v0.12.1"
+istio_version="1.3.6"
 domain="aws.agalue.net"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
 onms_url="https://onmsui.$domain/opennms"

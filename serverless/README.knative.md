@@ -4,9 +4,19 @@ In this tutorial, a very simple and simplified installation of [Istio](https://i
 
 The following outlines the installation steps, but all of them have been placed on the script [setup-istio-knative.sh](./setup-istio-knative.sh)
 
+## Declare versions to use
+
+In order to use the simplified version of Istio, the chosen version of it depends on what's available at the [third-party](https://github.com/knative/serving/tree/master/third_party) folder for the chosen version of Knative Service.
+
+```bash
+export serving_version="v0.12.1"
+export eventing_version="v0.12.1"
+export istio_version="1.3.6"
+```
+
 ## Install Istio
 
-Labeling default namespace w/ istio-injection=enabled
+Labeling default namespace with `istio-injection=enabled`
 
 ```bash
 kubectl label namespace default istio-injection=enabled
@@ -15,9 +25,6 @@ kubectl label namespace default istio-injection=enabled
 Install a simplified Istio from Knative source:
 
 ```bash
-export serving_version="v0.11.0"
-export istio_version="1.3.5"
-
 kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-crds.yaml"
 kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-lean.yaml"
 
