@@ -106,7 +106,7 @@ spec:
           privileged: true
       containers:
       - name: cassandra
-        image: cassandra:3.11.5
+        image: cassandra:3.11.6
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

@@ -135,7 +135,7 @@ spec:
           mountPath: /plugin
       # Initializes Newts keyspace on Cassandra/ScyllaDB through CQLSH (requires newts.cql)
       - name: init-newts
-        image: cassandra:3.11.5
+        image: cassandra:3.11.6
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -f /opennms-etc/newts.cql $CASSANDRA_HOST' ]
         env:
