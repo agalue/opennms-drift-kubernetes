@@ -4,7 +4,7 @@
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.15.x.
+* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.16.x.
 
 ## DNS Configuration
 
@@ -66,6 +66,8 @@ export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
 kops create cluster \
+  --cloud aws \
+  --cloud-labels Environment=Test,Department=Support \
   --dns-zone $KOPS_CLUSTER_NAME \
   --master-size t2.large \
   --master-count 1 \
@@ -73,8 +75,7 @@ kops create cluster \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
-  --cloud-labels Environment=Test,Department=Support \
-  --kubernetes-version 1.15.7 \
+  --kubernetes-version 1.16.7 \
   --networking calico
 ```
 
@@ -160,7 +161,9 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/ingress-nginx/v1.6.0.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/service-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/patch-configmap-l4.yaml
 ```
 
 ## Install the CertManager
@@ -169,7 +172,7 @@ The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is req
 
 ```bash
 kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.12.0/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
 ```
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
