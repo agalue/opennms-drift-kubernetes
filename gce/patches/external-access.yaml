@@ -85,6 +85,6 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: jaeger-query
+              serviceName: onms-tracing-query
               servicePort: 16686
 

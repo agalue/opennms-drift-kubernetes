@@ -116,7 +116,7 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: jaeger-query
+              serviceName: onms-tracing-query
               servicePort: 16686
 
 # The following is the entry point needed for external Minions
