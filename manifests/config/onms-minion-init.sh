@@ -133,9 +133,9 @@ syslog.batch.size=5
 syslog.queue.size=1000
 EOF
 
-# Off-heap feature
+# Off-heap feature (must be consistent with the memory limits on the Pod)
 cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.offheap.cfg
-offHeapSize=1GB
+offHeapSize=512MB
 entriesAllowedOnHeap=10000
 batchSize=10
 offHeapFilePath=
