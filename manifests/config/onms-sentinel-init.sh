@@ -34,6 +34,7 @@ NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
+KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
@@ -152,7 +153,7 @@ EOF
 # - ring_buffer_size and cache.max_entries should be consistent with the expected load and heap size
 
 hostname = ${CASSANDRA_SERVER}
-keyspace = ${INSTANCE_ID}_newts
+keyspace = ${KEYSPACE}
 port = 9042
 read_consistency = ONE
 write_consistency = ANY

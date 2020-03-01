@@ -31,7 +31,7 @@ command -v curl >/dev/null 2>&1 || { echo >&2 "curl is required but it's not ins
 
 CONFIG_DIR=/opt/opennms-etc-overlay
 WEB_DIR=/opt/opennms-jetty-webinf-overlay
-KEYSPACE=${INSTANCE_ID-onms}_newts
+KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
 
 mkdir -p ${CONFIG_DIR}/opennms.properties.d/
 touch ${CONFIG_DIR}/configured

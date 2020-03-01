@@ -54,7 +54,7 @@ KAFKA_MAX_MESSAGE_SIZE=${KAFKA_MAX_MESSAGE_SIZE-5000000}
 
 CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
-KEYSPACE=${INSTANCE_ID-onms}_newts
+KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
 KARAF_FILES=( \
 "create.sql" \
 "config.properties" \
