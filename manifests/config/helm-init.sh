@@ -38,13 +38,13 @@ if curl -u "${GRAFANA_AUTH}" "${HELM_URL}" 2>/dev/null | grep -q '"enabled":fals
   echo
   echo "$(date) Adding data source for performance metrics..."
   curl -u "${GRAFANA_AUTH}" -H 'Content-Type: application/json' -XPOST -d @${JSON_FILE} "${DS_URL}" 2>/dev/null
-  sed -i -r 's/-performance/-entity/g' ${JSON_FILE}
   echo
-  echo "$(date) Adding data source for alarms..."
+  echo "$(date) Adding data source for entities..."
+  sed -i -r 's/-performance/-entity/g' ${JSON_FILE}
   curl -u "${GRAFANA_AUTH}" -H 'Content-Type: application/json' -XPOST -d @${JSON_FILE} "${DS_URL}" 2>/dev/null
-  sed -i -r 's/-entity/-flow/g' ${JSON_FILE}
   echo
   echo "$(date) Adding data source for flows..."
+  sed -i -r 's/-entity/-flow/g' ${JSON_FILE}
   curl -u "${GRAFANA_AUTH}" -H 'Content-Type: application/json' -XPOST -d @${JSON_FILE} "${DS_URL}" 2>/dev/null
 else
   echo "$(date) OpenNMS Helm was already enabled and configured."

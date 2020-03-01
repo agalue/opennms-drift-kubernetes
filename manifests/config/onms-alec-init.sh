@@ -7,7 +7,7 @@
 # - Must run within a init-container based on opennms/sentinel.
 #   Version must match the runtime container.
 # - Horizon 25 or newer is required.
-#   This script expects ALEC 1.1.2 or newer.
+#   This script expects ALEC 1.0.2 or newer.
 #
 # Environment variables:
 # - INSTANCE_ID
@@ -58,15 +58,15 @@ if [[ $KAFKA_SERVER ]]; then
   echo "Configuring Kafka..."
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.consumer.cfg
-bootstrap.servers = ${KAFKA_SERVER}:9092
+bootstrap.servers=${KAFKA_SERVER}:9092
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.producer.cfg
-bootstrap.servers = ${KAFKA_SERVER}:9092
+bootstrap.servers=${KAFKA_SERVER}:9092
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.streams.cfg
-bootstrap.servers = ${KAFKA_SERVER}:9092
+bootstrap.servers=${KAFKA_SERVER}:9092
 commit.interval.ms=5000
 EOF
 

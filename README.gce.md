@@ -126,14 +126,10 @@ kubectl create namespace cert-manager
 kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
 ```
 
-## Install Jaeger Tracing
+## Install Jaeger CRDs
 
 ```bash
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
 ```
 
 ## Manifets
@@ -181,6 +177,15 @@ gcloud dns record-sets transaction start --zone $ZONE
 gcloud dns record-sets transaction add "$NGINX_EXTERNAL_IP" --zone $ZONE --name "*.$DOMAIN." --ttl 300 --type A
 gcloud dns record-sets transaction add "$KAFKA_EXTERNAL_IP" --zone $ZONE --name "kafka.$DOMAIN." --ttl 300 --type A
 gcloud dns record-sets transaction execute --zone $ZONE
+```
+
+## Install Jaeger Tracing
+
+```bash
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
 ## Security Groups

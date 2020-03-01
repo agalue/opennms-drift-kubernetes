@@ -129,7 +129,7 @@ spec:
         args: [ "yum install -y -q wget && wget --content-disposition $RPM_URL -O alec.rpm && rpm2cpio alec.rpm | cpio -idv && mv opt/opennms/deploy/opennms-alec-plugin.kar /plugin/" ]
         env:
         - name: RPM_URL
-          value: https://packagecloud.io/opennms/plugin-stable/packages/el/7/opennms-alec-plugin-1.0.2-1.noarch.rpm/download.rpm
+          value: http://yum.opennms.org/stable/common/packagecloud/noarch/opennms-alec-plugin-1.0.2-1.noarch.rpm
         volumeMounts:
         - name: karaf-deploy
           mountPath: /plugin

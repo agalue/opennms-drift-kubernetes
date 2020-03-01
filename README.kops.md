@@ -177,14 +177,10 @@ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/relea
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
 
-## Install Jaeger Tracing
+## Install Jaeger Tracing CRDs.
 
 ```bash
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
 ```
 
 ## Security Groups
@@ -220,6 +216,15 @@ kustomize build manifests | kubectl apply -f
 ```
 
 > The main [README](README.md) offers a way to initialize an external Minion that points to this solution for testing purposes.
+
+## Install Jaeger Tracing
+
+```bash
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
+```
 
 ## Cleanup
 
