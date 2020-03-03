@@ -124,12 +124,12 @@ spec:
           subPath: onms-core-init.sh
       # Install ALEC assuming it is not present on the Horizon Docker Image
       - name: alec-plugin
-        image: centos:7
+        image: busybox
         command: [ sh, -c ]
-        args: [ "yum install -y -q wget && wget --content-disposition $RPM_URL -O alec.rpm && rpm2cpio alec.rpm | cpio -idv && mv opt/opennms/deploy/opennms-alec-plugin.kar /plugin/" ]
+        args: [ "cd /plugin && wget $ALEC_KAR_URL" ]
         env:
-        - name: RPM_URL
-          value: http://yum.opennms.org/stable/common/packagecloud/noarch/opennms-alec-plugin-1.0.2-1.noarch.rpm
+        - name: ALEC_KAR_URL
+          value: https://github.com/OpenNMS/alec/releases/download/v1.0.2/opennms-alec-plugin.kar
         volumeMounts:
         - name: karaf-deploy
           mountPath: /plugin
