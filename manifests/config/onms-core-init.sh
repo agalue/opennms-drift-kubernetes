@@ -151,7 +151,7 @@ if [[ ${FEATURES_LIST} ]]; then
   echo "Enabling features: ${FEATURES_LIST} ..."
   LAST_ENTRY="opennms-karaf-health"
   FEATURES_CFG=${CONFIG_DIR}/org.apache.karaf.features.cfg
-  sed -r -i "s/.*$LAST_ENTRY.*/  ${FEATURES_LIST},$LAST_ENTRY/" ${FEATURES_CFG}
+  sed -r -i "s/^  $LAST_ENTRY.*/  ${FEATURES_LIST},$LAST_ENTRY/" ${FEATURES_CFG}
 fi
 
 # Enable ALEC (distributed mode)
