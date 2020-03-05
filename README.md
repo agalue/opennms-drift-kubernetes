@@ -84,6 +84,10 @@ With Docker:
 ```bash
 export DOMAIN="aws.agalue.net"
 export LOCATION="Apex"
+export INSTANCE_ID="K8S" # Must match kustomize.yaml
+
+docker run -it --rm --entrypoint cat opennms/minion:25.2.1 -- etc/system.properties > system.properties
+echo "org.opennms.instance.id=${INSTANCE_ID}" >> system.properties
 
 docker run -it --name minion \
  -e MINION_ID=$LOCATION-minion-1 \
@@ -99,10 +103,11 @@ docker run -it --name minion \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
+ -v $(pwd)/system.properties:/opt/minion/etc/system.properties \
  opennms/minion:25.2.1 -f
 ```
 
-> **IMPORTANT**: Make sure to use the same version as OpenNMS. If the `INSTANCE_ID` inside the OpenNMS YAML file or the Minion YAML file is different than the default (i.e. OpenNMS), the above won't work unless the property `org.opennms.instance.id` is added to the `system.properties` file.
+> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID`. Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
 
