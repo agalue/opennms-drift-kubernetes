@@ -44,6 +44,8 @@ if [[ ${INSTANCE_ID} ]]; then
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
+else
+  INSTANCE_ID="OpenNMS"
 fi
 
 # Disable data choices (optional)
@@ -176,10 +178,12 @@ fi
 # Configure Elasticsearch for Flow processing
 if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch for Flows..."
+  PREFIX=$(echo ${INSTANCE_ID} | tr '[:upper:]' '[:lower:]')-
   cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
+indexPrefix=${PREFIX}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 EOF
 fi

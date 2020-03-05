@@ -127,6 +127,8 @@ if [[ ${INSTANCE_ID} ]]; then
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
+else
+  INSTANCE_ID="OpenNMS"
 fi
 
 cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/rrd.properties
@@ -152,9 +154,9 @@ if [[ ${FEATURES_LIST} ]]; then
   sed -r -i "s/.*$LAST_ENTRY.*/  ${FEATURES_LIST},$LAST_ENTRY/" ${FEATURES_CFG}
 fi
 
-# Enable ALEC
+# Enable ALEC (distributed mode)
 if [[ ${ENABLE_ALEC} ]]; then
-  echo "Enabling ALEC..."
+  echo "Enabling ALEC (distributed mode)..."
   cat <<EOF > ${CONFIG_DIR}/featuresBoot.d/alec.boot
 alec-opennms-distributed wait-for-kar=opennms-alec-plugin
 EOF
@@ -163,7 +165,7 @@ fi
 # Enable Syslogd
 sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' ${CONFIG_DIR}/service-configuration.xml
 
-# Disable Telemetryd, as flows and streaming telemetry data will be handled on sentinel
+# Disable Telemetryd, as flows and streaming telemetry data will be handled on sentinels
 sed -i -r '/opennms-flows/d' ${CONFIG_DIR}/org.apache.karaf.features.cfg
 sed -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}/service-configuration.xml
 
@@ -340,11 +342,14 @@ fi
 
 # Configure Elasticsearch for Flow processing and for the event forwarder
 if [[ ${ELASTIC_SERVER} ]]; then
+  PREFIX=$(echo ${INSTANCE_ID} | tr '[:upper:]' '[:lower:]')-
+
   echo "Configuring Elasticsearch for Flows..."
   cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
+indexPrefix=${PREFIX}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 connTimeout=30000
 readTimeout=300000
@@ -359,12 +364,10 @@ EOF
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
+indexPrefix=${PREFIX}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_REST}
-groupOidParameters=true
-archiveRawEvents=true
-archiveAlarms=false
-archiveAlarmChangeEvents=false
-logAllEvents=false
+groupOidParameters=false
+logAllEvents=true
 retries=1
 connTimeout=30000
 readTimeout=300000
@@ -380,6 +383,7 @@ EOF
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
+indexPrefix=${PREFIX}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_ALARMS}
 connTimeout=30000
 readTimeout=300000
@@ -395,6 +399,7 @@ EOF
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
+indexPrefix=${PREFIX}
 elasticIndexStrategy=monthly
 connTimeout=30000
 readTimeout=300000
@@ -457,7 +462,9 @@ cat <<EOF > ${CONFIG_DIR}/events/kubernetes.events.xml
   </event>
 </events>
 EOF
-sed -r -i '/[<].global[>]/a <event-file>events/kubernetes.events.xml</event-file>' ${CONFIG_DIR}/eventconf.xml
+if ! grep -q kubernetes.events.xml ${CONFIG_DIR}/eventconf.xml; then
+  sed -r -i '/[<].global[>]/a <event-file>events/kubernetes.events.xml</event-file>' ${CONFIG_DIR}/eventconf.xml
+fi
 
 # Cleanup temporary requisition files:
 rm -f ${CONFIG_DIR}/imports/pending/*.xml.*

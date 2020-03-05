@@ -46,6 +46,8 @@ if [[ ${INSTANCE_ID} ]]; then
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
+else
+  INSTANCE_ID="OpenNMS"
 fi
 cp ${SYSTEM_CFG} ${OVERLAY}
 
@@ -103,11 +105,14 @@ adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.n
 queue.threads = ${NUM_LISTENER_THREADS}
 EOF
 
+  PREFIX=$(echo ${INSTANCE_ID} | tr '[:upper:]' '[:lower:]')-
   cat <<EOF > ${OVERLAY}/org.opennms.features.flows.persistence.elastic.cfg
 elasticUrl = http://${ELASTIC_SERVER}:9200
 globalElasticUser = elastic
+indexPrefix = ${PREFIX}
 globalElasticPassword = ${ELASTIC_PASSWORD}
 elasticIndexStrategy = ${ELASTIC_INDEX_STRATEGY_FLOWS}
+# The following settings should be consistent with your ES cluster
 settings.index.number_of_shards = 6
 settings.index.number_of_replicas = ${ELASTIC_REPLICATION_FACTOR}
 EOF
