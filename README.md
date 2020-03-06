@@ -56,35 +56,13 @@ For `AWS` using the domain `aws.agalue.net`, the resources should be:
 * OpenNMS Core: `https://onms.aws.agalue.net/opennms`
 * Kafka: `kafka.aws.agalue.net:9094`
 
-For example, here is the minimum configuration (without flow listeners):
-
-```bash
-[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.minion.controller.cfg
-location=Apex
-id=onms-minion.local
-http-url=https://onms.aws.agalue.net/opennms
-
-[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg
-bootstrap.servers=kafka.aws.agalue.net:9094
-
-[root@onms-minion ~]# cat /opt/minion/etc/org.opennms.core.ipc.rpc.kafka.cfg
-bootstrap.servers=kafka.aws.agalue.net:9094
-acks=1
-
-[root@onms-minion ~]# cat /opt/minion/etc/featuresBoot.d/kafka.boot
-!minion-jms
-!opennms-core-ipc-sink-camel
-!opennms-core-ipc-rpc-jms
-opennms-core-ipc-sink-kafka
-opennms-core-ipc-rpc-kafka
-```
-
-With Docker:
+For example:
 
 ```bash
 export DOMAIN="aws.agalue.net"
 export LOCATION="Apex"
-export INSTANCE_ID="K8S" # Must match kustomize.yaml
+export INSTANCE_ID="K8S" # Must match kustomization.yaml
+export JAAS_CFG='org.apache.kafka.common.security.scram.ScramLoginModule required username="opennms" password="0p3nNM5";' # Must match kustomization.yaml
 
 docker run -it --rm --entrypoint cat opennms/minion:25.2.1 -- etc/system.properties > system.properties
 echo "org.opennms.instance.id=${INSTANCE_ID}" >> system.properties
@@ -98,8 +76,14 @@ docker run -it --name minion \
  -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
  -e KAFKA_RPC_AUTO_OFFSET_RESET=latest \
  -e KAFKA_RPC_COMPRESSION_TYPE=gzip \
+ -e KAFKA_RPC_SASL_JAAS_CONFIG="$JAAS_CFG" \
+ -e KAFKA_RPC_SECURITY_PROTOCOL=SASL_PLAINTEXT \
+ -e KAFKA_RPC_SASL_MECHANISM=SCRAM-SHA-512 \
  -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
  -e KAFKA_SINK_ACKS=1 \
+ -e KAFKA_SINK_SASL_JAAS_CONFIG="$JAAS_CFG" \
+ -e KAFKA_SINK_SECURITY_PROTOCOL=SASL_PLAINTEXT \
+ -e KAFKA_SINK_SASL_MECHANISM=SCRAM-SHA-512 \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \

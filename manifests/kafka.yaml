@@ -8,7 +8,6 @@
 # - KAFKA_NUM_PARTITIONS should be greater than the number of replicas.
 #
 # TODO:
-# - Enable SASL authentication.
 # - For TLS, the advertised.listener on port 9094 should be the public FQDN of the K8S host.
 #   The reason for this is that all the certificates must be associated with that FQDN.
 
@@ -96,9 +95,13 @@ spec:
         - name: KAFKA_LISTENERS
           value: INSIDE://:9092,OUTSIDE://:9094
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-          value: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+          value: INSIDE:PLAINTEXT,OUTSIDE:SASL_PLAINTEXT
         - name: KAFKA_INTER_BROKER_LISTENER_NAME
           value: INSIDE
+        - name: KAFKA_SASL_ENABLED_MECHANISMS
+          value: SCRAM-SHA-512
+        - name: KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL
+          value: SCRAM-SHA-512
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zookeeper.opennms.svc.cluster.local:2181/kafka
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
@@ -127,7 +130,7 @@ spec:
         - name: JMX_PORT
           value: '9999'
         - name: KAFKA_JMX_OPTS
-          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(POD_IP) -Dcom.sun.management.jmxremote.rmi.port=$(JMX_PORT)
+          value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$(POD_IP) -Dcom.sun.management.jmxremote.rmi.port=$(JMX_PORT) -Djava.security.auth.login.config=/opt/kafka/config/jaas.conf
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -145,6 +148,9 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /kafka
+        - name: kafka-jaas
+          mountPath: /opt/kafka/config/jaas.conf
+          subPath: kafka-jaas.conf
         resources:
           limits:
             memory: 4Gi
@@ -162,6 +168,10 @@ spec:
             port: inside
           initialDelaySeconds: 30
           periodSeconds: 60
+      volumes:
+      - name: kafka-jaas
+        secret:
+          secretName: kafka-jaas
   volumeClaimTemplates:
   - metadata:
       name: data

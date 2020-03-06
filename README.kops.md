@@ -203,7 +203,7 @@ popd
 
 ## Manifets
 
-To apply all the manifests:
+Make sure all the operators are up and running. Then, to apply all the manifests:
 
 ```bash
 kubectl apply -k manifests
