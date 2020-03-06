@@ -9,30 +9,32 @@ The following outlines the installation steps, but all of them have been placed 
 In order to use the simplified version of Istio, the chosen version of it depends on what's available at the [third-party](https://github.com/knative/serving/tree/master/third_party) folder for the chosen version of Knative Service.
 
 ```bash
-export serving_version="v0.12.1"
-export eventing_version="v0.12.1"
-export istio_version="1.3.6"
+export serving_version="v0.13.0"
+export eventing_version="v0.13.0"
+export istio_version="1.4.4"
 ```
 
 ## Install Istio
 
-Labeling default namespace with `istio-injection=enabled`
+Labeling default namespace with `istio-injection=enabled`:
 
 ```bash
-kubectl label namespace default istio-injection=enabled
+kubectl label namespace default istio-injection=enabled --overwrite=true
 ```
+
+The above is for convenience, to facilitate the injection of the sidecars for the knative related pods.
 
 Install a simplified Istio from Knative source:
 
 ```bash
 kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-crds.yaml"
-kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-lean.yaml"
+kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-minimal.yaml"
 
 echo "Waiting for istio to become ready"
 sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 ```
 
-> **NOTE**: [Here](https://knative.dev/docs/install/installing-istio/#installing-istio-without-sidecar-injection) you can see how to build your own `istio-lean.yaml` from the Istio GIT repository.
+> **NOTE**: [Here](https://knative.dev/docs/install/installing-istio/#installing-istio-without-sidecar-injection) you can see how to build your own `istio-minimal.yaml` from the Istio GIT repository.
 
 ## Install Knative Serving
 
@@ -48,7 +50,8 @@ sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Runni
 ## Install Knative Eventing
 
 ```bash
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/release.yaml"
+kubectl apply --selector knative.dev/crd-install=true -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
 kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
 
 echo "Waiting for Knative Eventing to become ready"
@@ -83,6 +86,7 @@ SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz"
 ONMS_URL="https://onmsui.aws.agalue.net/opennms"
 
 kubectl create secret generic serverless-config \
+ --namespace default \
  --from-literal=SLACK_URL="$SLACK_URL" \
  --from-literal=ONMS_URL="$ONMS_URL" \
  --dry-run -o yaml | kubectl apply -f -

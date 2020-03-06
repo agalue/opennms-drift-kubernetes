@@ -1,14 +1,15 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
-apiVersion: sources.eventing.knative.dev/v1alpha1
+apiVersion: sources.knative.dev/v1alpha1
 kind: KafkaSource
 metadata:
   name: kafka-source
+  namespace: default
 spec:
   consumerGroup: knative-group
   bootstrapServers: kafka.opennms.svc.cluster.local:9092
-  topics: OpenNMS-alarms-json
+  topics: K8S-alarms-json
   sink:
     ref:
       apiVersion: serving.knative.dev/v1

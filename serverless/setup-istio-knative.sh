@@ -20,9 +20,9 @@ function header_text {
   echo "$header$*$reset"
 }
 
-serving_version="v0.12.1"
-eventing_version="v0.12.1"
-istio_version="1.3.6"
+serving_version="v0.13.0"
+eventing_version="v0.13.0"
+istio_version="1.4.4"
 domain="aws.agalue.net"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
 onms_url="https://onmsui.$domain/opennms"
@@ -36,11 +36,11 @@ header_text "Using Kafka Server:             ${kafka_server}"
 header_text "Using OpenNMS UI Server         ${onms_url}"
 
 header_text "Labeling default namespace w/ istio-injection=enabled"
-kubectl label namespace default istio-injection=enabled
+kubectl label namespace default istio-injection=enabled --overwrite=true
 
 header_text "Setting up Istio"
 kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-crds.yaml"
-kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-lean.yaml"
+kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-minimal.yaml"
 
 header_text "Waiting for istio to become ready"
 sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
@@ -52,7 +52,8 @@ header_text "Waiting for Knative Serving to become ready"
 sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 
 header_text "Setting up Knative Eventing"
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/release.yaml"
+kubectl apply --selector knative.dev/crd-install=true -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
 kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
 
 header_text "Waiting for Knative Eventing to become ready"
@@ -72,6 +73,7 @@ EOF
 
 header_text "Creating secret with OpenNMS and Slack URLs"
 kubectl create secret generic serverless-config \
+ --namespace default \
  --from-literal=SLACK_URL="${slack_url}" \
  --from-literal=ONMS_URL="${onms_url}" \
  --dry-run -o yaml | kubectl apply -f -
