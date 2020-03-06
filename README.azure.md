@@ -47,7 +47,7 @@ export GROUP="Kubernetes"
 az aks create --name opennms \
   --resource-group $GROUP \
   --dns-name-prefix opennms \
-  --kubernetes-version 1.14.8 \
+  --kubernetes-version 1.15.7 \
   --location "East US" \
   --node-count 4 \
   --node-vm-size Standard_DS3_v2 \
