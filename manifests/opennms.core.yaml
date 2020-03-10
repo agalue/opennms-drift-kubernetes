@@ -114,8 +114,8 @@ spec:
             configMapKeyRef:
               key: ELASTIC_REPLICATION_FACTOR
               name: common-settings
-        - name: JAEGER_AGENT_HOST
-          value: jaeger-agent.opennms.svc.cluster.local
+        - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
+          value: onms-tracing-agent.opennms.svc.cluster.local
         volumeMounts:
         - name: etc # Persistent volume for OpenNMS Configuration
           mountPath: /opennms-etc

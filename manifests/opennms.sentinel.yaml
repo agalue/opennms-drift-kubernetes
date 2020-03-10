@@ -107,8 +107,8 @@ spec:
             configMapKeyRef:
               key: KAFKA_NUM_PARTITIONS
               name: common-settings
-        - name: JAEGER_AGENT_HOST
-          value: jaeger-agent.opennms.svc.cluster.local
+        - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
+          value: onms-tracing-agent.opennms.svc.cluster.local
         volumeMounts:
         - name: etc-overlay
           mountPath: /etc-overlay

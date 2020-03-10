@@ -1,9 +1,12 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# The following deploys an all-in-one instance for demo purposes.
 
+---
 apiVersion: jaegertracing.io/v1
 kind: Jaeger
 metadata:
-  name: onms-tracing
+  name: onms-tracing # Agent will be available through onms-tracing-agent
   namespace: opennms
 spec:
   ingress:
