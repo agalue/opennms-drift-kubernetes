@@ -105,7 +105,7 @@ spec:
           subPath: hasura.sql
       containers:
       - name: hasura
-        image: hasura/graphql-engine:v1.0.0
+        image: hasura/graphql-engine:v1.1.0
         imagePullPolicy: IfNotPresent
         env:
         - name: PG_PASSWD
