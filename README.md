@@ -76,7 +76,7 @@ EOF
 
 cat <<EOF > grpc-client.cfg
 host=grpc.$DOMAIN
-port=8990
+port=443
 EOF
 
 docker run -it --name minion \

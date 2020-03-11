@@ -78,9 +78,56 @@ EOF
 
 > **WARNING**: Keep in mind that the certificates are self-signed.
 
+# Start Minion
+
 To extact the certificate for gRPC and use it on the client Minion:
 
 ```bash
 kubectl get secret grpc-ingress-cert -o json | jq -r '.data["tls.key"]' | base64 --decode > server.key
 kubectl get secret grpc-ingress-cert -o json | jq -r '.data["tls.crt"]' | base64 --decode > server.crt
+```
+
+
+```bash
+export DOMAIN="minikube.local"
+export LOCATION="Apex"
+export INSTANCE_ID="K8S" # Must match kustomization.yaml
+
+docker pull opennms/minion:bleeding
+
+docker run -it --rm --entrypoint cat opennms/minion:bleeding -- etc/system.properties > system.properties
+echo "org.opennms.instance.id=${INSTANCE_ID}" >> system.properties
+cat <<EOF > features.boot
+!minion-jms
+!opennms-core-ipc-rpc-jms
+!opennms-core-ipc-sink-camel
+opennms-core-ipc-grpc-client
+EOF
+
+cat <<EOF > grpc-client.cfg
+host=grpc.$DOMAIN
+port=443
+EOF
+
+kubectl get secret opennms-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > onms_server.crt
+kubectl get secret grpc-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > grpc_server.crt
+keytool -importcert -alias grpc -file grpc_server.crt -storepass 0p3nNM5 -keystore grpc_trust.jks
+keytool -importcert -alias onms -file onms_server.crt -storepass 0p3nNM5 -keystore grpc_trust.jks
+JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/grpc_trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
+
+docker run -it --rm --name minion \
+ -e MINION_ID=$LOCATION-minion-1 \
+ -e MINION_LOCATION=$LOCATION \
+ -e OPENNMS_HTTP_URL=https://onms.$DOMAIN/opennms \
+ -e OPENNMS_HTTP_USER=admin \
+ -e OPENNMS_HTTP_PASS=admin \
+ -e JAVA_OPTS=$JAVA_OPTS \
+ -p 8201:8201 \
+ -p 1514:1514/udp \
+ -p 1162:1162/udp \
+ -v $(pwd)/grpc_trust.jks:/opt/minion-etc-overlay/etc/grpc_trust.jks \
+ -v $(pwd)/system.properties:/opt/minion-etc-overlay/system.properties \
+ -v $(pwd)/grpc-client.cfg:/opt/minion-etc-overlay/org.opennms.core.ipc.grpc.client.cfg \
+ -v $(pwd)/features.boot:/opt/minion-etc-overlay/featuresBoot.d/features.boot \
+ opennms/minion:bleeding -f
 ```
