@@ -8,7 +8,6 @@ resources:
 - postgresql.yaml
 - zookeeper.yaml
 - kafka.yaml
-- kafka.users.yaml
 - kafka.converter.yaml
 - kafka.manager.yaml
 - cassandra.yaml
