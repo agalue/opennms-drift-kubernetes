@@ -77,3 +77,5 @@ EOF
 ```
 
 > **WARNING**: Keep in mind that the certificates are self-signed.
+
+> **IMPORTANT**: Access to the gRPC server is pending.

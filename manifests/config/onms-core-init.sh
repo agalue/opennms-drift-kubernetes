@@ -206,6 +206,7 @@ org.opennms.core.ipc.sink.kafka.max.partition.fetch.bytes=${KAFKA_MAX_MESSAGE_SI
 org.opennms.core.ipc.rpc.strategy=kafka
 org.opennms.core.ipc.rpc.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
 org.opennms.core.ipc.rpc.kafka.ttl=30000
+org.opennms.core.ipc.rpc.kafka.single-topic=true
 
 # RPC Consumer (verify Kafka broker configuration)
 org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000

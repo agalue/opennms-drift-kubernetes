@@ -1,10 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: ingress-rules
+  name: onms-ingress
   namespace: opennms
 spec:
   tls:
@@ -67,3 +67,23 @@ spec:
             backend:
               serviceName: onms-tracing-query
               servicePort: 16686
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: grpc-ingress
+  namespace: opennms
+spec:
+  tls:
+    - secretName: grpc-ingress-cert
+      hosts:
+        - grpc.azure.agalue.net
+  rules:
+    - host: grpc.azure.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grpc-server
+              servicePort: 8990

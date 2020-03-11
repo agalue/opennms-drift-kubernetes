@@ -192,24 +192,6 @@ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/relea
 kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
 ```
 
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.aws.agalue.net`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
-
-Make sure `terraform` it installed on your system, and then execute the following:
-
-```bash
-export DOMAIN_NAME="aws.agalue.net"
-export AWS_REGION="us-east-2"
-
-pushd kops
-terraform init
-terraform apply -var "region=$AWS_REGION" -var "domain=$DOMAIN_NAME" -auto-approve
-popd
-```
-
-> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
-
 ## Manifets
 
 Make sure all the operators are up and running. Then, to apply all the manifests:

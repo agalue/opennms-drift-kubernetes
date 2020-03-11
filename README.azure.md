@@ -22,6 +22,8 @@ export LOCATION="East US"
 export DOMAIN="azure.agalue.net"
 ```
 
+> Those variables will be used by all the commands used below.
+
 ## Create a Resource Group:
 
 ```bash
@@ -126,13 +128,7 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the workers public FQDN. For this reason, the external port (i.e. `9094`) should be opened. Fortunately, AKS does that auto-magically for you, so there is no need for changes.
-
-However, by default, with AKS there is no public IP for the nodes; hence, nothing is reported via metadata. For this reason, external Kafka won't work. There is a [feature in preview](https://docs.microsoft.com/en-us/azure/aks/use-multiple-node-pools#assign-a-public-ip-per-node-in-a-node-pool) to let AKS assign a public IP per node in a node pool.
-
-## Configure DNS Entry for the Ingress Controller and Kafka
+## Configure DNS Entry for the Ingress Controller
 
 With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach.
 
@@ -149,20 +145,12 @@ NAME            TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)           
 ingress-nginx   LoadBalancer   10.0.83.198   40.117.237.217   80:30664/TCP,443:30213/TCP   9m58s
 ```
 
-Something similar can be done for Kafka:
-
-```bash
-kubectl get svc ext-kafka -n opennms
-```
-
-Create a wildcard DNS entry on your DNS Zone to point to the `EXTERNAL-IP`; and create an A record for `kafka`. For example:
+Create a wildcard DNS entry on your DNS Zone to point to the `EXTERNAL-IP`; for example:
 
 ```bash
 export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
-az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n 'kafka' -a $KAFKA_EXTERNAL_IP
-az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n '*' -a $NGINX_EXTERNAL_IP
+az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
 
 ## Cleanup
@@ -170,8 +158,7 @@ az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n '*' -a $NGINX
 Remove the A Records from the DNS Zone:
 
 ```bash
-az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n 'kafka' -a $KAFKA_EXTERNAL_IP
-az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n '*' -a $NGINX_EXTERNAL_IP
+az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
 
 Delete the cluster:

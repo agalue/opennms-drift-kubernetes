@@ -24,10 +24,10 @@ spec:
           class: nginx
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: ingress-rules
+  name: onms-ingress
   namespace: opennms
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -119,24 +119,28 @@ spec:
               serviceName: onms-tracing-query
               servicePort: 16686
 
-# The following is the entry point needed for external Minions
 ---
-apiVersion: v1
-kind: Service
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
 metadata:
-  name: ext-kafka
+  name: grpc-ingress
   namespace: opennms
-  labels:
-    app: kafka
   annotations:
-    # For Kops
-    dns.alpha.kubernetes.io/external: kafka.aws.agalue.net.
-    # For External-DNS
-    external-dns.alpha.kubernetes.io/hostname: kafka.aws.agalue.net.
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: 'true'
 spec:
-  type: LoadBalancer
-  ports:
-  - port: 9094
-    targetPort: 9094
-  selector:
-    app: kafka
+  tls:
+    - secretName: grpc-ingress-cert
+      hosts:
+        - grpc.aws.agalue.net
+  rules:
+    - host: grpc.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grpc-server
+              servicePort: 8990

@@ -82,6 +82,7 @@ EOF
 bootstrap.servers=${KAFKA_SERVER}:9092
 compression.type=gzip
 request.timeout.ms=30000
+single-topic=true
 
 # Consumer (verify Kafka broker configuration)
 max.partition.fetch.bytes=5000000

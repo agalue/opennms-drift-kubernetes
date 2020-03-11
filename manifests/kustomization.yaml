@@ -35,7 +35,6 @@ configMapGenerator:
   files:
   - config/grafana-init.sh
   - config/helm-init.sh
-  - config/kafka-init.sh
   - config/onms-alec-init.sh
   - config/onms-core-init.sh
   - config/onms-minion-init.sh
@@ -68,14 +67,6 @@ secretGenerator:
   - KAFKA_MANAGER_USERNAME=opennms
   - KAFKA_MANAGER_PASSWORD=0p3nNMS
   - HASURA_GRAPHQL_ACCESS_KEY=0p3nNMS
-- name: kafka-jaas
-  literals: # Content must be consistent with kafka-jaas.conf
-  - KAFKA_ADMIN_USER=admin
-  - KAFKA_ADMIN_PASSWORD=0p3nNM5@dmin
-  - KAFKA_CLIENT_USER=opennms
-  - KAFKA_CLIENT_PASSWORD=0p3nNM5
-  files:
-  - config/kafka-jaas.conf
 
 generatorOptions:
   disableNameSuffixHash: true

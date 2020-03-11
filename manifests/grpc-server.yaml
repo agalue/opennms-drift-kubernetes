@@ -1,25 +1,36 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# Kafka Converter Tool implemented in Go.
-# This takes a given GPB payload from a topic and puts its JSON representation into another topic
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-server
+  namespace: opennms
+  labels:
+    app: grpc-server
+spec:
+  ports:
+  - port: 8990
+  selector:
+    app: grpc-server
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kafka-converter
+  name: grpc-server
   namespace: opennms
   labels:
-    app: kafka-converter
+    app: grpc-server
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: kafka-converter
+      app: grpc-server
   template:
     metadata:
       labels:
-        app: kafka-converter
+        app: grpc-server
     spec:
       initContainers:
       - name: dependencies
@@ -27,36 +38,45 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: TARGETS
-          value: opennms-core.opennms.svc.cluster.local:8980
+          value: kafka.opennms.svc.cluster.local:9092
         - name: TIMEOUT
           value: '600'
       containers:
-      - name: kafka-converter
-        image: agalue/kafka-converter-go:latest
-        imagePullPolicy: Always
+      - name: grpc-server
+        image: agalue/grpc-server:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8990
+          name: client
         env:
         - name: BOOTSTRAP_SERVERS
           value: kafka.opennms.svc.cluster.local:9092
-        - name: GROUP_ID
-          value: kafka-converter
-        - name: SOURCE_KIND
-          value: alarms
+        - name: TLS_ENABLED
+          value: 'false'
         - name: INSTANCE_ID
           valueFrom:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
-        - name: SOURCE_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
-          value: $(INSTANCE_ID)-alarms
-        - name: DEST_TOPIC
-          value: $(INSTANCE_ID)-alarms-json
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
         - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
           value: '5000000'
         - name: PRODUCER_MAX_REQUEST_SIZE
           value: '5000000'
+        - name: MAX_MESSAGE_SIZE
+          value: '4194304'
         resources:
           limits:
             memory: 128Mi
             cpu: 100m
+        readinessProbe:
+          tcpSocket:
+            port: client
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        livenessProbe:
+          tcpSocket:
+            port: client
+          initialDelaySeconds: 30
+          periodSeconds: 60

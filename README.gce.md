@@ -6,19 +6,27 @@
 
 * Install the [Google Cloud CLI](https://cloud.google.com/sdk/).
 
+## Create common environment variables:
+
+```bash
+export PROJECT_ID="opennms-k8s"
+export PROJECT_DESCR="OpenNMS Kubernetes"
+export COMPUTE_ZONE="us-central1-a"
+export DOMAIN="gce.agalue.net"
+
+```
+
+> Those variables will be used by all the commands used below.
+
 ## Configure the Google Cloud CLI
 
 Create a project and make it the default:
 
 ```bash
-export PROJECT_ID="opennms-k8s"
-export PROJECT_DESCR="OpenNMS Kubernetes"
-export ZONE="us-central1-a"
-
 gcloud auth login
 gcloud projects create $PROJECT_ID --name="$PROJECT_DESCR"
 gcloud config set project $PROJECT_ID
-gcloud config set compute/zone $ZONE
+gcloud config set compute/zone $COMPUTE_ZONE
 ```
 
 > **NOTE**: An existing project can be used. The following commands will use the default one.
@@ -148,7 +156,7 @@ kubectl apply -k gce-reduced
 
 > **NOTE**: Depending on the available resources, it is possible to remove some of the restrictions, to have more instances for the clusters, and/or OpenNMS.
 
-## Configure DNS Entry for the Ingress Controller and Kafka
+## Configure DNS Entry for the Ingress Controller
 
 With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach, as having external-dns working with GCE is challenging.
 
@@ -165,18 +173,15 @@ NAME            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)          
 ingress-nginx   LoadBalancer   10.51.248.125   35.239.225.26   80:31039/TCP,443:31186/TCP   103s
 ```
 
-Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`; and create an A record for `kafka`. For example:
+Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`; for example:
 
 ```bash
-export ZONE="gce"
-export DOMAIN="gce.agalue.net"
+export MANAGED_ZONE="gce"
 export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
-gcloud dns record-sets transaction start --zone $ZONE
-gcloud dns record-sets transaction add "$NGINX_EXTERNAL_IP" --zone $ZONE --name "*.$DOMAIN." --ttl 300 --type A
-gcloud dns record-sets transaction add "$KAFKA_EXTERNAL_IP" --zone $ZONE --name "kafka.$DOMAIN." --ttl 300 --type A
-gcloud dns record-sets transaction execute --zone $ZONE
+gcloud dns record-sets transaction start --zone $MANAGED_ZONE
+gcloud dns record-sets transaction add "$NGINX_EXTERNAL_IP" --zone $MANAGED_ZONE --name "*.$DOMAIN." --ttl 300 --type A
+gcloud dns record-sets transaction execute --zone $MANAGED_ZONE
 ```
 
 ## Install Jaeger Tracing
@@ -188,24 +193,14 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened. Fortunately, GKS does that auto-magically for you, so there is no need for changes.
-
 ## Cleanup
 
 Remove the A Records from the Cloud DNS Zone:
 
 ```bash
-export ZONE="gce"
-export DOMAIN="gce.agalue.net"
-export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-
-gcloud dns record-sets transaction start --zone $ZONE
-gcloud dns record-sets transaction remove --zone $ZONE --name "*.$DOMAIN" --ttl 300 --type A "$NGINX_EXTERNAL_IP"
-gcloud dns record-sets transaction remove --zone $ZONE --name "kafka.$DOMAIN" --ttl 300 --type A "$KAFKA_EXTERNAL_IP"
-gcloud dns record-sets transaction execute --zone $ZONE
+gcloud dns record-sets transaction start --zone $MANAGED_ZONE
+gcloud dns record-sets transaction remove --zone $MANAGED_ZONE --name "*.$DOMAIN" --ttl 300 --type A "$NGINX_EXTERNAL_IP"
+gcloud dns record-sets transaction execute --zone $MANAGED_ZONE
 ```
 
 Delete the cluster:

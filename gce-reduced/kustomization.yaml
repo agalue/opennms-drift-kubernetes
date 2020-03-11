@@ -8,6 +8,5 @@ bases:
 
 patchesStrategicMerge:
 - patches/common-settings.yaml
-- patches/kafka.yaml
 - patches/external-access.yaml
 
