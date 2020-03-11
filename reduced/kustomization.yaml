@@ -1,6 +1,4 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# Warning: this excludes Cassandra to reduce the overhead on Minikube
 
 ---
 bases:
@@ -13,6 +11,7 @@ patchesStrategicMerge:
 - patches/elasticsearch.data.yaml
 - patches/elasticsearch.master.yaml
 - patches/grafana.yaml
+- patches/grpc-server.yaml
 - patches/hasura.yaml
 - patches/kafka.yaml
 - patches/kibana.yaml

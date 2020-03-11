@@ -57,25 +57,30 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 
 ## DNS
 
-To be able to use the Ingress controller with TLS (even if CertManager is not being in use), a good trick to test it is adding entries to `/etc/hosts` pointing to the IP of the ingress. For example:
+To be able to use the Ingress controller with TLS, do the following on one terminal:
 
 ```bash
-$ kubectl get ingress -n opennms
-NAME            HOSTS                                                                                 ADDRESS          PORTS     AGE
-ingress-rules   onms.minikube.local,grafana.minikube.local,kafka-manager.minikube.local + 1 more...   192.168.99.106   80, 443   21m
+minikube tunnel
 ```
 
-Then,
+On another terminal update `/etc/hosts` with the FQDN used by the ingresses. For example:
 
+INGRESS_IP=$(kubectl get ingress -n opennms onms-ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ```bash
-cat <<EOF | sudo tee /etc/hosts
-192.168.99.106 onms.minikube.local
-192.168.99.106 grafana.minikube.local
-192.168.99.106 kafka-manager.minikube.local
-192.168.99.106 tracing.minikube.local
+cat <<EOF | sudo tee -a /etc/hosts
+$INGRESS_IP onms.minikube.local
+$INGRESS_IP grafana.minikube.local
+$INGRESS_IP kafka-manager.minikube.local
+$INGRESS_IP tracing.minikube.local
+$INGRESS_IP grpc.minikube.local
 EOF
 ```
 
 > **WARNING**: Keep in mind that the certificates are self-signed.
 
-> **IMPORTANT**: Access to the gRPC server is pending.
+To extact the certificate for gRPC and use it on the client Minion:
+
+```bash
+kubectl get secret grpc-ingress-cert -o json | jq -r '.data["tls.key"]' | base64 --decode > server.key
+kubectl get secret grpc-ingress-cert -o json | jq -r '.data["tls.crt"]' | base64 --decode > server.crt
+```

@@ -24,6 +24,7 @@ resources:
 - opennms.ui.yaml
 - grafana.yaml
 - grafana.helm.yaml
+- grpc-server.yaml
 - hasura.yaml
 - jaeger.yaml
 - external-access.yaml

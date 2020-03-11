@@ -6,9 +6,20 @@
 # WARNING:
 # Please use your own domains. This is not intended to be used by any user.
 
+# For testing purposes only (minikube)
 ---
 apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: opennms
+spec:
+  selfSigned: {}
+
+# For cloud providers / public access
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
 metadata:
   name: letsencrypt-prod
   namespace: opennms
@@ -23,6 +34,7 @@ spec:
         ingress:
           class: nginx
 
+# Access to applications based on HTTP
 ---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
@@ -35,7 +47,7 @@ metadata:
     ingress.kubernetes.io/session-cookie-name: route
     ingress.kubernetes.io/session-cookie-hash: sha1
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/issuer: letsencrypt-prod
     acme.cert-manager.io/http01-edit-in-place: 'true'
 spec:
   tls:
@@ -119,6 +131,7 @@ spec:
               serviceName: onms-tracing-query
               servicePort: 16686
 
+# Access to applications based on gRPC
 ---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
@@ -129,7 +142,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/issuer: letsencrypt-prod
     acme.cert-manager.io/http01-edit-in-place: 'true'
 spec:
   tls:

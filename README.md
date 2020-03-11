@@ -64,6 +64,7 @@ export LOCATION="Apex"
 export INSTANCE_ID="K8S" # Must match kustomization.yaml
 
 docker pull opennms/minion:bleeding
+
 docker run -it --rm --entrypoint cat opennms/minion:bleeding -- etc/system.properties > system.properties
 echo "org.opennms.instance.id=${INSTANCE_ID}" >> system.properties
 cat <<EOF > features.boot
