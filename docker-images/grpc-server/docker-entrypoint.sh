@@ -13,10 +13,14 @@ OPTIONS=(
   "-Dport=${PORT-8990}"
   "-Dmax.message.size=${MAX_MESSAGE_SIZE-10485760}"
 )
-if [[ $TLS_ENABLED == true ]]; then
-  OPTIONS+=(-Dserver.private.key.filepath=${SERVER_PRIVATE_KEY-/grpc/key.pem})
-  OPTIONS+=(-Dserver.cert.filepath=${SERVER_CERT-/grpc/cert.pem})
-  OPTIONS+=(-Dclient.cert.filepath=${CLIENT_CERT-/grpc/client.pem})
+if [ -z ${SERVER_PRIVATE_KEY+x} ]; then
+  OPTIONS+=(-Dserver.private.key.filepath=${SERVER_PRIVATE_KEY})
+fi
+if [ -z ${SERVER_CERT+x} ]; then
+  OPTIONS+=(-Dserver.cert.filepath=${SERVER_CERT})
+fi
+if [ -z ${CLIENT_CERT+x} ]; then
+  OPTIONS+=(-Dclient.cert.filepath=${CLIENT_CERT})
 fi
 
 for VAR in $(env)
