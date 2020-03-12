@@ -65,16 +65,17 @@ export INSTANCE_ID="K8S" # Must match kustomization.yaml
 
 docker pull opennms/minion:bleeding
 
-docker run -it --rm --entrypoint cat opennms/minion:bleeding -- etc/system.properties > system.properties
-echo "org.opennms.instance.id=${INSTANCE_ID}" >> system.properties
-cat <<EOF > features.boot
+mkdir -p overlay/featuresBoot.d
+docker run -it --rm --entrypoint cat opennms/minion:bleeding -- etc/system.properties > overlay/system.properties
+echo "org.opennms.instance.id=${INSTANCE_ID}" >> overlay/system.properties
+cat <<EOF > overlay/featuresBoot.d/ipc.boot
 !minion-jms
 !opennms-core-ipc-rpc-jms
 !opennms-core-ipc-sink-camel
 opennms-core-ipc-grpc-client
 EOF
-
-cat <<EOF > grpc-client.cfg
+cat <<EOF > overlay/org.opennms.core.ipc.grpc.client.cfg
+tls-enabled=true
 host=grpc.$DOMAIN
 port=443
 EOF
@@ -88,9 +89,7 @@ docker run -it --name minion \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
- -v $(pwd)/system.properties:/opt/minion-etc-overlay/system.properties \
- -v $(pwd)/grpc-client.cfg:/opt/minion-etc-overlay/org.opennms.core.ipc.grpc.client.cfg \
- -v $(pwd)/features.boot:/opt/minion-etc-overlay/featuresBoot.d/features.boot \
+ -v $(pwd)/overlay:/opt/minion-etc-overlay \
  opennms/minion:bleeding -f
 ```
 

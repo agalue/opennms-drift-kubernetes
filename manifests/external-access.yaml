@@ -140,10 +140,9 @@ metadata:
   namespace: opennms
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: GRPC
     cert-manager.io/issuer: letsencrypt-prod
-    acme.cert-manager.io/http01-edit-in-place: 'true'
 spec:
   tls:
     - secretName: grpc-ingress-cert
