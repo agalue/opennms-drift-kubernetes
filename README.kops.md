@@ -227,8 +227,8 @@ To remove the Kubernetes cluster, do the following:
 export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
-kubectl delete ingress ingress-rules --namespace opennms
-kubectl delete service ext-kafka --namespace opennms
+kubectl delete ingress grpc-ingress --namespace opennms
+kubectl delete service onms-ingress --namespace opennms
 sleep 10
 kops delete cluster --yes
 ```
