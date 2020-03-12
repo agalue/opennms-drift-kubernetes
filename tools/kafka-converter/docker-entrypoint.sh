@@ -25,6 +25,7 @@ do
   if [[ $env_var =~ ^PRODUCER_ ]]; then
     echo "[configuring producer] processing $env_var"
     key=$(get_key $env_var)
+    echo "[configuring producer] key: $key"
     val=${!env_var}
     echo "[configuring producer] '$key'='$val'"
     PRODUCDER+=("$key=$val")
