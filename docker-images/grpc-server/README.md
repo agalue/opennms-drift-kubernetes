@@ -28,10 +28,10 @@ docker run \
   -e SERVER_PRIVATE_KEY=/grpc/key.pem \
   -e SERVER_CERT=/grpc/cert.pem \
   -e CLIENT_CERT=/grpc/client.pem \
-  -e BOOTSTRAP_SERVERS=kafka1:9092 \
+  -e PORT=8990 \
   -e MAX_MESSAGE_SIZE=10485760 \
   -e PRODUCER_ACKS=1 \
-  -e PORT=8990 \
+  -e BOOTSTRAP_SERVERS=kafka1:9092 \
   -v $(pwd)/grpc:/grpc
   agalue/grpc-server
 ```
