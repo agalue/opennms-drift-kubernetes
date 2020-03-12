@@ -29,5 +29,4 @@ else
   TABLES=$(psql -qtAX -d "${GF_DATABASE_NAME}" -c "select count(*) from  pg_stat_user_tables;")
   echo "Grafana database already exists on ${PGHOST}."
   echo "There are ${TABLES} tables on it, skipping..."
-  sleep 10
 fi

@@ -22,6 +22,10 @@ metadata:
 spec:
   clusterIP: None
   ports:
+  - name: karaf
+    protocol: TCP
+    port: 8201
+    targetPort: karaf
   - name: http
     protocol: TCP
     port: 8181
