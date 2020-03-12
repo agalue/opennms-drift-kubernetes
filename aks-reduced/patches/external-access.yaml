@@ -11,8 +11,6 @@ spec:
     - secretName: opennms-ingress-cert
       hosts:
         - onms.azure.agalue.net
-        - onmsui.azure.agalue.net
-        - cassandra-reaper.azure.agalue.net
         - grafana.azure.agalue.net
         - hasura.azure.agalue.net
         - kibana.azure.agalue.net
@@ -27,13 +25,6 @@ spec:
             backend:
               serviceName: opennms-core
               servicePort: 8980
-    - host: cassandra-reaper.azure.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: cassandra-reaper
-              servicePort: 8080
     - host: grafana.azure.agalue.net
       http:
         paths:
@@ -69,17 +60,6 @@ spec:
             backend:
               serviceName: elastichq
               servicePort: 5000
-    - host: onmsui.azure.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: opennms-ui
-              servicePort: 8980
-          - path: /opennms/nrt
-            backend:
-              serviceName: opennms-core
-              servicePort: 8980
     - host: tracing.azure.agalue.net
       http:
         paths:

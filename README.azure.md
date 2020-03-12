@@ -42,7 +42,7 @@ az network dns zone create -g "$GROUP" -n "$DOMAIN"
 
 ## Cluster Creation
 
-> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment.
+> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription.
 
 Create a service principal account:
 
@@ -52,6 +52,22 @@ az ad sp create-for-rbac --skip-assignment --name opennmsAKSClusterServicePrinci
 
 From the output, create an environment variable called `APP_ID` with the content of the `appId` field, and another one called `PASSWORD` for the `password` field. Those will be used on the following command.
 
+With enough quota:
+
+```bash
+export AKS_NODE_COUNT=5
+export AKS_VM_SIZE=Standard_DS4_v2
+```
+
+With reduced quota:
+
+```bash
+export AKS_NODE_COUNT=4
+export AKS_VM_SIZE=Standard_DS3_v2
+```
+
+Then,
+
 ```bash
 az aks create --name opennms \
   --resource-group "$GROUP" \
@@ -60,8 +76,8 @@ az aks create --name opennms \
   --dns-name-prefix opennms \
   --kubernetes-version 1.15.7 \
   --location "$LOCATION" \
-  --node-count 4 \
-  --node-vm-size Standard_DS3_v2 \
+  --node-count $AKS_NODE_COUNT \
+  --node-vm-size $AKS_VM_SIZE \
   --nodepool-name onmspool \
   --network-plugin azure \
   --network-policy azure \
@@ -111,13 +127,17 @@ kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator
 
 ## Manifets
 
-To apply all the manifests:
+To apply all the manifests with enough quota:
 
 ```bash
 kubectl apply -k aks
 ```
 
-> **NOTE**: The amount of resources has been reduced to avoid quota issues. The limits were designed to use a `Visual Studio Enterprise` Subscription. 
+With reduced quota:
+
+```bash
+kubectl apply -k aks-reduced
+```
 
 ## Install Jaeger Tracing
 

@@ -1,0 +1,21 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+bases:
+- ../manifests
+
+patchesStrategicMerge:
+- patches/common-settings.yaml
+- patches/cassandra.reaper.yaml
+- patches/cassandra.yaml
+- patches/elasticsearch.data.yaml
+- patches/elasticsearch.master.yaml
+- patches/grafana.yaml
+- patches/kafka.yaml
+- patches/opennms.core.yaml
+- patches/opennms.minion.yaml
+- patches/opennms.sentinel.yaml
+- patches/opennms.ui.yaml
+- patches/postgresql.yaml
+- patches/zookeeper.yaml
+- patches/external-access.yaml
