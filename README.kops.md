@@ -110,10 +110,12 @@ spec:
 Optionally, if there is a need for having `metrics-server` running, add the following under the `kubelet` section:
 
 ```yaml
-kubelet:
-  anonymousAuth: false
-  authorizationMode: Webhook
-  authenticationTokenWebhook: true
+spec:
+...
+  kubelet:
+    anonymousAuth: false
+    authorizationMode: Webhook
+    authenticationTokenWebhook: true
 ```
 
 Finally, apply the changes to create the cluster:
