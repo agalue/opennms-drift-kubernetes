@@ -144,8 +144,8 @@ sed -r -i -e '/intercept-url.*measurements/a\' -e '    <intercept-url pattern="/
 # Enabling CORS
 WEB_CONFIG=${WEB_DIR}/web.xml
 cp /opt/opennms/jetty-webapps/opennms/WEB-INF/web.xml ${WEB_CONFIG}
-sudo sed -r -i '/[<][!]--/{$!{N;s/[<][!]--\n  ([<]filter-mapping)/\1/}}' ${WEB_CONFIG}
-sudo sed -r -i '/nrt/{$!{N;N;s/(nrt.*\n  [<]\/filter-mapping[>])\n  --[>]/\1/}}' ${WEB_CONFIG}
+sed -r -i '/[<][!]--/{$!{N;s/[<][!]--\n  ([<]filter-mapping)/\1/}}' ${WEB_CONFIG}
+sed -r -i '/nrt/{$!{N;N;s/(nrt.*\n  [<]\/filter-mapping[>])\n  --[>]/\1/}}' ${WEB_CONFIG}
 
 # Configure Newts (works with either Cassandra or ScyllaDB)
 # This has to match the configuration of the OpenNMS Core server.
