@@ -87,6 +87,8 @@ spec:
           value: PLAINTEXT://:9092
         - name: KAFKA_ADVERTISED_LISTENERS
           value: PLAINTEXT://:9092
+        - name: KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS
+          value: '15000'
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zookeeper.opennms.svc.cluster.local:2181/kafka
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
