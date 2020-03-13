@@ -132,8 +132,11 @@ spec:
           periodSeconds: 10
         livenessProbe:
           exec:
-            command:
-            - /health.sh
+            command: # Temporary usage of an explicit check due to NMS-12600
+#           - /health.sh
+            - bash
+            - -c
+            - 'if ssh -o StrictHostKeyChecking=no -p 8301 localhost health-check | grep --quiet "Everything is awesome"; then exit 0; else exit 1; fi'
           initialDelaySeconds: 60
           periodSeconds: 60
           timeoutSeconds: 15
