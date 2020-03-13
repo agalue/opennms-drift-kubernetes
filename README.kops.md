@@ -219,6 +219,14 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
+# [Optional] Install Metrics Server
+
+```bash
+curl https://raw.githubusercontent.com/kubernetes/kops/master/addons/metrics-server/v1.8.x.yaml 2>/dev/null | sed 's|extensions/v1beta1|apps/v1|' | kubectl apply -f -
+```
+
+> With modern kubernetes, deployments must use `apps/v1` (hence the patch).
+
 ## Cleanup
 
 To remove the Kubernetes cluster, do the following:
@@ -228,7 +236,7 @@ export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
 kubectl delete ingress grpc-ingress --namespace opennms
-kubectl delete service onms-ingress --namespace opennms
+kubectl delete ingress onms-ingress --namespace opennms
 sleep 10
 kops delete cluster --yes
 ```
