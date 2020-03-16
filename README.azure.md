@@ -42,15 +42,20 @@ az network dns zone create -g "$GROUP" -n "$DOMAIN"
 
 ## Cluster Creation
 
-> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription.
+> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription (which has a limitation of 20 vCPUs).
 
-Create a service principal account:
+Create a service principal account, and extract the service principal ID (or `appId`) and the client secret (or `password`):
 
 ```
-az ad sp create-for-rbac --skip-assignment --name opennmsAKSClusterServicePrincipal
+export SERVICE_PRINCIPAL_FILE=~/.azure/opennms-service-principal.json
+az ad sp create-for-rbac --skip-assignment --name opennms > $SERVICE_PRINCIPAL_FILE
+export SERVICE_PRINCIPAL=$(jq -r .appId $SERVICE_PRINCIPAL_FILE)
+export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 ```
 
-From the output, create an environment variable called `APP_ID` with the content of the `appId` field, and another one called `PASSWORD` for the `password` field. Those will be used on the following command.
+> **WARNING**: The above command should be executed once. If the principal already exists, either extract the information as mentioned or delete it and recreate it before proceed.
+
+The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you.
 
 With enough quota:
 
@@ -71,8 +76,8 @@ Then,
 ```bash
 az aks create --name opennms \
   --resource-group "$GROUP" \
-  --service-principal "$APP_ID" \
-  --client-secret "$PASSWORD" \
+  --service-principal "$SERVICE_PRINCIPAL" \
+  --client-secret "$CLIENT_SECRET" \
   --dns-name-prefix opennms \
   --kubernetes-version 1.15.7 \
   --location "$LOCATION" \
