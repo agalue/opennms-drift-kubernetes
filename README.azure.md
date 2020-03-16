@@ -55,7 +55,7 @@ export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 
 > **WARNING**: The above command should be executed once. If the principal already exists, either extract the information as mentioned or delete it and recreate it before proceed.
 
-The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you.
+The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you. For more information about service principals, follow [this](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal) link.
 
 With enough quota:
 
