@@ -30,12 +30,12 @@ var kinds = []string{eventKind, alarmKind, nodeKind, edgeKind, metricKind}
 type KafkaClient struct {
 	Bootstrap        string
 	SourceTopic      string
-	DestinationTopic string
+	DestTopic        string
+	FlatDestTopic    string
 	MessageKind      string
 	GroupID          string
 	ProducerSettings string
 	ConsumerSettings string
-	FlatJSON         bool
 	Debug            bool
 	producer         *kafka.Producer
 	consumer         *kafka.Consumer
@@ -62,7 +62,7 @@ func (cli *KafkaClient) validate() error {
 	if cli.SourceTopic == "" {
 		return fmt.Errorf("source topic cannot be empty")
 	}
-	if cli.DestinationTopic == "" {
+	if cli.DestTopic == "" {
 		return fmt.Errorf("destination topic cannot be empty")
 	}
 	if cli.MessageKind == "" {
@@ -141,22 +141,29 @@ func (cli *KafkaClient) start() error {
 				}
 				jsonBytes, err := json.Marshal(data)
 				if err == nil {
-					if cli.FlatJSON {
+					cli.producer.Produce(&kafka.Message{
+						TopicPartition: kafka.TopicPartition{Topic: &cli.DestTopic, Partition: kafka.PartitionAny},
+						Value:          jsonBytes,
+						Key:            msg.Key,
+					}, nil)
+					if cli.Debug {
+						log.Printf("JSON message: %s\n", string(jsonBytes))
+					}
+					if cli.FlatDestTopic != "" {
 						flat, err := flatten.FlattenString(string(jsonBytes), "", flatten.UnderscoreStyle)
 						if err == nil {
-							jsonBytes = []byte(flat)
+							cli.producer.Produce(&kafka.Message{
+								TopicPartition: kafka.TopicPartition{Topic: &cli.FlatDestTopic, Partition: kafka.PartitionAny},
+								Value:          []byte(flat),
+								Key:            msg.Key,
+							}, nil)
+							if cli.Debug {
+								log.Printf("JSON flat message: %s\n", string(jsonBytes))
+							}
 						} else {
 							log.Printf("cannot flat JSON: %v\n", err)
 						}
 					}
-					if cli.Debug {
-						log.Printf("JSON message: %s\n", string(jsonBytes))
-					}
-					cli.producer.Produce(&kafka.Message{
-						TopicPartition: kafka.TopicPartition{Topic: &cli.DestinationTopic, Partition: kafka.PartitionAny},
-						Value:          jsonBytes,
-						Key:            msg.Key,
-					}, nil)
 				} else {
 					fmt.Printf("cannot convert GPB to JSON: %v\n", err)
 				}
@@ -182,16 +189,15 @@ func main() {
 	client := KafkaClient{}
 	flag.StringVar(&client.Bootstrap, "bootstrap", "localhost:9092", "kafka bootstrap server")
 	flag.StringVar(&client.SourceTopic, "source-topic", "", "kafka source topic with OpenNMS Producer GPB messages")
-	flag.StringVar(&client.DestinationTopic, "dest-topic", "", "kafka destination topic for JSON generated payload")
+	flag.StringVar(&client.DestTopic, "dest-topic", "", "kafka destination topic for JSON generated payload")
+	flag.StringVar(&client.FlatDestTopic, "dest-topic-flat", "", "when specified, the flat content goes to this topic, and the non-flat version goes to dest-topic")
 	flag.StringVar(&client.GroupID, "group-id", "kafka-converter", "kafka consumer group ID")
 	flag.StringVar(&client.MessageKind, "message-kind", alarmKind, "source topic message kind; valid options: "+strings.Join(kinds, ", "))
 	flag.StringVar(&client.ProducerSettings, "producer-params", "", "optional kafka producer parameters as a CSV of Key-Value pairs")
 	flag.StringVar(&client.ConsumerSettings, "consumer-params", "", "optional kafka consumer parameters as a CSV of Key-Value pairs")
-	flat := flag.String("flat-json", "false", "Flatter JSON output (useful for KSQL)")
 	debug := flag.String("debug", "false", "enable debug, to visualize the JSON content to be sent")
 	flag.Parse()
 	client.Debug = *debug == "true"
-	client.FlatJSON = *flat == "true"
 
 	err := client.start()
 	if err != nil {

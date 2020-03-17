@@ -33,12 +33,12 @@ do
 done
 
 exec /kafka-converter \
-  -bootstrap ${BOOTSTRAP_SERVERS} \
-  -source-topic ${SOURCE_TOPIC} \
-  -dest-topic ${DEST_TOPIC} \
-  -group-id ${GROUP_ID-opennms} \
-  -message-kind ${MESSAGE_KIND-alarm} \
+  -bootstrap "${BOOTSTRAP_SERVERS}" \
+  -source-topic "${SOURCE_TOPIC}" \
+  -dest-topic "${DEST_TOPIC}" \
+  -dest-topic-flat "${DEST_TOPIC_FLAT}" \
+  -group-id "${GROUP_ID-opennms}" \
+  -message-kind "${MESSAGE_KIND-alarm}" \
   -producer-params "$(join , ${PRODUCER[@]})" \
   -consumer-params "$(join , ${CONSUMER[@]})" \
-  -debug ${DEBUG} \
-  -flat-json ${FLAT_JSON}
+  -debug ${DEBUG}

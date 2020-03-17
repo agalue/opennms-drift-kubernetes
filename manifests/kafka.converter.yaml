@@ -47,8 +47,6 @@ spec:
           value: alarm
         - name: DEBUG
           value: 'true'
-        - name: FLAT_JSON
-          value: 'true'
         - name: INSTANCE_ID
           valueFrom:
             configMapKeyRef:
@@ -58,6 +56,8 @@ spec:
           value: $(INSTANCE_ID)_alarms
         - name: DEST_TOPIC
           value: $(INSTANCE_ID)_alarms_json
+        - name: DEST_TOPIC_FLAT
+          value: $(INSTANCE_ID)_alarms_json_flat
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
         - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
@@ -109,8 +109,6 @@ spec:
           value: node
         - name: DEBUG
           value: 'true'
-        - name: FLAT_JSON
-          value: 'true'
         - name: INSTANCE_ID
           valueFrom:
             configMapKeyRef:
@@ -120,6 +118,8 @@ spec:
           value: $(INSTANCE_ID)_nodes
         - name: DEST_TOPIC
           value: $(INSTANCE_ID)_nodes_json
+        - name: DEST_TOPIC_FLAT
+          value: $(INSTANCE_ID)_nodes_json_flat
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
         - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
@@ -175,9 +175,9 @@ spec:
               key: KAFKA_NUM_PARTITIONS
               name: common-settings
         - name: NODES_TOPIC # Must match DEST_TOPIC from the kafka-nodes-json deployment
-          value: $(INSTANCE_ID)_nodes_json
+          value: $(INSTANCE_ID)_nodes_json_flat
         - name: ALARMS_TOPIC # Must match DEST_TOPIC from the kafka-alarms-json deployment
-          value: $(INSTANCE_ID)_alarms_json
+          value: $(INSTANCE_ID)_alarms_json_flat
         - name: TARGET_TOPIC
           value: $(ALARMS_TOPIC)_enriched
         - name: WINDOW
