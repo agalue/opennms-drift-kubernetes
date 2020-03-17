@@ -9,7 +9,7 @@ metadata:
 spec:
   consumerGroup: knative-group
   bootstrapServers: kafka.opennms.svc.cluster.local:9092
-  topics: K8S-alarms-json
+  topics: K8S_alarms_json
   sink:
     ref:
       apiVersion: serving.knative.dev/v1

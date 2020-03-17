@@ -67,16 +67,17 @@ EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.streams.cfg
 bootstrap.servers=${KAFKA_SERVER}:9092
+application.id=${INSTANCE_ID}_alec_datasource
 commit.interval.ms=5000
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.cfg
 # Make sure to configure the topics on OpenNMS the same way
 eventSinkTopic=${INSTANCE_ID}.Sink.Events
-inventoryTopic=${INSTANCE_ID}-alec-inventory
-nodeTopic=${INSTANCE_ID}-nodes
-alarmTopic=${INSTANCE_ID}-alarms
-alarmFeedbackTopic=${INSTANCE_ID}-alarms-feedback
-edgesTopic=${INSTANCE_ID}-edges
+inventoryTopic=${INSTANCE_ID}_alec_inventory
+nodeTopic=${INSTANCE_ID}_nodes
+alarmTopic=${INSTANCE_ID}_alarms
+alarmFeedbackTopic=${INSTANCE_ID}_alarms_feedback
+edgesTopic=${INSTANCE_ID}_edges
 EOF
 fi

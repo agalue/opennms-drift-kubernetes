@@ -39,4 +39,6 @@ exec /kafka-converter \
   -group-id ${GROUP_ID-opennms} \
   -message-kind ${MESSAGE_KIND-alarm} \
   -producer-params "$(join , ${PRODUCER[@]})" \
-  -consumer-params "$(join , ${CONSUMER[@]})"
+  -consumer-params "$(join , ${CONSUMER[@]})" \
+  -debug ${DEBUG} \
+  -flat-json ${FLAT_JSON}

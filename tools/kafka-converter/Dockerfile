@@ -12,7 +12,9 @@ ENV BOOTSTRAP_SERVERS="localhost:9092" \
     SOURCE_TOPIC="alarms" \
     DEST_TOPIC="alarms-json" \
     GROUP_ID="opennms" \
-    MESSAGE_KIND="alarm"
+    MESSAGE_KIND="alarm" \
+    DEBUG="false" \
+    FLAT_JSON="false"
 RUN echo "@edgecommunity http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
     apk update && \
     apk add --no-cache bash librdkafka@edgecommunity && \

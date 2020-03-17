@@ -13,6 +13,7 @@ import (
 	"github.com/agalue/kafka-converter/api/producer"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang/protobuf/proto"
+	"github.com/jeremywohl/flatten"
 )
 
 const (
@@ -34,9 +35,10 @@ type KafkaClient struct {
 	GroupID          string
 	ProducerSettings string
 	ConsumerSettings string
-
-	producer *kafka.Producer
-	consumer *kafka.Consumer
+	FlatJSON         bool
+	Debug            bool
+	producer         *kafka.Producer
+	consumer         *kafka.Consumer
 }
 
 func (cli *KafkaClient) getKafkaConfig(properties string) *kafka.ConfigMap {
@@ -139,6 +141,17 @@ func (cli *KafkaClient) start() error {
 				}
 				jsonBytes, err := json.Marshal(data)
 				if err == nil {
+					if cli.FlatJSON {
+						flat, err := flatten.FlattenString(string(jsonBytes), "", flatten.UnderscoreStyle)
+						if err == nil {
+							jsonBytes = []byte(flat)
+						} else {
+							log.Printf("cannot flat JSON: %v\n", err)
+						}
+					}
+					if cli.Debug {
+						log.Printf("JSON message: %s\n", string(jsonBytes))
+					}
 					cli.producer.Produce(&kafka.Message{
 						TopicPartition: kafka.TopicPartition{Topic: &cli.DestinationTopic, Partition: kafka.PartitionAny},
 						Value:          jsonBytes,
@@ -174,7 +187,11 @@ func main() {
 	flag.StringVar(&client.MessageKind, "message-kind", alarmKind, "source topic message kind; valid options: "+strings.Join(kinds, ", "))
 	flag.StringVar(&client.ProducerSettings, "producer-params", "", "optional kafka producer parameters as a CSV of Key-Value pairs")
 	flag.StringVar(&client.ConsumerSettings, "consumer-params", "", "optional kafka consumer parameters as a CSV of Key-Value pairs")
+	flat := flag.String("flat-json", "false", "Flatter JSON output (useful for KSQL)")
+	debug := flag.String("debug", "false", "enable debug, to visualize the JSON content to be sent")
 	flag.Parse()
+	client.Debug = *debug == "true"
+	client.FlatJSON = *flat == "true"
 
 	err := client.start()
 	if err != nil {
