@@ -79,7 +79,7 @@ az aks create --name opennms \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
   --dns-name-prefix opennms \
-  --kubernetes-version 1.15.7 \
+  --kubernetes-version 1.16.7 \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \

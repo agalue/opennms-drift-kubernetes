@@ -85,19 +85,24 @@ Create the Kubernetes Cluster
 With enough quota:
 
 ```bash
-gcloud container clusters create opennms \
-  --num-nodes=5 \
-  --cluster-version=1.14.8-gke.2 \
-  --machine-type=n1-standard-8
+export GCP_NODE_COUNT=5
+export GCP_VM_SIZE=n1-standard-8
 ```
 
 With reduced quota:
 
 ```bash
+export GCP_NODE_COUNT=3
+export GCP_VM_SIZE=n1-standard-2
+```
+
+Then,
+
+```bash
 gcloud container clusters create opennms \
-  --num-nodes=3 \
-  --cluster-version=1.14.8-gke.2 \
-  --machine-type=n1-standard-2
+  --num-nodes=$GCP_NODE_COUNT \
+  --cluster-version=1.15.9-gke.26 \
+  --machine-type=$GCP_VM_SIZE
 ```
 
 Then,
