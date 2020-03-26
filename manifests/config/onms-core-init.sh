@@ -40,6 +40,7 @@
 # - ELASTIC_INDEX_STRATEGY_ALARMS
 # - KAFKA_MAX_MESSAGE_SIZE
 # - JAEGER_AGENT_HOST
+# - FORWARD_METRICS
 
 # To avoid issues with OpenShift
 umask 002
@@ -51,6 +52,7 @@ ELASTIC_INDEX_STRATEGY_REST=${ELASTIC_INDEX_STRATEGY_REST-monthly}
 ELASTIC_INDEX_STRATEGY_ALARMS=${ELASTIC_INDEX_STRATEGY_ALARMS-monthly}
 ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
 KAFKA_MAX_MESSAGE_SIZE=${KAFKA_MAX_MESSAGE_SIZE-5000000}
+FORWARD_METRICS=${FORWARD_METRICS-true}
 
 CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
@@ -230,12 +232,17 @@ state.dir=/opennms-data/kafka
 EOF
 
     # Make sure to enable only what's needed for your use case
+    SUPPRESS_INC_ALARMS="true"
+    if [[ ${ENABLE_ALEC} ]]; then
+      SUPPRESS_INC_ALARMS="false"
+    fi
     cat <<EOF > ${CONFIG_DIR}/org.opennms.features.kafka.producer.cfg
 topologyProtocols=bridge,cdp,isis,lldp,ospf
-suppressIncrementalAlarms=false
-forward.metrics=true
+suppressIncrementalAlarms=${SUPPRESS_INC_ALARMS}
+forward.metrics=${FORWARD_METRICS}
 nodeRefreshTimeoutMs=300000
 alarmSyncIntervalMs=300000
+kafkaSendQueueCapacity=1000
 
 nodeTopic=${INSTANCE_ID}_nodes
 alarmTopic=${INSTANCE_ID}_alarms
