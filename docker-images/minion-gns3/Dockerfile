@@ -21,8 +21,7 @@ COPY ./entrypoint.sh /
 
 LABEL maintainer "Alejandro Galue <agalue@opennms.org>" \
       license="AGPLv3" \
-      vendor="OpenNMS Community" \
-      name="Minion"
+      name="Minion for GNS3"
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
