@@ -65,7 +65,7 @@ spec:
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:bleeding
+        image: opennms/horizon:release-candidate
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -155,7 +155,7 @@ spec:
           value: '600'
       containers:
       - name: onms
-        image: opennms/horizon:bleeding
+        image: opennms/horizon:release-candidate
         imagePullPolicy: IfNotPresent
         args:
         - -s
