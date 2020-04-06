@@ -74,6 +74,7 @@ if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch..."
 
   echo "sentinel-flows" > ${FEATURES_DIR}/flows.boot
+  echo "sentinel-telemetry-bmp" > ${FEATURES_DIR}/bmp.boot
 
   if [[ ! ${CASSANDRA_SERVER} ]]; then
     cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-sflow.cfg
