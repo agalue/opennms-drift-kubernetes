@@ -9,8 +9,8 @@ The following outlines the installation steps, but all of them have been placed 
 In order to use the simplified version of Istio, the chosen version of it depends on what's available at the [third-party](https://github.com/knative/serving/tree/master/third_party) folder for the chosen version of Knative Service.
 
 ```bash
-export serving_version="v0.13.0"
-export eventing_version="v0.13.0"
+export serving_version="v0.13.2"
+export eventing_version="v0.13.2"
 export istio_version="1.4.4"
 ```
 
@@ -40,9 +40,6 @@ sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|
 
 ```bash
 kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving.yaml"
-
-echo "Waiting for Knative Serving to become ready"
-sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 ```
 
 > **NOTE**: The monitoring manifets are not installed as they are not required for this solution; although, if your Kubernetes cluster has enough resources, you can give that a try.
@@ -53,10 +50,6 @@ sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Runni
 kubectl apply --selector knative.dev/crd-install=true -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
 kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
-
-echo "Waiting for Knative Eventing to become ready"
-sleep 5; while echo && kubectl get pods -n knative-eventing | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
-sleep 5; while echo && kubectl get pods -n knative-sources | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
 ```
 
 ## Fix the Domain Configuration
