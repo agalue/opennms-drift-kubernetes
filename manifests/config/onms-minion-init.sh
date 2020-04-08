@@ -158,14 +158,17 @@ parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.common.parser.Forwar
 parsers.1.name=Netflow-5
 parsers.1.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser
 parsers.1.parameters.dnsLookupsEnabled=true
+parsers.1.parameters.maxClockSkew=300
 parsers.2.name=Netflow-9
 parsers.2.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser
 parsers.2.parameters.dnsLookupsEnabled=true
-parsers.3.name=SFlow
-parsers.3.class-name=org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParser
+parsers.2.parameters.maxClockSkew=300
+parsers.3.name=IPFIX
+parsers.3.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser
 parsers.3.parameters.dnsLookupsEnabled=true
-parsers.4.name=IPFIX
-parsers.4.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser
+parsers.3.parameters.maxClockSkew=300
+parsers.4.name=SFlow
+parsers.4.class-name=org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParser
 parsers.4.parameters.dnsLookupsEnabled=true
 EOF
 
@@ -192,6 +195,7 @@ parameters.maxPacketSize=16192
 parsers.0.name=Netflow-5
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser
 parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.maxClockSkew=300
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-4729.cfg
@@ -203,6 +207,7 @@ parameters.maxPacketSize=16192
 parsers.0.name=Netflow-9
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser
 parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.maxClockSkew=300
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-6343.cfg
@@ -225,5 +230,6 @@ parameters.maxPacketSize=16192
 parsers.0.name=IPFIX
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser
 parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.maxClockSkew=300
 EOF
 fi
