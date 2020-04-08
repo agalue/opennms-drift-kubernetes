@@ -128,7 +128,6 @@ spec:
       - name: minion
         image: opennms/minion:release-candidate
         imagePullPolicy: IfNotPresent
-        hostNetwork: true # To avoid issues with the UDP Listeners
         args:
         - -c
         env:
@@ -212,7 +211,6 @@ spec:
       - name: nxos-grpc
         image: agalue/opennms-nxos-grpc-go:latest
         imagePullPolicy: Always
-        hostNetwork: true # To avoid issues with the UDP Listeners
         env:
         - name: TZ
           valueFrom:
