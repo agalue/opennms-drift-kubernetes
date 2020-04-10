@@ -54,46 +54,23 @@ This deployment already contains Minions inside the opennms namespace for monito
 For `AWS` using the domain `aws.agalue.net`, the resources should be:
 
 * OpenNMS Core: `https://onms.aws.agalue.net/opennms`
-* Kafka: `kafka.aws.agalue.net:9094`
+* GRPC: `grpc.aws.agalue.net:443`
 
 For example:
 
 ```bash
-export DOMAIN="aws.agalue.net"
-export LOCATION="Apex"
-export INSTANCE_ID="K8S" # Must match kustomization.yaml
-
-docker pull opennms/minion:bleeding
-
-mkdir -p overlay/featuresBoot.d
-docker run -it --rm --entrypoint cat opennms/minion:bleeding -- etc/system.properties > overlay/system.properties
-echo "org.opennms.instance.id=${INSTANCE_ID}" >> overlay/system.properties
-cat <<EOF > overlay/featuresBoot.d/ipc.boot
-!minion-jms
-!opennms-core-ipc-rpc-jms
-!opennms-core-ipc-sink-camel
-opennms-core-ipc-grpc-client
-EOF
-cat <<EOF > overlay/org.opennms.core.ipc.grpc.client.cfg
-tls-enabled=true
-host=grpc.$DOMAIN
-port=443
-EOF
-
 docker run -it --name minion \
- -e MINION_ID=$LOCATION-minion-1 \
- -e MINION_LOCATION=$LOCATION \
- -e OPENNMS_HTTP_URL=https://onms.$DOMAIN/opennms \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
- -v $(pwd)/overlay:/opt/minion-etc-overlay \
- opennms/minion:bleeding -f
+ -p 50000:50000/udp \
+ -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
+ opennms/minion:26.0.0 -f
 ```
 
-> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID`. Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
+> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
 

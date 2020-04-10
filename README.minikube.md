@@ -80,36 +80,8 @@ EOF
 
 # Start Minion
 
-To extact the certificate for gRPC and use it on the client Minion:
-
 ```bash
-kubectl get secret grpc-ingress-cert -o json | jq -r '.data["tls.key"]' | base64 --decode > server.key
-kubectl get secret grpc-ingress-cert -o json | jq -r '.data["tls.crt"]' | base64 --decode > server.crt
-```
-
-
-```bash
-export DOMAIN="minikube.local"
-export LOCATION="Apex"
-export INSTANCE_ID="K8S" # Must match kustomization.yaml
-
-docker pull opennms/minion:bleeding
-
-mkdir -p overlay/featuresBoot.d
-docker run -it --rm --entrypoint cat opennms/minion:bleeding -- etc/system.properties > overlay/system.properties
-echo "org.opennms.instance.id=${INSTANCE_ID}" >> overlay/system.properties
-cat <<EOF > overlay/featuresBoot.d/ipc.boot
-!minion-jms
-!opennms-core-ipc-rpc-jms
-!opennms-core-ipc-sink-camel
-opennms-core-ipc-grpc-client
-EOF
-cat <<EOF > overlay/org.opennms.core.ipc.grpc.client.cfg
-tls-enabled=true
-host=grpc.$DOMAIN
-port=443
-EOF
-
+mkdir -p overlay
 kubectl get secret opennms-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/onms_server.crt
 kubectl get secret grpc-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/grpc_server.crt
 keytool -importcert -alias grpc -file grpc_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks
@@ -117,15 +89,14 @@ keytool -importcert -alias onms -file onms_server.crt -storepass 0p3nNM5 -keysto
 JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/grpc_trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
 
 docker run -it --rm --name minion \
- -e MINION_ID=$LOCATION-minion-1 \
- -e MINION_LOCATION=$LOCATION \
- -e OPENNMS_HTTP_URL=https://onms.$DOMAIN/opennms \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
  -e JAVA_OPTS=$JAVA_OPTS \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
+ -p 50000:50000/udp \
  -v $(pwd)/overlay:/opt/minion-etc-overlay \
- opennms/minion:bleeding -f
+ -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
+ opennms/minion:26.0.0 -f
 ```
