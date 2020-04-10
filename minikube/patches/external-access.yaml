@@ -6,6 +6,8 @@ kind: Ingress
 metadata:
   name: ingress-rules
   namespace: opennms
+  annotations:
+    cert-manager.io/cluster-issuer: selfsigned-issuer
 spec:
   tls:
     - secretName: opennms-ingress-cert
