@@ -43,7 +43,7 @@ spec:
           value: '600'
       containers:
       - name: grpc-server
-        image: agalue/grpc-server:latest
+        image: agalue/grpc-server:H26
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8990
