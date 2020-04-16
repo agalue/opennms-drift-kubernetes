@@ -2,7 +2,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Requirements:
-# - Must run within a init-container based on opennms/horizon-core-web.
+# - Must run within a init-container based on opennms/horizon.
 #   Version must match the runtime container.
 # - Horizon 25 or newer is required.
 # - The following commands must be pre-installed on the chosen image:
@@ -115,9 +115,10 @@ fi
 MANDATORY=/tmp/opennms-mandatory
 mkdir -p ${MANDATORY}
 for file in "${KARAF_FILES[@]}"; do
-  echo "Backing up $file to ${MANDATORY}..."
+  echo "Backing up ${file} to ${MANDATORY}..."
   cp --force ${BACKUP_ETC}/${file} ${MANDATORY}/
 done
+# TODO if the volume behind CONFIG_DIR doesn't have the right permissions, the following fails
 echo "Overriding mandatory files from ${MANDATORY}..."
 rsync -aO --no-perms ${MANDATORY}/ ${CONFIG_DIR}/
 
