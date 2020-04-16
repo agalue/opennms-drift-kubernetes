@@ -10,7 +10,7 @@ org.opennms.instance.id: K8S
 ipc:
   grpc:
     host: "grpc.aws.agalue.net"
-    tls-enabled: "true"
+    tls.enabled: "true"
     port: "443"
   sink:
     offheap:
