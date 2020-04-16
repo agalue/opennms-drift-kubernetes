@@ -132,6 +132,7 @@ spec:
               servicePort: 16686
 
 # Access to applications based on gRPC
+# TODO: Currently not working, although the gRPC server works as expected.
 
 # Enable client certificate authentication
 # nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
@@ -156,9 +157,9 @@ metadata:
   namespace: opennms
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: GRPC
     cert-manager.io/issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: GRPC
 spec:
   tls:
     - secretName: grpc-ingress-cert

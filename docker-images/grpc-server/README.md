@@ -39,6 +39,6 @@ docker run \
 To build the image:
 
 ```bash
-docker build -t agalue/grpc-server .
-docker push agalue/grpc-server
+docker build -t agalue/grpc-server:H26 .
+docker push agalue/grpc-server:H26
 ```

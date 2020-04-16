@@ -1,10 +1,8 @@
 FROM maven:3.6-jdk-8 AS builder
 WORKDIR /app
-COPY H26.patch .
-RUN apt update && apt install patch && \
-    git clone https://github.com/OpenNMS/grpc-server.git && \
+RUN git clone https://github.com/OpenNMS/grpc-server.git && \
     cd grpc-server && \
-    patch -p1 < ../H26.patch && \
+    git checkout -b feature/reuse-proto-files origin/feature/reuse-proto-files && \
     mvn package
 
 FROM openjdk:8-jdk-slim
