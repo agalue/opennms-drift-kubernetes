@@ -57,22 +57,17 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 
 ## DNS
 
-To be able to use the Ingress controller with TLS, do the following on one terminal:
+Update `/etc/hosts` with the FQDN used by the ingresses. For example:
 
-```bash
-minikube tunnel
-```
-
-On another terminal update `/etc/hosts` with the FQDN used by the ingresses. For example:
-
-INGRESS_IP=$(kubectl get ingress -n opennms onms-ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+ONMS_INGRESS=$(kubectl get ingress -n opennms onms-ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+GRPC_INGRESS=$(kubectl get ingress -n opennms grpc-ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ```bash
 cat <<EOF | sudo tee -a /etc/hosts
-$INGRESS_IP onms.minikube.local
-$INGRESS_IP grafana.minikube.local
-$INGRESS_IP kafka-manager.minikube.local
-$INGRESS_IP tracing.minikube.local
-$INGRESS_IP grpc.minikube.local
+$ONMS_INGRESS onms.minikube.local
+$ONMS_INGRESS grafana.minikube.local
+$ONMS_INGRESS kafka-manager.minikube.local
+$ONMS_INGRESS tracing.minikube.local
+$GRPC_INGRESS grpc.minikube.local
 EOF
 ```
 
