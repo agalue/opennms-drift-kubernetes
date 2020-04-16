@@ -2,9 +2,8 @@
 
 This provides a way to build a Docker image around:
 
-https://github.com/OpenNMS/grpc-server
+https://github.com/OpenNMS/grpc-server/tree/feature/reuse-proto-files
 
-The server can be started like this:
 
 ```bash
 java -jar grpc-server.jar \
