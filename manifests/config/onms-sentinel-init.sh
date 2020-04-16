@@ -74,7 +74,7 @@ if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch..."
 
   echo "sentinel-flows" > ${FEATURES_DIR}/flows.boot
-  echo "sentinel-telemetry-bmp" > ${FEATURES_DIR}/bmp.boot
+# echo "sentinel-telemetry-bmp" > ${FEATURES_DIR}/bmp.boot
 
   if [[ ! ${CASSANDRA_SERVER} ]]; then
     cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-sflow.cfg
@@ -105,6 +105,17 @@ adapters.0.name = Netflow-9-Adapter
 adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
 queue.threads = ${NUM_LISTENER_THREADS}
 EOF
+
+#  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+#name = BMP
+#adapters.0.name = BMP-TelemetryAdapter
+#adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
+#adapters.1.name = BMP-PeerStatusAdapter
+#adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
+#adapters.2.name = BMP-IntegrationAdapter
+#adapters.2.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.openbmp.BmpIntegrationAdapter
+#queue.threads = ${NUM_LISTENER_THREADS}
+#EOF
 
   PREFIX=$(echo ${INSTANCE_ID} | tr '[:upper:]' '[:lower:]')-
   cat <<EOF > ${OVERLAY}/org.opennms.features.flows.persistence.elastic.cfg
