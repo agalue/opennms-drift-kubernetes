@@ -23,7 +23,7 @@ minikube config view
 
 ## Install the CertManager
 
-The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
+The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller. Although, for `minikube`, a self-signed certificate will be used.
 
 ```bash
 kubectl create namespace cert-manager
@@ -84,8 +84,8 @@ EOF
 mkdir -p overlay
 kubectl get secret opennms-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/onms_server.crt
 kubectl get secret grpc-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/grpc_server.crt
-keytool -importcert -alias grpc -file grpc_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks
-keytool -importcert -alias onms -file onms_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks
+keytool -importcert -alias grpc -file overlay/grpc_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
+keytool -importcert -alias onms -file overlay/onms_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
 JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/grpc_trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
 
 docker run -it --rm --name minion \
