@@ -13,10 +13,7 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 In order to do that, just start minikube, and make sure it has at least 4 Cores and 16GB of RAM:
 
 ```bash
-minikube config view
-- cpus: 4
-- ingress: true
-- memory: 16384
+minikube start --cpus=4 --memory=16g --addons=ingress --addons=ingress-dns --addons=metrics-server
 ```
 
 > *NOTE*: The solution was tested with Kubernetes 1.14.8 and 1.15.6. Newer versions of Kubernetes have not been tested yet.
@@ -30,7 +27,7 @@ kubectl create namespace cert-manager
 kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
 ```
 
-> **NOTE**: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html). For now, this is not used when using minikube.
+> **NOTE**: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
 
 ## Install Jaeger CRDs
 
@@ -57,19 +54,7 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 
 ## DNS
 
-Update `/etc/hosts` with the FQDN used by the ingresses. For example:
-
-ONMS_INGRESS=$(kubectl get ingress -n opennms onms-ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-GRPC_INGRESS=$(kubectl get ingress -n opennms grpc-ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-```bash
-cat <<EOF | sudo tee -a /etc/hosts
-$ONMS_INGRESS onms.minikube.local
-$ONMS_INGRESS grafana.minikube.local
-$ONMS_INGRESS kafka-manager.minikube.local
-$ONMS_INGRESS tracing.minikube.local
-$GRPC_INGRESS grpc.minikube.local
-EOF
-```
+Please take a look at the documentation of [ingress-dns](https://github.com/kubernetes/minikube/tree/master/deploy/addons/ingress-dns) for more information about how to use it, to avoid messing with `/etc/hosts`.
 
 > **WARNING**: Keep in mind that the certificates are self-signed.
 

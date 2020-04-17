@@ -7,7 +7,7 @@ metadata:
   name: common-settings
   namespace: opennms
 data:
-  DOMAIN: minikube.local
+  DOMAIN: test
   TIMEZONE: America/New_York
   OPENNMS_INSTANCE_ID: K8S
   CASSANDRA_CLUSTER_NAME: OpenNMS
