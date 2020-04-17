@@ -20,6 +20,8 @@
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
 # - ELASTIC_INDEX_STRATEGY_FLOWS
+# - ELASTIC_REPLICATION_FACTOR
+# - ELASTIC_NUM_SHARDS
 # - KAFKA_SERVER
 # - CASSANDRA_SERVER
 # - OPENNMS_HTTP_USER
@@ -32,6 +34,8 @@ umask 002
 
 NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
+ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
+ELASTIC_NUM_SHARDS${ELASTIC_NUM_SHARDS-6}
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
 KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
@@ -59,7 +63,8 @@ fi
 
 FEATURES_DIR=${OVERLAY}/featuresBoot.d
 mkdir -p ${FEATURES_DIR}
-echo "sentinel-jsonstore-postgres" > ${FEATURES_DIR}/store.boot
+echo "sentinel-persistence" > ${FEATURES_DIR}/persistence.boot
+echo "sentinel-jsonstore-postgres" > ${FEATURES_DIR}/store-postgres.boot
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
@@ -73,7 +78,10 @@ fi
 if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch..."
 
-  echo "sentinel-flows" > ${FEATURES_DIR}/flows.boot
+  cat <<EOF > ${FEATURES_DIR}/flows.boot
+sentinel-flows
+sentinel-telemetry-bmp
+EOF
 
   if [[ ! ${CASSANDRA_SERVER} ]]; then
     cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-sflow.cfg
@@ -113,7 +121,7 @@ indexPrefix = ${PREFIX}
 globalElasticPassword = ${ELASTIC_PASSWORD}
 elasticIndexStrategy = ${ELASTIC_INDEX_STRATEGY_FLOWS}
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards = 6
+settings.index.number_of_shards = ${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas = ${ELASTIC_REPLICATION_FACTOR}
 EOF
 fi
@@ -126,6 +134,7 @@ if [[ ${KAFKA_SERVER} ]]; then
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.cfg
 # Producers
 bootstrap.servers = ${KAFKA_SERVER}:9092
+acks = 1
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.consumer.cfg
@@ -133,6 +142,7 @@ EOF
 group.id = ${INSTANCE_ID}_Sentinel
 bootstrap.servers = ${KAFKA_SERVER}:9092
 max.partition.fetch.bytes = 5000000
+acks = 1
 EOF
 fi
 

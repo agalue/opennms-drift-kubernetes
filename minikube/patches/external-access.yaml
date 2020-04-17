@@ -15,6 +15,7 @@ spec:
         - onms.test
         - grafana.test
         - kafka-manager.test
+        - kibana.test
         - tracing.test
   rules:
     - host: onms.test
@@ -38,6 +39,13 @@ spec:
             backend:
               serviceName: kafka-manager
               servicePort: 9000
+    - host: kibana.test
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kibana
+              servicePort: 5601
     - host: tracing.test
       http:
         paths:

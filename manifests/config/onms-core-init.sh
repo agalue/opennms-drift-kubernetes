@@ -35,6 +35,7 @@
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
 # - ELASTIC_REPLICATION_FACTOR
+# - ELASTIC_NUM_SHARDS
 # - ELASTIC_INDEX_STRATEGY_FLOWS
 # - ELASTIC_INDEX_STRATEGY_REST
 # - ELASTIC_INDEX_STRATEGY_ALARMS
@@ -51,6 +52,7 @@ ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_INDEX_STRATEGY_REST=${ELASTIC_INDEX_STRATEGY_REST-monthly}
 ELASTIC_INDEX_STRATEGY_ALARMS=${ELASTIC_INDEX_STRATEGY_ALARMS-monthly}
 ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
+ELASTIC_NUM_SHARDS=${ELASTIC_NUM_SHARDS-6}
 KAFKA_MAX_MESSAGE_SIZE=${KAFKA_MAX_MESSAGE_SIZE-5000000}
 FORWARD_METRICS=${FORWARD_METRICS-true}
 
@@ -364,7 +366,7 @@ elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
 
@@ -382,7 +384,7 @@ retries=1
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
@@ -398,7 +400,7 @@ elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_ALARMS}
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
@@ -414,7 +416,7 @@ elasticIndexStrategy=monthly
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi

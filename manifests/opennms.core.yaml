@@ -115,6 +115,11 @@ spec:
             configMapKeyRef:
               key: ELASTIC_REPLICATION_FACTOR
               name: common-settings
+        - name: ELASTIC_NUM_SHARDS
+          valueFrom:
+            configMapKeyRef:
+              key: ELASTIC_NUM_SHARDS
+              name: common-settings
         - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
           value: onms-tracing-agent.opennms.svc.cluster.local
         volumeMounts:
