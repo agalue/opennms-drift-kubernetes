@@ -1,27 +1,29 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Kafka Converter Tool implemented in Go.
-# This takes a given GPB payload from a topic and puts its JSON representation into another topic
+# This takes a given GPB payload from a topic and puts its JSON representation into another topic.
+# 3 deployments are created:
+# - convert nodes from protobuf to JSON
+# - convert alarms from protobuf to JSON
+# - KSQL server to generate enriched version of alarms associated with nodes
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kafka-converter
+  name: kafka-alarms-json
   namespace: opennms
   labels:
-    app: kafka-converter
-    deployment: drift
+    app: kafka-alarms-json
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kafka-converter
+      app: kafka-alarms-json
   template:
     metadata:
       labels:
-        app: kafka-converter
-        deployment: drift
+        app: kafka-alarms-json
     spec:
       initContainers:
       - name: dependencies
@@ -33,25 +35,29 @@ spec:
         - name: TIMEOUT
           value: '600'
       containers:
-      - name: kafka-converter
+      - name: kafka-alarms-json
         image: agalue/kafka-converter-go:latest
         imagePullPolicy: Always
         env:
         - name: BOOTSTRAP_SERVERS
           value: kafka.opennms.svc.cluster.local:9092
         - name: GROUP_ID
-          value: kafka-converter
-        - name: SOURCE_KIND
-          value: alarms
+          value: kafka-alarms-json
+        - name: MESSAGE_KIND
+          value: alarm
+        - name: DEBUG
+          value: 'true'
         - name: INSTANCE_ID
           valueFrom:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
         - name: SOURCE_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
-          value: $(INSTANCE_ID)-alarms
+          value: $(INSTANCE_ID)_alarms
         - name: DEST_TOPIC
-          value: $(INSTANCE_ID)-alarms-json
+          value: $(INSTANCE_ID)_alarms_json
+        - name: DEST_TOPIC_FLAT
+          value: $(INSTANCE_ID)_alarms_json_flat
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
         - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
@@ -62,3 +68,145 @@ spec:
           limits:
             memory: 128Mi
             cpu: 100m
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-nodes-json
+  namespace: opennms
+  labels:
+    app: kafka-nodes-json
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-nodes-json
+  template:
+    metadata:
+      labels:
+        app: kafka-nodes-json
+    spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: kafka-nodes-json
+        image: agalue/kafka-converter-go:latest
+        imagePullPolicy: Always
+        env:
+        - name: BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: GROUP_ID
+          value: kafka-nodes-json
+        - name: MESSAGE_KIND
+          value: node
+        - name: DEBUG
+          value: 'true'
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: SOURCE_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
+          value: $(INSTANCE_ID)_nodes
+        - name: DEST_TOPIC
+          value: $(INSTANCE_ID)_nodes_json
+        - name: DEST_TOPIC_FLAT
+          value: $(INSTANCE_ID)_nodes_json_flat
+        - name: CONSUMER_AUTO_OFFSET_RESET
+          value: latest
+        - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
+          value: '5000000'
+        - name: PRODUCER_MAX_REQUEST_SIZE
+          value: '5000000'
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 100m
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ksql-alarms
+  namespace: opennms
+  labels:
+    app: ksql-alarms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ksql-alarms
+  template:
+    metadata:
+      labels:
+        app: ksql-alarms
+    spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
+      - name: init-config
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: [ sh, -c]
+        args: [ 'echo "${NODES_KQL} ${ALARMS_KQL} ${TARGET_KSQL}" > /ksql/alarms.ksql' ]
+        env:
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: PARTITIONS
+          valueFrom:
+            configMapKeyRef:
+              key: KAFKA_NUM_PARTITIONS
+              name: common-settings
+        - name: NODES_TOPIC # Must match DEST_TOPIC from the kafka-nodes-json deployment
+          value: $(INSTANCE_ID)_nodes_json_flat
+        - name: ALARMS_TOPIC # Must match DEST_TOPIC from the kafka-alarms-json deployment
+          value: $(INSTANCE_ID)_alarms_json_flat
+        - name: TARGET_TOPIC
+          value: $(ALARMS_TOPIC)_enriched
+        - name: WINDOW
+          value: 1 DAY
+        - name: NODES_KQL # Nodes stream with the required fields as columns from the JSON object
+          value: CREATE STREAM nodes (id BIGINT, foreign_source STRING, foreign_id STRING, location STRING, label STRING) WITH (KAFKA_TOPIC='$(NODES_TOPIC)', VALUE_FORMAT='JSON');
+        - name: ALARMS_KQL # Alarms stream with the required fields as columns from the JSON object
+          value: CREATE STREAM alarms (id BIGINT, uei STRING, log_message STRING, severity STRING, reduction_key STRING, clear_key STRING, node_criteria_id BIGINT) WITH (KAFKA_TOPIC='$(ALARMS_TOPIC)', VALUE_FORMAT='JSON');
+        - name: TARGET_KSQL # Combined stream with the required fields from alarms and nodes
+          value: CREATE STREAM alarms_enriched WITH (KAFKA_TOPIC='$(TARGET_TOPIC)', VALUE_FORMAT='JSON', PARTITIONS=$(PARTITIONS)) AS SELECT * FROM alarms LEFT JOIN nodes WITHIN $(WINDOW) ON alarms.node_criteria_id = nodes.id EMIT CHANGES;
+        volumeMounts:
+        - name: ksql
+          mountPath: /ksql
+      containers:
+      - name: ksql-alarms
+        image: confluentinc/cp-ksql-server:5.4.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KSQL_BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: KSQL_KSQL_SERVICE_ID
+          value: ksql-alarms
+        - name: KSQL_KSQL_QUERIES_FILE
+          value: /ksql/alarms.ksql
+        - name: KSQL_KSQL_STREAMS_REPLICATION_FACTOR
+          value: '2' # Must be consistent with the cluster size
+        volumeMounts:
+        - name: ksql
+          mountPath: /ksql
+      volumes:
+      - name: ksql
+        emptyDir: {}

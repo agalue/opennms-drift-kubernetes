@@ -1,0 +1,72 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-server
+  namespace: opennms
+  labels:
+    app: grpc-server
+spec:
+  ports:
+  - port: 8990
+  selector:
+    app: grpc-server
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-server
+  namespace: opennms
+  labels:
+    app: grpc-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: grpc-server
+  template:
+    metadata:
+      labels:
+        app: grpc-server
+    spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: grpc-server
+        image: agalue/grpc-server:H26
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8990
+          name: client
+        env:
+        - name: BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: TLS_ENABLED
+          value: 'false'
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: CONSUMER_AUTO_OFFSET_RESET
+          value: latest
+        - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
+          value: '5000000'
+        - name: PRODUCER_MAX_REQUEST_SIZE
+          value: '5000000'
+        - name: MAX_MESSAGE_SIZE
+          value: '4194304'
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 100m

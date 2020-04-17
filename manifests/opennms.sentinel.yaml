@@ -60,7 +60,7 @@ spec:
       # Initialize Sentinel Configuration
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: opennms/sentinel:25.2.1
+        image: opennms/sentinel:26.0.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -95,6 +95,11 @@ spec:
             configMapKeyRef:
               key: ELASTIC_REPLICATION_FACTOR
               name: common-settings
+        - name: ELASTIC_NUM_SHARDS
+          valueFrom:
+            configMapKeyRef:
+              key: ELASTIC_NUM_SHARDS
+              name: common-settings
         - name: OPENNMS_HTTP_USER
           value: admin
         - name: OPENNMS_HTTP_PASS
@@ -126,7 +131,7 @@ spec:
           value: '600'
       containers:
       - name: sentinel
-        image: opennms/sentinel:25.2.1
+        image: opennms/sentinel:26.0.0
         imagePullPolicy: IfNotPresent
         args:
         - -c

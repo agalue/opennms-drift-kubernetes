@@ -22,6 +22,8 @@ export LOCATION="East US"
 export DOMAIN="azure.agalue.net"
 ```
 
+> Those variables will be used by all the commands used below.
+
 ## Create a Resource Group:
 
 ```bash
@@ -40,26 +42,47 @@ az network dns zone create -g "$GROUP" -n "$DOMAIN"
 
 ## Cluster Creation
 
-> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment.
+> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription (which has a limitation of 20 vCPUs).
 
-Create a service principal account:
+Create a service principal account, and extract the service principal ID (or `appId`) and the client secret (or `password`):
 
 ```
-az ad sp create-for-rbac --skip-assignment --name opennmsAKSClusterServicePrincipal
+export SERVICE_PRINCIPAL_FILE=~/.azure/opennms-service-principal.json
+az ad sp create-for-rbac --skip-assignment --name opennms > $SERVICE_PRINCIPAL_FILE
+export SERVICE_PRINCIPAL=$(jq -r .appId $SERVICE_PRINCIPAL_FILE)
+export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 ```
 
-From the output, create an environment variable called `APP_ID` with the content of the `appId` field, and another one called `PASSWORD` for the `password` field. Those will be used on the following command.
+> **WARNING**: The above command should be executed once. If the principal already exists, either extract the information as mentioned or delete it and recreate it before proceed.
+
+The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you. For more information about service principals, follow [this](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal) link.
+
+With enough quota:
+
+```bash
+export AKS_NODE_COUNT=5
+export AKS_VM_SIZE=Standard_DS4_v2
+```
+
+With reduced quota:
+
+```bash
+export AKS_NODE_COUNT=4
+export AKS_VM_SIZE=Standard_DS3_v2
+```
+
+Then,
 
 ```bash
 az aks create --name opennms \
   --resource-group "$GROUP" \
-  --service-principal "$APP_ID" \
-  --client-secret "$PASSWORD" \
+  --service-principal "$SERVICE_PRINCIPAL" \
+  --client-secret "$CLIENT_SECRET" \
   --dns-name-prefix opennms \
-  --kubernetes-version 1.15.7 \
+  --kubernetes-version 1.16.7 \
   --location "$LOCATION" \
-  --node-count 4 \
-  --node-vm-size Standard_DS3_v2 \
+  --node-count $AKS_NODE_COUNT \
+  --node-vm-size $AKS_VM_SIZE \
   --nodepool-name onmspool \
   --network-plugin azure \
   --network-policy azure \
@@ -109,13 +132,17 @@ kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator
 
 ## Manifets
 
-To apply all the manifests:
+To apply all the manifests with enough quota:
 
 ```bash
 kubectl apply -k aks
 ```
 
-> **NOTE**: The amount of resources has been reduced to avoid quota issues. The limits were designed to use a `Visual Studio Enterprise` Subscription. 
+With reduced quota:
+
+```bash
+kubectl apply -k aks-reduced
+```
 
 ## Install Jaeger Tracing
 
@@ -126,13 +153,7 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the workers public FQDN. For this reason, the external port (i.e. `9094`) should be opened. Fortunately, AKS does that auto-magically for you, so there is no need for changes.
-
-However, by default, with AKS there is no public IP for the nodes; hence, nothing is reported via metadata. For this reason, external Kafka won't work. There is a [feature in preview](https://docs.microsoft.com/en-us/azure/aks/use-multiple-node-pools#assign-a-public-ip-per-node-in-a-node-pool) to let AKS assign a public IP per node in a node pool.
-
-## Configure DNS Entry for the Ingress Controller and Kafka
+## Configure DNS Entry for the Ingress Controller
 
 With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach.
 
@@ -149,20 +170,12 @@ NAME            TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)           
 ingress-nginx   LoadBalancer   10.0.83.198   40.117.237.217   80:30664/TCP,443:30213/TCP   9m58s
 ```
 
-Something similar can be done for Kafka:
-
-```bash
-kubectl get svc ext-kafka -n opennms
-```
-
-Create a wildcard DNS entry on your DNS Zone to point to the `EXTERNAL-IP`; and create an A record for `kafka`. For example:
+Create a wildcard DNS entry on your DNS Zone to point to the `EXTERNAL-IP`; for example:
 
 ```bash
 export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-export KAFKA_EXTERNAL_IP=$(kubectl get svc ext-kafka -n opennms -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
-az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n 'kafka' -a $KAFKA_EXTERNAL_IP
-az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n '*' -a $NGINX_EXTERNAL_IP
+az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
 
 ## Cleanup
@@ -170,8 +183,7 @@ az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n '*' -a $NGINX
 Remove the A Records from the DNS Zone:
 
 ```bash
-az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n 'kafka' -a $KAFKA_EXTERNAL_IP
-az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n '*' -a $NGINX_EXTERNAL_IP
+az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
 
 Delete the cluster:

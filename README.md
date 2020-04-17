@@ -2,15 +2,11 @@
 
 OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/).
 
-This is basically the `Kubernetes` version of the work done [here](https://github.com/OpenNMS/opennms-drift-aws/) for OpenNMS Horizon 24. For learning purposes, `Helm` charts and `operators` are avoided for this solution on the main components, with the exceptions of the Ingress Controller and Cert-Manager. In the future, that might change to take advantage of these technologies.
+For learning purposes, `Helm` charts and `operators` are avoided for this solution on the main components, with the exceptions of the Ingress Controller and Cert-Manager. In the future, that might change to take advantage of these technologies.
 
-Instead of using discrete EC2 instances, this repository explains how to deploy basically the same solution with `Kubernetes`.
+This deployment contains a full distributed version of all OpenNMS components and features, with high availability in mind when possible.
 
-In this case, there are some additional features available in this particular solution compared with the original one, like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/kafka-manager).
-
-## Limitations
-
-`Kafka` uses the `hostPort` feature to expose the advertise external listeners on port 9094, so applications outside `Kubernetes` like `Minion` can access it. For this reason, `Kafka` can be scaled up to the number of worker nodes on the `Kubernetes` cluster.
+There are some additional features available in this particular solution, like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/kafka-manager).
 
 ## Minimum Requirements
 
@@ -54,44 +50,23 @@ This deployment already contains Minions inside the opennms namespace for monito
 For `AWS` using the domain `aws.agalue.net`, the resources should be:
 
 * OpenNMS Core: `https://onms.aws.agalue.net/opennms`
-* Kafka: `kafka.aws.agalue.net:9094`
+* GRPC: `grpc.aws.agalue.net:443`
 
 For example:
 
 ```bash
-export DOMAIN="aws.agalue.net"
-export LOCATION="Apex"
-export INSTANCE_ID="K8S" # Must match kustomization.yaml
-export JAAS_CFG='org.apache.kafka.common.security.scram.ScramLoginModule required username="opennms" password="0p3nNM5";' # Must match kustomization.yaml
-
-docker run -it --rm --entrypoint cat opennms/minion:25.2.1 -- etc/system.properties > system.properties
-echo "org.opennms.instance.id=${INSTANCE_ID}" >> system.properties
-
 docker run -it --name minion \
- -e MINION_ID=$LOCATION-minion-1 \
- -e MINION_LOCATION=$LOCATION \
- -e OPENNMS_HTTP_URL=https://onms.$DOMAIN/opennms \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
- -e KAFKA_RPC_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
- -e KAFKA_RPC_AUTO_OFFSET_RESET=latest \
- -e KAFKA_RPC_COMPRESSION_TYPE=gzip \
- -e KAFKA_RPC_SASL_JAAS_CONFIG="$JAAS_CFG" \
- -e KAFKA_RPC_SECURITY_PROTOCOL=SASL_PLAINTEXT \
- -e KAFKA_RPC_SASL_MECHANISM=SCRAM-SHA-512 \
- -e KAFKA_SINK_BOOTSTRAP_SERVERS=kafka.$DOMAIN:9094 \
- -e KAFKA_SINK_ACKS=1 \
- -e KAFKA_SINK_SASL_JAAS_CONFIG="$JAAS_CFG" \
- -e KAFKA_SINK_SECURITY_PROTOCOL=SASL_PLAINTEXT \
- -e KAFKA_SINK_SASL_MECHANISM=SCRAM-SHA-512 \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
- -v $(pwd)/system.properties:/opt/minion/etc/system.properties \
- opennms/minion:25.2.1 -f
+ -p 50000:50000/udp \
+ -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
+ opennms/minion:26.0.0 -f
 ```
 
-> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID`. Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
+> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
 
@@ -111,7 +86,6 @@ docker run -it --name minion \
 
 ## Future Enhancements
 
-* Add SSL encryption with SASL Authentication for external Kafka (for Minions outside K8S/AWS). The challenge here is which FQDN will be taken in consideration for the certificates.
 * Add [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other component should not access those resources). A network manager like [Calico](https://www.projectcalico.org) is required.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
 * Investigate how to provide support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information. Although, using operators seems more feasible in this regard, due to the complexities when expanding/shrinking these kind of applications.
@@ -120,7 +94,5 @@ docker run -it --name minion \
 * Expose the Kubernetes Dashboard through the Ingress controller.
 * Design a solution to handle scale down of Cassandra and decommission of nodes; or investigate the existing operators.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using their [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres within K8s. Alternatively, we might consider the [Crunchy Data Operator](https://crunchydata.github.io/postgres-operator/stable/)
-* Add a sidecar container on PostgreSQL using [hasura](https://hasura.io) to expose the DB schema through GraphQL. If a Postgres Operator is used, Hasura can be managed through a deployment instead.
 * Explore a `Kafka` solution like [Strimzi](https://strimzi.io/), an operator that supports encryption and authentication.
-* Build a VPC with the additional security groups using Terraform. Then, use `--vpc` and `--node-security-groups` when calling `kops create cluster`, as explained [here](https://github.com/kubernetes/kops/blob/master/docs/run_in_existing_vpc.md).
 * Explore [Helm](https://helm.sh), and potentially add support for it.

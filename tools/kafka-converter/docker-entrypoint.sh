@@ -25,6 +25,7 @@ do
   if [[ $env_var =~ ^PRODUCER_ ]]; then
     echo "[configuring producer] processing $env_var"
     key=$(get_key $env_var)
+    echo "[configuring producer] key: $key"
     val=${!env_var}
     echo "[configuring producer] '$key'='$val'"
     PRODUCDER+=("$key=$val")
@@ -32,10 +33,12 @@ do
 done
 
 exec /kafka-converter \
-  -bootstrap ${BOOTSTRAP_SERVERS} \
-  -source-topic ${SOURCE_TOPIC} \
-  -dest-topic ${DEST_TOPIC} \
-  -group-id ${GROUP_ID-opennms} \
-  -message-kind ${MESSAGE_KIND-alarm} \
+  -bootstrap "${BOOTSTRAP_SERVERS}" \
+  -source-topic "${SOURCE_TOPIC}" \
+  -dest-topic "${DEST_TOPIC}" \
+  -dest-topic-flat "${DEST_TOPIC_FLAT}" \
+  -group-id "${GROUP_ID-opennms}" \
+  -message-kind "${MESSAGE_KIND-alarm}" \
   -producer-params "$(join , ${PRODUCER[@]})" \
-  -consumer-params "$(join , ${CONSUMER[@]})"
+  -consumer-params "$(join , ${CONSUMER[@]})" \
+  -debug ${DEBUG}

@@ -1,0 +1,18 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-server
+  namespace: opennms
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: grpc-server
+        resources:
+          limits:
+            memory: 64Mi
+            cpu: 20m

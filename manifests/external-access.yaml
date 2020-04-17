@@ -6,9 +6,20 @@
 # WARNING:
 # Please use your own domains. This is not intended to be used by any user.
 
+# For testing purposes only (minikube)
 ---
 apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: opennms
+spec:
+  selfSigned: {}
+
+# For cloud providers / public access
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
 metadata:
   name: letsencrypt-prod
   namespace: opennms
@@ -23,11 +34,12 @@ spec:
         ingress:
           class: nginx
 
+# Access to applications based on HTTP
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: ingress-rules
+  name: onms-ingress
   namespace: opennms
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -35,7 +47,7 @@ metadata:
     ingress.kubernetes.io/session-cookie-name: route
     ingress.kubernetes.io/session-cookie-hash: sha1
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/issuer: letsencrypt-prod
     acme.cert-manager.io/http01-edit-in-place: 'true'
 spec:
   tls:
@@ -119,24 +131,45 @@ spec:
               serviceName: onms-tracing-query
               servicePort: 16686
 
-# The following is the entry point needed for external Minions
+# Access to applications based on gRPC
+# TODO: Currently not working, although the gRPC server works as expected.
+
+# Enable client certificate authentication
+# nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+#
+# Create the secret containing the trusted ca certificates
+# nginx.ingress.kubernetes.io/auth-tls-secret: "default/ca-secret"
+#
+# Specify the verification depth in the client certificates chain
+# nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+#
+# Specify an error page to be redirected to verification errors
+# nginx.ingress.kubernetes.io/auth-tls-error-page: "http://www.mysite.com/error-cert.html"
+#
+# Specify if certificates are passed to upstream server
+# nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+
 ---
-apiVersion: v1
-kind: Service
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
 metadata:
-  name: ext-kafka
+  name: grpc-ingress
   namespace: opennms
-  labels:
-    app: kafka
   annotations:
-    # For Kops
-    dns.alpha.kubernetes.io/external: kafka.aws.agalue.net.
-    # For External-DNS
-    external-dns.alpha.kubernetes.io/hostname: kafka.aws.agalue.net.
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: GRPC
 spec:
-  type: LoadBalancer
-  ports:
-  - port: 9094
-    targetPort: 9094
-  selector:
-    app: kafka
+  tls:
+    - secretName: grpc-ingress-cert
+      hosts:
+        - grpc.aws.agalue.net
+  rules:
+    - host: grpc.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grpc-server
+              servicePort: 8990

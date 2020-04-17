@@ -70,7 +70,7 @@ fission mqt create \
  --name alarm2slack \
  --function alarm2slack \
  --mqtype kafka \
- --topic OpenNMS-alarms-json
+ --topic K8S_alarms_json
 ```
 
 > **IMPORTANT**: The name of the topic relies on the Kafka Converter YAML file.

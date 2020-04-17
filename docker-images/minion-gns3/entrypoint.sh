@@ -9,7 +9,7 @@ MINION_CFG=${MINION_HOME}/etc/org.opennms.minion.controller.cfg
 
 LOCATION=${LOCATION-GNS3}
 ONMS_URL=${ONMS_URL-https://onms.aws.agalue.net/opennms}
-KAFKA_SRV=${KAFKA_SRV-kafka.aws.agalue.net:9094}
+GRPC_SRV=${GRPC_SRV-grpc.aws.agalue.net}
 
 # Error codes
 E_ILLEGAL_ARGS=126
@@ -21,8 +21,7 @@ if [ -d "${MINION_OVERLAY_ETC}" ] && [ -n "$(ls -A ${MINION_OVERLAY_ETC})" ]; th
   sed -r -i "/^id/s/=.*/=${HOSTNAME}/"  ${MINION_CFG}
   sed -r -i "s|_ONMS_URL_|${ONMS_URL}|" ${MINION_CFG}
   sed -r -i "s|_LOCATION_|${LOCATION}|" ${MINION_CFG}
-  sed -r -i "s|_KAFKA_SRV_|${KAFKA_SRV}|" ${MINION_HOME}/etc/org.opennms.core.ipc.rpc.kafka.cfg
-  sed -r -i "s|_KAFKA_SRV_|${KAFKA_SRV}|" ${MINION_HOME}/etc/org.opennms.core.ipc.sink.kafka.cfg
+  sed -r -i "s|_GRPC_SRV_|${GRPC_SRV}|" ${MINION_HOME}/etc/org.opennms.core.ipc.grpc.client.cfg
 else
   echo "No custom config found in ${MINION_OVERLAY_ETC}. Use default configuration."
 fi

@@ -1,45 +1,77 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: ingress-rules
+  name: onms-ingress
   namespace: opennms
+  annotations:
+    cert-manager.io/issuer: selfsigned-issuer
 spec:
   tls:
     - secretName: opennms-ingress-cert
       hosts:
-        - onms.minikube.local
-        - grafana.minikube.local
-        - kafka-manager.minikube.local
-        - tracing.minikube.local
+        - onms.test
+        - grafana.test
+        - kafka-manager.test
+        - kibana.test
+        - tracing.test
   rules:
-    - host: onms.minikube.local
+    - host: onms.test
       http:
         paths:
           - path: /
             backend:
               serviceName: opennms-core
               servicePort: 8980
-    - host: grafana.minikube.local
+    - host: grafana.test
       http:
         paths:
           - path: /
             backend:
               serviceName: grafana
               servicePort: 3000
-    - host: kafka-manager.minikube.local
+    - host: kafka-manager.test
       http:
         paths:
           - path: /
             backend:
               serviceName: kafka-manager
               servicePort: 9000
-    - host: tracing.minikube.local
+    - host: kibana.test
       http:
         paths:
           - path: /
             backend:
-              serviceName: jaeger-query
+              serviceName: kibana
+              servicePort: 5601
+    - host: tracing.test
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: onms-tracing-query
               servicePort: 16686
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: grpc-ingress
+  namespace: opennms
+  annotations:
+    cert-manager.io/issuer: selfsigned-issuer
+spec:
+  tls:
+    - secretName: grpc-ingress-cert
+      hosts:
+        - grpc.test
+  rules:
+    - host: grpc.test
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grpc-server
+              servicePort: 8990

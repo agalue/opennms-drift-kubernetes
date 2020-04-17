@@ -75,7 +75,7 @@ kops create cluster \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
-  --kubernetes-version 1.16.7 \
+  --kubernetes-version 1.16.8 \
   --networking calico
 ```
 
@@ -110,10 +110,12 @@ spec:
 Optionally, if there is a need for having `metrics-server` running, add the following under the `kubelet` section:
 
 ```yaml
-kubelet:
-  anonymousAuth: false
-  authorizationMode: Webhook
-  authenticationTokenWebhook: true
+spec:
+...
+  kubelet:
+    anonymousAuth: false
+    authorizationMode: Webhook
+    authenticationTokenWebhook: true
 ```
 
 Finally, apply the changes to create the cluster:
@@ -170,9 +172,9 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/service-l4.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/patch-configmap-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/service-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/patch-configmap-l4.yaml
 ```
 
 ## Install the CertManager
@@ -191,24 +193,6 @@ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/relea
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
 ```
-
-## Security Groups
-
-When configuring Kafka, the `hostPort` is used in order to configure the `advertised.listeners` using the EC2 public FQDN. For this reason the external port (i.e. `9094`) should be opened on the security group called `nodes.aws.agalue.net`. Certainly, this can be done manually, but a `Terraform` recipe has been used for this purpose (check `update-security-groups.tf` for more details).
-
-Make sure `terraform` it installed on your system, and then execute the following:
-
-```bash
-export DOMAIN_NAME="aws.agalue.net"
-export AWS_REGION="us-east-2"
-
-pushd kops
-terraform init
-terraform apply -var "region=$AWS_REGION" -var "domain=$DOMAIN_NAME" -auto-approve
-popd
-```
-
-> NOTE: it is possible to pass additional security groups when creating the cluster through `kops`, but that requires to pre-create those security group.
 
 ## Manifets
 
@@ -235,6 +219,14 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
+# [Optional] Install Metrics Server
+
+```bash
+curl https://raw.githubusercontent.com/kubernetes/kops/master/addons/metrics-server/v1.8.x.yaml 2>/dev/null | sed 's|extensions/v1beta1|apps/v1|' | kubectl apply -f -
+```
+
+> With modern kubernetes, deployments must use `apps/v1` (hence the patch).
+
 ## Cleanup
 
 To remove the Kubernetes cluster, do the following:
@@ -243,8 +235,8 @@ To remove the Kubernetes cluster, do the following:
 export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
-kubectl delete ingress ingress-rules --namespace opennms
-kubectl delete service ext-kafka --namespace opennms
+kubectl delete ingress grpc-ingress --namespace opennms
+kubectl delete ingress onms-ingress --namespace opennms
 sleep 10
 kops delete cluster --yes
 ```

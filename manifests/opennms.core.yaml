@@ -60,12 +60,13 @@ spec:
     spec:
       terminationGracePeriodSeconds: 120
       securityContext: # In order to be able to write data as non-root on the volumes
-        fsGroup: 10001 # Default opennms user
+        fsGroup: 10001 # Default opennms group
+        fsGroupChangePolicy: Always
       initContainers:
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:25.2.1
+        image: opennms/horizon:26.0.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -114,6 +115,11 @@ spec:
             configMapKeyRef:
               key: ELASTIC_REPLICATION_FACTOR
               name: common-settings
+        - name: ELASTIC_NUM_SHARDS
+          valueFrom:
+            configMapKeyRef:
+              key: ELASTIC_NUM_SHARDS
+              name: common-settings
         - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
           value: onms-tracing-agent.opennms.svc.cluster.local
         volumeMounts:
@@ -155,7 +161,7 @@ spec:
           value: '600'
       containers:
       - name: onms
-        image: opennms/horizon:25.2.1
+        image: opennms/horizon:26.0.0
         imagePullPolicy: IfNotPresent
         args:
         - -s

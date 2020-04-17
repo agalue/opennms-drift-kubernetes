@@ -2,7 +2,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Requirements:
-# - Must run within a init-container based on opennms/horizon-core-web.
+# - Must run within a init-container based on opennms/horizon.
 #   Version must match the runtime container.
 # - Horizon 25 or newer is required.
 # - The following commands must be pre-installed on the chosen image:
@@ -35,11 +35,13 @@
 # - ELASTIC_SERVER
 # - ELASTIC_PASSWORD
 # - ELASTIC_REPLICATION_FACTOR
+# - ELASTIC_NUM_SHARDS
 # - ELASTIC_INDEX_STRATEGY_FLOWS
 # - ELASTIC_INDEX_STRATEGY_REST
 # - ELASTIC_INDEX_STRATEGY_ALARMS
 # - KAFKA_MAX_MESSAGE_SIZE
 # - JAEGER_AGENT_HOST
+# - FORWARD_METRICS
 
 # To avoid issues with OpenShift
 umask 002
@@ -50,7 +52,9 @@ ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_INDEX_STRATEGY_REST=${ELASTIC_INDEX_STRATEGY_REST-monthly}
 ELASTIC_INDEX_STRATEGY_ALARMS=${ELASTIC_INDEX_STRATEGY_ALARMS-monthly}
 ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
+ELASTIC_NUM_SHARDS=${ELASTIC_NUM_SHARDS-6}
 KAFKA_MAX_MESSAGE_SIZE=${KAFKA_MAX_MESSAGE_SIZE-5000000}
+FORWARD_METRICS=${FORWARD_METRICS-true}
 
 CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
@@ -113,9 +117,10 @@ fi
 MANDATORY=/tmp/opennms-mandatory
 mkdir -p ${MANDATORY}
 for file in "${KARAF_FILES[@]}"; do
-  echo "Backing up $file to ${MANDATORY}..."
+  echo "Backing up ${file} to ${MANDATORY}..."
   cp --force ${BACKUP_ETC}/${file} ${MANDATORY}/
 done
+# TODO if the volume behind CONFIG_DIR doesn't have the right permissions, the following fails
 echo "Overriding mandatory files from ${MANDATORY}..."
 rsync -aO --no-perms ${MANDATORY}/ ${CONFIG_DIR}/
 
@@ -206,6 +211,7 @@ org.opennms.core.ipc.sink.kafka.max.partition.fetch.bytes=${KAFKA_MAX_MESSAGE_SI
 org.opennms.core.ipc.rpc.strategy=kafka
 org.opennms.core.ipc.rpc.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
 org.opennms.core.ipc.rpc.kafka.ttl=30000
+org.opennms.core.ipc.rpc.kafka.single-topic=true
 
 # RPC Consumer (verify Kafka broker configuration)
 org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
@@ -229,19 +235,25 @@ state.dir=/opennms-data/kafka
 EOF
 
     # Make sure to enable only what's needed for your use case
+    SUPPRESS_INC_ALARMS="true"
+    if [[ ${ENABLE_ALEC} ]]; then
+      SUPPRESS_INC_ALARMS="false"
+    fi
     cat <<EOF > ${CONFIG_DIR}/org.opennms.features.kafka.producer.cfg
 topologyProtocols=bridge,cdp,isis,lldp,ospf
-suppressIncrementalAlarms=false
-forward.metrics=true
+suppressIncrementalAlarms=${SUPPRESS_INC_ALARMS}
+forward.metrics=${FORWARD_METRICS}
 nodeRefreshTimeoutMs=300000
 alarmSyncIntervalMs=300000
-nodeTopic=${INSTANCE_ID}-nodes
-alarmTopic=${INSTANCE_ID}-alarms
-eventTopic=${INSTANCE_ID}-events
-metricTopic=${INSTANCE_ID}-metrics
-alarmFeedbackTopic=${INSTANCE_ID}-alarms-feedback
-topologyVertexTopic=${INSTANCE_ID}-topology-vertices
-topologyEdgeTopic=${INSTANCE_ID}-edges
+kafkaSendQueueCapacity=1000
+
+nodeTopic=${INSTANCE_ID}_nodes
+alarmTopic=${INSTANCE_ID}_alarms
+eventTopic=${INSTANCE_ID}_events
+metricTopic=${INSTANCE_ID}_metrics
+alarmFeedbackTopic=${INSTANCE_ID}_alarms_feedback
+topologyVertexTopic=${INSTANCE_ID}_topology_vertices
+topologyEdgeTopic=${INSTANCE_ID}_edges
 EOF
   fi
 fi
@@ -354,7 +366,7 @@ elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
 
@@ -372,7 +384,7 @@ retries=1
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
@@ -388,7 +400,7 @@ elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_ALARMS}
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
@@ -404,7 +416,7 @@ elasticIndexStrategy=monthly
 connTimeout=30000
 readTimeout=300000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=6
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi

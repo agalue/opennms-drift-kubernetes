@@ -1,0 +1,31 @@
+# Basic Settings
+http-url: "https://onms.test/opennms"
+id: "durham-minion-01"
+location: "Durham"
+
+# Must match kustomization.yaml
+org.opennms.instance.id: K8S
+
+# Inter Process Communication
+ipc:
+  grpc:
+    host: "grpc.test"
+    tls.enabled: "true"
+    port: "443"
+
+# Flow Processing
+telemetry:
+  flows:
+    single-port-listener:
+      enabled: true
+      parameters:
+        port: 50000
+
+# Trap/Syslog Reception
+netmgt:
+  syslog:
+    syslog.listen.interface: "0.0.0.0"
+    syslog.listen.port: 1514
+  traps:
+    trapd.listen.interface: "0.0.0.0"
+    trapd.listen.port: 1162

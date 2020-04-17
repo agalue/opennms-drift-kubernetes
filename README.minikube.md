@@ -13,24 +13,21 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 In order to do that, just start minikube, and make sure it has at least 4 Cores and 16GB of RAM:
 
 ```bash
-minikube config view
-- cpus: 4
-- ingress: true
-- memory: 16384
+minikube start --cpus=4 --memory=16g --addons=ingress --addons=ingress-dns --addons=metrics-server
 ```
 
 > *NOTE*: The solution was tested with Kubernetes 1.14.8 and 1.15.6. Newer versions of Kubernetes have not been tested yet.
 
 ## Install the CertManager
 
-The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
+The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller. Although, for `minikube`, a self-signed certificate will be used.
 
 ```bash
 kubectl create namespace cert-manager
 kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
 ```
 
-> **NOTE**: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html). For now, this is not used when using minikube.
+> **NOTE**: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
 
 ## Install Jaeger CRDs
 
@@ -57,23 +54,29 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 
 ## DNS
 
-To be able to use the Ingress controller with TLS (even if CertManager is not being in use), a good trick to test it is adding entries to `/etc/hosts` pointing to the IP of the ingress. For example:
-
-```bash
-$ kubectl get ingress -n opennms
-NAME            HOSTS                                                                                 ADDRESS          PORTS     AGE
-ingress-rules   onms.minikube.local,grafana.minikube.local,kafka-manager.minikube.local + 1 more...   192.168.99.106   80, 443   21m
-```
-
-Then,
-
-```bash
-cat <<EOF | sudo tee /etc/hosts
-192.168.99.106 onms.minikube.local
-192.168.99.106 grafana.minikube.local
-192.168.99.106 kafka-manager.minikube.local
-192.168.99.106 tracing.minikube.local
-EOF
-```
+Please take a look at the documentation of [ingress-dns](https://github.com/kubernetes/minikube/tree/master/deploy/addons/ingress-dns) for more information about how to use it, to avoid messing with `/etc/hosts`.
 
 > **WARNING**: Keep in mind that the certificates are self-signed.
+
+# Start Minion
+
+```bash
+mkdir -p overlay
+kubectl get secret opennms-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/onms_server.crt
+kubectl get secret grpc-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/grpc_server.crt
+keytool -importcert -alias grpc -file overlay/grpc_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
+keytool -importcert -alias onms -file overlay/onms_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
+JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/grpc_trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
+
+docker run -it --rm --name minion \
+ -e OPENNMS_HTTP_USER=admin \
+ -e OPENNMS_HTTP_PASS=admin \
+ -e JAVA_OPTS=$JAVA_OPTS \
+ -p 8201:8201 \
+ -p 1514:1514/udp \
+ -p 1162:1162/udp \
+ -p 50000:50000/udp \
+ -v $(pwd)/overlay:/opt/minion-etc-overlay \
+ -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
+ opennms/minion:26.0.0 -f
+```

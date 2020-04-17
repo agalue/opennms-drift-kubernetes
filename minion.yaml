@@ -1,0 +1,36 @@
+# Basic Settings
+http-url: "https://onms.aws.agalue.net/opennms"
+id: "durham-minion-01"
+location: "Durham"
+
+# Must match kustomization.yaml
+org.opennms.instance.id: K8S
+
+# Inter Process Communication
+ipc:
+  grpc:
+    host: "grpc.aws.agalue.net"
+    tls.enabled: "true"
+    port: "443"
+  sink:
+    offheap:
+      offHeapSize: "128MB"
+      entriesAllowedOnHeap: 100000
+      offHeapFilePath: ""
+
+# Flow Processing
+telemetry:
+  flows:
+    single-port-listener:
+      enabled: true
+      parameters:
+        port: 50000
+
+# Trap/Syslog Reception
+netmgt:
+  syslog:
+    syslog.listen.interface: "0.0.0.0"
+    syslog.listen.port: 1514
+  traps:
+    trapd.listen.interface: "0.0.0.0"
+    trapd.listen.port: 1162
