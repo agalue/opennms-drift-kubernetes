@@ -2,6 +2,8 @@
 
 OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/).
 
+![Diagram](diagram.png)
+
 For learning purposes, `Helm` charts and `operators` are avoided for this solution on the main components, with the exceptions of the Ingress Controller and Cert-Manager. In the future, that might change to take advantage of these technologies.
 
 This deployment contains a full distributed version of all OpenNMS components and features, with high availability in mind when possible.
