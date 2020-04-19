@@ -5,7 +5,7 @@ RUN mkdir /app && \
     apk add --no-cache build-base git librdkafka-dev@edgecommunity
 ADD ./ /app/
 WORKDIR /app
-RUN go build -a -o kafka-converter .
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags musl -a -o kafka-converter .
 
 FROM alpine
 ENV BOOTSTRAP_SERVERS="localhost:9092" \
