@@ -1,8 +1,8 @@
-// Source: https://github.com/OpenNMS/opennms/blob/develop/features/kafka/producer/src/main/proto/opennms-kafka-producer.proto
+// Source: https://github.com/OpenNMS/opennms/blob/master/features/kafka/producer/src/main/proto/opennms-kafka-producer.proto
 
 syntax = "proto3";
 
-option go_package = "producer";
+option go_package = ".;producer";
 
 // The values differ from the standard codes in OpenNMS
 // since proto3 enforces us to start at 0
