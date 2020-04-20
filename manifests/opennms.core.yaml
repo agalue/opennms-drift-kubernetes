@@ -61,7 +61,6 @@ spec:
       terminationGracePeriodSeconds: 120
       securityContext: # In order to be able to write data as non-root on the volumes
         fsGroup: 10001 # Default opennms group
-        fsGroupChangePolicy: Always
       initContainers:
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
