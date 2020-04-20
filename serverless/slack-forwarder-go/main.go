@@ -9,9 +9,8 @@ import (
 	"net/http"
 	"os"
 
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/lunny/html2md"
-	"knative.dev/eventing-contrib/pkg/kncloudevents"
 )
 
 var onmsURL string
@@ -147,43 +146,35 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 	return SlackMessage{[]SlackAttachment{att}}
 }
 
-// ProcessAlarm build a message based on an OpenNMS alarm and sends it to Slack
-func ProcessAlarm(alarm Alarm, onmsURL, slackURL string) {
+func receive(ctx context.Context, event cloudevents.Event) (*cloudevents.Event, cloudevents.Result) {
+	log.Printf("Processing %s\n", event)
+	alarm := Alarm{}
+	if err := event.DataAs(&alarm); err != nil {
+		return nil, cloudevents.NewHTTPResult(500, "Error while parsing alarm: %s", err)
+	}
 	if alarm.ID == 0 {
 		log.Println("Invalid alarm received, ignoring")
-		return
+		return nil, cloudevents.NewHTTPResult(400, "Alarm without ID received, ignoring")
 	}
 	msg := convertAlarm(alarm, onmsURL)
 	jsonBytes, err := json.Marshal(msg)
 	if err != nil {
-		log.Printf("Error while converting Slack Message to JSON: %v\n", err)
-		return
+		return nil, cloudevents.NewHTTPResult(400, "Cannot convert Slack Message to JSON: %s", err)
 	}
 	request, err := http.NewRequest(http.MethodPost, slackURL, bytes.NewBuffer(jsonBytes))
 	if err != nil {
-		log.Printf("Error while creating HTTP request: %v\n", err)
-		return
+		return nil, cloudevents.NewHTTPResult(400, "Cannot create request: %s", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
-		log.Printf("Error while sending Slack Message: %v\n", err)
-		return
+		return nil, cloudevents.NewHTTPResult(400, "Error while sending Slack Message: %s", err)
 	}
 	code := response.StatusCode
 	if code != http.StatusOK && code != http.StatusAccepted && code != http.StatusNoContent {
-		log.Printf("Error, invalid Response: %s", response.Status)
+		return nil, cloudevents.NewHTTPResult(500, "Invalid response from Slack: %s", response.Status)
 	}
-}
-
-func run(event cloudevents.Event) {
-	log.Printf("Processing %s\n", event.String())
-	alarm := Alarm{}
-	if err := event.DataAs(&alarm); err != nil {
-		log.Printf("Error while parsing alarm: %v\n", err)
-		return
-	}
-	ProcessAlarm(alarm, onmsURL, slackURL)
+	return nil, cloudevents.NewHTTPResult(200, "OK")
 }
 
 func main() {
@@ -195,11 +186,11 @@ func main() {
 		log.Fatal("Environment variable SLACK_URL must exist")
 	}
 
-	c, err := kncloudevents.NewDefaultClient()
+	c, err := cloudevents.NewDefaultClient()
 	log.Println("Listening for Knative cloud events")
 	if err != nil {
 		log.Fatal("Failed to create client, ", err)
 	}
 
-	log.Fatal(c.StartReceiver(context.Background(), run))
+	log.Fatal(c.StartReceiver(context.Background(), receive))
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,10 +9,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"gotest.tools/assert"
 )
 
-func TestProcessAlarm(t *testing.T) {
+func TestReceive(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, http.MethodPost, req.Method)
 		bytes, err := ioutil.ReadAll(req.Body)
@@ -31,8 +33,8 @@ func TestProcessAlarm(t *testing.T) {
 	}))
 	defer testServer.Close()
 
-	slackURL := testServer.URL
-	onmsURL := "https://onms.aws.agalue.net/opennms"
+	slackURL = testServer.URL
+
 	alarm := Alarm{
 		ID:          666,
 		UEI:         "uei.opennms.org/test",
@@ -55,6 +57,7 @@ func TestProcessAlarm(t *testing.T) {
 			},
 		},
 	}
-
-	ProcessAlarm(alarm, onmsURL, slackURL)
+	event := cloudevents.NewEvent()
+	event.SetData("application/json", alarm)
+	receive(context.Background(), event)
 }
