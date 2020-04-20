@@ -1,9 +1,9 @@
 module github.com/agalue/k8s-to-onms
 
-go 1.13
+go 1.14
 
 require (
-	github.com/OpenNMS/onmsctl v0.0.0-20191010212827-7b56d04a289c
+	github.com/OpenNMS/onmsctl v0.0.0-20191122214009-2f15601f1be1
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/gogo/protobuf v1.3.0 // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
@@ -20,7 +20,7 @@ require (
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/yaml.v2 v2.2.4
+	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.0.0-20191010143144-fbf594f18f80 // indirect
 	k8s.io/apimachinery v0.0.0-20191006235458-f9f2f3f8ab02
 	k8s.io/client-go v0.0.0-20190620085101-78d2af792bab
