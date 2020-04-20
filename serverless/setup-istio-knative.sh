@@ -20,9 +20,16 @@ function header_text {
   echo "$header$*$reset"
 }
 
-serving_version="v0.13.2"
-eventing_version="v0.13.5"
-istio_version="1.5.0"
+# Version 0.13
+#serving_version="v0.13.2"
+#eventing_version="v0.13.2"
+#istio_version="1.4.4"
+
+# Version 0.14
+serving_version="v0.14.0"
+eventing_version="v0.14.0"
+istio_version="1.5.1"
+
 domain="aws.agalue.net"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
 onms_url="https://onmsui.$domain/opennms"
@@ -46,19 +53,9 @@ header_text "Waiting for istio to become ready"
 sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 
 header_text "Setting up Knative Serving"
-kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving.yaml"
-
-header_text "Waiting for Knative Serving to become ready"
-sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
-
-header_text "Setting up Knative Eventing"
-kubectl apply --selector knative.dev/crd-install=true -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing.yaml"
-kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
-
-header_text "Waiting for Knative Eventing to become ready"
-sleep 5; while echo && kubectl get pods -n knative-eventing | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
-sleep 5; while echo && kubectl get pods -n knative-sources | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
+kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-crds.yaml"
+kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-core.yaml"
+[[ $serving_version = v0.13* ]] && kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-istio.yaml"
 
 header_text "Configuring custom domain"
 cat <<EOF | kubectl apply -f -
@@ -71,12 +68,23 @@ data:
   $domain: ""
 EOF
 
+header_text "Waiting for Knative Serving to become ready"
+sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
+
+header_text "Setting up Knative Eventing"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing-crds.yaml"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing-core.yaml"
+kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
+
+header_text "Waiting for Knative Eventing to become ready"
+sleep 5; while echo && kubectl get pods -n knative-eventing | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
+sleep 5; while echo && kubectl get pods -n knative-sources | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
+
 header_text "Creating secret with OpenNMS and Slack URLs"
 kubectl create secret generic serverless-config \
  --namespace default \
  --from-literal=SLACK_URL="${slack_url}" \
- --from-literal=ONMS_URL="${onms_url}" \
- --dry-run -o yaml | kubectl apply -f -
+ --from-literal=ONMS_URL="${onms_url}"
 
 header_text "Launching Slack Forwarder Service"
 kubectl apply -f knative-service.yaml
