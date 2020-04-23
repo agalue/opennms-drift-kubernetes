@@ -77,7 +77,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        image: grafana/grafana:6.5.3 # Using official image instead of opennms/helm:5.0.1 due to HELM-229
+        image: opennms/helm:5.0.2
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -93,8 +93,6 @@ spec:
             secretKeyRef:
               key: GRAFANA_UI_ADMIN_PASSWORD
               name: onms-passwords
-        - name: GF_INSTALL_PLUGINS # Only required when using Grafana's image
-          value: opennms-helm-app # Will install latest version available
         - name: GF_SERVER_DOMAIN
           value: grafana.aws.agalue.net
         - name: GF_SERVER_ROOT_URL
