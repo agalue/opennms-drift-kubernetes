@@ -24,7 +24,6 @@ func main() {
 	flag.StringVar(&rest.Instance.Username, "user", rest.Instance.Username, "OpenNMS Username")
 	flag.StringVar(&rest.Instance.Password, "passwd", rest.Instance.Password, "OpenNMS Password")
 	namespace := flag.String("namespace", "opennms", "The namespace where the OpenNMS resources live")
-	requisition := flag.String("requisition", "Kubernetes", "The name of the target OpenNMS requisition")
 	location := flag.String("location", "Kubernetes", "The name of the Location for the target nodes")
 	kubecfg := flag.String("config", os.Getenv("HOME")+"/.kube/config", "Kubernetes Configuration")
 	show := flag.Bool("show", false, "Only show requisition in YAML")
@@ -40,7 +39,7 @@ func main() {
 	}
 
 	req := model.Requisition{
-		Name: *requisition,
+		Name: "Kubernetes-NS-" + *namespace,
 	}
 
 	svcs, err := client.CoreV1().Services(*namespace).List(v1.ListOptions{})
