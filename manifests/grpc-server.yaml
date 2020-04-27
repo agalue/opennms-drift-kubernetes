@@ -66,15 +66,30 @@ spec:
           value: '5000000'
         - name: MAX_MESSAGE_SIZE
           value: '4194304'
-        readinessProbe:
-          exec:
-            command: ['/bin/grpc_health_probe', '-addr=:8990']
-          initialDelaySeconds: 10
-        livenessProbe:
-          exec:
-            command: ['/bin/grpc_health_probe', '-addr=:8990']
-          initialDelaySeconds: 20
+        - name: MEM_TOTAL_MB
+          valueFrom:
+            resourceFieldRef:
+              resource: requests.memory
+              divisor: 1Mi
+        - name: JAVA_OPTS # Preferred way instead of opennms.conf
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         resources:
           limits:
+            memory: 512Mi
+            cpu: 200m
+          requests:
             memory: 256Mi
             cpu: 100m
+        readinessProbe:
+          exec:
+            command: ['/bin/grpc_health_probe', '-addr=localhost:8990', '-rpc-timeout=2s']
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          exec:
+            command: ['/bin/grpc_health_probe', '-addr=localhost:8990', '-rpc-timeout=2s']
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 3
+
