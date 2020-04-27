@@ -35,7 +35,7 @@ umask 002
 NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
-ELASTIC_NUM_SHARDS${ELASTIC_NUM_SHARDS-6}
+ELASTIC_NUM_SHARDS=${ELASTIC_NUM_SHARDS-6}
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
 KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
@@ -63,8 +63,10 @@ fi
 
 FEATURES_DIR=${OVERLAY}/featuresBoot.d
 mkdir -p ${FEATURES_DIR}
-echo "sentinel-persistence" > ${FEATURES_DIR}/persistence.boot
-echo "sentinel-jsonstore-postgres" > ${FEATURES_DIR}/store-postgres.boot
+cat <<EOF > ${FEATURES_DIR}/persistence.boot
+sentinel-persistence
+sentinel-jsonstore-postgres
+EOF
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
@@ -75,12 +77,23 @@ EOF
   echo "opennms-core-tracing-jaeger" > ${FEATURES_DIR}/jaeger.boot
 fi
 
+# Enable BMP
+#cat <<EOF > ${FEATURES_DIR}/bmp.boot
+#sentinel-telemetry-bmp
+#EOF
+#cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+#name = BMP
+#adapters.0.name = BMP-Peer-Status-Adapter
+#adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
+#adapters.1.name = BMP-Telemetry-Adapter
+#adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
+#EOF
+
 if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch..."
 
   cat <<EOF > ${FEATURES_DIR}/flows.boot
 sentinel-flows
-sentinel-telemetry-bmp
 EOF
 
   if [[ ! ${CASSANDRA_SERVER} ]]; then
@@ -144,6 +157,13 @@ bootstrap.servers = ${KAFKA_SERVER}:9092
 max.partition.fetch.bytes = 5000000
 acks = 1
 EOF
+
+#  cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+#adapters.2.name = BMP-OpenBMP-Integration-Adapter
+#adapters.2.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.openbmp.BmpIntegrationAdapter
+#adapters.2.parameters.kafka.bootstrap.servers = ${KAFKA_SERVER}:9092
+#adapters.2.parameters.topicPrefix = ${INSTANCE_ID}
+#EOF
 fi
 
 if [[ $CASSANDRA_SERVER ]]; then

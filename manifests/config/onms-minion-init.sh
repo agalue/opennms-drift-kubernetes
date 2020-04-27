@@ -234,12 +234,14 @@ parsers.0.parameters.maxClockSkew=300
 EOF
 fi
 
-cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-11019.cfg
-name=BMP-Listener
-class-name=org.opennms.netmgt.telemetry.listeners.TcpListener
-parameters.host=0.0.0.0
-parameters.port=11019
-parsers.0.name=BMP
-parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser
-parsers.0.parameters.dnsLookupsEnabled=true
-EOF
+#cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-tcp-11019.cfg
+#name=BMP-Listener
+#class-name=org.opennms.netmgt.telemetry.listeners.TcpListener
+#parameters.host=0.0.0.0
+#parameters.port=11019
+#parsers.0.name=BMP
+#parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser
+#parsers.0.parameters.dnsLookupsEnabled=true
+#parsers.0.parameters.bulkhead.maxConcurrentCalls=1000
+#parsers.0.parameters.bulkhead.maxWaitDurationMs=300000
+#EOF
