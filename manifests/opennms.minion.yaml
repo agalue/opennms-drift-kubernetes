@@ -81,6 +81,15 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       initContainers:
+      # Wait for all the dependencies
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092,opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
       # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config
@@ -115,15 +124,6 @@ spec:
         - name: init-scripts
           mountPath: /init.sh
           subPath: onms-minion-init.sh
-      # Wait for all the dependencies
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: kafka.opennms.svc.cluster.local:9092,opennms-core.opennms.svc.cluster.local:8980
-        - name: TIMEOUT
-          value: '600'
       containers:
       - name: minion
         image: opennms/minion:26.0.0

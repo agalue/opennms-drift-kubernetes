@@ -62,6 +62,15 @@ spec:
       securityContext: # In order to be able to write data as non-root on the volumes
         fsGroup: 10001 # Default opennms group
       initContainers:
+      # Wait for all the dependencies
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
+        - name: TIMEOUT
+          value: '600'
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
@@ -149,15 +158,6 @@ spec:
         volumeMounts:
         - name: etc
           mountPath: /opennms-etc
-      # Wait for all the dependencies
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
-        - name: TIMEOUT
-          value: '600'
       containers:
       - name: onms
         image: opennms/horizon:26.0.0
