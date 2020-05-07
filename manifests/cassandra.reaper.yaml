@@ -64,7 +64,7 @@ spec:
           value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REP_FACTOR) };"
       containers:
       - name: cassandra-reaper
-        image: thelastpickle/cassandra-reaper:1.4.4
+        image: thelastpickle/cassandra-reaper:1.4.8
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
