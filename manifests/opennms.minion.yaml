@@ -50,6 +50,12 @@ spec:
   - name: ipfix
     protocol: UDP
     port: 4738
+  - name: bmp
+    protocol: TCP
+    port: 11019
+  - name: graphite
+    protocol: UDP
+    port: 2003
   - name: nxos-udp
     protocol: UDP
     port: 50001
@@ -184,6 +190,12 @@ spec:
         - containerPort: 4738
           protocol: UDP
           name: ipfix
+        - containerPort: 2003
+          protocol: UDP
+          name: graphite
+        - containerPort: 11019
+          protocol: TCP
+          name: bmp
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/minion-etc-overlay

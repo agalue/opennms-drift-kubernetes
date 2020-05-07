@@ -78,16 +78,16 @@ EOF
 fi
 
 # Enable BMP
-#cat <<EOF > ${FEATURES_DIR}/bmp.boot
-#sentinel-telemetry-bmp
-#EOF
-#cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
-#name = BMP
-#adapters.0.name = BMP-Peer-Status-Adapter
-#adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
-#adapters.1.name = BMP-Telemetry-Adapter
-#adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
-#EOF
+cat <<EOF > ${FEATURES_DIR}/bmp.boot
+sentinel-telemetry-bmp
+EOF
+cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+name = BMP
+adapters.0.name = BMP-PeerStatus-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
+adapters.1.name = BMP-Telemetry-Adapter
+adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
+EOF
 
 if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch..."
@@ -173,7 +173,8 @@ if [[ $CASSANDRA_SERVER ]]; then
 sentinel-newts
 sentinel-telemetry-nxos
 sentinel-telemetry-jti
-sentinel-blobstore-cassandra
+sentinel-telemetry-graphite
+sentinel-blobstore-noop
 EOF
 
   cat <<EOF >> ${OVERLAY}/system.properties
@@ -223,6 +224,13 @@ adapters.0.name = JTI-Adapter
 adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
 adapters.0.parameters.script = ${SENTINEL_HOME}/etc/junos-telemetry-interface.groovy
 queue.threads = ${NUM_LISTENER_THREADS}
+EOF
+
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-graphite.cfg
+name = Graphite
+adapters.0.name = Graphite-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.graphite.adapter.GraphiteAdapter
+adapters.0.parameters.script = ${SENTINEL_HOME}/etc/graphite-telemetry-interface.groovy
 EOF
 
   cat <<EOF > ${OVERLAY}/datacollection-config.xml
@@ -394,5 +402,33 @@ class CollectionSetGenerator {
 
 TelemetryBis.Telemetry telemetryMsg = msg
 CollectionSetGenerator.generate(agent, builder, telemetryMsg)
+EOF
+
+  cat <<EOF > ${OVERLAY}/graphite-telemetry-interface.groovy
+import groovy.util.logging.Slf4j
+import org.opennms.core.utils.RrdLabelUtils
+import org.opennms.netmgt.collection.api.AttributeType
+import org.opennms.netmgt.telemetry.protocols.graphite.adapter.GraphiteMetric
+import org.opennms.netmgt.collection.support.builder.InterfaceLevelResource
+import org.opennms.netmgt.collection.support.builder.NodeLevelResource
+
+@Slf4j
+class CollectionSetGenerator {
+    static generate(agent, builder, graphiteMsg) {
+        log.debug("Generating collection set for message: {}", graphiteMsg)
+        def nodeLevelResource = new NodeLevelResource(agent.getNodeId())
+
+        if (graphiteMsg.path.startsWith("eth")) {
+            def ifaceLabel = RrdLabelUtils.computeLabelForRRD(graphiteMsg.path.split(".")[0], null, null);
+            def interfaceResource = new InterfaceLevelResource(nodeLevelResource, interfaceLabel);
+            builder.withGauge(interfaceResource, "some-group", graphiteMsg.path.split(".")[1], graphitMsg.longValue());
+        } else {
+            log.warn("Cannot handle message from graphite. {}", graphiteMsg);
+        }
+    }
+}
+
+GraphiteMetric graphiteMsg = msg
+CollectionSetGenerator.generate(agent, builder, graphiteMsg)
 EOF
 fi

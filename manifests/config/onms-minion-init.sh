@@ -165,6 +165,16 @@ else
 
   echo "Configuring listeners on default ports"
 
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-2003.cfg
+name=Graphite-Listener
+class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
+parameters.host=0.0.0.0
+parameters.port=2003
+parameters.maxPacketSize=16192
+parsers.0.name=Graphite
+parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.common.parser.ForwardParser
+EOF
+
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-50001.cfg
 name=NXOS-Listener
 class-name=org.opennms.netmgt.telemetry.listeners.UdpListener
@@ -223,14 +233,11 @@ parsers.0.parameters.maxClockSkew=300
 EOF
 fi
 
-#cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-tcp-5000.cfg
-#name=BMP-Listener
-#class-name=org.opennms.netmgt.telemetry.listeners.TcpListener
-#parameters.host=0.0.0.0
-#parameters.port=5000
-#parsers.0.name=BMP
-#parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser
-#parsers.0.parameters.dnsLookupsEnabled=true
-#parsers.0.parameters.bulkhead.maxConcurrentCalls=1000
-#parsers.0.parameters.bulkhead.maxWaitDurationMs=300000
-#EOF
+cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-bmp-11019.cfg
+name=BMP
+class-name=org.opennms.netmgt.telemetry.listeners.TcpListener
+parameters.host=0.0.0.0
+parameters.port=11019
+parsers.0.name=BMP
+parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser
+EOF

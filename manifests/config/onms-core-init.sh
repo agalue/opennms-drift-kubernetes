@@ -182,9 +182,24 @@ fi
 cat <<EOF > $CONFIG_DIR/telemetryd-configuration.xml
 <?xml version="1.0"?>
 <telemetryd-config>
+  <listener name="BMP-11019" class-name="org.opennms.netmgt.telemetry.listeners.TcpListener" enabled="true">
+    <parameter key="port" value="11019"/>
+    <parser name="BMP-Parser" class-name="org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser" queue="BMP"/>
+  </listener>
   <queue name="BMP">
-    <adapter name="BMP-Peer-Status-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter" enabled="true"/>
-    <adapter name="BMP-Telemetry-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter" enabled="true"/>
+    <adapter name="BMP-Telemetry-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter" enabled="true">
+      <package name="BMP-Default">
+        <rrd step="300">
+          <rra>RRA:AVERAGE:0.5:1:2016</rra>
+          <rra>RRA:AVERAGE:0.5:12:1488</rra>
+          <rra>RRA:AVERAGE:0.5:288:366</rra>
+          <rra>RRA:MAX:0.5:288:366</rra>
+          <rra>RRA:MIN:0.5:288:366</rra>
+        </rrd>
+      </package>
+    </adapter>
+    <adapter name="BMP-PeerStatus-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter" enabled="true">
+    </adapter>
     <adapter name="BMP-OpenBMP-Integration-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.openbmp.BmpIntegrationAdapter" enabled="${ENABLE_OPEN_BMP}">
       <parameter key="kafka.bootstrap.servers" value="${KAFKA_SERVER-localhost}:9092" />
     </adapter>
