@@ -2,8 +2,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Requirements:
-# - Must run within a init-container based on opennms/minion.
-#   Version must match the runtime container.
 # - Horizon 25 or newer is required.
 #
 # Purpose:
@@ -27,7 +25,7 @@
 umask 002
 
 OVERLAY=/etc-overlay
-MINION_HOME=/opt/minion
+CUSTOM_PROPERTIES=${OVERLAY}/custom.system.properties
 
 ### Basic Settings
 
@@ -36,26 +34,17 @@ mkdir -p ${FEATURES_DIR}
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-SYSTEM_CFG=${MINION_HOME}/etc/system.properties
 if [[ ${INSTANCE_ID} ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF >> ${SYSTEM_CFG}
-
+  cat <<EOF >> ${CUSTOM_PROPERTIES}
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
-  cp ${SYSTEM_CFG} ${OVERLAY}
-fi
-
-# Configuring SCV credentials to access the OpenNMS ReST API
-if [[ ${OPENNMS_HTTP_USER} && ${OPENNMS_HTTP_PASS} ]]; then
-  ${MINION_HOME}/bin/scvcli set opennms.http "${OPENNMS_HTTP_USER}" "${OPENNMS_HTTP_PASS}"
-  cp ${MINION_HOME}/etc/scv.jce ${OVERLAY}
 fi
 
 # Append the same relaxed SNMP4J options that OpenNMS has,
 # to make sure that broken SNMP devices still work with Minions.
-cat <<EOF >> ${OVERLAY}/system.properties
+cat <<EOF >> ${CUSTOM_PROPERTIES}
 # Adding SNMP4J Options:
 snmp4j.LogFactory=org.snmp4j.log.Log4jLogFactory
 org.snmp4j.smisyntaxes=opennms-snmp4j-smisyntaxes.properties
@@ -65,6 +54,15 @@ org.opennms.snmp.snmp4j.noGetBulk=false
 org.opennms.snmp.workarounds.allow64BitIpAddress=true
 org.opennms.snmp.workarounds.allowZeroLengthIpAddress=true
 EOF
+
+# Enable tracing with jaeger
+if [[ $JAEGER_AGENT_HOST ]]; then
+  cat <<EOF >> ${CUSTOM_PROPERTIES}
+# Enable Tracing
+JAEGER_AGENT_HOST=${JAEGER_AGENT_HOST}
+EOF
+  echo "opennms-core-tracing-jaeger" > $FEATURES_DIR/jaeger.boot
+fi
 
 # Configure Sink and RPC to use Kafka
 if [[ ${KAFKA_SERVER} ]]; then
@@ -99,15 +97,6 @@ EOF
 opennms-core-ipc-sink-kafka
 opennms-core-ipc-rpc-kafka
 EOF
-fi
-
-# Enable tracing with jaeger
-if [[ $JAEGER_AGENT_HOST ]]; then
-  cat <<EOF >> ${OVERLAY}/system.properties
-# Enable Tracing
-JAEGER_AGENT_HOST=${JAEGER_AGENT_HOST}
-EOF
-  echo "opennms-core-tracing-jaeger" > $FEATURES_DIR/jaeger.boot
 fi
 
 # Configure SNMP Trap reception
@@ -234,14 +223,14 @@ parsers.0.parameters.maxClockSkew=300
 EOF
 fi
 
-#cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-tcp-11019.cfg
-#name=BMP-Listener
-#class-name=org.opennms.netmgt.telemetry.listeners.TcpListener
-#parameters.host=0.0.0.0
-#parameters.port=11019
-#parsers.0.name=BMP
-#parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser
-#parsers.0.parameters.dnsLookupsEnabled=true
-#parsers.0.parameters.bulkhead.maxConcurrentCalls=1000
-#parsers.0.parameters.bulkhead.maxWaitDurationMs=300000
-#EOF
+cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-tcp-11019.cfg
+name=BMP-Listener
+class-name=org.opennms.netmgt.telemetry.listeners.TcpListener
+parameters.host=0.0.0.0
+parameters.port=11019
+parsers.0.name=BMP
+parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser
+parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.bulkhead.maxConcurrentCalls=1000
+parsers.0.parameters.bulkhead.maxWaitDurationMs=300000
+EOF

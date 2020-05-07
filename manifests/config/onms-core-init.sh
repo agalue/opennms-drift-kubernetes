@@ -171,8 +171,26 @@ fi
 sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' ${CONFIG_DIR}/service-configuration.xml
 
 # Disable Telemetryd, as flows and streaming telemetry data will be handled on sentinels
-sed -i -r '/opennms-flows/d' ${CONFIG_DIR}/org.apache.karaf.features.cfg
-sed -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}/service-configuration.xml
+#sed -i -r '/opennms-flows/d' ${CONFIG_DIR}/org.apache.karaf.features.cfg
+#sed -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}/service-configuration.xml
+
+# Enable Telemetryd only for BMP, as flows and streaming telemetry data will be handled on sentinels
+ENABLE_OPEN_BMP="false"
+if [[ ${KAFKA_SERVER} ]]; then
+  ENABLE_OPEN_BMP="true"
+fi
+cat <<EOF > $CONFIG_DIR/telemetryd-configuration.xml
+<?xml version="1.0"?>
+<telemetryd-config>
+  <queue name="BMP">
+    <adapter name="BMP-Peer-Status-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter" enabled="true"/>
+    <adapter name="BMP-Telemetry-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter" enabled="true"/>
+    <adapter name="BMP-OpenBMP-Integration-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.openbmp.BmpIntegrationAdapter" enabled="${ENABLE_OPEN_BMP}">
+      <parameter key="kafka.bootstrap.servers" value="${KAFKA_SERVER-localhost}:9092" />
+    </adapter>
+  </queue>
+</telemetryd-config>
+EOF
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
@@ -485,3 +503,7 @@ rm -f ${CONFIG_DIR}/foreign-sources/pending/*.xml.*
 # Force to execute runjava and the install script
 touch ${CONFIG_DIR}/do-upgrade
 
+# Fix permissions when executing the script as root
+if [[ "$(id -u)" == "0" ]]; then
+  chown -R opennms:opennms ${CONFIG_DIR}
+fi

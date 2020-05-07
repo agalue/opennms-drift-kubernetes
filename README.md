@@ -65,7 +65,7 @@ docker run -it --name minion \
  -p 1162:1162/udp \
  -p 50000:50000/udp \
  -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
- opennms/minion:26.0.0 -f
+ opennms/minion:26.1.0 -f
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).

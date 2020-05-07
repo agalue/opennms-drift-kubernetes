@@ -193,7 +193,7 @@ spec:
           mountPath: /ksql
       containers:
       - name: ksql-alarms
-        image: confluentinc/cp-ksql-server:5.4.1
+        image: confluentinc/cp-ksql-server:5.4.2
         imagePullPolicy: IfNotPresent
         env:
         - name: KSQL_BOOTSTRAP_SERVERS

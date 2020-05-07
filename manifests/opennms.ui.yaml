@@ -75,7 +75,7 @@ spec:
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:26.0.0
+        image: opennms/horizon:26.1.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -127,7 +127,7 @@ spec:
           subPath: onms-ui-init.sh
       containers:
       - name: onms-ui
-        image: opennms/horizon:26.0.0
+        image: opennms/horizon:26.1.0
         imagePullPolicy: IfNotPresent
         args:
         - -s

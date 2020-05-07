@@ -93,7 +93,7 @@ spec:
       # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: opennms/minion:26.0.0
+        image: bash
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -107,13 +107,6 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
-        - name: OPENNMS_HTTP_USER
-          value: admin
-        - name: OPENNMS_HTTP_PASS
-          valueFrom:
-            secretKeyRef:
-              key: OPENNMS_UI_ADMIN_PASSWORD
-              name: onms-passwords
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
         - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
@@ -126,7 +119,7 @@ spec:
           subPath: onms-minion-init.sh
       containers:
       - name: minion
-        image: opennms/minion:26.0.0
+        image: opennms/minion:26.1.0
         imagePullPolicy: IfNotPresent
         args:
         - -c
@@ -147,6 +140,13 @@ spec:
               name: common-settings
         - name: OPENNMS_HTTP_URL
           value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
+        - name: OPENNMS_HTTP_USER
+          value: admin
+        - name: OPENNMS_HTTP_PASS
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_UI_ADMIN_PASSWORD
+              name: onms-passwords
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:

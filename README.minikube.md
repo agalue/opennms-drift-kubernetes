@@ -16,15 +16,18 @@ In order to do that, just start minikube, and make sure it has at least 4 Cores 
 minikube start --cpus=4 --memory=16g --addons=ingress --addons=ingress-dns --addons=metrics-server
 ```
 
-> *NOTE*: The solution was tested with Kubernetes 1.14.8 and 1.15.6. Newer versions of Kubernetes have not been tested yet.
+If you have enough resources, you could try having a small cluster:
+
+```bash
+minikube start --nodes=3 --cpus=2 --memory=6g --addons=ingress --addons=ingress-dns --addons=metrics-server
+```
 
 ## Install the CertManager
 
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller. Although, for `minikube`, a self-signed certificate will be used.
 
 ```bash
-kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.2/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.0/cert-manager.yaml
 ```
 
 > **NOTE**: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
@@ -78,5 +81,5 @@ docker run -it --rm --name minion \
  -p 50000:50000/udp \
  -v $(pwd)/overlay:/opt/minion-etc-overlay \
  -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
- opennms/minion:26.0.0 -f
+ opennms/minion:26.1.0 -f
 ```

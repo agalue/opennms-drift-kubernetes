@@ -17,10 +17,10 @@ spec:
       restartPolicy: Never
       containers:
       - name: init-config
-        image: centos:7
+        image: curlimages/curl
         imagePullPolicy: IfNotPresent
         command:
-        - bash
+        - sh
         - /bin/helm-init.sh
         env:
         - name: TZ
