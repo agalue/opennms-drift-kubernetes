@@ -157,13 +157,6 @@ bootstrap.servers = ${KAFKA_SERVER}:9092
 max.partition.fetch.bytes = 5000000
 acks = 1
 EOF
-
-#  cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
-#adapters.2.name = BMP-OpenBMP-Integration-Adapter
-#adapters.2.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.openbmp.BmpIntegrationAdapter
-#adapters.2.parameters.kafka.bootstrap.servers = ${KAFKA_SERVER}:9092
-#adapters.2.parameters.topicPrefix = ${INSTANCE_ID}
-#EOF
 fi
 
 if [[ $CASSANDRA_SERVER ]]; then

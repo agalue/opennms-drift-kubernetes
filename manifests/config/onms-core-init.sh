@@ -170,42 +170,9 @@ fi
 # Enable Syslogd
 sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' ${CONFIG_DIR}/service-configuration.xml
 
-# Disable Telemetryd, as flows and streaming telemetry data will be handled on sentinels
-#sed -i -r '/opennms-flows/d' ${CONFIG_DIR}/org.apache.karaf.features.cfg
-#sed -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}/service-configuration.xml
-
-# Enable Telemetryd only for BMP, as flows and streaming telemetry data will be handled on sentinels
-ENABLE_OPEN_BMP="false"
-if [[ ${KAFKA_SERVER} ]]; then
-  ENABLE_OPEN_BMP="true"
-fi
-cat <<EOF > $CONFIG_DIR/telemetryd-configuration.xml
-<?xml version="1.0"?>
-<telemetryd-config>
-  <listener name="BMP-11019" class-name="org.opennms.netmgt.telemetry.listeners.TcpListener" enabled="true">
-    <parameter key="port" value="11019"/>
-    <parser name="BMP-Parser" class-name="org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser" queue="BMP"/>
-  </listener>
-  <queue name="BMP">
-    <adapter name="BMP-Telemetry-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter" enabled="true">
-      <package name="BMP-Default">
-        <rrd step="300">
-          <rra>RRA:AVERAGE:0.5:1:2016</rra>
-          <rra>RRA:AVERAGE:0.5:12:1488</rra>
-          <rra>RRA:AVERAGE:0.5:288:366</rra>
-          <rra>RRA:MAX:0.5:288:366</rra>
-          <rra>RRA:MIN:0.5:288:366</rra>
-        </rrd>
-      </package>
-    </adapter>
-    <adapter name="BMP-PeerStatus-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter" enabled="true">
-    </adapter>
-    <adapter name="BMP-OpenBMP-Integration-Adapter" class-name="org.opennms.netmgt.telemetry.protocols.bmp.adapter.openbmp.BmpIntegrationAdapter" enabled="${ENABLE_OPEN_BMP}">
-      <parameter key="kafka.bootstrap.servers" value="${KAFKA_SERVER-localhost}:9092" />
-    </adapter>
-  </queue>
-</telemetryd-config>
-EOF
+# Disable Telemetryd as BMP, flows, and streaming telemetry data will be managed by sentinels
+sed -i -r '/opennms-flows/d' ${CONFIG_DIR}/org.apache.karaf.features.cfg
+sed -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}/service-configuration.xml
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
