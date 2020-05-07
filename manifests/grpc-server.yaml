@@ -75,11 +75,11 @@ spec:
           value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         resources:
           limits:
-            memory: 512Mi
             cpu: 200m
+            memory: 512Mi
           requests:
-            memory: 256Mi
             cpu: 100m
+            memory: 256Mi
         readinessProbe:
           exec:
             command: ['/bin/grpc_health_probe', '-addr=localhost:8990', '-rpc-timeout=2s']
