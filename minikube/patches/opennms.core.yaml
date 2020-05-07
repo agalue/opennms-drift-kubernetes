@@ -1,0 +1,16 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: onms
+  namespace: opennms
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: init-config
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
