@@ -82,13 +82,13 @@ spec:
             memory: 256Mi
         readinessProbe:
           exec:
-            command: ['/bin/grpc_health_probe', '-addr=localhost:8990', '-rpc-timeout=2s']
-          initialDelaySeconds: 10
+            command: ['/bin/grpc_health_probe', '-addr', ':8990', '-rpc-timeout', '2s']
+          initialDelaySeconds: 20
           periodSeconds: 10
           timeoutSeconds: 3
         livenessProbe:
           exec:
-            command: ['/bin/grpc_health_probe', '-addr=localhost:8990', '-rpc-timeout=2s']
+            command: ['/bin/grpc_health_probe', '-addr', ':8990', '-rpc-timeout', '2s']
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 3
