@@ -36,6 +36,7 @@ NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
 ELASTIC_NUM_SHARDS=${ELASTIC_NUM_SHARDS-6}
+
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
 KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
@@ -85,8 +86,6 @@ cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
 name = BMP
 adapters.0.name = BMP-PeerStatus-Adapter
 adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
-adapters.1.name = BMP-Telemetry-Adapter
-adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
 EOF
 
 if [[ ${ELASTIC_SERVER} ]]; then
@@ -167,7 +166,7 @@ sentinel-newts
 sentinel-telemetry-nxos
 sentinel-telemetry-jti
 sentinel-telemetry-graphite
-sentinel-blobstore-noop
+sentinel-blobstore-cassandra
 EOF
 
   cat <<EOF >> ${OVERLAY}/system.properties
@@ -224,6 +223,11 @@ name = Graphite
 adapters.0.name = Graphite-Adapter
 adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.graphite.adapter.GraphiteAdapter
 adapters.0.parameters.script = ${SENTINEL_HOME}/etc/graphite-telemetry-interface.groovy
+EOF
+
+  cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+adapters.1.name = BMP-Telemetry-Adapter
+adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
 EOF
 
   cat <<EOF > ${OVERLAY}/datacollection-config.xml
@@ -423,5 +427,9 @@ class CollectionSetGenerator {
 
 GraphiteMetric graphiteMsg = msg
 CollectionSetGenerator.generate(agent, builder, graphiteMsg)
+EOF
+else
+  cat <<EOF >> ${FEATURES_DIR}/persistence.boot
+sentinel-blobstore-noop
 EOF
 fi
