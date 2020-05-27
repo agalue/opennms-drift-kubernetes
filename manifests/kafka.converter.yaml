@@ -56,7 +56,7 @@ spec:
           value: $(INSTANCE_ID)_alarms
         - name: DEST_TOPIC
           value: $(INSTANCE_ID)_alarms_json
-        - name: DEST_TOPIC_FLAT
+        - name: DEST_TOPIC_FLAT # To facilitate KSQL processing
           value: $(INSTANCE_ID)_alarms_json_flat
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
@@ -118,7 +118,7 @@ spec:
           value: $(INSTANCE_ID)_nodes
         - name: DEST_TOPIC
           value: $(INSTANCE_ID)_nodes_json
-        - name: DEST_TOPIC_FLAT
+        - name: DEST_TOPIC_FLAT # To facilitate KSQL processing
           value: $(INSTANCE_ID)_nodes_json_flat
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
@@ -131,6 +131,7 @@ spec:
             memory: 128Mi
             cpu: 100m
 
+# The following is for educational purposes only, to demonstrate how to involve KSQL when processing alarms
 ---
 apiVersion: apps/v1
 kind: Deployment
