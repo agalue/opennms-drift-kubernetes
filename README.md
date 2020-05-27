@@ -64,6 +64,7 @@ docker run -it --name minion \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
  -p 50000:50000/udp \
+ -p 11019:11019 \
  -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
  opennms/minion:26.1.0 -f
 ```

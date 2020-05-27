@@ -79,6 +79,7 @@ docker run -it --rm --name minion \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
  -p 50000:50000/udp \
+ -p 11019:11019 \
  -v $(pwd)/overlay:/opt/minion-etc-overlay \
  -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
  opennms/minion:26.1.0 -f

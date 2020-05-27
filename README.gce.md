@@ -74,7 +74,7 @@ gce.agalue.net.   300 IN  SOA ns-cloud-a1.googledomains.com. cloud-dns-hostmaste
 ;; MSG SIZE  rcvd: 136
 ```
 
-> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is mentioned or used, replace it with your own.
+> **WARNING**: Please use your own Domain, meaning that every time the domain `gce.agalue.net` is mentioned or used, replace it with your own.
 
 ## Cluster Creation
 
@@ -101,7 +101,7 @@ Then,
 ```bash
 gcloud container clusters create opennms \
   --num-nodes=$GCP_NODE_COUNT \
-  --cluster-version=1.15.9-gke.26 \
+  --cluster-version=1.16.8-gke.15 \
   --machine-type=$GCP_VM_SIZE
 ```
 
