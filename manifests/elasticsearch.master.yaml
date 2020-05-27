@@ -95,6 +95,8 @@ spec:
           value: 'false'
         - name: node.ingest
           value: 'false'
+        - name: xpack.monitoring.collection.enabled
+          value: 'true'
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
