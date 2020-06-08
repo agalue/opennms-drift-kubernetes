@@ -430,6 +430,6 @@ CollectionSetGenerator.generate(agent, builder, graphiteMsg)
 EOF
 else
   cat <<EOF >> ${FEATURES_DIR}/persistence.boot
-sentinel-blobstore-noop
+sentinel-blobstore-postgres
 EOF
 fi
