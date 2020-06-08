@@ -74,7 +74,7 @@ spec:
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:26.1.0
+        image: opennms/horizon:26.1.1
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -160,7 +160,7 @@ spec:
           mountPath: /opennms-etc
       containers:
       - name: onms
-        image: opennms/horizon:26.1.0
+        image: opennms/horizon:26.1.1
         imagePullPolicy: IfNotPresent
         args:
         - -s
@@ -185,7 +185,7 @@ spec:
         - name: JMX_PORT
           value: '18980'
         - name: JAVA_OPTS # Preferred way instead of opennms.conf; JMX exposed for troubleshooting purposes
-          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -Dcom.sun.management.jmxremote.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.rmi.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+UseStringDeduplication -Xlog:gc*,gc+phases=debug:file=/opt/opennms/logs/gc.log:time,pid,tags:filecount=10,filesize=10m -Dcom.sun.management.jmxremote.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.rmi.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
