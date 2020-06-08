@@ -43,7 +43,7 @@ spec:
           value: '600'
       containers:
       - name: kafka-manager
-        image: hlebalbau/kafka-manager:2.0.0.2
+        image: hlebalbau/kafka-manager:stable
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
@@ -51,8 +51,6 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
-        - name: JAVA_OPTS
-          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
         - name: ZK_HOSTS
           value: zookeeper.opennms.svc.cluster.local:2181
         - name: KAFKA_MANAGER_AUTH_ENABLED
