@@ -175,9 +175,9 @@ spec:
             configMapKeyRef:
               key: KAFKA_NUM_PARTITIONS
               name: common-settings
-        - name: NODES_TOPIC # Must match DEST_TOPIC from the kafka-nodes-json deployment
+        - name: NODES_TOPIC # Must match DEST_TOPIC_FLAT from the kafka-nodes-json deployment
           value: $(INSTANCE_ID)_nodes_json_flat
-        - name: ALARMS_TOPIC # Must match DEST_TOPIC from the kafka-alarms-json deployment
+        - name: ALARMS_TOPIC # Must match DEST_TOPIC_FLAT from the kafka-alarms-json deployment
           value: $(INSTANCE_ID)_alarms_json_flat
         - name: TARGET_TOPIC
           value: $(ALARMS_TOPIC)_enriched
