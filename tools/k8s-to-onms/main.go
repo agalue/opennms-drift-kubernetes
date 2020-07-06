@@ -65,10 +65,9 @@ func main() {
 				name := p.Name
 				port := fmt.Sprintf("%d", p.Port)
 				if name == "" {
-					name = string(p.Protocol) + port
+					name = string(p.Protocol)
 				}
-
-				intf.AddMetaData("port-"+name, port)
+				node.AddMetaData("port-"+name, port)
 			}
 			node.AddInterface(intf)
 			for key, value := range svc.ObjectMeta.Labels {
