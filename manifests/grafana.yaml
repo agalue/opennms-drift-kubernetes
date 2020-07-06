@@ -11,6 +11,7 @@ metadata:
 spec:
   ports:
   - port: 3000
+    name: http
   selector:
     app: grafana
 

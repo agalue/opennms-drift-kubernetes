@@ -11,6 +11,7 @@ metadata:
 spec:
   ports:
   - port: 8990
+    name: http
   selector:
     app: grpc-server
 
@@ -47,7 +48,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8990
-          name: client
+          name: http
         env:
         - name: BOOTSTRAP_SERVERS
           value: kafka.opennms.svc.cluster.local:9092
