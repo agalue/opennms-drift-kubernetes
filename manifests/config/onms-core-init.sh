@@ -357,68 +357,52 @@ fi
 if [[ ${ELASTIC_SERVER} ]]; then
   PREFIX=$(echo ${INSTANCE_ID} | tr '[:upper:]' '[:lower:]')-
 
-  echo "Configuring Elasticsearch for Flows..."
-  cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
+  read -r -d '' ES_COMMON <<EOF
+# Common Settings
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
 indexPrefix=${PREFIX}
-elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 connTimeout=30000
 readTimeout=300000
+retries=1
+
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
+
+# Custom Settings
+EOF
+
+  echo "Configuring Elasticsearch for Flows..."
+  cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
+${ES_COMMON}
+elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 EOF
 
   if [[ ${FEATURES_LIST} == *"opennms-es-rest"* ]]; then
     echo "Configuring Elasticsearch Event Forwarder..."
     cat <<EOF > ${CONFIG_DIR}/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
-elasticUrl=http://${ELASTIC_SERVER}:9200
-globalElasticUser=elastic
-globalElasticPassword=${ELASTIC_PASSWORD}
-indexPrefix=${PREFIX}
+${ES_COMMON}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_REST}
 groupOidParameters=true
 logAllEvents=true
-retries=1
-connTimeout=30000
-readTimeout=300000
-# The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
-settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 
   if [[ ${FEATURES_LIST} == *"opennms-alarm-history-elastic"* ]]; then
     echo "Configuring Alarm History Forwarder..."
     cat <<EOF > ${CONFIG_DIR}/org.opennms.features.alarms.history.elastic.cfg
-elasticUrl=http://${ELASTIC_SERVER}:9200
-globalElasticUser=elastic
-globalElasticPassword=${ELASTIC_PASSWORD}
-indexPrefix=${PREFIX}
+${ES_COMMON}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_ALARMS}
-connTimeout=30000
-readTimeout=300000
-# The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
-settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 
   if [[ ${FEATURES_LIST} == *"opennms-situation-feedback"* ]]; then
     echo "Configuring Situations Feedback..."
     cat <<EOF > ${CONFIG_DIR}/org.opennms.features.situation-feedback.persistence.elastic.cfg
-elasticUrl=http://${ELASTIC_SERVER}:9200
-globalElasticUser=elastic
-globalElasticPassword=${ELASTIC_PASSWORD}
-indexPrefix=${PREFIX}
+${ES_COMMON}
 elasticIndexStrategy=monthly
-connTimeout=30000
-readTimeout=300000
-# The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
-settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 fi
