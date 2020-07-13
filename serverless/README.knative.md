@@ -11,9 +11,9 @@ The following outlines the installation steps, but all of them have been placed 
 In order to use the simplified version of Istio, the chosen version of it depends on what's available at the [third-party](https://github.com/knative/serving/tree/master/third_party) folder for the chosen version of Knative Service.
 
 ```bash
-export serving_version="v0.14.0"
-export eventing_version="v0.14.0"
-export istio_version="1.5.1"
+export serving_version="v0.16.0"
+export eventing_version="v0.16.0"
+export istio_version="1.5.4"
 ```
 
 ## Install Istio

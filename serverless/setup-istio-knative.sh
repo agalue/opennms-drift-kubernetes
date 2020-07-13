@@ -20,15 +20,9 @@ function header_text {
   echo "$header$*$reset"
 }
 
-# Version 0.13
-#serving_version="v0.13.2"
-#eventing_version="v0.13.2"
-#istio_version="1.4.4"
-
-# Version 0.14
-serving_version="v0.14.0"
-eventing_version="v0.14.0"
-istio_version="1.5.1"
+serving_version="v0.16.0"
+eventing_version="v0.16.0"
+istio_version="1.5.4"
 
 domain="aws.agalue.net"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
@@ -55,7 +49,6 @@ sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|
 header_text "Setting up Knative Serving"
 kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-crds.yaml"
 kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-core.yaml"
-[[ $serving_version = v0.13* ]] && kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-istio.yaml"
 
 header_text "Configuring custom domain"
 cat <<EOF | kubectl apply -f -
