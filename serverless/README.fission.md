@@ -28,7 +28,7 @@ ONMS_URL="https://onmsui.aws.agalue.net/opennms"
 kubectl -n fission create secret generic serverless-config \
  --from-literal=SLACK_URL="$SLACK_URL" \
  --from-literal=ONMS_URL="$ONMS_URL" \
- --dry-run -o yaml | kubectl apply -f -
+ --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 > **WARNING**: do not forget to fix the Slack URL.
@@ -70,10 +70,10 @@ fission mqt create \
  --name alarm2slack \
  --function alarm2slack \
  --mqtype kafka \
- --topic K8S_alarms_json
+ --topic K8S_enhanced_alarms
 ```
 
-> **IMPORTANT**: The name of the topic relies on the Kafka Converter YAML file.
+> **IMPORTANT**: The name of the topic relies on the Kafka Producer Enhancer YAML file.
 
 ## Testing
 
@@ -85,14 +85,22 @@ The following alternative options are valid, but they are not working, probably 
 
 ```bash
 fission function test --name alarm2slack --body '{
-  "id": 666,
-  "uei": "uei.jigsaw/test",
-  "severity": 6,
-  "last_event_time": 1560438592000,
-  "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
-  "log_message": "I want to play a game",
-  "description": "<p>Hope to hear from your soon!</p>"
- }'
+  "alarm": {
+    "id": 666,
+    "uei": "uei.jigsaw/test",
+    "severity": 6,
+    "last_event_time": 1560438592000,
+    "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
+    "log_message": "I want to play a game",
+    "description": "<p>Hope to hear from your soon!</p>"
+  },
+  "node": {
+    "id": 6,
+    "label": "lucifer01",
+    "foreign_source": "hell",
+    "foreign_id": "666"
+  }
+}'
 ```
 
 [2] Using an HTTP trigger:
@@ -113,12 +121,20 @@ Then,
 
 ```bash
 curl -H 'Content-Type: application/json' -v -d '{
-  "id": 666,
-  "uei": "uei.jigsaw/test",
-  "severity": 6,
-  "last_event_time": 1560438592000,
-  "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
-  "log_message": "I want to play a game",
-  "description": "<p>Hope to hear from your soon!</p>"
- }' http://fission.$DOMAIN/alarm2slack
+  "alarm": {
+    "id": 666,
+    "uei": "uei.jigsaw/test",
+    "severity": 6,
+    "last_event_time": 1560438592000,
+    "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
+    "log_message": "I want to play a game",
+    "description": "<p>Hope to hear from your soon!</p>"
+  },
+  "node": {
+    "id": 6,
+    "label": "lucifer01",
+    "foreign_source": "hell",
+    "foreign_id": "666"
+  }
+}' http://fission.$DOMAIN/alarm2slack
 ```

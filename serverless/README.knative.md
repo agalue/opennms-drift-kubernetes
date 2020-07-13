@@ -82,7 +82,7 @@ kubectl create secret generic serverless-config \
  --namespace default \
  --from-literal=SLACK_URL="$SLACK_URL" \
  --from-literal=ONMS_URL="$ONMS_URL" \
- --dry-run -o yaml | kubectl apply -f -
+ --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 > **WARNING**: do not forget to fix the Slack URL.
