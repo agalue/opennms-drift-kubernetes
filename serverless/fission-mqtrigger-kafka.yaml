@@ -32,6 +32,6 @@ spec:
         - name: MESSAGE_QUEUE_URL
           value: "kafka.opennms.svc.cluster.local:9092"
         - name: MESSAGE_QUEUE_KAFKA_VERSION
-          value: "2.3.0"
+          value: "2.5.0"
       serviceAccount: fission-svc
 

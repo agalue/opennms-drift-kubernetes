@@ -57,7 +57,7 @@ function getConfig(attributeName) {
   return process.env[attributeName];
 }
 
-function buildMessage(alarm) {
+function buildMessage(alarm, node) {
   let attachment = {
     title: `Alarm ID: ${alarm.id}`,
     title_link: `${globalOnmsUrl}/alarm/detail.htm?id=${alarm.id}`,
@@ -71,12 +71,11 @@ function buildMessage(alarm) {
       short: true
     }]
   }
-  if (alarm.node_criteria) {
-    const c = alarm.node_criteria
-    const nodeLabel = c.foreign_id ? `${c.foreign_source}:${c.foreign_id}(${c.id})` : `ID=${c.id}`;
+  if (node) {
+    const id = node.foreign_id ? `${node.foreign_source}:${node.foreign_id}(${node.id})` : `${node.id}`;
     attachment.fields.push({
       title: 'Node',
-      value: nodeLabel,
+      value: `${node.label}; ID ${id}`,
       short: false
     });
   }
@@ -94,11 +93,9 @@ function buildMessage(alarm) {
   return message;
 }
 
-async function sendAlarm(alarm) {
-  console.log('Reveived: ', JSON.stringify(alarm, null, 2));
-	if (!alarm.id) {
-    return { status: 400, body: 'Invalid alarm received, ignoring.' };
-	}
+async function sendAlarm(data) {
+  console.log('Reveived: ', JSON.stringify(data, null, 2));
+  const { alarm, node } = data;
   if (!globalSlackUrl) {
     return { status: 400, body: 'Missing Slack Webhook URL.' };
   }
@@ -112,7 +109,7 @@ async function sendAlarm(alarm) {
     }
   }
   try {
-    const response = await axios.post(globalSlackUrl, buildMessage(alarm));
+    const response = await axios.post(globalSlackUrl, buildMessage(alarm, node));
     console.log(response.statusText);
     return { status: 200, body: response.statusText };
   } catch (error) {

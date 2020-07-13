@@ -17,9 +17,7 @@ The Kafka Producer feature of OpenNMS publishes events, alarms, metrics and node
 
 Unfortunately, serverless controllers like Fission, Kubeless and Knative expect plain text or to be more presice, a JSON as the payload. For this reason, it is necessary to convert the GPB messages to JSON messages.
 
-[Here](../tools/kafka-converter) you'll find an application implemented in Go to transform GPB payload into JSON and place it on another topic. This is an alternative to the [original](https://github.com/agalue/OpenNMS-Kafka-Converter) solution implemented in Java which is still valid.
-
-The converter directory contains all the details to to generate a Docker image for the application, and also has an example YAML file to deploy the converter to Kubernetes. The converter is already part of the [manifests](../manifests/kafka.converter.yaml).
+[Here](https://github.com/agalue/producer-enhancer) you'll find an application implemented in Go to enhance an Alarm with Node data when available and forward the result in JSON  to another topic.
 
 ### Create a Slack WebHook
 

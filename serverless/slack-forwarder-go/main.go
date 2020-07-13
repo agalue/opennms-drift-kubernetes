@@ -71,21 +71,24 @@ type Alarm struct {
 	LastEvent     *Event        `json:"last_event"`
 }
 
-// HasNode returns true if the alarm has a valid node criteria
-func (alarm Alarm) HasNode() bool {
-	return alarm.NodeCriteria != nil && alarm.NodeCriteria.ID > 0
+// Node represents the simplified version of an OpenNMS Node from the Kafka Producer
+type Node struct {
+	ID             int      `json:"id,omitempty"`
+	ForeignSource  string   `json:"foreign_source,omitempty"`
+	ForeignID      string   `json:"foreign_id,omitempty"`
+	Location       string   `json:"location,omitempty"`
+	Category       []string `json:"category,omitempty"`
+	Label          string   `json:"label,omitempty"`
+	CreateTime     int      `json:"create_time,omitempty"`
+	SysContact     string   `json:"sys_contact,omitempty"`
+	SysDescription string   `json:"sys_description,omitempty"`
+	SysObjectID    string   `json:"sys_object_id,omitempty"`
 }
 
-// GetNodeLabel returns the node label based on the node criteria
-func (alarm Alarm) GetNodeLabel() string {
-	nc := alarm.NodeCriteria
-	if nc == nil {
-		return "Unknown"
-	}
-	if nc.ForeignID == "" {
-		return fmt.Sprintf("ID=%d", nc.ID)
-	}
-	return fmt.Sprintf("%s:%s(%d)", nc.ForeignSource, nc.ForeignID, nc.ID)
+// EnhancedAlarm represents an enhancement version of an OpenNMS Alarm
+type EnhancedAlarm struct {
+	Alarm *Alarm `json:"alarm,omitempty"`
+	Node  *Node  `json:"node,omitempty"`
 }
 
 // SlackField represents a field object of an attachment
@@ -111,7 +114,7 @@ type SlackMessage struct {
 	Attachments []SlackAttachment `json:"attachments"`
 }
 
-func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
+func convertAlarm(alarm *Alarm, node *Node, onmsURL string) SlackMessage {
 	att := SlackAttachment{
 		Title:     fmt.Sprintf("Alarm ID: %d", alarm.ID),
 		TitleLink: fmt.Sprintf("%s/alarm/detail.htm?id=%d", onmsURL, alarm.ID),
@@ -127,10 +130,16 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 			},
 		},
 	}
-	if alarm.HasNode() {
+	if node != nil {
+		var label string
+		if node.ForeignID == "" {
+			label = fmt.Sprintf("%s; ID %d", node.Label, node.ID)
+		} else {
+			label = fmt.Sprintf("%s; ID %s:%s(%d)", node.Label, node.ForeignSource, node.ForeignID, node.ID)
+		}
 		att.Fields = append(att.Fields, SlackField{
 			Title: "Node",
-			Value: alarm.GetNodeLabel(),
+			Value: label,
 			Short: false,
 		})
 	}
@@ -148,15 +157,15 @@ func convertAlarm(alarm Alarm, onmsURL string) SlackMessage {
 
 func receive(ctx context.Context, event cloudevents.Event) (*cloudevents.Event, cloudevents.Result) {
 	log.Printf("Processing %s\n", event)
-	alarm := Alarm{}
-	if err := event.DataAs(&alarm); err != nil {
+	data := EnhancedAlarm{}
+	if err := event.DataAs(&data); err != nil {
 		return nil, cloudevents.NewHTTPResult(500, "Error while parsing alarm: %s", err)
 	}
-	if alarm.ID == 0 {
+	if data.Alarm.ID == 0 {
 		log.Println("Invalid alarm received, ignoring")
 		return nil, cloudevents.NewHTTPResult(400, "Alarm without ID received, ignoring")
 	}
-	msg := convertAlarm(alarm, onmsURL)
+	msg := convertAlarm(data.Alarm, data.Node, onmsURL)
 	jsonBytes, err := json.Marshal(msg)
 	if err != nil {
 		return nil, cloudevents.NewHTTPResult(400, "Cannot convert Slack Message to JSON: %s", err)

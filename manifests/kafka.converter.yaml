@@ -1,5 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# DEPRECATED, see kafka.producer.enhancer.yaml
+#
 # Kafka Converter Tool implemented in Go.
 # This takes a given GPB payload from a topic and puts its JSON representation into another topic.
 # 3 deployments are created:
