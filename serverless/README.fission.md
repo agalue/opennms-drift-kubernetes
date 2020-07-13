@@ -13,6 +13,8 @@ kubectl -n fission apply -f https://github.com/fission/fission/releases/download
 kubectl -n fission apply -f fission-mqtrigger-kafka.yaml
 ```
 
+> For Minikube use `https://github.com/fission/fission/releases/download/$RELEASE/fission-core-$RELEASE-minikube.yaml`
+
 The last command applies the YAML that contains the Kafka `mqtrigger` which is not included/enabled by default with Fission.
 
 It has been done this way because it doesn't look possible to use `fission-core` with `mqtrigger-kafka` through Helm, as the Kafka feature is part of `fission-all`, which contains features not required here.
