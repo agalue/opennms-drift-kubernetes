@@ -24,9 +24,9 @@ serving_version="v0.16.0"
 eventing_version="v0.16.0"
 istio_version="1.5.4"
 
-domain="aws.agalue.net"
+domain="${domain-aws.agalue.net}"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
-onms_url="https://onmsui.$domain/opennms"
+onms_url="${onms_url-https://onmsui.$domain/opennms}"
 
 header_text "Starting Knative on minikube..."
 
