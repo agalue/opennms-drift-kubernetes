@@ -4,7 +4,8 @@
 
 ## Requirements
 
-* Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest).
+* Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) command.
+* Install the [jq](https://stedolan.github.io/jq/) command.
 
 ## Configure the Azure CLI
 
@@ -79,7 +80,7 @@ az aks create --name opennms \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
   --dns-name-prefix opennms \
-  --kubernetes-version 1.16.7 \
+  --kubernetes-version 1.17.7 \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
