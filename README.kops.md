@@ -75,7 +75,7 @@ kops create cluster \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
-  --kubernetes-version 1.17.8 \
+  --kubernetes-version 1.17.9 \
   --networking calico
 ```
 
