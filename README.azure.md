@@ -75,12 +75,17 @@ export AKS_VM_SIZE=Standard_DS3_v2
 Then,
 
 ```bash
+VERSION=$(az aks get-versions \
+    --location "$LOCATION" \
+    --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion' \
+    --output tsv)
+
 az aks create --name opennms \
   --resource-group "$GROUP" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
   --dns-name-prefix opennms \
-  --kubernetes-version 1.17.7 \
+  --kubernetes-version $VERSION \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
@@ -89,12 +94,6 @@ az aks create --name opennms \
   --network-policy azure \
   --generate-ssh-keys \
   --tags Environment=Development
-```
-
-The following command can be used to verify which Kubernetes versions are available:
-
-```bash
-az aks get-versions --location "$LOCATION"
 ```
 
 To validate the cluster:
