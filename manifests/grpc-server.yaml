@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# https://github.com/agalue/onms-grpc-server/
 
 ---
 apiVersion: v1
@@ -12,6 +14,8 @@ spec:
   ports:
   - port: 8990
     name: http
+  - port: 2112
+    name: prometheus
   selector:
     app: grpc-server
 
@@ -44,13 +48,19 @@ spec:
           value: '600'
       containers:
       - name: grpc-server
-        image: agalue/grpc-server:H26
+        image: agalue/onms-grpc-server
         imagePullPolicy: Always
         ports:
         - containerPort: 8990
           name: http
+        - containerPort: 2112
+          name: prometheus
         env:
-        - name: BOOTSTRAP_SERVERS
+        - name: PORT
+          value: '8990'
+        - name: HTTP_PORT
+          value: '2112'
+        - name: BOOTSTRAP_SERVER
           value: kafka.opennms.svc.cluster.local:9092
         - name: TLS_ENABLED
           value: 'false'
@@ -67,20 +77,13 @@ spec:
           value: '5000000'
         - name: MAX_MESSAGE_SIZE
           value: '4194304'
-        - name: MEM_TOTAL_MB
-          valueFrom:
-            resourceFieldRef:
-              resource: requests.memory
-              divisor: 1Mi
-        - name: JAVA_OPTS # Preferred way instead of opennms.conf
-          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
         resources:
           limits:
-            cpu: 200m
-            memory: 512Mi
-          requests:
             cpu: 100m
             memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
         readinessProbe:
           exec:
             command: ['/bin/grpc_health_probe', '-addr', ':8990', '-rpc-timeout', '2s']
