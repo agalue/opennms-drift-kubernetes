@@ -74,7 +74,7 @@ spec:
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:26.1.2
+        image: opennms/horizon:26.1.3
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -149,7 +149,7 @@ spec:
           mountPath: /plugin
       # Initializes Newts keyspace on Cassandra/ScyllaDB through CQLSH (requires newts.cql)
       - name: init-newts
-        image: cassandra:3.11.6
+        image: cassandra:3.11.7
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -f /opennms-etc/newts.cql $CASSANDRA_HOST' ]
         env:
@@ -160,7 +160,7 @@ spec:
           mountPath: /opennms-etc
       containers:
       - name: onms
-        image: opennms/horizon:26.1.2
+        image: opennms/horizon:26.1.3
         imagePullPolicy: IfNotPresent
         args:
         - -s
