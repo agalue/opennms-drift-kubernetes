@@ -58,6 +58,8 @@ export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 
 The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you. For more information about service principals, follow [this](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal) link.
 
+> **INFO**: Only when the resource group to use for the AKS cluster is new, you can omit the principal creation.
+
 With enough quota:
 
 ```bash
