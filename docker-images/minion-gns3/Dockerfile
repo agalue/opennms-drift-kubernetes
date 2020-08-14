@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y && \
     apt-get upgrade -y && \
-    apt-get install snmp tzdata iproute2 iputils-ping curl rsync gnupg ca-certificates ssh sshpass openjdk-11-jre -y && \
+    apt-get install snmp snmp-mibs-downloader tzdata iproute2 iputils-ping curl rsync gnupg ca-certificates ssh sshpass openjdk-11-jre -y && \
     echo "deb https://debian.opennms.org $MINION_SOURCE main" | tee /etc/apt/sources.list.d/opennms.list && \
     curl https://debian.opennms.org/OPENNMS-GPG-KEY 2>/dev/null | apt-key add - && \
     apt-get update && \
