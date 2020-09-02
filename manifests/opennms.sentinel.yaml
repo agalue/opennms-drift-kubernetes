@@ -69,7 +69,7 @@ spec:
       # Initialize Sentinel Configuration
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: opennms/sentinel:16.1.3
+        image: opennms/sentinel:26.2.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -131,7 +131,7 @@ spec:
           subPath: onms-sentinel-init.sh
       containers:
       - name: sentinel
-        image: opennms/sentinel:16.1.3
+        image: opennms/sentinel:26.2.0
         imagePullPolicy: IfNotPresent
         args:
         - -c

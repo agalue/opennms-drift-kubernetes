@@ -82,5 +82,5 @@ docker run -it --rm --name minion \
  -p 11019:11019 \
  -v $(pwd)/overlay:/opt/minion-etc-overlay \
  -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
- opennms/minion:26.1.3 -f
+ opennms/minion:26.2.0 -f
 ```
