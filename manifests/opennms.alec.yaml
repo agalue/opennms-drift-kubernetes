@@ -45,7 +45,7 @@ spec:
       # Initialize Sentinel Configuration for ALEC in Distributed Mode
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: opennms/sentinel:26.2.0
+        image: opennms/sentinel:26.2.1
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -82,7 +82,7 @@ spec:
           mountPath: /plugin
       containers:
       - name: alec
-        image: opennms/sentinel:26.2.0
+        image: opennms/sentinel:26.2.1
         imagePullPolicy: IfNotPresent
         args:
         - -c
