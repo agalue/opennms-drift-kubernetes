@@ -78,7 +78,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        image: grafana/grafana:6.6.2 # Helm 5.0.2 doesn't work with 6.7.x or 7.x
+        image: opennms/helm:5.0.3
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -89,8 +89,6 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
-        - name: GF_INSTALL_PLUGINS # Should grab the latest version available
-          value: opennms-helm-app
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
