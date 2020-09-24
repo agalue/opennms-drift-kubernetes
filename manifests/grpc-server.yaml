@@ -73,7 +73,7 @@ spec:
           value: latest
         - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
           value: '5000000'
-        - name: PRODUCER_MAX_REQUEST_SIZE
+        - name: PRODUCER_MESSAGE_MAX_BYTES
           value: '5000000'
         - name: MAX_MESSAGE_SIZE
           value: '4194304'
