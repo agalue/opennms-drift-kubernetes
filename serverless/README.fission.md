@@ -27,7 +27,8 @@ Once you have the WebHook URL, add it to a `secret`, as well as the OpenNMS WebU
 SLACK_URL="https://hooks.slack.com/services/xxx/yyy/zzzz"
 ONMS_URL="https://onmsui.aws.agalue.net/opennms"
 
-kubectl -n fission create secret generic serverless-config \
+kubectl create secret generic serverless-config \
+ --namespace opennms \
  --from-literal=SLACK_URL="$SLACK_URL" \
  --from-literal=ONMS_URL="$ONMS_URL" \
  --dry-run=client -o yaml | kubectl apply -f -
@@ -39,9 +40,11 @@ kubectl -n fission create secret generic serverless-config \
 
 ```bash
 fission environment create \
+ --envNamespace opennms \
  --name nodejs \
  --image fission/node-env \
- --builder fission/node-builder
+ --builder fission/node-builder \
+ --poolsize 1
 ```
 
 ## Create a ZIP with the NodeJS app and its dependencies
@@ -59,6 +62,8 @@ zip -j alarm2slack.zip slack-forwarder/package.json slack-forwarder/alarm2slack.
 ```bash
 fission function create \
  --name alarm2slack \
+ --envNamespace opennms \
+ --fnNamespace opennms \
  --src alarm2slack.zip \
  --env nodejs \
  --secret serverless-config \
@@ -70,6 +75,7 @@ fission function create \
 ```bash
 fission mqt create \
  --name alarm2slack \
+ --fnNamespace opennms \
  --function alarm2slack \
  --mqtype kafka \
  --topic K8S_enhanced_alarms
@@ -86,7 +92,7 @@ The following alternative options are valid, but they are not working, probably 
 [1] Using the test command:
 
 ```bash
-fission function test --name alarm2slack --body '{
+fission function test --name alarm2slack --fnNamespace opennms --body '{
   "alarm": {
     "id": 666,
     "uei": "uei.jigsaw/test",

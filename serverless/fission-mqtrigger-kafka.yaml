@@ -22,16 +22,16 @@ spec:
     spec:
       containers:
       - name: mqtrigger
-        image: "index.docker.io/fission/fission-bundle"
+        image: fission/fission-bundle
         imagePullPolicy: IfNotPresent
         command: ["/fission-bundle"]
-        args: ["--mqt", "--routerUrl", "http://router.fission", "--collectorEndpoint", ""]
+        args: ["--mqt", "--routerUrl", "http://router.fission.svc.cluster.local"]
         env:
         - name: MESSAGE_QUEUE_TYPE
           value: kafka
         - name: MESSAGE_QUEUE_URL
           value: "kafka.opennms.svc.cluster.local:9092"
         - name: MESSAGE_QUEUE_KAFKA_VERSION
-          value: "2.5.0"
+          value: "2.6.0"
       serviceAccount: fission-svc
 

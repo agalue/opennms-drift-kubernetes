@@ -41,7 +41,7 @@ const mandatoryFields = [
 
 function getConfig(attributeName) {
   let paths = [
-    '/configs/default/serverless-config',
+    '/secrets/opennms/serverless-config',
     '/secrets/default/serverless-config',
     '/serverless-config'
   ];
