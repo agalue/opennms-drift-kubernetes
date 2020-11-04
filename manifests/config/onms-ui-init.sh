@@ -71,8 +71,10 @@ cat <<EOF > ${CONFIG_DIR}/eventconf.xml
   <event-file>events/opennms.snmp.trap.translator.events.xml</event-file>
   <event-file>events/opennms.ackd.events.xml</event-file>
   <event-file>events/opennms.alarm.events.xml</event-file>
+  <event-file>events/opennms.bmp.events.xml</event-file>
   <event-file>events/opennms.bsm.events.xml</event-file>
   <event-file>events/opennms.capsd.events.xml</event-file>
+  <event-file>events/opennms.collectd.events.xml</event-file>
   <event-file>events/opennms.config.events.xml</event-file>
   <event-file>events/opennms.correlation.events.xml</event-file>
   <event-file>events/opennms.default.threshold.events.xml</event-file>
@@ -84,7 +86,7 @@ cat <<EOF > ${CONFIG_DIR}/eventconf.xml
   <event-file>events/opennms.pollerd.events.xml</event-file>
   <event-file>events/opennms.provisioning.events.xml</event-file>
   <event-file>events/opennms.minion.events.xml</event-file>
-  <event-file>events/opennms.remote.poller.events.xml</event-file>
+  <event-file>events/opennms.perspective.poller.events.xml</event-file>
   <event-file>events/opennms.reportd.events.xml</event-file>
   <event-file>events/opennms.syslogd.events.xml</event-file>
   <event-file>events/opennms.ticketd.events.xml</event-file>
