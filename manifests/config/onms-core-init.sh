@@ -60,7 +60,6 @@ CONFIG_DIR=/opennms-etc
 BACKUP_ETC=/opt/opennms/etc
 KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
 KARAF_FILES=( \
-"create.sql" \
 "config.properties" \
 "startup.properties" \
 "custom.properties" \
