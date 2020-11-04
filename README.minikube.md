@@ -81,5 +81,5 @@ docker run -it --rm --name minion \
  -p 50000:50000/udp \
  -p 11019:11019 \
  -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
- opennms/minion:26.2.1 -f
+ opennms/minion:27.0.0 -f
 ```

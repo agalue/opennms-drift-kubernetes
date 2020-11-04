@@ -43,7 +43,7 @@ spec:
         - name: TIMEOUT
           value: '600'
       - name: init-database
-        image: postgres:12
+        image: postgres:13
         imagePullPolicy: IfNotPresent
         command:
         - sh

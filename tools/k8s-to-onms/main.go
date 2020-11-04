@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -29,6 +30,8 @@ func main() {
 	show := flag.Bool("show", false, "Only show requisition in YAML")
 	flag.Parse()
 
+	ctx := context.Background()
+
 	config, err := clientcmd.BuildConfigFromFlags("", *kubecfg)
 	if err != nil {
 		panic(err)
@@ -42,7 +45,7 @@ func main() {
 		Name: "Kubernetes-NS-" + *namespace,
 	}
 
-	svcs, err := client.CoreV1().Services(*namespace).List(v1.ListOptions{})
+	svcs, err := client.CoreV1().Services(*namespace).List(ctx, v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
@@ -77,7 +80,7 @@ func main() {
 		}
 	}
 
-	pods, err := client.CoreV1().Pods(*namespace).List(v1.ListOptions{})
+	pods, err := client.CoreV1().Pods(*namespace).List(ctx, v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
