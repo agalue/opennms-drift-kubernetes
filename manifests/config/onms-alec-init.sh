@@ -22,16 +22,16 @@ SENTINEL_HOME=/opt/sentinel
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-SYSTEM_CFG=${SENTINEL_HOME}/etc/system.properties
+CUSTOM_PROPERTIES=${OVERLAY}/custom.system.properties
 if [[ ${INSTANCE_ID} ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF >> ${SYSTEM_CFG}
-
+  cat <<EOF >> ${CUSTOM_PROPERTIES}
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
+else
+  INSTANCE_ID="OpenNMS"
 fi
-cp ${SYSTEM_CFG} ${OVERLAY}
 
 FEATURES_DIR=${OVERLAY}/featuresBoot.d
 mkdir -p ${FEATURES_DIR}

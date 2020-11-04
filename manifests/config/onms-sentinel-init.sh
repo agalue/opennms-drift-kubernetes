@@ -4,8 +4,6 @@
 # Sentinel is required only when flow/telemetry processing is required.
 #
 # Requirements:
-# - Must run within a init-container based on opennms/sentinel.
-#   Version must match the runtime container.
 # - Horizon 25 or newer is required.
 # - NUM_LISTENER_THREADS (i.e. queue.threads) should be consistent with the amount of partitions on Kafka
 #
@@ -43,18 +41,16 @@ KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
 
 # Configure the instance ID
 # Required when having multiple OpenNMS backends sharing the same Kafka cluster.
-SYSTEM_CFG=${SENTINEL_HOME}/etc/system.properties
+CUSTOM_PROPERTIES=${OVERLAY}/custom.system.properties
 if [[ ${INSTANCE_ID} ]]; then
   echo "Configuring Instance ID..."
-  cat <<EOF >> ${SYSTEM_CFG}
-
+  cat <<EOF >> ${CUSTOM_PROPERTIES}
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
 EOF
 else
   INSTANCE_ID="OpenNMS"
 fi
-cp ${SYSTEM_CFG} ${OVERLAY}
 
 # Configuring SCV credentials to access the OpenNMS ReST API
 if [[ ${OPENNMS_HTTP_USER} && ${OPENNMS_HTTP_PASS} ]]; then
@@ -71,7 +67,7 @@ EOF
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
-  cat <<EOF >> ${OVERLAY}/system.properties
+  cat <<EOF >> ${CUSTOM_PROPERTIES}
 # Enable Tracing
 JAEGER_AGENT_HOST=${JAEGER_AGENT_HOST}
 EOF
@@ -169,7 +165,7 @@ sentinel-telemetry-graphite
 sentinel-blobstore-cassandra
 EOF
 
-  cat <<EOF >> ${OVERLAY}/system.properties
+  cat <<EOF >> ${CUSTOM_PROPERTIES}
 # WARNING: Must match OpenNMS in order to properly store telemetry metrics on Cassandra
 org.opennms.rrd.storeByGroup=true
 org.opennms.rrd.storeByForeignSource=true

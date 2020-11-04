@@ -68,30 +68,9 @@ cat <<EOF > ${CONFIG_DIR}/eventconf.xml
       <doNotOverride>script</doNotOverride>
     </security>
   </global>
-  <event-file>events/opennms.snmp.trap.translator.events.xml</event-file>
-  <event-file>events/opennms.ackd.events.xml</event-file>
-  <event-file>events/opennms.alarm.events.xml</event-file>
-  <event-file>events/opennms.bmp.events.xml</event-file>
-  <event-file>events/opennms.bsm.events.xml</event-file>
-  <event-file>events/opennms.capsd.events.xml</event-file>
-  <event-file>events/opennms.collectd.events.xml</event-file>
-  <event-file>events/opennms.config.events.xml</event-file>
-  <event-file>events/opennms.correlation.events.xml</event-file>
-  <event-file>events/opennms.default.threshold.events.xml</event-file>
-  <event-file>events/opennms.discovery.events.xml</event-file>
-  <event-file>events/opennms.hyperic.events.xml</event-file>
-  <event-file>events/opennms.internal.events.xml</event-file>
-  <event-file>events/opennms.linkd.events.xml</event-file>
-  <event-file>events/opennms.mib.events.xml</event-file>
-  <event-file>events/opennms.pollerd.events.xml</event-file>
-  <event-file>events/opennms.provisioning.events.xml</event-file>
-  <event-file>events/opennms.minion.events.xml</event-file>
-  <event-file>events/opennms.perspective.poller.events.xml</event-file>
-  <event-file>events/opennms.reportd.events.xml</event-file>
-  <event-file>events/opennms.syslogd.events.xml</event-file>
-  <event-file>events/opennms.ticketd.events.xml</event-file>
-  <event-file>events/opennms.tl1d.events.xml</event-file>
-  <event-file>events/opennms.catch-all.events.xml</event-file>
+EOF
+grep 'events\/opennms' etc/eventconf.xml >> ${CONFIG_DIR}/eventconf.xml
+cat <<EOF > ${CONFIG_DIR}/eventconf.xml
 </events>
 EOF
 
