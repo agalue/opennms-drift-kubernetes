@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: kafka-trigger-controller
-        image: kubeless/kafka-trigger-controller:v1.0.3
+        image: kubeless/kafka-trigger-controller
         imagePullPolicy: IfNotPresent
         env:
         - name: KAFKA_BROKERS
