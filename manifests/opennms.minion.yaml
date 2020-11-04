@@ -125,7 +125,7 @@ spec:
           subPath: onms-minion-init.sh
       containers:
       - name: minion
-        image: opennms/minion:26.2.1
+        image: opennms/minion:26.2.2
         imagePullPolicy: IfNotPresent
         args:
         - -c
@@ -207,11 +207,12 @@ spec:
             cpu: 200m
             memory: 1Gi
         readinessProbe:
-          tcpSocket:
-            port: karaf
+          exec:
+            command:
+            - /health.sh
           initialDelaySeconds: 30
           periodSeconds: 10
-        livenessProbe:
+        livenessProbe: # WARNING: The health-check checks dependencies, which is not suitable for liveness probes
           exec:
             command:
             - /health.sh
