@@ -20,6 +20,8 @@
 # - KAFKA_SERVER
 # - SINGLE_PORT
 # - JAEGER_AGENT_HOST
+# - DNS_LOOKUPS_ENABLED
+# - DNS_SERVERS
 
 # To avoid issues with OpenShift
 umask 002
@@ -54,6 +56,28 @@ org.opennms.snmp.snmp4j.noGetBulk=false
 org.opennms.snmp.workarounds.allow64BitIpAddress=true
 org.opennms.snmp.workarounds.allowZeroLengthIpAddress=true
 EOF
+
+DNS_LOOKUPS_ENABLED=${DNS_LOOKUPS_ENABLED-false}
+DNS_SERVERS=${DNS_SERVERS-8.8.8.8}
+if [[ ${DNS_LOOKUPS_ENABLED} == "true" ]]; then
+  echo "Configuring DNS resolver..."
+  cat <<EOF > ${OVERLAY}/org.opennms.features.dnsresolver.netty.cfg
+num-contexts=16
+nameservers=${DNS_SERVERS}
+query-timeout-millis=500
+max-cache-size=500000
+min-ttl-seconds=60
+max-ttl-seconds=300
+negative-ttl-seconds=300
+breaker-enabled=true
+breaker-failure-rate-threshold=90
+breaker-wait-duration-in-open-state=5
+breaker-ring-buffer-size-in-half-open-state=100
+breaker-ring-buffer-size-in-closed-state=50000
+bulkhead-max-concurrent-calls=50000
+bulkhead-max-wait-duration-millis=0
+EOF
+fi
 
 # Enable tracing with jaeger
 if [[ $JAEGER_AGENT_HOST ]]; then
@@ -148,19 +172,19 @@ parsers.0.name=NXOS
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.common.parser.ForwardParser
 parsers.1.name=Netflow-5
 parsers.1.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser
-parsers.1.parameters.dnsLookupsEnabled=true
+parsers.1.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 parsers.1.parameters.maxClockSkew=300
 parsers.2.name=Netflow-9
 parsers.2.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser
-parsers.2.parameters.dnsLookupsEnabled=true
+parsers.2.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 parsers.2.parameters.maxClockSkew=300
 parsers.3.name=IPFIX
 parsers.3.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser
-parsers.3.parameters.dnsLookupsEnabled=true
+parsers.3.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 parsers.3.parameters.maxClockSkew=300
 parsers.4.name=SFlow
 parsers.4.class-name=org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParser
-parsers.4.parameters.dnsLookupsEnabled=true
+parsers.4.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 EOF
 
 else
@@ -195,7 +219,7 @@ parameters.port=8877
 parameters.maxPacketSize=16192
 parsers.0.name=Netflow-5
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser
-parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 parsers.0.parameters.maxClockSkew=300
 EOF
 
@@ -207,7 +231,7 @@ parameters.port=4729
 parameters.maxPacketSize=16192
 parsers.0.name=Netflow-9
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser
-parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 parsers.0.parameters.maxClockSkew=300
 EOF
 
@@ -219,7 +243,7 @@ parameters.port=6343
 parameters.maxPacketSize=16192
 parsers.0.name=SFlow
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParser
-parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.listeners-udp-4738.cfg
@@ -230,7 +254,7 @@ parameters.port=4738
 parameters.maxPacketSize=16192
 parsers.0.name=IPFIX
 parsers.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser
-parsers.0.parameters.dnsLookupsEnabled=true
+parsers.0.parameters.dnsLookupsEnabled=${DNS_LOOKUPS_ENABLED}
 parsers.0.parameters.maxClockSkew=300
 EOF
 fi
