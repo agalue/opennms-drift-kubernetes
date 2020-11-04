@@ -12,7 +12,7 @@ There are some additional features available in this particular solution, like [
 
 ## Minimum Requirements
 
-* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary. Make sure to have at least version 1.14 to use the `kustomize` integration.
+* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary.
 * Install the [kustomize](https://kustomize.io/) binary on your machine [Optional, but good to have for troubleshooting]
 
 > **NOTE**: Depending on the chosen platform, additional requirements might be needed. Check the respective `README` files for more information.

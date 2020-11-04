@@ -199,12 +199,6 @@ Make sure all the operators are up and running. Then, to apply all the manifests
 kubectl apply -k manifests
 ```
 
-If you're not running `kubectl` version 1.14, the following is an alternative:
-
-```bash
-kustomize build manifests | kubectl apply -f
-```
-
 > The main [README](README.md) offers a way to initialize an external Minion that points to this solution for testing purposes.
 
 ## Install Jaeger Tracing

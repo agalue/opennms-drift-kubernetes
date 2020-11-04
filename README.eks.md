@@ -134,12 +134,6 @@ To apply all the manifests:
 kubectl apply -k manifests
 ```
 
-If you're not running `kubectl` version 1.14, the following is an alternative:
-
-```bash
-kustomize build manifests | kubectl apply -f
-```
-
 ## Install Jaeger Tracing
 
 ```bash
