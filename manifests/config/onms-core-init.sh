@@ -325,8 +325,7 @@ CREATE TABLE IF NOT EXISTS ${KEYSPACE}.samples (
   'compaction_window_unit': 'DAYS',
   'expired_sstable_check_frequency_seconds': '86400',
   'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
-} AND gc_grace_seconds = 604800
-  AND read_repair_chance = 0;
+} AND gc_grace_seconds = 604800;
 
 CREATE TABLE IF NOT EXISTS ${KEYSPACE}.terms (
   context text,
