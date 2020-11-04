@@ -1,5 +1,7 @@
 # OpenNMS-Kafka-Converter
 
+> **DEPRECATED**: This tool is not used anymore as the current solution is based on the [Producer Enhancer](https://github.com/agalue/producer-enhancer).
+
 A simple Kafka Consumer application to convert GPB payload from Topic A to JSON into Topic B
 
 This solution requires using the OpenNMS Kafka Producer. This feature can export events, alarms, metrics, nodes and edges from the OpenNMS database to Kafka. All the payloads are stored using Google Protobuf.

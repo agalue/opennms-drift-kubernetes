@@ -51,7 +51,7 @@ Create the Kubernetes cluster using `eksctl`. The following example creates a cl
 ```bash
 eksctl create cluster \
   --name opennms \
-  --version 1.15 \
+  --version 1.17 \
   --region us-east-2 \
   --nodegroup-name onms-fleet \
   --node-type t2.2xlarge \
@@ -117,8 +117,7 @@ curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controlle
 ## Install the CertManager
 
 ```bash
-kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.1/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs

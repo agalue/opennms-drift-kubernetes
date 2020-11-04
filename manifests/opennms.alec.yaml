@@ -33,10 +33,19 @@ spec:
                   values:
                   - onms
       initContainers:
+      # Wait for all the dependencies
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
       # Initialize Sentinel Configuration for ALEC in Distributed Mode
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
-        image: opennms/sentinel:26.0.0
+        image: opennms/sentinel:26.2.2
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -67,22 +76,13 @@ spec:
         args: [ "cd /plugin && wget $ALEC_KAR_URL" ]
         env:
         - name: ALEC_KAR_URL
-          value: https://github.com/OpenNMS/alec/releases/download/v1.0.2/opennms-alec-plugin.kar
+          value: https://github.com/OpenNMS/alec/releases/download/v1.1.0/opennms-alec-plugin.kar
         volumeMounts:
         - name: karaf-deploy
           mountPath: /plugin
-      # Wait for all the dependencies
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: opennms-core.opennms.svc.cluster.local:8980
-        - name: TIMEOUT
-          value: '600'
       containers:
       - name: alec
-        image: opennms/sentinel:26.0.0
+        image: opennms/sentinel:26.2.2
         imagePullPolicy: IfNotPresent
         args:
         - -c
@@ -126,11 +126,12 @@ spec:
             cpu: 500m
             memory: 1Gi
         readinessProbe:
-          tcpSocket:
-            port: karaf
+          exec:
+            command:
+            - /health.sh
           initialDelaySeconds: 30
           periodSeconds: 10
-        livenessProbe:
+        livenessProbe: # WARNING: The health-check checks dependencies, which is not suitable for liveness probes
           exec:
             command:
             - /health.sh

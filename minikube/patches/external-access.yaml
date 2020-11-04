@@ -12,11 +12,11 @@ spec:
   tls:
     - secretName: opennms-ingress-cert
       hosts:
-        - onms.test
-        - grafana.test
-        - kafka-manager.test
-        - kibana.test
-        - tracing.test
+        - onms.minikube.local
+        - grafana.minikube.local
+        - kafka-manager.minikube.local
+        - kibana.minikube.local
+        - tracing.minikube.local
   rules:
     - host: onms.test
       http:
@@ -39,14 +39,14 @@ spec:
             backend:
               serviceName: kafka-manager
               servicePort: 9000
-    - host: kibana.test
+    - host: kibana.minikube.local
       http:
         paths:
           - path: /
             backend:
               serviceName: kibana
               servicePort: 5601
-    - host: tracing.test
+    - host: tracing.minikube.local
       http:
         paths:
           - path: /
@@ -66,9 +66,9 @@ spec:
   tls:
     - secretName: grpc-ingress-cert
       hosts:
-        - grpc.test
+        - grpc.minikube.local
   rules:
-    - host: grpc.test
+    - host: grpc.minikube.local
       http:
         paths:
           - path: /

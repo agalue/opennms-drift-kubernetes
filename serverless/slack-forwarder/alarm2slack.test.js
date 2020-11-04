@@ -33,6 +33,14 @@ test('Test message generation', async() => {
     }
   };
 
+  const node = {
+    id: 6,
+    foreign_source: "hell",
+    foreign_id: "diablo",
+    label: "lucifer01",
+    sys_object_id: ".1.3.6.1.4.1.666.1"
+  }
+
   const message = {
     attachments: [{
       title: `Alarm ID: ${alarm.id}`,
@@ -47,7 +55,7 @@ test('Test message generation', async() => {
         short: true
       },{
         title: "Node",
-        value: "hell:diablo(6)",
+        value: "lucifer01; ID hell:diablo(6)",
         short: false
       },{
         title: "Owner",
@@ -57,12 +65,14 @@ test('Test message generation', async() => {
     }]
   };
 
+  const data = { alarm, node }
+
   const kubelessResults = await app.kubeless({
-    data: alarm
+    data
   });
 
   const fissionResults = await app.fission({
-    request: { body: alarm }
+    request: { body: data }
   });
 
   expect(kubelessResults.status).toBe(200);
@@ -71,10 +81,11 @@ test('Test message generation', async() => {
   expect(mockAxios.post).toHaveBeenCalledWith(process.env.SLACK_URL, message);
 });
 
+
 test('Test missing fields', async() => {
-  const test1 = await app.kubeless({data: {}});
-  const test2 = await app.kubeless({data: {id: 666}});
-  const test3 = await app.kubeless({data: {logMessage: 'blah'}});
+  const test1 = await app.kubeless({data: { alarm: {} }});
+  const test2 = await app.kubeless({data: { alarm: {id: 666} }});
+  const test3 = await app.kubeless({data: { alarm: {logMessage: 'blah'} }});
 
   expect(test1.status).toBe(400);
   expect(test2.status).toBe(400);

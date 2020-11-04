@@ -50,6 +50,12 @@ spec:
   - name: ipfix
     protocol: UDP
     port: 4738
+  - name: bmp
+    protocol: TCP
+    port: 11019
+  - name: graphite
+    protocol: UDP
+    port: 2003
   - name: nxos-udp
     protocol: UDP
     port: 50001
@@ -81,10 +87,19 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       initContainers:
+      # Wait for all the dependencies
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092,opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
       # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config
-        image: opennms/minion:26.0.0
+        image: bash
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -98,13 +113,6 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
-        - name: OPENNMS_HTTP_USER
-          value: admin
-        - name: OPENNMS_HTTP_PASS
-          valueFrom:
-            secretKeyRef:
-              key: OPENNMS_UI_ADMIN_PASSWORD
-              name: onms-passwords
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
         - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
@@ -115,18 +123,9 @@ spec:
         - name: init-scripts
           mountPath: /init.sh
           subPath: onms-minion-init.sh
-      # Wait for all the dependencies
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: kafka.opennms.svc.cluster.local:9092,opennms-core.opennms.svc.cluster.local:8980
-        - name: TIMEOUT
-          value: '600'
       containers:
       - name: minion
-        image: opennms/minion:26.0.0
+        image: opennms/minion:26.2.2
         imagePullPolicy: IfNotPresent
         args:
         - -c
@@ -147,6 +146,13 @@ spec:
               name: common-settings
         - name: OPENNMS_HTTP_URL
           value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
+        - name: OPENNMS_HTTP_USER
+          value: admin
+        - name: OPENNMS_HTTP_PASS
+          valueFrom:
+            secretKeyRef:
+              key: OPENNMS_UI_ADMIN_PASSWORD
+              name: onms-passwords
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -184,6 +190,12 @@ spec:
         - containerPort: 4738
           protocol: UDP
           name: ipfix
+        - containerPort: 2003
+          protocol: UDP
+          name: graphite
+        - containerPort: 11019
+          protocol: TCP
+          name: bmp
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/minion-etc-overlay
@@ -195,11 +207,12 @@ spec:
             cpu: 200m
             memory: 1Gi
         readinessProbe:
-          tcpSocket:
-            port: karaf
+          exec:
+            command:
+            - /health.sh
           initialDelaySeconds: 30
           periodSeconds: 10
-        livenessProbe:
+        livenessProbe: # WARNING: The health-check checks dependencies, which is not suitable for liveness probes
           exec:
             command:
             - /health.sh

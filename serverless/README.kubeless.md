@@ -24,7 +24,7 @@ ONMS_URL="https://onmsui.aws.agalue.net/opennms"
 kubectl -n opennms create secret generic serverless-config \
  --from-literal=SLACK_URL="$SLACK_URL" \
  --from-literal=ONMS_URL="$ONMS_URL" \
- --dry-run -o yaml | kubectl apply -f -
+ --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 > **WARNING**: do not forget to fix the Slack URL.
@@ -34,7 +34,7 @@ kubectl -n opennms create secret generic serverless-config \
 ```bash
 kubeless function deploy alarm2slack \
 --namespace opennms \
---runtime nodejs8 \
+--runtime nodejs10 \
 --dependencies ./slack-forwarder/package.json \
 --from-file ./slack-forwarder/alarm2slack.js \
 --handler alarm2slack.kubeless \
@@ -47,10 +47,10 @@ kubeless function deploy alarm2slack \
 kubeless trigger kafka create alarm2slack \
  --namespace opennms \
  --function-selector created-by=kubeless,function=alarm2slack \
- --trigger-topic K8S_alarms_json
+ --trigger-topic K8S_enhanced_alarms
 ```
 
-> **IMPORTANT**: The name of the topic relies on the Kafka Converter YAML file.
+> **IMPORTANT**: The name of the topic relies on the Kafka Producer Enhancer YAML file.
 
 Use `kubeless function list` to check whether the function is ready to use.
 
@@ -60,12 +60,20 @@ Use `kubeless function list` to check whether the function is ready to use.
 kubeless function call alarm2slack \
  -n opennms \
  --data '{
-  "id": 666,
-  "uei": "uei.jigsaw/test",
-  "severity": 6,
-  "last_event_time": 1560438592000,
-  "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
-  "log_message": "I want to play a game",
-  "description": "<p>Hope to hear from your soon!</p>"
+  "alarm": {
+    "id": 666,
+    "uei": "uei.jigsaw/test",
+    "severity": 6,
+    "last_event_time": 1560438592000,
+    "last_event": { "id": 66, "parameter": [{"name":"owner","value":"agalue"}] },
+    "log_message": "I want to play a game",
+    "description": "<p>Hope to hear from your soon!</p>"
+  },
+  "node": {
+    "id": 6,
+    "label": "lucifer01",
+    "foreign_source": "hell",
+    "foreign_id": "666"
+  }
  }'
 ```

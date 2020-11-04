@@ -4,7 +4,8 @@
 
 ## Requirements
 
-* Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest).
+* Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) command.
+* Install the [jq](https://stedolan.github.io/jq/) command.
 
 ## Configure the Azure CLI
 
@@ -57,6 +58,8 @@ export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 
 The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you. For more information about service principals, follow [this](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal) link.
 
+> **INFO**: Only when the resource group to use for the AKS cluster is new, you can omit the principal creation.
+
 With enough quota:
 
 ```bash
@@ -74,12 +77,17 @@ export AKS_VM_SIZE=Standard_DS3_v2
 Then,
 
 ```bash
+VERSION=$(az aks get-versions \
+    --location "$LOCATION" \
+    --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion' \
+    --output tsv)
+
 az aks create --name opennms \
   --resource-group "$GROUP" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
   --dns-name-prefix opennms \
-  --kubernetes-version 1.16.7 \
+  --kubernetes-version $VERSION \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
@@ -88,12 +96,6 @@ az aks create --name opennms \
   --network-policy azure \
   --generate-ssh-keys \
   --tags Environment=Development
-```
-
-The following command can be used to verify which Kubernetes versions are available:
-
-```bash
-az aks get-versions --location "$LOCATION"
 ```
 
 To validate the cluster:
@@ -113,15 +115,13 @@ az aks get-credentials --resource-group "$GROUP" --name opennms
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud/deploy.yaml
 ```
 
 ## Install the CertManager
 
 ```bash
-kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.1/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs

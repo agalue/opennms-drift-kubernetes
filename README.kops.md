@@ -4,7 +4,7 @@
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.16.x.
+* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.15.x or newer.
 
 ## DNS Configuration
 
@@ -75,7 +75,7 @@ kops create cluster \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
-  --kubernetes-version 1.16.8 \
+  --kubernetes-version 1.18.6 \
   --networking calico
 ```
 
@@ -172,9 +172,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/service-l4.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/patch-configmap-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/deploy.yaml
 ```
 
 ## Install the CertManager
@@ -182,8 +180,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mast
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
 
 ```bash
-kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.1/cert-manager.yaml
 ```
 
 > NOTE: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).

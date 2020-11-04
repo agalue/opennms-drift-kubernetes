@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Purpose:
@@ -46,6 +46,7 @@ if curl -u "${GRAFANA_AUTH}" "${HELM_URL}" 2>/dev/null | grep -q '"enabled":fals
   echo "$(date) Adding data source for flows..."
   sed -i -r 's/-entity/-flow/g' ${JSON_FILE}
   curl -u "${GRAFANA_AUTH}" -H 'Content-Type: application/json' -XPOST -d @${JSON_FILE} "${DS_URL}" 2>/dev/null
+  echo
 else
   echo "$(date) OpenNMS Helm was already enabled and configured."
 fi

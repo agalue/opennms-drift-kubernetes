@@ -14,7 +14,9 @@ spec:
       - name: zk
         env:
         - name: ZOO_SERVERS
-          value: server.1=zk-0.zookeeper.opennms.svc.cluster.local:2888:3888
+          value: server.1=zk-0.zookeeper.opennms.svc.cluster.local:2888:3888;2181
+        - name: ZOO_STANDALONE_ENABLED
+          value: 'true'
         resources:
           limits:
             memory: 256Mi

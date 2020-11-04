@@ -1,5 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# DEPRECATED, see kafka.producer.enhancer.yaml
+#
 # Kafka Converter Tool implemented in Go.
 # This takes a given GPB payload from a topic and puts its JSON representation into another topic.
 # 3 deployments are created:
@@ -56,7 +58,7 @@ spec:
           value: $(INSTANCE_ID)_alarms
         - name: DEST_TOPIC
           value: $(INSTANCE_ID)_alarms_json
-        - name: DEST_TOPIC_FLAT
+        - name: DEST_TOPIC_FLAT # To facilitate KSQL processing
           value: $(INSTANCE_ID)_alarms_json_flat
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
@@ -118,7 +120,7 @@ spec:
           value: $(INSTANCE_ID)_nodes
         - name: DEST_TOPIC
           value: $(INSTANCE_ID)_nodes_json
-        - name: DEST_TOPIC_FLAT
+        - name: DEST_TOPIC_FLAT # To facilitate KSQL processing
           value: $(INSTANCE_ID)_nodes_json_flat
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
@@ -131,6 +133,7 @@ spec:
             memory: 128Mi
             cpu: 100m
 
+# The following is for educational purposes only, to demonstrate how to involve KSQL when processing alarms
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -174,9 +177,9 @@ spec:
             configMapKeyRef:
               key: KAFKA_NUM_PARTITIONS
               name: common-settings
-        - name: NODES_TOPIC # Must match DEST_TOPIC from the kafka-nodes-json deployment
+        - name: NODES_TOPIC # Must match DEST_TOPIC_FLAT from the kafka-nodes-json deployment
           value: $(INSTANCE_ID)_nodes_json_flat
-        - name: ALARMS_TOPIC # Must match DEST_TOPIC from the kafka-alarms-json deployment
+        - name: ALARMS_TOPIC # Must match DEST_TOPIC_FLAT from the kafka-alarms-json deployment
           value: $(INSTANCE_ID)_alarms_json_flat
         - name: TARGET_TOPIC
           value: $(ALARMS_TOPIC)_enriched
@@ -193,7 +196,7 @@ spec:
           mountPath: /ksql
       containers:
       - name: ksql-alarms
-        image: confluentinc/cp-ksql-server:5.4.1
+        image: confluentinc/cp-ksql-server:5.4.2
         imagePullPolicy: IfNotPresent
         env:
         - name: KSQL_BOOTSTRAP_SERVERS

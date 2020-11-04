@@ -74,7 +74,7 @@ gce.agalue.net.   300 IN  SOA ns-cloud-a1.googledomains.com. cloud-dns-hostmaste
 ;; MSG SIZE  rcvd: 136
 ```
 
-> **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is mentioned or used, replace it with your own.
+> **WARNING**: Please use your own Domain, meaning that every time the domain `gce.agalue.net` is mentioned or used, replace it with your own.
 
 ## Cluster Creation
 
@@ -101,7 +101,7 @@ Then,
 ```bash
 gcloud container clusters create opennms \
   --num-nodes=$GCP_NODE_COUNT \
-  --cluster-version=1.15.9-gke.26 \
+  --cluster-version=1.16.10-gke.8 \
   --machine-type=$GCP_VM_SIZE
 ```
 
@@ -128,15 +128,13 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud/deploy.yaml
 ```
 
 ## Install the CertManager
 
 ```bash
-kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.13.1/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.1/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs

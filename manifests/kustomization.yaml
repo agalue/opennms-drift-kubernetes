@@ -8,8 +8,8 @@ resources:
 - postgresql.yaml
 - zookeeper.yaml
 - kafka.yaml
-- kafka.converter.yaml
 - kafka.manager.yaml
+- kafka.producer.enhancer.yaml
 - cassandra.yaml
 - cassandra.reaper.yaml
 - elasticsearch.master.yaml

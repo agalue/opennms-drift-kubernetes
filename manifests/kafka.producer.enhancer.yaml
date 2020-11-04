@@ -1,0 +1,57 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# Enhance Alarms with Node data when available and send the result to a topic in JSON format
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-producer-enhancer
+  namespace: opennms
+  labels:
+    app: kafka-producer-enhancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-producer-enhancer
+  template:
+    metadata:
+      labels:
+        app: kafka-producer-enhancer
+    spec:
+      initContainers:
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: opennms-core.opennms.svc.cluster.local:8980
+        - name: TIMEOUT
+          value: '600'
+      containers:
+      - name: kafka-producer-enhancer
+        image: agalue/producer-enhancer-go:latest
+        imagePullPolicy: Always
+        env:
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: BOOTSTRAP_SERVERS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: GROUP_ID
+          value: alarms-enhancer-group
+        - name: TARGET_KIND
+          value: alarms
+        - name: TARGET_TOPIC
+          value: $(INSTANCE_ID)_enhanced_alarms
+        - name: NODES_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
+          value: $(INSTANCE_ID)_nodes
+        - name: ALARMS_TOPIC # Check org.opennms.features.kafka.producer.cfg at the OpenNMS server
+          value: $(INSTANCE_ID)_alarms
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 100m

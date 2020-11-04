@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/agalue/kafka-converter/api/producer"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang/protobuf/proto"
 	"github.com/jeremywohl/flatten"
+	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
 const (

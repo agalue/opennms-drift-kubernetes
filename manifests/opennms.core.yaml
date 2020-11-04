@@ -61,12 +61,20 @@ spec:
       terminationGracePeriodSeconds: 120
       securityContext: # In order to be able to write data as non-root on the volumes
         fsGroup: 10001 # Default opennms group
-        fsGroupChangePolicy: Always
       initContainers:
+      # Wait for all the dependencies
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
+        - name: TIMEOUT
+          value: '600'
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:26.0.0
+        image: opennms/horizon:26.2.2
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -135,13 +143,13 @@ spec:
         args: [ "cd /plugin && wget $ALEC_KAR_URL" ]
         env:
         - name: ALEC_KAR_URL
-          value: https://github.com/OpenNMS/alec/releases/download/v1.0.2/opennms-alec-plugin.kar
+          value: https://github.com/OpenNMS/alec/releases/download/v1.1.0/opennms-alec-plugin.kar
         volumeMounts:
         - name: karaf-deploy
           mountPath: /plugin
       # Initializes Newts keyspace on Cassandra/ScyllaDB through CQLSH (requires newts.cql)
       - name: init-newts
-        image: cassandra:3.11.6
+        image: cassandra:3.11.7
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -f /opennms-etc/newts.cql $CASSANDRA_HOST' ]
         env:
@@ -150,18 +158,9 @@ spec:
         volumeMounts:
         - name: etc
           mountPath: /opennms-etc
-      # Wait for all the dependencies
-      - name: dependencies
-        image: waisbrot/wait
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: TARGETS
-          value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
-        - name: TIMEOUT
-          value: '600'
       containers:
       - name: onms
-        image: opennms/horizon:26.0.0
+        image: opennms/horizon:26.2.2
         imagePullPolicy: IfNotPresent
         args:
         - -s
@@ -170,6 +169,8 @@ spec:
           name: karaf
         - containerPort: 8980
           name: http
+        - containerPort: 18980
+          name: jmx
         env:
         - name: TZ
           valueFrom:
@@ -181,8 +182,10 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
-        - name: JAVA_OPTS # Preferred way instead of opennms.conf
-          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
+        - name: JMX_PORT
+          value: '18980'
+        - name: JAVA_OPTS # Preferred way instead of opennms.conf; JMX exposed for troubleshooting purposes
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+UseStringDeduplication -Xlog:gc*,gc+phases=debug:file=/opt/opennms/logs/gc.log:time,pid,tags:filecount=10,filesize=10m -Dcom.sun.management.jmxremote.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.rmi.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT

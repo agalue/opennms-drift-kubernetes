@@ -23,6 +23,7 @@ data:
     monitorRole QED
     controlRole R&D
     cassandra cassandra
+  # For Cassandra 3.11.x
   # Enable G1GC as the performance tests on the field have proven good results.
   jvm.options: |+
     -ea
@@ -50,6 +51,28 @@ data:
     -XX:+UseGCLogFileRotation
     -XX:NumberOfGCLogFiles=10
     -XX:GCLogFileSize=10M
+  # For Cassandra 4.x
+  # Enable G1GC (default in JDK 11) as the performance tests on the field have proven good results.
+  jvm11-server.options: |+
+    -XX:+UseG1GC
+    -XX:G1RSetUpdatingPauseTimePercent=5
+    -XX:MaxGCPauseMillis=500
+    -Djdk.attach.allowAttachSelf=true
+    --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
+    --add-exports java.base/jdk.internal.ref=ALL-UNNAMED
+    --add-exports java.base/sun.nio.ch=ALL-UNNAMED
+    --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED
+    --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED
+    --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED
+    --add-exports java.sql/java.sql=ALL-UNNAMED
+    --add-opens java.base/java.lang.module=ALL-UNNAMED
+    --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+    --add-opens java.base/jdk.internal.ref=ALL-UNNAMED
+    --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED
+    --add-opens java.base/jdk.internal.math=ALL-UNNAMED
+    --add-opens java.base/jdk.internal.module=ALL-UNNAMED
+    --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED
+    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
 
 ---
 apiVersion: v1
@@ -106,7 +129,7 @@ spec:
           privileged: true
       containers:
       - name: cassandra
-        image: cassandra:3.11.6
+        image: cassandra:4.0
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
@@ -144,6 +167,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name # TODO spec.nodeName seems more accurate, but an affinity policy might be better.
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         ports:
         - containerPort: 7000
           name: intra-node
@@ -160,8 +187,8 @@ spec:
           mountPath: /etc/cassandra/jmxremote.password
           subPath: jmxremote.password
         - name: cassandra-config
-          mountPath: /etc/cassandra/jvm.options
-          subPath: jvm.options
+          mountPath: /etc/cassandra/jvm11-server.options
+          subPath: jvm11-server.options
         resources:
           limits:
             cpu: 4
@@ -179,7 +206,7 @@ spec:
             command:
             - bash
             - -c
-            - 'if [[ $(nodetool -u cassandra -pw cassandra status -r | grep $HOSTNAME) == *"UN"* ]]; then exit 0; else exit 1; fi'
+            - 'if [[ $(nodetool -u cassandra -pw cassandra status | grep $POD_IP) == *"UN"* ]]; then exit 0; else exit 1; fi'
           initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:

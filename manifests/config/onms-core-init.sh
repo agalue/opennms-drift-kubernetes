@@ -170,7 +170,7 @@ fi
 # Enable Syslogd
 sed -r -i '/enabled="false"/{$!{N;s/ enabled="false"[>]\n(.*OpenNMS:Name=Syslogd.*)/>\n\1/}}' ${CONFIG_DIR}/service-configuration.xml
 
-# Disable Telemetryd, as flows and streaming telemetry data will be handled on sentinels
+# Disable Telemetryd as BMP, flows, and streaming telemetry data will be managed by sentinels
 sed -i -r '/opennms-flows/d' ${CONFIG_DIR}/org.apache.karaf.features.cfg
 sed -i 'N;s/service.*\n\(.*Telemetryd\)/service enabled="false">\n\1/;P;D' ${CONFIG_DIR}/service-configuration.xml
 
@@ -212,6 +212,7 @@ org.opennms.core.ipc.rpc.strategy=kafka
 org.opennms.core.ipc.rpc.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
 org.opennms.core.ipc.rpc.kafka.ttl=30000
 org.opennms.core.ipc.rpc.kafka.single-topic=true
+org.opennms.core.ipc.rpc.kafka.group.id=${INSTANCE_ID}
 
 # RPC Consumer (verify Kafka broker configuration)
 org.opennms.core.ipc.rpc.kafka.request.timeout.ms=30000
@@ -324,8 +325,7 @@ CREATE TABLE IF NOT EXISTS ${KEYSPACE}.samples (
   'compaction_window_unit': 'DAYS',
   'expired_sstable_check_frequency_seconds': '86400',
   'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
-} AND gc_grace_seconds = 604800
-  AND read_repair_chance = 0;
+} AND gc_grace_seconds = 604800;
 
 CREATE TABLE IF NOT EXISTS ${KEYSPACE}.terms (
   context text,
@@ -356,68 +356,52 @@ fi
 if [[ ${ELASTIC_SERVER} ]]; then
   PREFIX=$(echo ${INSTANCE_ID} | tr '[:upper:]' '[:lower:]')-
 
-  echo "Configuring Elasticsearch for Flows..."
-  cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
+  read -r -d '' ES_COMMON <<EOF
+# Common Settings
 elasticUrl=http://${ELASTIC_SERVER}:9200
 globalElasticUser=elastic
 globalElasticPassword=${ELASTIC_PASSWORD}
 indexPrefix=${PREFIX}
-elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 connTimeout=30000
 readTimeout=300000
+retries=1
+
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
+
+# Custom Settings
+EOF
+
+  echo "Configuring Elasticsearch for Flows..."
+  cat <<EOF > ${CONFIG_DIR}/org.opennms.features.flows.persistence.elastic.cfg
+${ES_COMMON}
+elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 EOF
 
   if [[ ${FEATURES_LIST} == *"opennms-es-rest"* ]]; then
     echo "Configuring Elasticsearch Event Forwarder..."
     cat <<EOF > ${CONFIG_DIR}/org.opennms.plugin.elasticsearch.rest.forwarder.cfg
-elasticUrl=http://${ELASTIC_SERVER}:9200
-globalElasticUser=elastic
-globalElasticPassword=${ELASTIC_PASSWORD}
-indexPrefix=${PREFIX}
+${ES_COMMON}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_REST}
 groupOidParameters=true
 logAllEvents=true
-retries=1
-connTimeout=30000
-readTimeout=300000
-# The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
-settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 
   if [[ ${FEATURES_LIST} == *"opennms-alarm-history-elastic"* ]]; then
     echo "Configuring Alarm History Forwarder..."
     cat <<EOF > ${CONFIG_DIR}/org.opennms.features.alarms.history.elastic.cfg
-elasticUrl=http://${ELASTIC_SERVER}:9200
-globalElasticUser=elastic
-globalElasticPassword=${ELASTIC_PASSWORD}
-indexPrefix=${PREFIX}
+${ES_COMMON}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_ALARMS}
-connTimeout=30000
-readTimeout=300000
-# The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
-settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 
   if [[ ${FEATURES_LIST} == *"opennms-situation-feedback"* ]]; then
     echo "Configuring Situations Feedback..."
     cat <<EOF > ${CONFIG_DIR}/org.opennms.features.situation-feedback.persistence.elastic.cfg
-elasticUrl=http://${ELASTIC_SERVER}:9200
-globalElasticUser=elastic
-globalElasticPassword=${ELASTIC_PASSWORD}
-indexPrefix=${PREFIX}
+${ES_COMMON}
 elasticIndexStrategy=monthly
-connTimeout=30000
-readTimeout=300000
-# The following settings should be consistent with your ES cluster
-settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
-settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
   fi
 fi
@@ -485,3 +469,7 @@ rm -f ${CONFIG_DIR}/foreign-sources/pending/*.xml.*
 # Force to execute runjava and the install script
 touch ${CONFIG_DIR}/do-upgrade
 
+# Fix permissions when executing the script as root
+if [[ "$(id -u)" == "0" ]]; then
+  chown -R opennms:opennms ${CONFIG_DIR}
+fi

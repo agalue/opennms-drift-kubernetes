@@ -1,8 +1,8 @@
-// Source: https://github.com/OpenNMS/opennms/blob/develop/features/kafka/producer/src/main/proto/collectionset.proto
+// Source: https://github.com/OpenNMS/opennms/blob/master/features/kafka/producer/src/main/proto/collectionset.proto
 
 syntax = "proto3";
 
-option go_package = "producer";
+option go_package = ".;producer";
 
 message StringAttribute {
   string name = 1;  

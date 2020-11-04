@@ -35,7 +35,8 @@ umask 002
 NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
-ELASTIC_NUM_SHARDS${ELASTIC_NUM_SHARDS-6}
+ELASTIC_NUM_SHARDS=${ELASTIC_NUM_SHARDS-6}
+
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
 KEYSPACE=$(echo ${INSTANCE_ID-onms}_newts | tr '[:upper:]' '[:lower:]')
@@ -63,8 +64,10 @@ fi
 
 FEATURES_DIR=${OVERLAY}/featuresBoot.d
 mkdir -p ${FEATURES_DIR}
-echo "sentinel-persistence" > ${FEATURES_DIR}/persistence.boot
-echo "sentinel-jsonstore-postgres" > ${FEATURES_DIR}/store-postgres.boot
+cat <<EOF > ${FEATURES_DIR}/persistence.boot
+sentinel-persistence
+sentinel-jsonstore-postgres
+EOF
 
 # Enable tracing with jaeger
 if [[ ${JAEGER_AGENT_HOST} ]]; then
@@ -75,12 +78,21 @@ EOF
   echo "opennms-core-tracing-jaeger" > ${FEATURES_DIR}/jaeger.boot
 fi
 
+# Enable BMP
+cat <<EOF > ${FEATURES_DIR}/bmp.boot
+sentinel-telemetry-bmp
+EOF
+cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+name = BMP
+adapters.0.name = BMP-PeerStatus-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
+EOF
+
 if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch..."
 
   cat <<EOF > ${FEATURES_DIR}/flows.boot
 sentinel-flows
-sentinel-telemetry-bmp
 EOF
 
   if [[ ! ${CASSANDRA_SERVER} ]]; then
@@ -153,6 +165,7 @@ if [[ $CASSANDRA_SERVER ]]; then
 sentinel-newts
 sentinel-telemetry-nxos
 sentinel-telemetry-jti
+sentinel-telemetry-graphite
 sentinel-blobstore-cassandra
 EOF
 
@@ -203,6 +216,18 @@ adapters.0.name = JTI-Adapter
 adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
 adapters.0.parameters.script = ${SENTINEL_HOME}/etc/junos-telemetry-interface.groovy
 queue.threads = ${NUM_LISTENER_THREADS}
+EOF
+
+  cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-graphite.cfg
+name = Graphite
+adapters.0.name = Graphite-Adapter
+adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.graphite.adapter.GraphiteAdapter
+adapters.0.parameters.script = ${SENTINEL_HOME}/etc/graphite-telemetry-interface.groovy
+EOF
+
+  cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+adapters.1.name = BMP-Telemetry-Adapter
+adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
 EOF
 
   cat <<EOF > ${OVERLAY}/datacollection-config.xml
@@ -374,5 +399,37 @@ class CollectionSetGenerator {
 
 TelemetryBis.Telemetry telemetryMsg = msg
 CollectionSetGenerator.generate(agent, builder, telemetryMsg)
+EOF
+
+  cat <<EOF > ${OVERLAY}/graphite-telemetry-interface.groovy
+import groovy.util.logging.Slf4j
+import org.opennms.core.utils.RrdLabelUtils
+import org.opennms.netmgt.collection.api.AttributeType
+import org.opennms.netmgt.telemetry.protocols.graphite.adapter.GraphiteMetric
+import org.opennms.netmgt.collection.support.builder.InterfaceLevelResource
+import org.opennms.netmgt.collection.support.builder.NodeLevelResource
+
+@Slf4j
+class CollectionSetGenerator {
+    static generate(agent, builder, graphiteMsg) {
+        log.debug("Generating collection set for message: {}", graphiteMsg)
+        def nodeLevelResource = new NodeLevelResource(agent.getNodeId())
+
+        if (graphiteMsg.path.startsWith("eth")) {
+            def ifaceLabel = RrdLabelUtils.computeLabelForRRD(graphiteMsg.path.split(".")[0], null, null);
+            def interfaceResource = new InterfaceLevelResource(nodeLevelResource, interfaceLabel);
+            builder.withGauge(interfaceResource, "some-group", graphiteMsg.path.split(".")[1], graphitMsg.longValue());
+        } else {
+            log.warn("Cannot handle message from graphite. {}", graphiteMsg);
+        }
+    }
+}
+
+GraphiteMetric graphiteMsg = msg
+CollectionSetGenerator.generate(agent, builder, graphiteMsg)
+EOF
+else
+  cat <<EOF >> ${FEATURES_DIR}/persistence.boot
+sentinel-blobstore-postgres
 EOF
 fi

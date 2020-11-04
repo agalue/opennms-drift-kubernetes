@@ -9,4 +9,5 @@ bases:
 patchesStrategicMerge:
 - patches/common-settings.yaml
 - patches/external-access.yaml
+- patches/opennms.core.yaml
 - patches/kibana.yaml

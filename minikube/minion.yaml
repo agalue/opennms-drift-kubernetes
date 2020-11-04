@@ -20,6 +20,14 @@ telemetry:
       enabled: true
       parameters:
         port: 50000
+    listeners:
+      BMP:
+        class-name: org.opennms.netmgt.telemetry.listeners.TcpListener
+        parameters:
+          port: 11019
+        parsers:
+          BMP:
+            class-name: org.opennms.netmgt.telemetry.protocols.bmp.parser.BmpParser
 
 # Trap/Syslog Reception
 netmgt:

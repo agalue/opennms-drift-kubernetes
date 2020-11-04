@@ -11,6 +11,7 @@ spec:
     spec:
       containers:
       - image: agalue/slack-forwarder
+        imagePullPolicy: Always
         env:
         - name: SLACK_URL
           valueFrom:

@@ -49,7 +49,7 @@ spec:
         - name: TIMEOUT
           value: '600'
       - name: init-database
-        image: cassandra:3.11.6
+        image: cassandra:4.0
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -e "$CQL" $CASSANDRA_HOST' ]
         env:
@@ -64,7 +64,7 @@ spec:
           value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REP_FACTOR) };"
       containers:
       - name: cassandra-reaper
-        image: thelastpickle/cassandra-reaper:1.4.4
+        image: thelastpickle/cassandra-reaper:1.4.8
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

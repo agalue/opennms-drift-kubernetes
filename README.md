@@ -2,6 +2,8 @@
 
 OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/).
 
+![Diagram](diagram.png)
+
 For learning purposes, `Helm` charts and `operators` are avoided for this solution on the main components, with the exceptions of the Ingress Controller and Cert-Manager. In the future, that might change to take advantage of these technologies.
 
 This deployment contains a full distributed version of all OpenNMS components and features, with high availability in mind when possible.
@@ -10,7 +12,7 @@ There are some additional features available in this particular solution, like [
 
 ## Minimum Requirements
 
-* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary. Make sure to have version 1.14 to use the `kustomize` integration.
+* Install the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) binary. Make sure to have at least version 1.14 to use the `kustomize` integration.
 * Install the [kustomize](https://kustomize.io/) binary on your machine [Optional, but good to have for troubleshooting]
 
 > **NOTE**: Depending on the chosen platform, additional requirements might be needed. Check the respective `README` files for more information.
@@ -62,13 +64,16 @@ docker run -it --name minion \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
  -p 50000:50000/udp \
+ -p 11019:11019 \
  -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
- opennms/minion:26.0.0 -f
+ opennms/minion:26.2.2 -f
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
+
+> **CRITICAL**: If you're planning to use the UDP Listeners (Telemetry, Flows, SNMP Traps, Syslog), and you're going to use Docker, make sure to do it on a server running Linux, not a VM, Docker for Mac or Docker for Windows, because of the reasons explained [here](https://opennms.discourse.group/t/running-in-docker-and-receiving-flows-traps-or-syslog-messages-over-udp/1103).
 
 ## Users Resources
 
@@ -87,7 +92,7 @@ docker run -it --name minion \
 ## Future Enhancements
 
 * Add [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other component should not access those resources). A network manager like [Calico](https://www.projectcalico.org) is required.
-* Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://vapor-ware.github.io/ksync/).
+* Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://ksync.github.io/ksync/).
 * Investigate how to provide support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information. Although, using operators seems more feasible in this regard, due to the complexities when expanding/shrinking these kind of applications.
 * Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
