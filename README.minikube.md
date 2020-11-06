@@ -13,10 +13,14 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 Start minikube with the following recommended settings:
 
 ```bash
-minikube start --cpus=8 --memory=32g --addons=ingress --addons=ingress-dns --addons=metrics-server
+minikube start --cpus=8 --memory=32g --disk-size=60g \
+  --addons=ingress \
+  --addons=ingress-dns \
+  --addons=metrics-server \
+  --kubernetes-version=v1.18.10
 ```
 
-> **NOTE**: it could take time to have all the components up and running, compared to cloud-based solutions.
+> **WARNING**: it could take time to have all the components up and running compared to cloud-based solutions, and I personally had a bad experiencing trying to make it work, which is why I encourage to use a cloud provider or a bare-metal Kubernetes cluster.
 
 ## Install the CertManager
 
