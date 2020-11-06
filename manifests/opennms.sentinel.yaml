@@ -150,7 +150,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        - name: SENTINEL_LOCATION
+        - name: SENTINEL_LOCATION # Required when using tracing through Jaeger
           valueFrom:
             configMapKeyRef:
               key: MINION_LOCATION
