@@ -10,13 +10,13 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 
 ## Cluster Configuration
 
-In order to do that, just start minikube, and make sure it has at least 4 Cores and 16GB of RAM:
+Start minikube with the following recommended settings:
 
 ```bash
-minikube start --cpus=4 --memory=16g --addons=ingress --addons=ingress-dns --addons=metrics-server
+minikube start --cpus=8 --memory=32g --addons=ingress --addons=ingress-dns --addons=metrics-server
 ```
 
-If you have enough resources, I recommend 8 cores and 32GB of RAM.
+> **NOTE**: it could take time to have all the components up and running, compared to cloud-based solutions.
 
 ## Install the CertManager
 
@@ -60,7 +60,7 @@ Please take a look at the documentation of [ingress-dns](https://github.com/kube
 # Start Minion
 
 ```bash
-mkdir -p overlay
+rm -rf overlay && mkdir -p overlay
 kubectl get secret opennms-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/onms_server.crt
 kubectl get secret grpc-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/grpc_server.crt
 keytool -importcert -alias grpc -file overlay/grpc_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
@@ -76,6 +76,7 @@ docker run -it --rm --name minion \
  -p 1162:1162/udp \
  -p 50000:50000/udp \
  -p 11019:11019 \
+ -v $(pwd)/overlay:/opt/minion-etc-overlay \
  -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
  opennms/minion:27.0.0 -f
 ```
