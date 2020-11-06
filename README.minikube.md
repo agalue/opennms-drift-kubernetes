@@ -16,11 +16,7 @@ In order to do that, just start minikube, and make sure it has at least 4 Cores 
 minikube start --cpus=4 --memory=16g --addons=ingress --addons=ingress-dns --addons=metrics-server
 ```
 
-If you have enough resources, you could try having a small cluster:
-
-```bash
-minikube start --nodes=3 --cpus=2 --memory=6g --addons=ingress --addons=ingress-dns --addons=metrics-server
-```
+If you have enough resources, I recommend 8 cores and 32GB of RAM.
 
 ## Install the CertManager
 
