@@ -26,6 +26,7 @@
 # - OPENNMS_HTTP_PASS
 # - NUM_LISTENER_THREADS
 # - JAEGER_AGENT_HOST
+# - USE_NEPHRON
 
 # To avoid issues with OpenShift
 umask 002
@@ -34,6 +35,7 @@ NUM_LISTENER_THREADS=${NUM_LISTENER_THREADS-6}
 ELASTIC_INDEX_STRATEGY_FLOWS=${ELASTIC_INDEX_STRATEGY_FLOWS-daily}
 ELASTIC_REPLICATION_FACTOR=${ELASTIC_REPLICATION_FACTOR-2}
 ELASTIC_NUM_SHARDS=${ELASTIC_NUM_SHARDS-6}
+USE_NEPHRON=${USE_NEPHRON-false}
 
 OVERLAY=/etc-overlay
 SENTINEL_HOME=/opt/sentinel
@@ -132,6 +134,11 @@ elasticIndexStrategy = ${ELASTIC_INDEX_STRATEGY_FLOWS}
 settings.index.number_of_shards = ${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas = ${ELASTIC_REPLICATION_FACTOR}
 EOF
+
+  if [[ ${USE_NEPHRON} == "true" ]]; then
+    curl https://raw.githubusercontent.com/OpenNMS/nephron/master/main/src/main/resources/netflow_agg-template.json
+    curl -XPUT -H 'Content-Type: application/json' http://${ELASTIC_SERVER}:9200/_template/netflow_agg -d@netflow_agg-template.json
+  fi
 fi
 
 if [[ ${KAFKA_SERVER} ]]; then
@@ -152,9 +159,20 @@ bootstrap.servers = ${KAFKA_SERVER}:9092
 max.partition.fetch.bytes = 5000000
 acks = 1
 EOF
+
+  if [[ ${USE_NEPHRON} == "true" ]]; then
+    cat <<EOF > ${OVERLAY}/org.opennms.features.flows.persistence.kafka.cfg
+topic = opennms-flows
+bootstrap.servers = ${KAFKA_SERVER}:9092
+EOF
+
+    cat <<EOF >> ${OVERLAY}/org.opennms.features.flows.persistence.elastic.cfg
+enableForwarding true
+EOF
+  fi
 fi
 
-if [[ $CASSANDRA_SERVER ]]; then
+if [[ ${CASSANDRA_SERVER} ]]; then
   echo "Configuring Cassandra..."
 
   cat <<EOF > ${FEATURES_DIR}/telemetry.boot
@@ -407,18 +425,17 @@ import org.opennms.netmgt.collection.support.builder.NodeLevelResource
 
 @Slf4j
 class CollectionSetGenerator {
-    static generate(agent, builder, graphiteMsg) {
-        log.debug("Generating collection set for message: {}", graphiteMsg)
-        def nodeLevelResource = new NodeLevelResource(agent.getNodeId())
-
-        if (graphiteMsg.path.startsWith("eth")) {
-            def ifaceLabel = RrdLabelUtils.computeLabelForRRD(graphiteMsg.path.split(".")[0], null, null);
-            def interfaceResource = new InterfaceLevelResource(nodeLevelResource, interfaceLabel);
-            builder.withGauge(interfaceResource, "some-group", graphiteMsg.path.split(".")[1], graphitMsg.longValue());
-        } else {
-            log.warn("Cannot handle message from graphite. {}", graphiteMsg);
-        }
+  static generate(agent, builder, graphiteMsg) {
+    log.debug("Generating collection set for message: {}", graphiteMsg)
+    def nodeLevelResource = new NodeLevelResource(agent.getNodeId())
+    if (graphiteMsg.path.startsWith("eth")) {
+      def ifaceLabel = RrdLabelUtils.computeLabelForRRD(graphiteMsg.path.split(".")[0], null, null);
+      def interfaceResource = new InterfaceLevelResource(nodeLevelResource, interfaceLabel);
+      builder.withGauge(interfaceResource, "some-group", graphiteMsg.path.split(".")[1], graphitMsg.longValue());
+    } else {
+      log.warn("Cannot handle message from graphite. {}", graphiteMsg);
     }
+  }
 }
 
 GraphiteMetric graphiteMsg = msg
