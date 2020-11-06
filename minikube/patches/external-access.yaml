@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# Requires the ingress-dns add-on in Minikube, and some configuration in your host machine
 
 ---
 apiVersion: networking.k8s.io/v1beta1
@@ -12,41 +14,41 @@ spec:
   tls:
     - secretName: opennms-ingress-cert
       hosts:
-        - onms.minikube.local
-        - grafana.minikube.local
-        - kafka-manager.minikube.local
-        - kibana.minikube.local
-        - tracing.minikube.local
+        - onms.test
+        - grafana.test
+        - kafka-manager.test
+        - kibana.test
+        - tracing.test
   rules:
-    - host: onms.minikube.local
+    - host: onms.test
       http:
         paths:
           - path: /
             backend:
               serviceName: opennms-core
               servicePort: 8980
-    - host: grafana.minikube.local
+    - host: grafana.test
       http:
         paths:
           - path: /
             backend:
               serviceName: grafana
               servicePort: 3000
-    - host: kafka-manager.minikube.local
+    - host: kafka-manager.test
       http:
         paths:
           - path: /
             backend:
               serviceName: kafka-manager
               servicePort: 9000
-    - host: kibana.minikube.local
+    - host: kibana.test
       http:
         paths:
           - path: /
             backend:
               serviceName: kibana
               servicePort: 5601
-    - host: tracing.minikube.local
+    - host: tracing.test
       http:
         paths:
           - path: /
@@ -66,9 +68,9 @@ spec:
   tls:
     - secretName: grpc-ingress-cert
       hosts:
-        - grpc.minikube.local
+        - grpc.test
   rules:
-    - host: grpc.minikube.local
+    - host: grpc.test
       http:
         paths:
           - path: /
