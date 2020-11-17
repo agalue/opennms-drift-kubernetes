@@ -24,6 +24,7 @@ func main() {
 	flag.StringVar(&rest.Instance.URL, "url", "https://onms.aws.agalue.net/opennms", "OpenNMS URL")
 	flag.StringVar(&rest.Instance.Username, "user", rest.Instance.Username, "OpenNMS Username")
 	flag.StringVar(&rest.Instance.Password, "passwd", rest.Instance.Password, "OpenNMS Password")
+	flag.BoolVar(&rest.Instance.Insecure, "insecure", rest.Instance.Insecure, "Skip Certificate Validation")
 	namespace := flag.String("namespace", "opennms", "The namespace where the OpenNMS resources live")
 	location := flag.String("location", "Kubernetes", "The name of the Location for the target nodes")
 	kubecfg := flag.String("config", os.Getenv("HOME")+"/.kube/config", "Kubernetes Configuration")
