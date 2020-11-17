@@ -1,6 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # DEPRECATED, see kafka.producer.enhancer.yaml
+# This is an optional component
 #
 # Kafka Converter Tool implemented in Go.
 # This takes a given GPB payload from a topic and puts its JSON representation into another topic.
@@ -35,7 +36,7 @@ spec:
         - name: TARGETS
           value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: kafka-alarms-json
         image: agalue/kafka-converter-go:latest
@@ -97,7 +98,7 @@ spec:
         - name: TARGETS
           value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: kafka-nodes-json
         image: agalue/kafka-converter-go:latest
@@ -160,7 +161,7 @@ spec:
         - name: TARGETS
           value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       - name: init-config
         image: busybox
         imagePullPolicy: IfNotPresent

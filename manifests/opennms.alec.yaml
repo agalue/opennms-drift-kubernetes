@@ -41,7 +41,7 @@ spec:
         - name: TARGETS
           value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       # Initialize Sentinel Configuration for ALEC in Distributed Mode
       # Requires the same image/version used at runtime: sentinel
       - name: init-config

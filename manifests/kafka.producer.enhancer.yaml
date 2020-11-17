@@ -1,5 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# This is an optional component
 # Enhance Alarms with Node data when available and send the result to a topic in JSON format
 
 ---
@@ -28,7 +29,7 @@ spec:
         - name: TARGETS
           value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: kafka-producer-enhancer
         image: agalue/producer-enhancer-go:latest

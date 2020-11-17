@@ -95,7 +95,7 @@ spec:
         - name: TARGETS
           value: kafka.opennms.svc.cluster.local:9092,opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       # Initialize Minion Configuration
       # Requires the same image/version used at runtime: minion
       - name: init-config

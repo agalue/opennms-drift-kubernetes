@@ -45,7 +45,7 @@ spec:
         - name: TARGETS
           value: kafka.opennms.svc.cluster.local:9092
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: grpc-server
         image: agalue/onms-grpc-server

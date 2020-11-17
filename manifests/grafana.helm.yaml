@@ -1,6 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# A one time Job to enable OpenNMS Helm and creating the data sources on Grafana
+# A one time Job to enable OpenNMS Helm and creating the data sources in Grafana
 
 ---
 apiVersion: batch/v1

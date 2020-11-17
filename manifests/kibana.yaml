@@ -44,7 +44,7 @@ spec:
         - name: TARGETS
           value: esdata.opennms.svc.cluster.local:9200
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: kibana
         image: docker.elastic.co/kibana/kibana:7.6.2

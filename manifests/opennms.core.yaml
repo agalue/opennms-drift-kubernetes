@@ -70,7 +70,7 @@ spec:
         - name: TARGETS
           value: postgresql.opennms.svc.cluster.local:5432,cassandra.opennms.svc.cluster.local:9042,kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config

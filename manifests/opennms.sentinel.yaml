@@ -2,7 +2,7 @@
 #
 # Sentinel is required only for Processing Flows and Telemetry Data.
 # Using StatefulSets for Sentinels only to have a unique and immutable SENTINEL_ID.
-# SENTINEL_ID is required for tracing.
+# SENTINEL_ID and SENTINEL_LOCATION are required for tracing.
 #
 # NOTES:
 # - It is perfectly valid to have all the required configuration files on a config-map,
@@ -65,7 +65,7 @@ spec:
         - name: TARGETS
           value: opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       # Initialize Sentinel Configuration
       # Requires the same image/version used at runtime: sentinel
       - name: init-config
@@ -146,7 +146,7 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
-        - name: SENTINEL_ID
+        - name: SENTINEL_ID # Required when using tracing through Jaeger
           valueFrom:
             fieldRef:
               fieldPath: metadata.name

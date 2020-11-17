@@ -75,7 +75,7 @@ spec:
         - name: TARGETS
           value: esmaster.opennms.svc.cluster.local:9200
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: esdata
         image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2

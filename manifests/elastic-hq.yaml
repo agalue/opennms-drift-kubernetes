@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# This is an optional component
 
 ---
 apiVersion: v1
@@ -42,7 +44,7 @@ spec:
         - name: TARGETS
           value: esdata.opennms.svc.cluster.local:9200
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: esmaster
         image: elastichq/elasticsearch-hq:latest

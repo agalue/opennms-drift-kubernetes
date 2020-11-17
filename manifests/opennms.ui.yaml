@@ -1,5 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# This is an optional component
+#
 # NOTES:
 # - I'm not a fan of this use case, and can only embrace it as either to provide additional
 #   horsepower for the ReST API, or as a limited WebUI (not all features available).
@@ -71,7 +73,7 @@ spec:
         - name: TARGETS
           value: grafana.opennms.svc.cluster.local:3000,opennms-core.opennms.svc.cluster.local:8980
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       # Initialize OpenNMS UI Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config

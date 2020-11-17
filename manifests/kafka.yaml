@@ -57,7 +57,7 @@ spec:
         - name: TARGETS
           value: zookeeper.opennms.svc.cluster.local:2181
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       containers:
       - name: kafka
         image: wurstmeister/kafka:2.13-2.6.0

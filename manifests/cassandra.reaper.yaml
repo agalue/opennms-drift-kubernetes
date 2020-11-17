@@ -1,7 +1,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# This is an optional component
+#
 # http://cassandra-reaper.io/docs/configuration/docker_vars/
-# Main UI: https://cassandra-reaper.aws.agalue.net/webui/
+# Main UI: https://cassandra-reaper.$YOUR_DOMAIN/webui/
 
 ---
 apiVersion: v1
@@ -47,7 +49,7 @@ spec:
         - name: TARGETS
           value: cassandra.opennms.svc.cluster.local:9042
         - name: TIMEOUT
-          value: '600'
+          value: '900'
       - name: init-database
         image: cassandra:4.0
         imagePullPolicy: IfNotPresent
