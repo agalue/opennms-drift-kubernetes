@@ -14,7 +14,8 @@ spec:
       - name: cassandra
         resources:
           limits:
-            memory: 2Gi
+            memory: 3Gi
+            cpu: 1000m
           requests:
-            memory: 1Gi
-          $patch: replace
+            memory: 2Gi
+            cpu: 250m

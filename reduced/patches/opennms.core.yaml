@@ -14,6 +14,7 @@ spec:
         resources:
           limits:
             memory: 3Gi
+            cpu: 1000m
           requests:
             memory: 2Gi
-          $patch: replace
+            cpu: 500m
