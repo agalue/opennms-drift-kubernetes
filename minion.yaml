@@ -1,3 +1,5 @@
+# WARNING: Make sure to update the domain on each host.
+
 # Basic Settings
 http-url: "https://onms.aws.agalue.net/opennms"
 id: "durham-minion-01"
