@@ -69,8 +69,8 @@ cat <<EOF > ${CONFIG_DIR}/eventconf.xml
     </security>
   </global>
 EOF
-grep 'events\/opennms' etc/eventconf.xml >> ${CONFIG_DIR}/eventconf.xml
-cat <<EOF > ${CONFIG_DIR}/eventconf.xml
+grep 'events\/opennms' /opt/opennms/share/etc-pristine/eventconf.xml >> ${CONFIG_DIR}/eventconf.xml
+cat <<EOF >> ${CONFIG_DIR}/eventconf.xml
 </events>
 EOF
 
