@@ -146,8 +146,8 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 To remove the Kubernetes cluster, do the following:
 
 ```bash
-kubectl delete ingress ingress-rules --namespace opennms
-kubectl delete service ext-kafka --namespace opennms
+kubectl delete ingress grpc-ingress --namespace opennms
+kubectl delete ingress onms-ingress --namespace opennms
 sleep 10
 eksctl delete cluster --name opennms --region us-east-2 --wait
 ```
