@@ -26,7 +26,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: agalue@opennms.org
+    email: agalue@opennms.org # Warning: use your own email
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
