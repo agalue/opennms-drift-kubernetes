@@ -75,7 +75,7 @@ The output should be something like this:
 
 ```text
 NAME	VERSION	STATUS	CREATED			VPC			SUBNETS										SECURITYGROUPS
-opennms	1.14	ACTIVE	2019-11-19T18:31:45Z	vpc-0ba92160c1b9c36bd	subnet-02b614a06818c80a3,subnet-03484aa51fe7d7045,subnet-07e1b1be81687054c,subnet-08663ab52ff8ee348,subnet-08c5c04a3487ed4db,subnet-0e4e3304642c52875	sg-0d2a3cac05d2b6e78
+opennms	1.18	ACTIVE	2020-11-19T18:31:45Z	vpc-0ba92160c1b9c36bd	subnet-02b614a06818c80a3,subnet-03484aa51fe7d7045,subnet-07e1b1be81687054c,subnet-08663ab52ff8ee348,subnet-08c5c04a3487ed4db,subnet-0e4e3304642c52875	sg-0d2a3cac05d2b6e78
 ```
 
 Then,
@@ -98,9 +98,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 This add-on is required in order to avoid having a LoadBalancer per external service.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/service-l4.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/patch-configmap-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/deploy.yaml
 ```
 
 For Route53 mapping:
@@ -109,7 +107,7 @@ For Route53 mapping:
 export DOMAIN=aws.agalue.net
 export OWNER=agalue
 
-curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.3/docs/examples/external-dns.yaml 2>/dev/null | sed "s/--domain-filter=.*/--domain-filter=$DOMAIN/" | sed "s/--txt-owner-id=.*/--txt-owner-id=$OWNER/" | kubectl apply -f -
+curl https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/examples/external-dns.yaml 2>/dev/null | sed "s/--domain-filter=.*/--domain-filter=$DOMAIN/" | sed "s/--txt-owner-id=.*/--txt-owner-id=$OWNER/" | kubectl apply -f -
 ```
 
 > **WARNING**: Please use your own domain.
@@ -117,7 +115,7 @@ curl https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controlle
 ## Install the CertManager
 
 ```bash
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.4/cert-manager.yaml
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs
