@@ -131,7 +131,7 @@ spec:
           subPath: onms-sentinel-init.sh
       containers:
       - name: sentinel
-        image: opennms/sentinel:27.0.0
+        image: opennms/sentinel:27.0.1
         imagePullPolicy: IfNotPresent
         args:
         - -c
