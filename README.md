@@ -8,7 +8,7 @@ For learning purposes, `Helm` charts and `operators` are avoided for this soluti
 
 This deployment contains a full distributed version of all OpenNMS components and features, with high availability in mind when possible.
 
-There are some additional features available in this particular solution, like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/kafka-manager).
+There are some additional features available in this particular solution, like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/CMAK) (or `CMAK`).
 
 ## Minimum Requirements
 

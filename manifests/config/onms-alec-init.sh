@@ -1,13 +1,14 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# ALEC is required only when advanced AI correlation is required.
+# ALEC is required only for advanced alarms correlation.
 #
 # Requirements:
-# - Must run within a init-container based on opennms/sentinel.
+# - Horizon 27 or newer is required.
+# - ALEC 1.1.0 or newer is required.
+# - Overlay volume mounted at /etc-overlay
+# - Must run within a init-container based on the opennms/sentinel image.
 #   Version must match the runtime container.
-# - Horizon 25 or newer is required.
-#   This script expects ALEC 1.0.2 or newer.
 #
 # Environment variables:
 # - INSTANCE_ID

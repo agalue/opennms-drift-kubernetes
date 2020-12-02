@@ -97,7 +97,6 @@ spec:
         - name: TIMEOUT
           value: '900'
       # Initialize Minion Configuration
-      # Requires the same image/version used at runtime: minion
       - name: init-config
         image: bash
         imagePullPolicy: IfNotPresent

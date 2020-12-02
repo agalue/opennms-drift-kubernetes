@@ -2,9 +2,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Requirements:
-# - Must run within a init-container based on opennms/horizon.
+# - Horizon 27 or newer is required.
+# - Must run within a init-container based on the opennms/horizon image.
 #   Version must match the runtime container.
-# - Horizon 25 or newer is required.
 # - The following commands must be pre-installed on the chosen image:
 #   rsync
 #

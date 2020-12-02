@@ -2,7 +2,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # Requirements:
-# - Horizon 25 or newer is required.
+# - Horizon 27 or newer is required
+# - Overlay volume mounted at /etc-overlay
 #
 # Purpose:
 # - Configure the instance ID, SNMP4J and Kafka (for RPC and Sink)

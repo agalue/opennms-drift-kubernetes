@@ -1,11 +1,14 @@
 #!/bin/bash
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# Sentinel is required only when flow/telemetry processing is required.
+# Sentinel is required only for bmp, flows, and streaming telemetry processing.
 #
 # Requirements:
-# - Horizon 25 or newer is required.
-# - NUM_LISTENER_THREADS (i.e. queue.threads) should be consistent with the amount of partitions on Kafka
+# - Horizon 27 or newer is required
+# - Overlay volume mounted at /etc-overlay
+# - Must run within a init-container based on the opennms/sentinel image.
+#   Version must match the runtime container.
+# - NUM_LISTENER_THREADS (i.e. queue.threads) must be consistent with the amount of partitions on Kafka
 #
 # Purpose:
 # - Configure instance ID.
