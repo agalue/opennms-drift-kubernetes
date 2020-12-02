@@ -3,6 +3,8 @@
 #
 # Requirements:
 # - Horizon 27 or newer is required.
+# - Config overlay volume mounted at /opt/opennms-etc-overlay
+# - Webinf overlay volume mounted at /opt/opennms-jetty-webinf-overlay
 # - Must run within a init-container based on the opennms/horizon image.
 #   Version must match the runtime container.
 # - The following commands must be pre-installed on the chosen image:

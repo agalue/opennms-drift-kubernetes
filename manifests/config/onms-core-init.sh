@@ -5,8 +5,8 @@
 # - Horizon 27 or newer is required.
 # - Must run within a init-container based on the opennms/horizon image.
 #   Version must match the runtime container.
-# - The following commands must be pre-installed on the chosen image:
-#   rsync
+# - Target configuration volume at /opennms-etc
+# - rsync must be pre-installed on the chosen image.
 #
 # Purpose:
 # - Initialize the config directory on the volume only once.
