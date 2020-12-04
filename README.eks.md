@@ -1,7 +1,5 @@
 # Setup Cluster with EKS
 
-> WARNING: This is a work in progress.
-
 ## Requirements
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
