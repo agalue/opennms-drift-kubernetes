@@ -78,7 +78,7 @@ spec:
           subPath: grafana-init.sh
       containers:
       - name: grafana-helm
-        image: opennms/helm:6.0.0
+        image: opennms/helm:5.0.3 # Helm 6.x is not stable in Grafana 7.x
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
