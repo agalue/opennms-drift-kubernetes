@@ -1,0 +1,62 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-renderer
+  namespace: opennms
+  labels:
+    app: grafana-renderer
+spec:
+  ports:
+  - port: 8081
+    name: http
+  selector:
+    app: grafana-renderer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-renderer
+  namespace: opennms
+  labels:
+    app: grafana-renderer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-renderer
+  template:
+    metadata:
+      labels:
+        app: grafana-renderer
+    spec:
+      containers:
+      - name: grafana-renderer
+        image: grafana/grafana-image-renderer:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+          name: http
+        env:
+        - name: BROWSER_TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: ENABLE_METRICS
+          value: 'true'
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 60

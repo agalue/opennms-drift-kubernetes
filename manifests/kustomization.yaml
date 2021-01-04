@@ -23,6 +23,7 @@ resources:
 - opennms.alec.yaml
 - opennms.ui.yaml
 - grafana.yaml
+- grafana.renderer.yaml
 - grafana.helm.yaml
 - grpc-server.yaml
 - hasura.yaml
