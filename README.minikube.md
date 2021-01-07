@@ -16,11 +16,12 @@ Start minikube with the following recommended settings:
 minikube start --cpus=8 --memory=32g --disk-size=60g \
   --addons=ingress \
   --addons=ingress-dns \
-  --addons=metrics-server \
-  --kubernetes-version=v1.18.10
+  --addons=metrics-server
 ```
 
-> **WARNING**: it could take time to have all the components up and running compared to cloud-based solutions, and I personally had a bad experiencing trying to make it work, which is why I encourage to use a cloud provider or a bare-metal Kubernetes cluster.
+> **WARNING**: it could take time to have all the components up and running compared to cloud-based solutions, which is why I encourage to use a cloud provider or a bare-metal Kubernetes cluster.
+
+> **IMPORTANT**: on macOS, it is better to use Hyperkit rather than VirtualBox, as I found it a lot faster to work with. You can enforce it by passing `--driver hyperkit`.
 
 ## Install the CertManager
 
@@ -82,5 +83,5 @@ docker run -it --rm --name minion \
  -p 11019:11019 \
  -v $(pwd)/overlay:/opt/minion-etc-overlay \
  -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
- opennms/minion:27.0.2 -f
+ opennms/minion:27.0.3 -f
 ```

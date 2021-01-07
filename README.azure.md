@@ -1,7 +1,5 @@
 # Setup Cluster with Azure
 
-> WARNING: This is a work in progress.
-
 ## Requirements
 
 * Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) command.
@@ -23,7 +21,7 @@ export LOCATION="East US"
 export DOMAIN="azure.agalue.net"
 ```
 
-> Those variables will be used by all the commands used below.
+> Those variables will be used by all the commands used below. Make sure to use your own domain.
 
 ## Create a Resource Group:
 
@@ -39,7 +37,7 @@ Create a DNS Zone:
 az network dns zone create -g "$GROUP" -n "$DOMAIN"
 ```
 
-> **WARNING**: Make sure to add a `NS` record on your registrar pointing to the Domain Servers returned from the above command.
+> **WARNING**: Make sure to add a `NS` record on your registrar pointing to the Domain Servers returned from the above command. The resource group can be different then the group used for the AKS cluster.
 
 ## Cluster Creation
 

@@ -16,7 +16,7 @@ export DOMAIN="gce.agalue.net"
 
 ```
 
-> Those variables will be used by all the commands used below.
+> Those variables will be used by all the commands used below. Make sure to use your own domain.
 
 ## Configure the Google Cloud CLI
 
