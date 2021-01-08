@@ -4,6 +4,7 @@
 # - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 # - Make sure to take appropriate actions when stopping or decomissioning (shrink cluster).
 # - Cassandra expects to have very fast disks for the PVC to avoid performance issues.
+# - Cassandra doesn't expect changes on IP addresses, and Kubernetes doesn't guarrantee that.
 #
 # TODO:
 # - Take a look at https://github.com/instaclustr/cassandra-operator
@@ -19,7 +20,7 @@ metadata:
     app: cassandra
 data:
   ready-probe.sh: |+
-    #!/bin/bash
+    #!/usr/bin/bash
     if [[ $(nodetool -u cassandra -pw cassandra status | grep $POD_IP) == *"UN"* ]]; then
       if [[ $DEBUG ]]; then
         echo "UN";
@@ -212,9 +213,7 @@ spec:
           preStop:
             exec:
               command:
-              - /bin/sh
-              - -c
-              - nodetool drain
+              - nodetool -u cassandra -pw cassandra drain
         resources:
           limits:
             cpu: 4
@@ -232,8 +231,9 @@ spec:
             command:
             - bash
             - /ready-probe.sh
-          initialDelaySeconds: 30
-          periodSeconds: 10
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
         livenessProbe:
           tcpSocket:
             port: cql
