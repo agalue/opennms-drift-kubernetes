@@ -18,6 +18,19 @@ metadata:
   labels:
     app: cassandra
 data:
+  ready-probe.sh: |+
+    #!/bin/bash
+    if [[ $(nodetool -u cassandra -pw cassandra status | grep $POD_IP) == *"UN"* ]]; then
+      if [[ $DEBUG ]]; then
+        echo "UN";
+      fi
+      exit 0;
+    else
+      if [[ $DEBUG ]]; then
+        echo "Not Up";
+      fi
+      exit 1;
+    fi
   # Be able to access Cassandra through JMX (for cassandra-reaper and for monitoring purposes)
   jmxremote.password: |+
     monitorRole QED
@@ -129,7 +142,7 @@ spec:
           privileged: true
       containers:
       - name: cassandra
-        image: cassandra:4.0
+        image: cassandra:3.11 # Use either 3.11 or 4.0
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
@@ -184,11 +197,24 @@ spec:
         - name: data
           mountPath: /cassandra_data
         - name: cassandra-config
+          mountPath: /ready-probe.sh
+          subPath: ready-probe.sh
+        - name: cassandra-config
           mountPath: /etc/cassandra/jmxremote.password
           subPath: jmxremote.password
-        - name: cassandra-config
+        - name: cassandra-config # For Cassandra 4.x
           mountPath: /etc/cassandra/jvm11-server.options
           subPath: jvm11-server.options
+        - name: cassandra-config # For Cassandra 3.11.x
+          mountPath: /etc/cassandra/jvm.options
+          subPath: jvm.options
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - nodetool drain
         resources:
           limits:
             cpu: 4
@@ -205,8 +231,7 @@ spec:
           exec:
             command:
             - bash
-            - -c
-            - 'if [[ $(nodetool -u cassandra -pw cassandra status | grep $POD_IP) == *"UN"* ]]; then exit 0; else exit 1; fi'
+            - /ready-probe.sh
           initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
