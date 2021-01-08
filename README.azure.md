@@ -158,23 +158,25 @@ With Kops and EKS, the External DNS controller takes care of the DNS entries. He
 Find out the external IP of the Ingress Controller (wait for it, in case it is not there):
 
 ```bash
-kubectl get svc ingress-nginx -n ingress-nginx
+kubectl get svc ingress-nginx-controller -n ingress-nginx
 ```
 
 The output should be something like this:
 
 ```text
-NAME            TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)                      AGE
-ingress-nginx   LoadBalancer   10.0.83.198   40.117.237.217   80:30664/TCP,443:30213/TCP   9m58s
+NAME                       TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)                      AGE
+ingress-nginx-controller   LoadBalancer   10.0.83.198   40.117.237.217   80:30664/TCP,443:30213/TCP   9m58s
 ```
 
 Create a wildcard DNS entry on your DNS Zone to point to the `EXTERNAL-IP`; for example:
 
 ```bash
-export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
 az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
+
+> **IMPORTANT**: The above assumes the Azure DNS was configured within the same Resource Group as the AKS cluster. Change it if necessary.
 
 ## Cleanup
 
