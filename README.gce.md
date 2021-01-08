@@ -166,21 +166,21 @@ With Kops and EKS, the External DNS controller takes care of the DNS entries. He
 Find out the external IP of the Ingress Controller (wait for it, in case it is not there):
 
 ```bash
-kubectl get svc ingress-nginx -n ingress-nginx
+kubectl get svc ingress-nginx-controller -n ingress-nginx
 ```
 
 The output should be something like this:
 
 ```text
-NAME            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
-ingress-nginx   LoadBalancer   10.51.248.125   35.239.225.26   80:31039/TCP,443:31186/TCP   103s
+NAME                       TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+ingress-nginx-controller   LoadBalancer   10.51.248.125   35.239.225.26   80:31039/TCP,443:31186/TCP   103s
 ```
 
 Create a wildcard DNS entry on your Cloud DNS Zone to point to the `EXTERNAL-IP`; for example:
 
 ```bash
 export MANAGED_ZONE="gce"
-export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 
 gcloud dns record-sets transaction start --zone $MANAGED_ZONE
 gcloud dns record-sets transaction add "$NGINX_EXTERNAL_IP" --zone $MANAGED_ZONE --name "*.$DOMAIN." --ttl 300 --type A
