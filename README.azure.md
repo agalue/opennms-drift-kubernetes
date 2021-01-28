@@ -72,6 +72,8 @@ export AKS_NODE_COUNT=4
 export AKS_VM_SIZE=Standard_DS3_v2
 ```
 
+> **WARNING**: Please keep in mind that node size cannot be changed after the cluster is created (i.e., `--node-vm-size`); although you can change the number of nodes in the scale set (i.e., `--node-count`).
+
 Then,
 
 ```bash
