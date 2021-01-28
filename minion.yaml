@@ -5,8 +5,9 @@ http-url: "https://onms.aws.agalue.net/opennms"
 id: "durham-minion-01"
 location: "Durham"
 
+# Use custom.system.properties due to https://issues.opennms.org/browse/NMS-13101
 # Must match kustomization.yaml
-org.opennms.instance.id: K8S
+# org.opennms.instance.id: K8S
 
 # Inter Process Communication
 ipc:
