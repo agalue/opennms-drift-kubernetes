@@ -65,6 +65,8 @@ Create the Kubernetes cluster using `kops`. The following example creates a clus
 export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
+K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[]|select(.tag_name|startswith("v1.19"))|.tag_name' | head -n 1 | sed 's/v//')
+
 kops create cluster \
   --cloud aws \
   --cloud-labels Environment=Test,Department=Support \
@@ -75,7 +77,7 @@ kops create cluster \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
-  --kubernetes-version 1.18.10 \
+  --kubernetes-version $K8S_VER \
   --networking calico
 ```
 
