@@ -1,14 +1,14 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
+# FOR TESTING/DEVELOPMENT ONLY
+#
 # WARNING:
 # - The cassandra user (uid: 999, gid: 999) cannot be used in OpenShift by default.
 # - Make sure to take appropriate actions when stopping or decomissioning (shrink cluster).
 # - Cassandra expects to have very fast disks for the PVC to avoid performance issues.
 # - Cassandra doesn't expect changes on IP addresses, and Kubernetes doesn't guarrantee that.
 #
-# TODO:
-# - Take a look at https://github.com/instaclustr/cassandra-operator
-# - Take a look at https://github.com/scylladb/scylla-code-samples/tree/master/kubernetes-scylla
+# For production, take a look at the existing operators; which deal with all the limittions.
 
 ---
 apiVersion: v1
