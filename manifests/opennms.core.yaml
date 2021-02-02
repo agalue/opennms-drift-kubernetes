@@ -106,6 +106,16 @@ spec:
               name: common-settings
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
+        - name: KAFKA_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_USERNAME
+              name: onms-passwords
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_PASSWORD
+              name: onms-passwords
         - name: ELASTIC_SERVER
           value: esdata.opennms.svc.cluster.local
         - name: ELASTIC_PASSWORD

@@ -6,8 +6,6 @@
 # Requirements:
 # - Horizon 27 or newer is required
 # - Overlay volume mounted at /etc-overlay
-# - Must run within a init-container based on the opennms/sentinel image.
-#   Version must match the runtime container.
 # - NUM_LISTENER_THREADS (i.e. queue.threads) must be consistent with the amount of partitions on Kafka
 #
 # Purpose:
@@ -24,9 +22,9 @@
 # - ELASTIC_REPLICATION_FACTOR
 # - ELASTIC_NUM_SHARDS
 # - KAFKA_SERVER
+# - KAFKA_SASL_USERNAME
+# - KAFKA_SASL_PASSWORD
 # - CASSANDRA_SERVER
-# - OPENNMS_HTTP_USER
-# - OPENNMS_HTTP_PASS
 # - NUM_LISTENER_THREADS
 # - JAEGER_AGENT_HOST
 # - USE_NEPHRON
@@ -57,12 +55,6 @@ else
   INSTANCE_ID="OpenNMS"
 fi
 
-# Configuring SCV credentials to access the OpenNMS ReST API
-if [[ ${OPENNMS_HTTP_USER} && ${OPENNMS_HTTP_PASS} ]]; then
-  ${SENTINEL_HOME}/bin/scvcli set opennms.http "${OPENNMS_HTTP_USER}" "${OPENNMS_HTTP_PASS}"
-  cp ${SENTINEL_HOME}/etc/scv.jce ${OVERLAY}
-fi
-
 FEATURES_DIR=${OVERLAY}/featuresBoot.d
 mkdir -p ${FEATURES_DIR}
 cat <<EOF > ${FEATURES_DIR}/persistence.boot
@@ -84,9 +76,9 @@ cat <<EOF > ${FEATURES_DIR}/bmp.boot
 sentinel-telemetry-bmp
 EOF
 cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
-name = BMP
-adapters.0.name = BMP-PeerStatus-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
+name=BMP
+adapters.0.name=BMP-PeerStatus-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
 EOF
 
 if [[ ${ELASTIC_SERVER} ]]; then
@@ -98,80 +90,90 @@ EOF
 
   if [[ ! ${CASSANDRA_SERVER} ]]; then
     cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-sflow.cfg
-name = SFlow
-adapters.0.name = SFlow-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
-queue.threads = ${NUM_LISTENER_THREADS}
+name=SFlow
+adapters.0.name=SFlow-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
+queue.threads=${NUM_LISTENER_THREADS}
 EOF
   fi
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-ipfix.cfg
-name = IPFIX
-adapters.0.name = IPFIX-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
-queue.threads = ${NUM_LISTENER_THREADS}
+name=IPFIX
+adapters.0.name=IPFIX-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.adapter.ipfix.IpfixAdapter
+queue.threads=${NUM_LISTENER_THREADS}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-netflow5.cfg
-name = Netflow-5
-adapters.0.name = Netflow-5-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
-queue.threads = ${NUM_LISTENER_THREADS}
+name=Netflow-5
+adapters.0.name=Netflow-5-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow5.Netflow5Adapter
+queue.threads=${NUM_LISTENER_THREADS}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-netflow9.cfg
-name = Netflow-9
-adapters.0.name = Netflow-9-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
-queue.threads = ${NUM_LISTENER_THREADS}
+name=Netflow-9
+adapters.0.name=Netflow-9-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.netflow.adapter.netflow9.Netflow9Adapter
+queue.threads=${NUM_LISTENER_THREADS}
 EOF
 
   PREFIX=$(echo ${INSTANCE_ID} | tr '[:upper:]' '[:lower:]')-
   cat <<EOF > ${OVERLAY}/org.opennms.features.flows.persistence.elastic.cfg
-elasticUrl = http://${ELASTIC_SERVER}:9200
-globalElasticUser = elastic
-indexPrefix = ${PREFIX}
-globalElasticPassword = ${ELASTIC_PASSWORD}
-elasticIndexStrategy = ${ELASTIC_INDEX_STRATEGY_FLOWS}
-clockSkewCorrectionThreshold = 5000
+elasticUrl=http://${ELASTIC_SERVER}:9200
+globalElasticUser=elastic
+indexPrefix=${PREFIX}
+globalElasticPassword=${ELASTIC_PASSWORD}
+elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
+clockSkewCorrectionThreshold=5000
 # The following settings should be consistent with your ES cluster
-settings.index.number_of_shards = ${ELASTIC_NUM_SHARDS}
-settings.index.number_of_replicas = ${ELASTIC_REPLICATION_FACTOR}
+settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
+settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
 EOF
 
   if [[ ${USE_NEPHRON} == "true" ]]; then
     curl https://raw.githubusercontent.com/OpenNMS/nephron/master/main/src/main/resources/netflow_agg-template.json
     curl -XPUT -H 'Content-Type: application/json' http://${ELASTIC_SERVER}:9200/_template/netflow_agg -d@netflow_agg-template.json
+    cat <<EOF >> ${OVERLAY}/org.opennms.features.flows.persistence.elastic.cfg
+enableForwarding=true
+EOF
   fi
 fi
 
 if [[ ${KAFKA_SERVER} ]]; then
   echo "Configuring Kafka..."
 
+  if [[ ${KAFKA_SASL_USERNAME} && ${KAFKA_SASL_PASSWORD} ]]; then
+    read -r -d '' KAFKA_SASL <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+EOF
+  fi
+
   echo "sentinel-kafka" > ${FEATURES_DIR}/kafka.boot
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.cfg
 # Producers
-bootstrap.servers = ${KAFKA_SERVER}:9092
-acks = 1
+bootstrap.servers=${KAFKA_SERVER}:9092
+acks=1
+${KAFKA_SASL}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.consumer.cfg
 # Consumers
-group.id = ${INSTANCE_ID}_Sentinel
-bootstrap.servers = ${KAFKA_SERVER}:9092
-max.partition.fetch.bytes = 5000000
-acks = 1
+group.id=${INSTANCE_ID}_Sentinel
+bootstrap.servers=${KAFKA_SERVER}:9092
+max.partition.fetch.bytes=5000000
+acks=1
+${KAFKA_SASL}
 EOF
 
   if [[ ${USE_NEPHRON} == "true" ]]; then
     cat <<EOF > ${OVERLAY}/org.opennms.features.flows.persistence.kafka.cfg
-topic = opennms-flows
-bootstrap.servers = ${KAFKA_SERVER}:9092
-EOF
-
-    cat <<EOF >> ${OVERLAY}/org.opennms.features.flows.persistence.elastic.cfg
-enableForwarding true
+topic=${INSTANCE_ID}_opennms_flows
+bootstrap.servers=${KAFKA_SERVER}:9092
+${KAFKA_SASL}
 EOF
   fi
 fi
@@ -198,54 +200,54 @@ EOF
 # - Must match what OpenNMS has configured for Newts
 # - ring_buffer_size and cache.max_entries should be consistent with the expected load and heap size
 
-hostname = ${CASSANDRA_SERVER}
-keyspace = ${KEYSPACE}
-port = 9042
-read_consistency = ONE
-write_consistency = ANY
-resource_shard = 604800
-ttl = 31540000
-ring_buffer_size = 131072
-cache.max_entries = 131072
-cache.strategy = org.opennms.netmgt.newts.support.GuavaSearchableResourceMetadataCache
+hostname=${CASSANDRA_SERVER}
+keyspace=${KEYSPACE}
+port=9042
+read_consistency=ONE
+write_consistency=ANY
+resource_shard=604800
+ttl=31540000
+cache.strategy=org.opennms.netmgt.newts.support.GuavaSearchableResourceMetadataCache
+ring_buffer_size=131072
+cache.max_entries=131072
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-sflow-telemetry.cfg
-name = SFlow
-adapters.1.name = SFlow-Adapter
-adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
-adapters.2.name = SFlow-Telemetry
-adapters.2.class-name = org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowTelemetryAdapter
-adapters.2.parameters.script = ${SENTINEL_HOME}/etc/sflow-host.groovy
-queue.threads = ${NUM_LISTENER_THREADS}
+name=SFlow
+adapters.1.name=SFlow-Adapter
+adapters.1.class-name=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowAdapter
+adapters.2.name=SFlow-Telemetry
+adapters.2.class-name=org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlowTelemetryAdapter
+adapters.2.parameters.script=${SENTINEL_HOME}/etc/sflow-host.groovy
+queue.threads=${NUM_LISTENER_THREADS}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-nxos.cfg
-name = NXOS
-adapters.0.name = NXOS-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
-adapters.0.parameters.script = ${SENTINEL_HOME}/etc/cisco-nxos-telemetry-interface.groovy
-queue.threads = ${NUM_LISTENER_THREADS}
+name=NXOS
+adapters.0.name=NXOS-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.nxos.adapter.NxosGpbAdapter
+adapters.0.parameters.script=${SENTINEL_HOME}/etc/cisco-nxos-telemetry-interface.groovy
+queue.threads=${NUM_LISTENER_THREADS}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-jti.cfg
-name = JTI
-adapters.0.name = JTI-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
-adapters.0.parameters.script = ${SENTINEL_HOME}/etc/junos-telemetry-interface.groovy
-queue.threads = ${NUM_LISTENER_THREADS}
+name=JTI
+adapters.0.name=JTI-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.jti.adapter.JtiGpbAdapter
+adapters.0.parameters.script=${SENTINEL_HOME}/etc/junos-telemetry-interface.groovy
+queue.threads=${NUM_LISTENER_THREADS}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.telemetry.adapters-graphite.cfg
-name = Graphite
-adapters.0.name = Graphite-Adapter
-adapters.0.class-name = org.opennms.netmgt.telemetry.protocols.graphite.adapter.GraphiteAdapter
-adapters.0.parameters.script = ${SENTINEL_HOME}/etc/graphite-telemetry-interface.groovy
+name=Graphite
+adapters.0.name=Graphite-Adapter
+adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.graphite.adapter.GraphiteAdapter
+adapters.0.parameters.script=${SENTINEL_HOME}/etc/graphite-telemetry-interface.groovy
 EOF
 
   cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
-adapters.1.name = BMP-Telemetry-Adapter
-adapters.1.class-name = org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
+adapters.1.name=BMP-Telemetry-Adapter
+adapters.1.class-name=org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
 EOF
 
   cat <<EOF > ${OVERLAY}/datacollection-config.xml

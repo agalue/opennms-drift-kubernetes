@@ -86,3 +86,5 @@ docker run -it --rm --name minion \
  -v $(pwd)/minion.properties:/opt/minion-etc-overlay/custom.system.properties \
  opennms/minion:27.0.3 -f
 ```
+
+> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID` (see [minion.properties](minion.properties)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).

@@ -57,6 +57,8 @@ configMapGenerator:
 
 secretGenerator:
 - name: onms-passwords
+  files:
+  - config/kafka-jaas.conf
   literals:
   - POSTGRES_PASSWORD=postgres
   - OPENNMS_DB_PASSWORD=opennms
@@ -64,11 +66,15 @@ secretGenerator:
   - GRAFANA_UI_ADMIN_PASSWORD=0p3nNMS
   - GRAFANA_DB_USERNAME=grafana
   - GRAFANA_DB_PASSWORD=grafana
+  - ELASTICSEARCH_USERNAME=elastic
   - ELASTICSEARCH_PASSWORD=elastic
   - KAFKA_MANAGER_APPLICATION_SECRET=0p3nNMS
   - KAFKA_MANAGER_USERNAME=opennms
   - KAFKA_MANAGER_PASSWORD=0p3nNMS
   - HASURA_GRAPHQL_ACCESS_KEY=0p3nNMS
+  # Make sure the following matches config/kafka-jaas.conf
+  - KAFKA_SASL_USERNAME=opennms
+  - KAFKA_SASL_PASSWORD=0p3nNM5
 
 generatorOptions:
   disableNameSuffixHash: true

@@ -29,6 +29,8 @@
 # - FEATURES_LIST
 # - ENABLE_ALEC
 # - KAFKA_SERVER
+# - KAFKA_SASL_USERNAME
+# - KAFKA_SASL_PASSWORD
 # - CASSANDRA_SERVER
 # - CASSANDRA_DC
 # - CASSANDRA_REPLICATION_FACTOR
@@ -225,6 +227,19 @@ org.opennms.core.ipc.rpc.kafka.compression.type=gzip
 org.opennms.core.ipc.rpc.kafka.max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 EOF
 
+  if [[ ${KAFKA_SASL_USERNAME} && ${KAFKA_SASL_PASSWORD} ]]; then
+    cat <<EOF >> ${CONFIG_DIR}/opennms.properties.d/kafka.properties
+
+# Authentication
+org.opennms.core.ipc.sink.kafka.security.protocol=SASL_PLAINTEXT
+org.opennms.core.ipc.sink.kafka.sasl.mechanism=PLAIN
+org.opennms.core.ipc.sink.kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+org.opennms.core.ipc.rpc.kafka.security.protocol=SASL_PLAINTEXT
+org.opennms.core.ipc.rpc.kafka.sasl.mechanism=PLAIN
+org.opennms.core.ipc.rpc.kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+EOF
+  fi
+
   if [[ ${FEATURES_LIST} == *"opennms-kafka-producer"* ]]; then
     cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
@@ -233,7 +248,13 @@ timeout.ms=30000
 max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 state.dir=/opennms-data/kafka
 EOF
-
+    if [[ ${KAFKA_SASL_USERNAME} && ${KAFKA_SASL_PASSWORD} ]]; then
+      cat <<EOF >> $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+EOF
+    fi
     # Make sure to enable only what's needed for your use case
     SUPPRESS_INC_ALARMS="true"
     if [[ ${ENABLE_ALEC} ]]; then

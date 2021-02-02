@@ -69,14 +69,44 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
+        - name: MAX_MESSAGE_SIZE
+          value: '4194304'
+        # Kafka Consumer
+        - name: CONSUMER_SECURITY_PROTOCOL
+          value: SASL_PLAINTEXT
+        - name: CONSUMER_SASL_MECHANISM
+          value: PLAIN
+        - name: CONSUMER_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_USERNAME
+              name: onms-passwords
+        - name: CONSUMER_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_PASSWORD
+              name: onms-passwords
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
         - name: CONSUMER_MAX_PARTITION_FETCH_BYTES
           value: '5000000'
+        # Kafka Producer
+        - name: PRODUCER_SECURITY_PROTOCOL
+          value: SASL_PLAINTEXT
+        - name: PRODUCER_SASL_MECHANISM
+          value: PLAIN
+        - name: PRODUCER_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_USERNAME
+              name: onms-passwords
+        - name: PRODUCER_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_PASSWORD
+              name: onms-passwords
         - name: PRODUCER_MESSAGE_MAX_BYTES
           value: '5000000'
-        - name: MAX_MESSAGE_SIZE
-          value: '4194304'
         resources:
           limits:
             cpu: 100m
