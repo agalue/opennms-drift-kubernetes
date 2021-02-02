@@ -19,6 +19,8 @@
 # - OPENNMS_HTTP_USER
 # - OPENNMS_HTTP_PASS
 # - KAFKA_SERVER
+# - KAFKA_SASL_USERNAME
+# - KAFKA_SASL_PASSWORD
 # - SINGLE_PORT
 # - JAEGER_AGENT_HOST
 # - DNS_LOOKUPS_ENABLED
@@ -93,8 +95,17 @@ fi
 if [[ ${KAFKA_SERVER} ]]; then
   echo "Configuring Kafka..."
 
+  if [[ ${KAFKA_SASL_USERNAME} && ${KAFKA_SASL_PASSWORD} ]]; then
+    read -r -d '' KAFKA_SASL <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+EOF
+  fi
+
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.cfg
 bootstrap.servers=${KAFKA_SERVER}:9092
+${KAFKA_SASL}
 
 # Producer (verify Kafka broker configuration)
 acks=1
@@ -106,6 +117,7 @@ bootstrap.servers=${KAFKA_SERVER}:9092
 compression.type=gzip
 request.timeout.ms=30000
 single-topic=true
+${KAFKA_SASL}
 
 # Consumer (verify Kafka broker configuration)
 max.partition.fetch.bytes=5000000

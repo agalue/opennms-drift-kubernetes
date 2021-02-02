@@ -114,6 +114,16 @@ spec:
               name: common-settings
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
+        - name: KAFKA_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_USERNAME
+              name: onms-passwords
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_PASSWORD
+              name: onms-passwords
         - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
           value: onms-tracing-agent.opennms.svc.cluster.local
         volumeMounts:
@@ -249,6 +259,20 @@ spec:
           value: '50002' # Must match containerPort for nxos-grpc
         - name: TOPIC
           value: $(INSTANCE_ID).Sink.Telemetry-NXOS
+        - name: KAFKA_SECURITY_PROTOCOL
+          value: SASL_PLAINTEXT
+        - name: KAFKA_SASL_MECHANISM
+          value: PLAIN
+        - name: KAFKA_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_USERNAME
+              name: onms-passwords
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_SASL_PASSWORD
+              name: onms-passwords
         ports:
         - containerPort: 50002
           protocol: TCP

@@ -154,6 +154,12 @@ ip-172-20-62-60.us-east-2.compute.internal   node   True
 Your cluster aws.agalue.net is ready
 ```
 
+If you have issues, execute the following and then try again:
+
+```
+kops export kubecfg --admin
+```
+
 Or,
 
 ```bash

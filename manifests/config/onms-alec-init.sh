@@ -7,13 +7,13 @@
 # - Horizon 27 or newer is required.
 # - ALEC 1.1.0 or newer is required.
 # - Overlay volume mounted at /etc-overlay
-# - Must run within a init-container based on the opennms/sentinel image.
-#   Version must match the runtime container.
 #
 # Environment variables:
 # - INSTANCE_ID
 # - ZOOKEEPER_SERVER
 # - KAFKA_SERVER
+# - KAFKA_SASL_USERNAME
+# - KAFKA_SASL_PASSWORD
 
 # To avoid issues with OpenShift
 umask 002
@@ -43,7 +43,7 @@ sentinel-core
 alec-sentinel-distributed wait-for-kar=opennms-alec-plugin
 EOF
 
-if [[ $ZOOKEEPER_SERVER ]]; then
+if [[ ${ZOOKEEPER_SERVER} ]]; then
   echo "Configure ZooKeeper for distributed coordination..."
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.distributed.coordination.zookeeper.cfg
@@ -55,21 +55,32 @@ sentinel-coordination-zookeeper
 EOF
 fi
 
-if [[ $KAFKA_SERVER ]]; then
+if [[ ${KAFKA_SERVER} ]]; then
   echo "Configuring Kafka..."
+
+  if [[ ${KAFKA_SASL_USERNAME} && ${KAFKA_SASL_PASSWORD} ]]; then
+    read -r -d '' KAFKA_SASL <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+EOF
+  fi
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.sink.kafka.consumer.cfg
 bootstrap.servers=${KAFKA_SERVER}:9092
+${KAFKA_SASL}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.producer.cfg
 bootstrap.servers=${KAFKA_SERVER}:9092
+${KAFKA_SASL}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.streams.cfg
 bootstrap.servers=${KAFKA_SERVER}:9092
 application.id=${INSTANCE_ID}_alec_datasource
 commit.interval.ms=5000
+${KAFKA_SASL}
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.alec.datasource.opennms.kafka.cfg
