@@ -125,7 +125,7 @@ spec:
         - name: JMX_PORT
           value: '9999'
         - name: KAFKA_OPTS
-          value: -Djava.security.auth.login.config=/opt/kafka/config/kafka_server_jaas.conf
+          value: -Djava.security.auth.login.config=/opt/kafka/config/kafka-jaas.conf
         - name: KAFKA_JMX_OPTS
           value: |
             -Dcom.sun.management.jmxremote
@@ -162,7 +162,7 @@ spec:
         - name: data
           mountPath: /kafka
         - name: config
-          mountPath: /opt/kafka/config/kafka_server_jaas.conf
+          mountPath: /opt/kafka/config/kafka-jaas.conf
           subPath: kafka-jaas.conf
         resources:
           limits:
@@ -185,7 +185,6 @@ spec:
       - name: config
         secret:
           secretName: onms-passwords
-
   volumeClaimTemplates:
   - metadata:
       name: data
