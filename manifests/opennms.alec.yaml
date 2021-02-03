@@ -92,7 +92,7 @@ spec:
           mountPath: /plugin
       containers:
       - name: alec
-        image: opennms/sentinel:27.0.3
+        image: opennms/sentinel:27.0.4
         imagePullPolicy: IfNotPresent
         args:
         - -c
