@@ -132,7 +132,6 @@ spec:
               servicePort: 16686
 
 # Access to applications based on gRPC
-# TODO: Currently not working, although the gRPC server works as expected.
 
 # Enable client certificate authentication
 # nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
