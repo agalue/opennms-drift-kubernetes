@@ -23,8 +23,8 @@ Proceed with the preferred cluster technology:
 
 * Using [Kops](README.kops.md) on AWS.
 * Using [EKS](README.eks.md) on AWS.
-* Using [Google Compute Platform](README.gce.md).
-* Using [Microsoft Azure](README.azure.md).
+* Using [GKE](README.gce.md) on Google Compute Platform.
+* Using [AKS](README.azure.md) on Microsoft Azure.
 * Using [Minikube](README.minikube.md) on your machine (with restrictions).
 
 ## Deployment
