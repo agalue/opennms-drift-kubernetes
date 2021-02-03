@@ -8,7 +8,7 @@
 
 ## DNS Configuration
 
-Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), register it as an `NS` entry on your registrar matching the name servers from the sub-domain, and make sure it works prior start the cluster; for example:
+Create DNS sub-domain on [Route 53](https://console.aws.amazon.com/route53/home), register it as an `NS` entry on your registrar matching the name servers from the sub-domain, and make sure it works before starting the cluster; for example:
 
 ```bash
 dig ns aws.agalue.net
@@ -83,7 +83,7 @@ kops create cluster \
 
 > **IMPORTANT:** Remember to change the settings to reflect your desired environment.
 
-> **WARNING:** There are problem with K8s 1.14.7 and ELB creation (fixed on 1.14.8 as of [#82923](https://github.com/kubernetes/kubernetes/issues/82923)). This leads to not having services with type LoadBalancer affecting the Ingress Controller and cert-manager.
+> **WARNING:** There are problems with K8s 1.14.7 and ELB creation (fixed on 1.14.8 as of [#82923](https://github.com/kubernetes/kubernetes/issues/82923)). This leads to not having services with type LoadBalancer affecting the Ingress Controller and cert-manager.
 
 Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
@@ -101,7 +101,7 @@ spec:
 
 The above is to avoid setting up `external-dns`, but if you're familiar with that controller, you're welcome to use it.
 
-While on edit mode, optionally, enable `CoreDNS` instead of `KubeDNS` (the default), by adding:
+While on edit mode, optionally, enable `CoreDNS` instead of `KubeDNS` (the default) by adding:
 
 ```yaml
 spec:
@@ -177,7 +177,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ## Install the Ingress Controller
 
-This add-on is required in order to avoid having a LoadBalancer per external service.
+This add-on is required to avoid having a Load Balancer per external service.
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/aws/deploy.yaml
@@ -185,7 +185,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mast
 
 ## Install the CertManager
 
-The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller.
+The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required to provide HTTPS/TLS support through [LetsEncrypt](https://letsencrypt.org) to the web-based services managed by the ingress controller.
 
 ```bash
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
@@ -211,6 +211,8 @@ kubectl apply -k manifests
 
 ## Install Jaeger Tracing
 
+This installs the Jaeger operator in the `opennms` namespace for tracing purposes.
+
 ```bash
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
@@ -224,11 +226,11 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 curl https://raw.githubusercontent.com/kubernetes/kops/master/addons/metrics-server/v1.8.x.yaml 2>/dev/null | sed 's|extensions/v1beta1|apps/v1|' | kubectl apply -f -
 ```
 
-> With modern kubernetes, deployments must use `apps/v1` (hence the patch).
+> With recent Kubernetes versions, deployments must use `apps/v1` (hence the patch).
 
 ## Cleanup
 
-To remove the Kubernetes cluster, do the following:
+To delete the Kubernetes cluster, do the following:
 
 ```bash
 export KOPS_CLUSTER_NAME="aws.agalue.net"

@@ -37,7 +37,7 @@ Create a DNS Zone:
 az network dns zone create -g "$GROUP" -n "$DOMAIN"
 ```
 
-> **WARNING**: Make sure to add a `NS` record on your registrar pointing to the Domain Servers returned from the above command. The resource group can be different then the group used for the AKS cluster.
+> **WARNING**: Make sure to add an `NS` record on your registrar pointing to the Domain Servers returned from the above command. The resource group can be different than the group used for the AKS cluster.
 
 ## Cluster Creation
 
@@ -112,13 +112,15 @@ az aks get-credentials --resource-group "$GROUP" --name opennms
 
 ## Install the NGinx Ingress Controller
 
-This add-on is required in order to avoid having a LoadBalancer per external service.
+This add-on is required to avoid having a Load Balancer per external service.
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud/deploy.yaml
 ```
 
 ## Install the CertManager
+
+The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required to provide HTTPS/TLS support through [LetsEncrypt](https://letsencrypt.org) to the web-based services managed by the ingress controller.
 
 ```bash
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
@@ -145,6 +147,8 @@ kubectl apply -k aks-reduced
 ```
 
 ## Install Jaeger Tracing
+
+This installs the Jaeger operator in the `opennms` namespace for tracing purposes.
 
 ```bash
 kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
@@ -178,17 +182,17 @@ export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx-controller -n ingress-n
 az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
 
-> **IMPORTANT**: The above assumes the Azure DNS was configured within the same Resource Group as the AKS cluster. Change it if necessary.
+> **IMPORTANT**: The above assumes that Azure DNS was configured within the same Resource Group as the AKS cluster. Change it if necessary.
 
 ## Cleanup
 
-Remove the A Records from the DNS Zone:
+To remove the A Records from the DNS Zone:
 
 ```bash
 az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
 
-Delete the cluster:
+To delete the Kubernetes cluster, do the following:
 
 ```bash
 az aks delete --name opennms --resource-group "$GROUP"

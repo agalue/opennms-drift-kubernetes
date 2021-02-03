@@ -80,7 +80,7 @@ gce.agalue.net.   300 IN  SOA ns-cloud-a1.googledomains.com. cloud-dns-hostmaste
 
 Create the Kubernetes Cluster
 
-> **WARNING**: Make sure you have enough quota on your Google Cloud account to create all the resources. Without alterations, this deployment requires `CPUS_ALL_REGIONS=40`. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment.
+> **WARNING**: Make sure you have enough quota on your Google Cloud account to create all the resources. Without alterations, this deployment requires `CPUS_ALL_REGIONS=40`. Be aware that trial accounts cannot request quota changes. A reduced version is available to test the deployment.
 
 With enough quota:
 
@@ -125,13 +125,15 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ## Install the NGinx Ingress Controller
 
-This add-on is required in order to avoid having a LoadBalancer per external service.
+This add-on is required to avoid having a Load Balancer per external service.
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud/deploy.yaml
 ```
 
 ## Install the CertManager
+
+The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required to provide HTTPS/TLS support through [LetsEncrypt](https://letsencrypt.org) to the web-based services managed by the ingress controller.
 
 ```bash
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
@@ -159,9 +161,20 @@ kubectl apply -k gce-reduced
 
 > **NOTE**: Depending on the available resources, it is possible to remove some of the restrictions, to have more instances for the clusters, and/or OpenNMS.
 
+## Install Jaeger Tracing
+
+This installs the Jaeger operator in the `opennms` namespace for tracing purposes.
+
+```bash
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
+```
+
 ## Configure DNS Entry for the Ingress Controller
 
-With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach, as having external-dns working with GCE is challenging.
+With Kops and EKS, the External DNS controller takes care of the DNS entries. Here, we're going to use a different approach, as having `external-dns` working with GCE is challenging.
 
 Find out the external IP of the Ingress Controller (wait for it, in case it is not there):
 
@@ -187,18 +200,9 @@ gcloud dns record-sets transaction add "$NGINX_EXTERNAL_IP" --zone $MANAGED_ZONE
 gcloud dns record-sets transaction execute --zone $MANAGED_ZONE
 ```
 
-## Install Jaeger Tracing
-
-```bash
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
-```
-
 ## Cleanup
 
-Remove the A Records from the Cloud DNS Zone:
+Remove the A Records from the Cloud DNS Zone, do the following:
 
 ```bash
 gcloud dns record-sets transaction start --zone $MANAGED_ZONE
@@ -206,7 +210,7 @@ gcloud dns record-sets transaction remove --zone $MANAGED_ZONE --name "*.$DOMAIN
 gcloud dns record-sets transaction execute --zone $MANAGED_ZONE
 ```
 
-Delete the cluster:
+To delete the Kubernetes cluster, do the following:
 
 ```bash
 gcloud container clusters delete opennms

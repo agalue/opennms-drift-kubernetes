@@ -4,11 +4,11 @@ OpenNMS Drift deployment in [Kubernetes](https://kubernetes.io/).
 
 ![Diagram](diagram.png)
 
-For learning purposes, `Helm` charts and `operators` are avoided for this solution on the main components, with the exceptions of the Ingress Controller and Cert-Manager. In the future, that might change to take advantage of these technologies.
+For learning purposes, `Helm` charts and `operators` are avoided for this solution on the main components, except the Ingress Controller and Cert-Manager. In the future, that might change to take advantage of these technologies.
 
-This deployment contains a full distributed version of all OpenNMS components and features, with high availability in mind when possible.
+This deployment contains a fully distributed version of all OpenNMS components and features, with high availability in mind when possible.
 
-There are some additional features available in this particular solution, like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/CMAK) (or `CMAK`).
+There are some additional features available in this particular solution, like [Hasura](https://hasura.io/), [Cassandra Reaper](http://cassandra-reaper.io/) and [Kafka Manager](https://github.com/yahoo/CMAK) (or `CMAK`). All of them are optional (added for learning purposes).
 
 ## Minimum Requirements
 
@@ -29,7 +29,7 @@ Proceed with the preferred cluster technology:
 
 ## Deployment
 
-To facilicate the process, everything is done through `kustomize`.
+To facilitate the process, everything is done through `kustomize`.
 
 To update the default settings, find the `common-settings` under `configMapGenerator` inside [kustomization.yaml](manifests/kustomization.yaml).
 
@@ -37,7 +37,7 @@ To update the default passwords, find the `onms-passwords` under `secretGenerato
 
 Each cluster technology explains how to deploy the manifests.
 
-As part of the deployment, some complementary RBAC permissions will be added, in case there is a need for adding operators and/or administrators to the OpenNMS namespace. Check [namespace.yaml](manifests/namespace.yaml) for more details.
+As part of the deployment, some complementary RBAC permissions will be added if there is a need for adding operators and/or administrators to the OpenNMS namespace. Check [namespace.yaml](manifests/namespace.yaml) for more details.
 
 Use the following to check whether or not all the resources have been created:
 
@@ -47,9 +47,9 @@ kubectl get all --namespace opennms
 
 ## Minion
 
-This deployment already contains Minions inside the opennms namespace for monitoring devices within the cluster. In order to have Minions outside the Kubernetes cluster, they should use the following resources in order to connect to OpenNMS and the dependent applications.
+This deployment already contains Minions inside the opennms namespace for monitoring devices within the cluster. To have Minions outside the Kubernetes cluster, they should use the following resources to connect to OpenNMS and the dependent applications.
 
-For `AWS` using the domain `aws.agalue.net`, the resources should be:
+For instance, for `AWS` using the domain `aws.agalue.net`, the resources should be:
 
 * OpenNMS Core: `https://onms.aws.agalue.net/opennms`
 * GRPC: `grpc.aws.agalue.net:443`
@@ -92,13 +92,13 @@ docker run -it --name minion \
 
 ## Future Enhancements
 
-* Add [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other component should not access those resources). A network manager like [Calico](https://www.projectcalico.org) is required.
+* Add [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other components should not access those resources). A network manager like [Calico](https://www.projectcalico.org) is required.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://ksync.github.io/ksync/).
-* Investigate how to provide support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information. Although, using operators seems more feasible in this regard, due to the complexities when expanding/shrinking these kind of applications.
-* Add support for Cluster Autoscaler. Check what `kops` offers on this regard.
+* Investigate how to provide support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka, and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information. However, using operators seems more feasible due to the complexities when expanding/shrinking these kinds of applications.
+* Add support for Cluster Autoscaler. Check what `kops` offers in this regard.
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
 * Expose the Kubernetes Dashboard through the Ingress controller.
-* Design a solution to handle scale down of Cassandra and decommission of nodes; or investigate the existing operators.
+* Design a solution to handle Cassandra's scale and decommission of nodes; or investigate the existing operators.
 * Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using their [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres within K8s. Alternatively, we might consider the [Crunchy Data Operator](https://crunchydata.github.io/postgres-operator/stable/)
 * Explore a `Kafka` solution like [Strimzi](https://strimzi.io/), an operator that supports encryption and authentication.
 * Explore [Helm](https://helm.sh), and potentially add support for it.
