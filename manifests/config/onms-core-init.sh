@@ -121,7 +121,7 @@ for file in "${KARAF_FILES[@]}"; do
   echo "Backing up ${file} to ${MANDATORY}..."
   cp --force ${BACKUP_ETC}/${file} ${MANDATORY}/
 done
-# TODO if the volume behind CONFIG_DIR doesn't have the right permissions, the following fails
+# WARNING: if the volume behind CONFIG_DIR doesn't have the right permissions, the following fails
 echo "Overriding mandatory files from ${MANDATORY}..."
 rsync -aO --no-perms ${MANDATORY}/ ${CONFIG_DIR}/
 
@@ -143,7 +143,10 @@ org.opennms.rrd.storeByForeignSource=true
 EOF
 
 cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/collectd.properties
+# To get data as close as possible to PDP
 org.opennms.netmgt.collectd.strictInterval=true
+# To only retrieve data from the SNMP Interfaces that has snmpCollect=true
+org.opennms.netmgt.collectd.SnmpCollector.limitCollectionToInstances=true
 EOF
 
 # Required changes in order to use HTTPS through Ingress
