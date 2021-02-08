@@ -119,6 +119,8 @@ spec:
           value: '*'
         - name: xpack.monitoring.collection.enabled
           value: 'true'
+        - name: search.max_buckets # To avoid "Too many buckets exception" in Grafana
+          value: 50000
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
