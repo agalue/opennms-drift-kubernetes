@@ -1,7 +1,7 @@
 # WARNING: Make sure to update the domain on each host.
 
 # Basic Settings
-http-url: "https://onms.azure.agalue.net/opennms"
+http-url: "https://onms.aws.agalue.net/opennms"
 id: "durham-minion-01"
 location: "Durham"
 
@@ -12,7 +12,7 @@ location: "Durham"
 # Inter Process Communication
 ipc:
   grpc:
-    host: "grpc.azure.agalue.net"
+    host: "grpc.aws.agalue.net"
     tls.enabled: "true"
     port: "443"
   sink:

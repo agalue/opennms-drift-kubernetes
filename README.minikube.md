@@ -71,6 +71,7 @@ kubectl get secret grpc-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"
 keytool -importcert -alias grpc -file overlay/grpc_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
 keytool -importcert -alias onms -file overlay/onms_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
 JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/grpc_trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
+sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
 
 docker run -it --rm --name minion \
  -e OPENNMS_HTTP_USER=admin \
@@ -82,7 +83,7 @@ docker run -it --rm --name minion \
  -p 8877:8877/udp \
  -p 11019:11019 \
  -v $(pwd)/overlay:/opt/minion-etc-overlay \
- -v $(pwd)/minikube/minion.yaml:/opt/minion/minion-config.yaml \
+ -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
  -v $(pwd)/minion.properties:/opt/minion-etc-overlay/custom.system.properties \
  opennms/minion:27.0.4 -f
 ```
