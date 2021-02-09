@@ -63,7 +63,7 @@ docker run -it --name minion \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
- -p 50000:50000/udp \
+ -p 8877:8877/udp \
  -p 11019:11019 \
  -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
  -v $(pwd)/minion.properties:/opt/minion-etc-overlay/custom.system.properties \

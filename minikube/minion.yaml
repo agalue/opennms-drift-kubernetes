@@ -3,7 +3,7 @@ http-url: "https://onms.test/opennms"
 id: "durham-minion-01"
 location: "Durham"
 
-# Use custom.system.properties due to https://issues.opennms.org/browse/NMS-13101
+# WARNING: Use custom.system.properties due to https://issues.opennms.org/browse/NMS-13101
 # Must match kustomization.yaml
 # org.opennms.instance.id: K8S
 
@@ -17,13 +17,38 @@ ipc:
 # Flow Processing
 telemetry:
   flows:
-    single-port-listener:
-      enabled: true
-      parameters:
-        port: 50000
     listeners:
-      BMP:
-        class-name: org.opennms.netmgt.telemetry.listeners.TcpListener
+      Flow-Listener:
+        class-name: "org.opennms.netmgt.telemetry.listeners.UdpListener"
+        parameters:
+          port: 8877
+        parsers:
+          Netflow-9:
+            class-name: "org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow9UdpParser"
+            queue:
+              use-routing-key: "true"
+            parameters:
+              dnsLookupsEnabled: "false" # Because we cannot specify DNS settings via org.opennms.features.dnsresolver.netty.cfg
+          Netflow-5:
+            class-name: "org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser"
+            queue:
+              use-routing-key: "true"
+            parameters:
+              dnsLookupsEnabled: "false" # Because we cannot specify DNS settings via org.opennms.features.dnsresolver.netty.cfg
+          IPFIX:
+            class-name: "org.opennms.netmgt.telemetry.protocols.netflow.parser.IpfixUdpParser"
+            queue:
+              use-routing-key: "true"
+            parameters:
+              dnsLookupsEnabled: "false" # Because we cannot specify DNS settings via org.opennms.features.dnsresolver.netty.cfg
+          SFlow:
+            class-name: "org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParser"
+            queue:
+              use-routing-key: "true"
+            parameters:
+              dnsLookupsEnabled: "false" # Because we cannot specify DNS settings via org.opennms.features.dnsresolver.netty.cfg
+      BMP-Listener:
+        class-name: "org.opennms.netmgt.telemetry.listeners.TcpListener"
         parameters:
           port: 11019
         parsers:
@@ -35,6 +60,14 @@ netmgt:
   syslog:
     syslog.listen.interface: "0.0.0.0"
     syslog.listen.port: 1514
+    # To control how many traps are included in a single message sent to the broker
+    syslog.batch.size: 1000
+    # To limit how many messages are kept in memory if the broker is unreachable
+    syslog.queue.size: 10000
   traps:
     trapd.listen.interface: "0.0.0.0"
     trapd.listen.port: 1162
+    # To control how many traps are included in a single message sent to the broker
+    trapd.batch.size: 1000
+    # To limit how many messages are kept in memory if the broker is unreachable
+    trapd.queue.size: 10000
