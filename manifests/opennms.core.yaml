@@ -153,7 +153,7 @@ spec:
         args: [ "cd /plugin && wget -q --no-check-certificate $ALEC_KAR_URL" ]
         env:
         - name: ALEC_KAR_URL
-          value: https://github.com/OpenNMS/alec/releases/download/v1.1.0/opennms-alec-plugin.kar
+          value: https://github.com/OpenNMS/alec/releases/download/v1.1.1/opennms-alec-plugin.kar
         volumeMounts:
         - name: karaf-deploy
           mountPath: /plugin
