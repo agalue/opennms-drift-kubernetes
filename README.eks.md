@@ -49,7 +49,7 @@ Create the Kubernetes cluster using `eksctl`. The following example creates a cl
 ```bash
 eksctl create cluster \
   --name opennms \
-  --version 1.18 \
+  --version 1.19 \
   --region us-east-2 \
   --nodegroup-name onms-fleet \
   --node-type t2.2xlarge \

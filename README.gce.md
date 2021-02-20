@@ -101,7 +101,7 @@ Then,
 ```bash
 gcloud container clusters create opennms \
   --num-nodes=$GCP_NODE_COUNT \
-  --cluster-version=1.16.10-gke.8 \
+  --cluster-version=1.18.12-gke.1210 \
   --machine-type=$GCP_VM_SIZE
 ```
 
