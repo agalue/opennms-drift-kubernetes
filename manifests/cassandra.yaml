@@ -8,7 +8,11 @@
 # - Cassandra expects to have very fast disks for the PVC to avoid performance issues.
 # - Cassandra doesn't expect changes on IP addresses, and Kubernetes doesn't guarrantee that.
 #
+# TODO:
+# - Check if it is possible to use replace_address_first_boot on subsequent boots.
+#
 # For production, take a look at the existing operators; which deal with all the limittions.
+# For instance, https://k8ssandra.io/
 
 ---
 apiVersion: v1
@@ -21,7 +25,7 @@ metadata:
 data:
   ready-probe.sh: |+
     #!/usr/bin/bash
-    if [[ $(nodetool -u cassandra -pw cassandra status | grep $POD_IP) == *"UN"* ]]; then
+    if [[ $(nodetool -u cassandra -pw cassandra status | grep $CASSANDRA_LISTEN_ADDRESS) == *"UN"* ]]; then
       if [[ $DEBUG ]]; then
         echo "UN";
       fi
@@ -181,7 +185,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name # TODO spec.nodeName seems more accurate, but an affinity policy might be better.
-        - name: POD_IP
+        - name: CASSANDRA_LISTEN_ADDRESS
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
