@@ -73,7 +73,7 @@ keytool -importcert -alias onms -file overlay/onms_server.crt -storepass 0p3nNM5
 JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/grpc_trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
 sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
 
-docker run -it --rm --name minion \
+docker run --name minion \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
  -e JAVA_OPTS=$JAVA_OPTS \

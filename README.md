@@ -57,7 +57,7 @@ For instance, for `AWS` using the domain `aws.agalue.net`, the resources should 
 For example:
 
 ```bash
-docker run -it --name minion \
+docker run --name minion \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
  -p 8201:8201 \
