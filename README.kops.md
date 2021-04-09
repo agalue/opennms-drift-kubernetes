@@ -242,4 +242,4 @@ sleep 10
 kops delete cluster --yes
 ```
 
-The first 2 commands will trigger the removal of the Route 53 entries associated with the ingresses and the Kafka ELB. The last will take care of the rest (including the PVCs).
+The first 2 commands will trigger the removal of the Route 53 entries associated with the ingresses. The last will take care of the kubernetes resources (including the PVCs).
