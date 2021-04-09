@@ -1,10 +1,10 @@
-# Setup Cluster with KOPS
+# Setup Cluster with kOps
 
 ## Requirements
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [kops](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.15.x or newer.
+* Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.19.x or newer.
 
 ## DNS Configuration
 
@@ -44,7 +44,7 @@ aws.agalue.net.   172800  IN  NS  ns-144.awsdns-18.com.
 
 ## Cluster Creation
 
-Create an S3 bucket to hold the `kops` configuration; for example:
+Create an S3 bucket to hold the `kOps` configuration; for example:
 
 ```bash
 export KOPS_CLUSTER_NAME="aws.agalue.net"
@@ -59,7 +59,7 @@ aws s3api put-bucket-versioning \
   --versioning-configuration Status=Enabled
 ```
 
-Create the Kubernetes cluster using `kops`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `aws.agalue.net`, and the S3 bucked created above:
+Create the Kubernetes cluster using `kOps`. The following example creates a cluster with 1 master node and 5 worker nodes on a single Availability Zone using the Hosted Zone `aws.agalue.net`, and the S3 bucked created above:
 
 ```bash
 export KOPS_CLUSTER_NAME="aws.agalue.net"
