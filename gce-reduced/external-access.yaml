@@ -1,0 +1,80 @@
+# @author Alejandro Galue <agalue@opennms.org>
+# GCE doesn't support K8s 1.19 in the stable channel (2021-04-01)
+
+# Access to applications based on HTTP
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: onms-ingress
+  namespace: opennms
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: route
+    ingress.kubernetes.io/session-cookie-hash: sha1
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    cert-manager.io/issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: 'true'
+spec:
+  tls:
+    - secretName: opennms-ingress-cert
+      hosts:
+        - onms.gce.agalue.net
+        - grafana.gce.agalue.net
+        - kafka-manager.gce.agalue.net
+        - tracing.gce.agalue.net
+  rules:
+    - host: onms.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: opennms-core
+              servicePort: 8980
+    - host: grafana.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grafana
+              servicePort: 3000
+    - host: kafka-manager.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kafka-manager
+              servicePort: 9000
+    - host: tracing.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: onms-tracing-query
+              servicePort: 16686
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: grpc-ingress
+  namespace: opennms
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: GRPC
+spec:
+  tls:
+    - secretName: grpc-ingress-cert
+      hosts:
+        - grpc.gce.agalue.net
+  rules:
+    - host: grpc.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grpc-server
+              servicePort: 8990
