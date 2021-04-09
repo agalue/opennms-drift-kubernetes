@@ -78,6 +78,8 @@ docker run -it --name minion \
 
 ## Users Resources
 
+When using AWS using my domain:
+
 * OpenNMS Core: `https://onms.aws.agalue.net/opennms/` (for administrative tasks)
 * OpenNMS UI: `https://onmsui.aws.agalue.net/opennms/` (for users/operators)
 * Grafana: `https://grafana.aws.agalue.net/`
@@ -94,11 +96,11 @@ docker run -it --name minion \
 
 * Add [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) to control the communication between components (for example, only OpenNMS needs access to PostgreSQL and Cassandra; other components should not access those resources). A network manager like [Calico](https://www.projectcalico.org) is required.
 * Design a solution to manage OpenNMS Configuration files (the `/opt/opennms/etc` directory), or use an existing one like [ksync](https://ksync.github.io/ksync/).
-* Investigate how to provide support for `HorizontalPodAutoscaler` for the data clusters like Cassandra, Kafka, and Elasticsearch. Check [here](https://github.com/kubernetes/kops/blob/master/docs/horizontal_pod_autoscaling.md) for more information. However, using operators seems more feasible due to the complexities when expanding/shrinking these kinds of applications.
-* Add support for Cluster Autoscaler. Check what `kops` offers in this regard.
+* Add support for Cluster Autoscaler.
 * Add support for monitoring through [Prometheus](https://prometheus.io) using [Prometheus Operator](https://coreos.com/operators/prometheus/docs/latest/). Expose the UI (including Grafana) through the Ingress controller.
 * Expose the Kubernetes Dashboard through the Ingress controller.
-* Design a solution to handle Cassandra's scale and decommission of nodes; or investigate the existing operators.
-* Explore a `PostgreSQL` solution like [Spilo/Patroni](https://patroni.readthedocs.io/en/latest/) using their [Postgres Operator](https://postgres-operator.readthedocs.io/en/latest/), to understand how to build a HA Postgres within K8s. Alternatively, we might consider the [Crunchy Data Operator](https://crunchydata.github.io/postgres-operator/stable/)
-* Explore a `Kafka` solution like [Strimzi](https://strimzi.io/), an operator that supports encryption and authentication.
 * Explore [Helm](https://helm.sh), and potentially add support for it.
+* Improve State Management
+    * Explore a solution for Cassandra to reattach nodes and scale up or down; or migrate to use existing operators like [k8ssandra](https://k8ssandra.io/)
+    * Explore a solution for PostgreSQL to manage HA like [Postgres Operator](postgres-operator.readthedocs.io), or [Crunchy Data Operator](https://crunchydata.github.io/postgres-operator/)
+    * Explore a `Kafka` solution like [Strimzi](https://strimzi.io/), an operator that supports encryption and authentication.
