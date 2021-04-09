@@ -72,8 +72,8 @@ eksctl get cluster opennms
 The output should be something like this:
 
 ```text
-NAME	VERSION	STATUS	CREATED			VPC			SUBNETS										SECURITYGROUPS
-opennms	1.18	ACTIVE	2020-11-19T18:31:45Z	vpc-0ba92160c1b9c36bd	subnet-02b614a06818c80a3,subnet-03484aa51fe7d7045,subnet-07e1b1be81687054c,subnet-08663ab52ff8ee348,subnet-08c5c04a3487ed4db,subnet-0e4e3304642c52875	sg-0d2a3cac05d2b6e78
+NAME	VERSION	STATUS	CREATED			VPC			SUBNETS											SECURITYGROUPS
+opennms	1.19	ACTIVE	2021-04-09T14:37:49Z	vpc-05d7ebb8980713546	subnet-03a49abe804f21824,subnet-061e35b67b4145175,subnet-09a51b0ac396718b2,subnet-0c03c7719d44f4965,subnet-0d6ff4b413595c583,subnet-0e1d1a5389d459b1c	sg-063005b91330b51c1
 ```
 
 Then,
@@ -85,8 +85,8 @@ kubectl cluster-info
 The output should be something like this:
 
 ```text
-Kubernetes master is running at https://7B58353198925AA605F877A99F3E85A2.sk1.us-east-2.eks.amazonaws.com
-CoreDNS is running at https://7B58353198925AA605F877A99F3E85A2.sk1.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Kubernetes control plane is running at https://B2C36A1FCD670EE2477BCB54C7F118F2.yl4.us-east-2.eks.amazonaws.com
+CoreDNS is running at https://B2C36A1FCD670EE2477BCB54C7F118F2.yl4.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
@@ -115,7 +115,7 @@ curl https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-control
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required to provide HTTPS/TLS support through [LetsEncrypt](https://letsencrypt.org) to the web-based services managed by the ingress controller.
 
 ```bash
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.0/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs
