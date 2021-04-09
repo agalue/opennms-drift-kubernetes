@@ -1,109 +1,18 @@
 # @author Alejandro Galue <agalue@opennms.org>
+# GCE doesn't support K8s 1.19 in the stable channel (2021-04-01)
 
 ---
-apiVersion: networking.k8s.io/v1beta1
+$patch: delete
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: onms-ingress
   namespace: opennms
-spec:
-  tls:
-    - secretName: opennms-ingress-cert
-      hosts:
-        - onms.gce.agalue.net
-        - onmsui.gce.agalue.net
-        - cassandra-reaper.gce.agalue.net
-        - grafana.gce.agalue.net
-        - hasura.gce.agalue.net
-        - kibana.gce.agalue.net
-        - elastichq.gce.agalue.net
-        - kafka-manager.gce.agalue.net
-        - tracing.gce.agalue.net
-  rules:
-    - host: onms.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: opennms-core
-              servicePort: 8980
-    - host: cassandra-reaper.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: cassandra-reaper
-              servicePort: 8080
-    - host: grafana.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: grafana
-              servicePort: 3000
-    - host: hasura.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: hasura
-              servicePort: 8080
-    - host: kafka-manager.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: kafka-manager
-              servicePort: 9000
-    - host: kibana.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: kibana
-              servicePort: 5601
-    - host: elastichq.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: elastichq
-              servicePort: 5000
-    - host: onmsui.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: opennms-ui
-              servicePort: 8980
-          - path: /opennms/nrt
-            backend:
-              serviceName: opennms-core
-              servicePort: 8980
-    - host: tracing.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: onms-tracing-query
-              servicePort: 16686
 
 ---
-apiVersion: networking.k8s.io/v1beta1
+$patch: delete
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grpc-ingress
   namespace: opennms
-spec:
-  tls:
-    - secretName: grpc-ingress-cert
-      hosts:
-        - grpc.gce.agalue.net
-  rules:
-    - host: grpc.gce.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: grpc-server
-              servicePort: 8990

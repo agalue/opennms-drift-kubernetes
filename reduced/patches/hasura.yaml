@@ -1,6 +1,15 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
+$patch: delete
+apiVersion: v1
+kind: Service
+metadata:
+  name: hasura
+  namespace: opennms
+
+---
+$patch: delete
 apiVersion: apps/v1
 kind: Deployment
 metadata:

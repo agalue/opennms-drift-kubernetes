@@ -36,7 +36,7 @@ spec:
 
 # Access to applications based on HTTP
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: onms-ingress
@@ -58,78 +58,108 @@ spec:
         - cassandra-reaper.aws.agalue.net
         - grafana.aws.agalue.net
         - hasura.aws.agalue.net
+        - kafka-manager.aws.agalue.net
         - kibana.aws.agalue.net
         - elastichq.aws.agalue.net
-        - kafka-manager.aws.agalue.net
         - tracing.aws.agalue.net
   rules:
     - host: onms.aws.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: opennms-core
-              servicePort: 8980
-    - host: cassandra-reaper.aws.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: cassandra-reaper
-              servicePort: 8080
-    - host: grafana.aws.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: grafana
-              servicePort: 3000
-    - host: hasura.aws.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: hasura
-              servicePort: 8080
-    - host: kafka-manager.aws.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: kafka-manager
-              servicePort: 9000
-    - host: kibana.aws.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: kibana
-              servicePort: 5601
-    - host: elastichq.aws.agalue.net
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: elastichq
-              servicePort: 5000
+              service:
+                name: opennms-core
+                port:
+                  number: 8980
     - host: onmsui.aws.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: opennms-ui
-              servicePort: 8980
+              service:
+                name: opennms-ui
+                port:
+                  number: 8980
           - path: /opennms/nrt
+            pathType: Prefix
             backend:
-              serviceName: opennms-core
-              servicePort: 8980
+              service:
+                name: opennms-core
+                port:
+                  number: 8980
+    - host: cassandra-reaper.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cassandra-reaper
+                port:
+                  number: 8080
+    - host: grafana.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+    - host: hasura.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hasura
+                port:
+                  number: 8080
+    - host: kafka-manager.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kafka-manager
+                port:
+                  number: 9000
+    - host: kibana.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kibana
+                port:
+                  number: 5601
+    - host: elastichq.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: elastichq
+                port:
+                  number: 5000
     - host: tracing.aws.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: onms-tracing-query
-              servicePort: 16686
+              service:
+                name: onms-tracing-query
+                port:
+                  number: 16686
 
 # Access to applications based on gRPC
 
@@ -149,7 +179,7 @@ spec:
 # nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
 
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grpc-ingress
@@ -169,6 +199,9 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: grpc-server
-              servicePort: 8990
+              service:
+                name: grpc-server
+                port:
+                  number: 8990
