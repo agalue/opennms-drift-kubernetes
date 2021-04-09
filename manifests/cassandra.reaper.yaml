@@ -51,7 +51,7 @@ spec:
         - name: TIMEOUT
           value: '900'
       - name: init-database
-        image: cassandra:4.0
+        image: cassandra:3.11
         imagePullPolicy: IfNotPresent
         command: [ sh, -c, 'cqlsh -e "$CQL" $CASSANDRA_HOST' ]
         env:
