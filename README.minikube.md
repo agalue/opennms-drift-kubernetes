@@ -65,27 +65,30 @@ Please take a look at the documentation of [ingress-dns](https://github.com/kube
 # Start Minion
 
 ```bash
-rm -rf overlay && mkdir -p overlay
-kubectl get secret opennms-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/onms_server.crt
-kubectl get secret grpc-ingress-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > overlay/grpc_server.crt
-keytool -importcert -alias grpc -file overlay/grpc_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
-keytool -importcert -alias onms -file overlay/onms_server.crt -storepass 0p3nNM5 -keystore overlay/grpc_trust.jks -noprompt
-JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/grpc_trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
+keytool -importcert -alias minikube -file ~/.minikube/ca.pem -storepass M1n1kub3 -keystore minikube-trust.jks -noprompt
+JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/minikube-trust.jks -Djavax.net.ssl.trustStorePassword=M1n1kub3"
 sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
 
 docker run --name minion \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
- -e JAVA_OPTS=$JAVA_OPTS \
+ -e JAVA_OPTS="$JAVA_OPTS" \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
  -p 8877:8877/udp \
  -p 11019:11019 \
- -v $(pwd)/overlay:/opt/minion-etc-overlay \
  -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
  -v $(pwd)/minion.properties:/opt/minion-etc-overlay/custom.system.properties \
+ -v $(pwd)/minikube-trust.jks:/opt/minion-etc-overlay/minikube-trust.jks \
  opennms/minion:27.1.1 -c
 ```
 
-> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID` (see [minion.properties](minion.properties)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
+> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above requires using a custom content for the `INSTANCE_ID` (see [minion.properties](minion.properties)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
+
+# minion-minikube.yaml
+
+```bash
+minikube delete
+rm minikube-trust.jks minion-minikube.yaml
+```
