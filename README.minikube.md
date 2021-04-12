@@ -23,7 +23,7 @@ minikube start --cpus=8 --memory=32g --disk-size=60g \
 
 > **IMPORTANT**: on macOS, it is better to use Hyperkit rather than VirtualBox, as I found it a lot faster to work with. You can enforce it by passing `--driver hyperkit`.
 
-It could take time to have all the components up and running compared to cloud-based solutions, which is why I encourage using a cloud provider or a bare-metal Kubernetes cluster.
+It could about 15 minutes to have all the components up and running compared to cloud-based solutions (as we have one node, despite the resource reduction), which is why I encourage you to use a cloud-based solution or a bare-metal Kubernetes cluster.
 
 Depending on the version you're running, you might encounter problems when creating ingress resources due to admission control validations. The following is a workaround you could use:
 
@@ -83,18 +83,18 @@ EOF
 
 # Start Minion
 
+From the directory on which you checked out this repository, do the following:
+
 ```bash
 sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
 
 kubectl get secret onms-ca -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > onms-ca.pem
 keytool -importcert -alias onms-ca -file onms-ca.pem -storepass 0p3nNM5 -keystore onms-ca-trust.jks -noprompt
 
-JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/onms-ca-trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
-
 docker run --name minion \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
- -e JAVA_OPTS="$JAVA_OPTS" \
+ -e JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/onms-ca-trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5" \
  -p 8201:8201 \
  -p 1514:1514/udp \
  -p 1162:1162/udp \
