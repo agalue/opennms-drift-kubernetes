@@ -6,6 +6,9 @@
 bases:
 - ../reduced
 
+resources:
+- self-signed.yaml
+
 patchesStrategicMerge:
 - patches/common-settings.yaml
 - patches/external-access.yaml

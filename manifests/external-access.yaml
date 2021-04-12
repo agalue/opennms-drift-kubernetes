@@ -6,16 +6,6 @@
 # WARNING:
 # Please use your own domains. This is not intended to be used by any user.
 
-# For testing purposes only (minikube)
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: selfsigned-issuer
-  namespace: opennms
-spec:
-  selfSigned: {}
-
 # For cloud providers / public access
 ---
 apiVersion: cert-manager.io/v1

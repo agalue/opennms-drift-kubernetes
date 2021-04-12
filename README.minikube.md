@@ -14,14 +14,22 @@ Start minikube with the following recommended settings:
 
 ```bash
 minikube start --cpus=8 --memory=32g --disk-size=60g \
+  --cni=flannel \
+  --container-runtime=containerd \
   --addons=ingress \
   --addons=ingress-dns \
   --addons=metrics-server
 ```
 
-> **WARNING**: it could take time to have all the components up and running compared to cloud-based solutions, which is why I encourage to use a cloud provider or a bare-metal Kubernetes cluster.
-
 > **IMPORTANT**: on macOS, it is better to use Hyperkit rather than VirtualBox, as I found it a lot faster to work with. You can enforce it by passing `--driver hyperkit`.
+
+It could take time to have all the components up and running compared to cloud-based solutions, which is why I encourage using a cloud provider or a bare-metal Kubernetes cluster.
+
+Depending on the version you're running, you might encounter problems when creating ingress resources due to admission control validations. The following is a workaround you could use:
+
+```bash
+kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
+```
 
 ## Install the CertManager
 
@@ -65,9 +73,12 @@ Please take a look at the documentation of [ingress-dns](https://github.com/kube
 # Start Minion
 
 ```bash
-keytool -importcert -alias minikube -file ~/.minikube/ca.pem -storepass M1n1kub3 -keystore minikube-trust.jks -noprompt
-JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/minikube-trust.jks -Djavax.net.ssl.trustStorePassword=M1n1kub3"
 sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
+
+kubectl get secret onms-ca -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > onms-ca.pem
+keytool -importcert -alias onms-ca -file onms-ca.pem -storepass 0p3nNM5 -keystore onms-ca-trust.jks -noprompt
+
+JAVA_OPTS="-Djavax.net.ssl.trustStore=/opt/minion/etc/onms-ca-trust.jks -Djavax.net.ssl.trustStorePassword=0p3nNM5"
 
 docker run --name minion \
  -e OPENNMS_HTTP_USER=admin \
@@ -80,7 +91,7 @@ docker run --name minion \
  -p 11019:11019 \
  -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
  -v $(pwd)/minion.properties:/opt/minion-etc-overlay/custom.system.properties \
- -v $(pwd)/minikube-trust.jks:/opt/minion-etc-overlay/minikube-trust.jks \
+ -v $(pwd)/onms-ca-trust.jks:/opt/minion-etc-overlay/onms-ca-trust.jks \
  opennms/minion:27.1.1 -c
 ```
 

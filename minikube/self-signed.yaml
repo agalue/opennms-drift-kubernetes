@@ -1,0 +1,38 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: opennms
+spec:
+  selfSigned: {}
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: onms-ca
+  namespace: opennms
+spec:
+  isCA: true
+  commonName: onms-system
+  secretName: onms-ca
+  subject:
+    organizations:
+    - OpenNMS
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: onms-ca
+  namespace: opennms
+spec:
+  ca:
+    secretName: onms-ca
