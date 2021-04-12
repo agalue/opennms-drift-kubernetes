@@ -68,7 +68,18 @@ kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeg
 
 Please take a look at the documentation of [ingress-dns](https://github.com/kubernetes/minikube/tree/master/deploy/addons/ingress-dns) for more information about how to use it, to avoid messing with `/etc/hosts`.
 
-> **WARNING**: Keep in mind that the certificates are self-signed.
+For instance, for macOS:
+
+```bash
+cat <<EOF | sudo tee /etc/resolver/minikube-default-test
+domain test
+nameserver $(minikube ip)
+search_order 1
+timeout 5
+EOF
+```
+
+> **WARNING**: Keep in mind that the certificates used here are self-signed.
 
 # Start Minion
 
