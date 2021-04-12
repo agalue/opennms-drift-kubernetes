@@ -263,18 +263,16 @@ spec:
           value: SASL_PLAINTEXT
         - name: KAFKA_SASL_MECHANISM
           value: PLAIN
-        - name: SASL_USERNAME
+        - name: KAFKA_SASL_USERNAME
           valueFrom:
             secretKeyRef:
               key: KAFKA_SASL_USERNAME
               name: onms-passwords
-        - name: SASL_PASSWORD
+        - name: KAFKA_SASL_PASSWORD
           valueFrom:
             secretKeyRef:
               key: KAFKA_SASL_PASSWORD
               name: onms-passwords
-        - name: KAFKA_SASL_JAAS_CONFIG
-          value: org.apache.kafka.common.security.plain.PlainLoginModule required username="$(SASL_USERNAME)" password="$(SASL_PASSWORD)";
         ports:
         - containerPort: 50002
           protocol: TCP
