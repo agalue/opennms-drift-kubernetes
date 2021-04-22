@@ -57,13 +57,18 @@ spec:
         env:
         - name: CASSANDRA_HOST
           value: cassandra.opennms.svc.cluster.local
+        - name: CASSANDRA_DC
+          valueFrom:
+            configMapKeyRef:
+              key: CASSANDRA_DC
+              name: common-settings
         - name: REP_FACTOR
           valueFrom:
             configMapKeyRef:
               key: CASSANDRA_REPLICATION_FACTOR
               name: common-settings
         - name: CQL
-          value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', 'Main' : $(REP_FACTOR) };"
+          value: "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class' : 'NetworkTopologyStrategy', '$(CASSANDRA_DC)' : $(REP_FACTOR) };"
       containers:
       - name: cassandra-reaper
         image: thelastpickle/cassandra-reaper:1.4.8
