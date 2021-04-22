@@ -101,7 +101,6 @@ docker run --name minion \
  -p 8877:8877/udp \
  -p 11019:11019 \
  -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
- -v $(pwd)/minion.properties:/opt/minion-etc-overlay/custom.system.properties \
  -v $(pwd)/onms-ca-trust.jks:/opt/minion-etc-overlay/onms-ca-trust.jks \
  opennms/minion:27.1.1 -c
 ```
