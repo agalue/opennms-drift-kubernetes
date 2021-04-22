@@ -156,7 +156,7 @@ spec:
               key: TIMEZONE
               name: common-settings
         - name: LOCAL_JMX
-          value: 'false'
+          value: no
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
