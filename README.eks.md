@@ -154,6 +154,14 @@ sleep 10
 eksctl delete cluster --name opennms --region us-east-2 --wait
 ```
 
-The first 2 commands will trigger the removal of the Route 53 entries associated with the ingresses. The last will take care of the rest (including the PVCs).
+The first 2 commands will trigger the removal of the Route 53 entries associated with the ingresses. The last will take care of the rest.
+
+However, EBS volumes associated with PVCs might not be removed. In tha case you could do:
+
+```bash
+volumes=($(aws ec2 describe-volumes --filters 'Name=tag:Name,Values=kubernetes-dynamic*'  --query 'Volumes[*].VolumeId' --output text))
+
+for v in ${volumes[@]}; do aws ec2 delete-volume --volume-id $v --output text; done
+```
 
 This process could take on average between 10 to 15 minutes to complete. If waiting is not feasible, remove `--wait` from the last command.
