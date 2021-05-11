@@ -12,7 +12,10 @@
 # - Check if it is possible to use replace_address_first_boot on subsequent boots.
 #
 # For production, take a look at the existing operators; which deal with all the limittions.
-# For instance, https://k8ssandra.io/
+# For instance:
+# - https://k8ssandra.io/
+# - https://orange-opensource.github.io/casskop/
+# - https://www.scylladb.com/product/scylla-operator-kubernetes/
 
 ---
 apiVersion: v1
@@ -73,8 +76,10 @@ data:
   # Enable G1GC (default in JDK 11) as the performance tests on the field have proven good results.
   jvm11-server.options: |+
     -XX:+UseG1GC
+    -XX:+ParallelRefProcEnabled
     -XX:G1RSetUpdatingPauseTimePercent=5
     -XX:MaxGCPauseMillis=500
+    -XX:InitiatingHeapOccupancyPercent=70
     -Djdk.attach.allowAttachSelf=true
     --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
     --add-exports java.base/jdk.internal.ref=ALL-UNNAMED
@@ -147,7 +152,7 @@ spec:
           privileged: true
       containers:
       - name: cassandra
-        image: cassandra:3.11 # Use either 3.11 or 4.0
+        image: cassandra:4.0 # Use either 3.11 or 4.0
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ

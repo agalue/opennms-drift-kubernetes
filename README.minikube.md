@@ -102,7 +102,7 @@ docker run --name minion \
  -p 11019:11019 \
  -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
  -v $(pwd)/onms-ca-trust.jks:/opt/minion-etc-overlay/onms-ca-trust.jks \
- opennms/minion:27.1.1 -c
+ opennms/minion:27.2.0 -c
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. The above requires using a custom content for the `INSTANCE_ID` (see [minion.properties](minion.properties)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
