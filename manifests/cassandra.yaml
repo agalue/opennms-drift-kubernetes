@@ -161,7 +161,7 @@ spec:
               key: TIMEZONE
               name: common-settings
         - name: LOCAL_JMX
-          value: no
+          value: 'no'
         - name: MEM_TOTAL_MB
           valueFrom:
             resourceFieldRef:
@@ -173,11 +173,17 @@ spec:
           value: $(MEM_TOTAL_MB)m
         - name: CASSANDRA_SEEDS
           value: cassandra-0.cassandra.opennms.svc.cluster.local
+        - name: CASSANDRA_NUM_TOKENS
+          value: '16'
         - name: CASSANDRA_CLUSTER_NAME
           valueFrom:
             configMapKeyRef:
               key: CASSANDRA_CLUSTER_NAME
               name: common-settings
+        - name: CASSANDRA_LISTEN_ADDRESS # Required by ready-probe.sh
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         # The following 3 variables are required to use NetworkTopologyStrategy with the Newts keyspace
         - name: CASSANDRA_ENDPOINT_SNITCH
           value: GossipingPropertyFileSnitch
@@ -190,10 +196,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name # TODO spec.nodeName seems more accurate, but an affinity policy might be better.
-        - name: CASSANDRA_LISTEN_ADDRESS
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
         ports:
         - containerPort: 7000
           name: intra-node
