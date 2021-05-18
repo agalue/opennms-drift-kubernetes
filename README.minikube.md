@@ -105,7 +105,7 @@ docker run --name minion \
  opennms/minion:27.2.0 -c
 ```
 
-> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above requires using a custom content for the `INSTANCE_ID` (see [minion.properties](minion.properties)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
+> **IMPORTANT**: Make sure to use the same version as OpenNMS. The above requires using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
 # minion-minikube.yaml
 
