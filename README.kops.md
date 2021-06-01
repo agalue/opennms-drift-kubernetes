@@ -4,7 +4,7 @@
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.19.x or newer.
+* Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary. Tested with version 1.20.x or newer.
 
 ## DNS Configuration
 
