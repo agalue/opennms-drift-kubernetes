@@ -8,6 +8,7 @@
 #   prior upgrading the version of OpenNMS on the chosen image.
 #
 # WARNING:
+# - Internet access from the container is required to retrieve ALEC binaries from GitHub.
 # - This deployment will have a persistent volume for /opt/opennms/etc to track the configuration changes.
 #
 # TODO:

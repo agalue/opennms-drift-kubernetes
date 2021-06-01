@@ -1,4 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# WARNING:
+# - Internet access from the container is required to retrieve ALEC binaries from GitHub.
 
 ---
 apiVersion: apps/v1
