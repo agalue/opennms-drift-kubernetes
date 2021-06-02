@@ -422,7 +422,7 @@ EOF
 
   if [[ ${FEATURES_LIST} == *"opennms-situation-feedback"* ]]; then
     echo "Configuring Situations Feedback..."
-    cat <<EOF > ${CONFIG_DIR}/org.opennms.features.situation-feedback.persistence.elastic.cfg
+    cat <<EOF > ${CONFIG_DIR}/org.opennms.features.situationfeedback.persistence.elastic.cfg
 ${ES_COMMON}
 elasticIndexStrategy=monthly
 EOF
