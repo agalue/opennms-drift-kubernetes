@@ -14,7 +14,7 @@ Start minikube with the following recommended settings:
 
 ```bash
 minikube start --cpus=8 --memory=32g --disk-size=60g \
-  --cni=flannel \
+  --cni=calico \
   --container-runtime=containerd \
   --addons=ingress \
   --addons=ingress-dns \
