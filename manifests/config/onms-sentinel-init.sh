@@ -165,7 +165,6 @@ EOF
 group.id=${INSTANCE_ID}_Sentinel
 bootstrap.servers=${KAFKA_SERVER}:9092
 max.partition.fetch.bytes=5000000
-acks=1
 ${KAFKA_SASL}
 EOF
 
