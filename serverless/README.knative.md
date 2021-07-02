@@ -8,18 +8,26 @@ The following outlines the installation steps, but all of them have been placed 
 
 > **IMPORTANT**: This requires Kubernetes 1.18 or newer.
 
+Declare a variable with the desired Knative version you would like to use:
+
+```bash
+export knative_version="v0.23.3"
+```
+
+The above will be used on all subsequent commands.
+
 ## Install Knative Serving
 
 ```bash
-kubectl apply -f https://github.com/knative/serving/releases/download/v0.23.0/serving-crds.yaml
-kubectl apply -f https://github.com/knative/serving/releases/download/v0.23.0/serving-core.yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/${knative_version}/serving-crds.yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/${knative_version}/serving-core.yaml
 ```
 
 ## Install a Networking Layer (Istio)
 
 ```bash
-kubectl apply -f https://github.com/knative/net-istio/releases/download/v0.23.0/istio.yaml
-kubectl apply -f https://github.com/knative/net-istio/releases/download/v0.23.0/net-istio.yaml
+kubectl apply -f https://github.com/knative/net-istio/releases/download/${knative_version}/istio.yaml
+kubectl apply -f https://github.com/knative/net-istio/releases/download/${knative_version}/net-istio.yaml
 ```
 
 Label default namespace for auto-injection.
@@ -51,9 +59,9 @@ EOF
 ## Install Knative Eventing
 
 ```bash
-kubectl apply -f https://github.com/knative/eventing/releases/download/v0.23.0/eventing-crds.yaml
-kubectl apply -f https://github.com/knative/eventing/releases/download/v0.23.0/eventing-core.yaml
-kubectl apply -f https://github.com/knative/eventing-contrib/releases/download/v0.18.8/kafka-source.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/${knative_version}/eventing-crds.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/${knative_version}/eventing-core.yaml
+kubectl apply -f https://github.com/knative-sandbox/eventing-kafka/releases/download/${knative_version}/source.yaml
 ```
 
 ## Create the secret with configuration

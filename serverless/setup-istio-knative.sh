@@ -21,7 +21,6 @@ function header_text {
 }
 
 knative_version="v0.23.0"
-kafka_source_version="v0.18.8"
 
 domain="${domain-aws.agalue.net}"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
@@ -29,10 +28,9 @@ onms_url="${onms_url-https://onmsui.$domain/opennms}"
 
 header_text "Starting Knative..."
 
-header_text "Using Knative Version:      ${knative_version}"
-header_text "Using Kafka Source Version: ${kafka_source_version}"
-header_text "Using Kafka Server:         ${kafka_server}"
-header_text "Using OpenNMS UI Server     ${onms_url}"
+header_text "Using Knative Version:  ${knative_version}"
+header_text "Using Kafka Server:     ${kafka_server}"
+header_text "Using OpenNMS UI Server ${onms_url}"
 
 header_text "Labeling default namespace w/ istio-injection=enabled"
 kubectl label namespace default istio-injection=enabled --overwrite=true
@@ -65,7 +63,7 @@ sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Runni
 header_text "Setting up Knative Eventing"
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${knative_version}/eventing-crds.yaml"
 kubectl apply -f "https://github.com/knative/eventing/releases/download/${knative_version}/eventing-core.yaml"
-kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${kafka_source_version}/kafka-source.yaml"
+kubectl apply -f "https://github.com/knative-sandbox/eventing-kafka/releases/download/${knative_version}/source.yaml"
 
 header_text "Waiting for Knative Eventing to become ready"
 sleep 5; while echo && kubectl get pods -n knative-eventing | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
