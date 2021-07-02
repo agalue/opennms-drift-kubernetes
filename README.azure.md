@@ -17,7 +17,7 @@ az login
 
 ```bash
 export GROUP="Kubernetes"
-export LOCATION="East US"
+export LOCATION="eastus"
 export DOMAIN="azure.agalue.net"
 ```
 
@@ -45,9 +45,9 @@ az network dns zone create -g "$GROUP" -n "$DOMAIN"
 
 Create a service principal account, and extract the service principal ID (or `appId`) and the client secret (or `password`):
 
-```
+```bash
 export SERVICE_PRINCIPAL_FILE=~/.azure/opennms-service-principal.json
-az ad sp create-for-rbac --skip-assignment --name opennms > $SERVICE_PRINCIPAL_FILE
+az ad sp create-for-rbac --skip-assignment --name $USER-opennms > $SERVICE_PRINCIPAL_FILE
 export SERVICE_PRINCIPAL=$(jq -r .appId $SERVICE_PRINCIPAL_FILE)
 export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 ```
@@ -82,20 +82,20 @@ VERSION=$(az aks get-versions \
     --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion' \
     --output tsv)
 
-az aks create --name opennms \
+az aks create --name "$USER-opennms" \
   --resource-group "$GROUP" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
-  --dns-name-prefix opennms \
+  --dns-name-prefix "$USER-opennms" \
   --kubernetes-version $VERSION \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
-  --nodepool-name onmspool \
+  --nodepool-name "$USER-onmspool" \
   --network-plugin azure \
   --network-policy azure \
   --generate-ssh-keys \
-  --tags Environment=Development
+  --tags Owner=$USER
 ```
 
 To validate the cluster:
