@@ -1,48 +1,34 @@
 # Knative
 
+> **This is a work in progress, usability not guaranteed**
+
 In this tutorial, a very simple and simplified installation of [Istio](https://istio.io) and [Knative](https://knative.dev/) will be performed. All tracing/logging/observability features won/t be used to simplify the deployment.
 
 The following outlines the installation steps, but all of them have been placed on the script [setup-istio-knative.sh](./setup-istio-knative.sh)
 
-> **IMPORTANT**: This requires Kubernetes 1.15 or newer.
+> **IMPORTANT**: This requires Kubernetes 1.18 or newer.
 
-## Declare versions to use
-
-In order to use the simplified version of Istio, the chosen version of it depends on what's available at the [third-party](https://github.com/knative/serving/tree/master/third_party) folder for the chosen version of Knative Service.
+## Install Knative Serving
 
 ```bash
-export serving_version="v0.16.0"
-export eventing_version="v0.16.0"
-export istio_version="1.5.4"
+kubectl apply -f https://github.com/knative/serving/releases/download/v0.23.0/serving-crds.yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/v0.23.0/serving-core.yaml
 ```
 
-## Install Istio
+## Install a Networking Layer (Istio)
 
-Labeling default namespace with `istio-injection=enabled`:
+```bash
+kubectl apply -f https://github.com/knative/net-istio/releases/download/v0.23.0/istio.yaml
+kubectl apply -f https://github.com/knative/net-istio/releases/download/v0.23.0/net-istio.yaml
+```
+
+Label default namespace for auto-injection.
 
 ```bash
 kubectl label namespace default istio-injection=enabled --overwrite=true
 ```
 
 The above is for convenience, to facilitate the injection of the sidecars for the knative related pods.
-
-Install a simplified Istio from Knative source:
-
-```bash
-kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-crds.yaml"
-kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-minimal.yaml"
-```
-
-> **NOTE**: [Here](https://knative.dev/docs/install/installing-istio/#installing-istio-without-sidecar-injection) you can see how to build your own `istio-minimal.yaml` from the Istio GIT repository.
-
-## Install Knative Serving
-
-```bash
-kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-crds.yaml"
-kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-core.yaml"
-```
-
-> **NOTE**: The monitoring manifets are not installed as they are not required for this solution; although, if your Kubernetes cluster has enough resources, you can give that a try.
 
 ## Fix the Domain Configuration
 
@@ -65,9 +51,9 @@ EOF
 ## Install Knative Eventing
 
 ```bash
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing-crds.yaml"
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing-core.yaml"
-kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
+kubectl apply -f https://github.com/knative/eventing/releases/download/v0.23.0/eventing-crds.yaml
+kubectl apply -f https://github.com/knative/eventing/releases/download/v0.23.0/eventing-core.yaml
+kubectl apply -f https://github.com/knative/eventing-contrib/releases/download/v0.18.8/kafka-source.yaml
 ```
 
 ## Create the secret with configuration

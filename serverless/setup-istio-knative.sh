@@ -20,35 +20,33 @@ function header_text {
   echo "$header$*$reset"
 }
 
-serving_version="v0.16.0"
-eventing_version="v0.16.0"
-istio_version="1.5.4"
+knative_version="v0.23.0"
+kafka_source_version="v0.18.8"
 
 domain="${domain-aws.agalue.net}"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
 onms_url="${onms_url-https://onmsui.$domain/opennms}"
 
-header_text "Starting Knative on minikube..."
+header_text "Starting Knative..."
 
-header_text "Using Knative Serving Version:  ${serving_version}"
-header_text "Using Knative Eventing Version: ${eventing_version}"
-header_text "Using Istio Version:            ${istio_version}"
-header_text "Using Kafka Server:             ${kafka_server}"
-header_text "Using OpenNMS UI Server         ${onms_url}"
+header_text "Using Knative Version:      ${knative_version}"
+header_text "Using Kafka Source Version: ${kafka_source_version}"
+header_text "Using Kafka Server:         ${kafka_server}"
+header_text "Using OpenNMS UI Server     ${onms_url}"
 
 header_text "Labeling default namespace w/ istio-injection=enabled"
 kubectl label namespace default istio-injection=enabled --overwrite=true
 
-header_text "Setting up Istio"
-kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-crds.yaml"
-kubectl apply -f "https://raw.githubusercontent.com/knative/serving/${serving_version}/third_party/istio-${istio_version}/istio-minimal.yaml"
+header_text "Setting up Knative Serving"
+kubectl apply -f "https://github.com/knative/serving/releases/download/${knative_version}/serving-crds.yaml"
+kubectl apply -f "https://github.com/knative/serving/releases/download/${knative_version}/serving-core.yaml"
+
+header_text "Setting up Network Layer - Istio"
+kubectl apply -f "https://github.com/knative/net-istio/releases/download/${knative_version}/istio.yaml"
+kubectl apply -f "https://github.com/knative/net-istio/releases/download/${knative_version}/net-istio.yaml"
 
 header_text "Waiting for istio to become ready"
 sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
-
-header_text "Setting up Knative Serving"
-kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-crds.yaml"
-kubectl apply -f "https://github.com/knative/serving/releases/download/${serving_version}/serving-core.yaml"
 
 header_text "Configuring custom domain"
 cat <<EOF | kubectl apply -f -
@@ -65,9 +63,9 @@ header_text "Waiting for Knative Serving to become ready"
 sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 
 header_text "Setting up Knative Eventing"
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing-crds.yaml"
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${eventing_version}/eventing-core.yaml"
-kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${eventing_version}/kafka-source.yaml"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/${knative_version}/eventing-crds.yaml"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/${knative_version}/eventing-core.yaml"
+kubectl apply -f "https://github.com/knative/eventing-contrib/releases/download/${kafka_source_version}/kafka-source.yaml"
 
 header_text "Waiting for Knative Eventing to become ready"
 sleep 5; while echo && kubectl get pods -n knative-eventing | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done

@@ -1,7 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
-apiVersion: sources.knative.dev/v1beta1
+apiVersion: sources.knative.dev/v1
 kind: KafkaSource
 metadata:
   name: kafka-source
