@@ -3,7 +3,7 @@
 # WARNING:
 # - The elasticsearch user (uid: 1000, gid: 1000) cannot be used in OpenShift by default.
 # - Elasticsearch expects to have very fast disks for the PVC to avoid performance issues.
-# - Internet access from the container is required to retrieve ALEC binaries from GitHub.
+# - Internet access from the container is required to retrieve the Drift Plugin binaries from GitHub.
 
 ---
 apiVersion: v1
