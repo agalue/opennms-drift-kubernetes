@@ -86,7 +86,7 @@ az aks create --name "$USER-opennms" \
   --resource-group "$GROUP" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
-  --dns-name-prefix "$USER-opennms" \
+  --dns-name-prefix "opennms" \
   --kubernetes-version $VERSION \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
@@ -101,13 +101,13 @@ az aks create --name "$USER-opennms" \
 To validate the cluster:
 
 ```bash
-az aks show --resource-group "$GROUP" --name opennms
+az aks show --resource-group "$GROUP" --name "$USER-opennms"
 ```
 
 To configure `kubectl`:
 
 ```bash
-az aks get-credentials --resource-group "$GROUP" --name opennms
+az aks get-credentials --resource-group "$GROUP" --name "$USER-opennms"
 ```
 
 ## Install the NGinx Ingress Controller
@@ -195,7 +195,7 @@ az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NG
 To delete the Kubernetes cluster, do the following:
 
 ```bash
-az aks delete --name opennms --resource-group "$GROUP"
+az aks delete --name "$USER-opennms" --resource-group "$GROUP"
 ```
 
 > **WARNING**: Deleting the cluster may take several minutes to complete.
