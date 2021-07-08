@@ -134,7 +134,7 @@ spec:
           subPath: onms-minion-init.sh
       containers:
       - name: minion
-        image: opennms/minion:28.0.0
+        image: opennms/minion:release-candidate
         imagePullPolicy: IfNotPresent
         args:
         - -c
@@ -216,18 +216,18 @@ spec:
             cpu: 200m
             memory: 1Gi
         readinessProbe:
-          exec:
-            command:
-            - /health.sh
+          httpGet:
+            path: /rest/health
+            port: http
           initialDelaySeconds: 30
           periodSeconds: 10
-        livenessProbe: # WARNING: The health-check checks dependencies, which is not suitable for liveness probes
-          exec:
-            command:
-            - /health.sh
+        livenessProbe:
+          httpGet:
+            path: /rest/health?tag=local
+            port: http
           initialDelaySeconds: 60
-          periodSeconds: 60
-          timeoutSeconds: 15
+          periodSeconds: 30
+          timeoutSeconds: 5
       # Use the following only when NX-OS Telemetry over gRPC is required.
       # https://github.com/agalue/nxos-telemetry-to-kafka-go
       - name: nxos-grpc
