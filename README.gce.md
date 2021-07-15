@@ -78,11 +78,13 @@ gce.agalue.net.   300 IN  SOA ns-cloud-a1.googledomains.com. cloud-dns-hostmaste
 
 > **WARNING**: Please use your own Domain, meaning that every time the domain `gce.agalue.net` is mentioned or used, replace it with your own.
 
+This is required so the Ingress Controller and CertManager can use custom FQDNs for all the different services.
+
 ## Cluster Creation
 
 Create the Kubernetes Cluster
 
-> **WARNING**: Make sure you have enough quota on your Google Cloud account to create all the resources. Without alterations, this deployment requires `CPUS_ALL_REGIONS=40`. Be aware that trial accounts cannot request quota changes. A reduced version is available to test the deployment.
+> **WARNING**: Make sure you have enough quota on your Google Cloud account to create all the resources. Without alterations, this deployment requires `CPUS_ALL_REGIONS=40`. Be aware that trial accounts cannot request quota changes. A reduced version is available to test the deployment. If you need further limitations, use the `gce-reduced` folder as inspiration, and create a copy of it with your desired settings. The minimal version is what `minikube` would use.
 
 With enough quota:
 
@@ -140,7 +142,8 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mast
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required to provide HTTPS/TLS support through [LetsEncrypt](https://letsencrypt.org) to the web-based services managed by the ingress controller.
 
 ```bash
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
+CMVER=$(curl -s https://api.github.com/repos/jetstack/cert-manager/releases/latest | grep tag_name | cut -d '"' -f 4)
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/$CMVER/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs

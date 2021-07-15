@@ -44,6 +44,8 @@ aws.agalue.net.   172800  IN  NS  ns-144.awsdns-18.com.
 
 > **WARNING**: Please use your own Domain, meaning that every time the domain `aws.agalue.net` is mentioned or used, replace it with your own.
 
+This is required so the Ingress Controller and CertManager can use custom FQDNs for all the different services.
+
 ## Cluster Creation
 
 Create the Kubernetes cluster using `eksctl`. The following example creates a cluster with 1 master node and 6 worker nodes:
@@ -62,6 +64,8 @@ eksctl create cluster \
   --alb-ingress-access \
   --managed
 ```
+
+> **WARNING**: Make sure you have enough quota on your AWS account to create all the resources. Be aware that trial accounts cannot request quota changes. If you need further limitations, use any of the `reduced` folder as inspiration, and create a copy of it with your desired settings. The minimal version is what `minikube` would use.
 
 This process could take on average between 15 to 20 minutes to complete. The above command will finish when the cluster is ready.
 
@@ -117,7 +121,8 @@ curl https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-control
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required to provide HTTPS/TLS support through [LetsEncrypt](https://letsencrypt.org) to the web-based services managed by the ingress controller.
 
 ```bash
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.0/cert-manager.yaml
+CMVER=$(curl -s https://api.github.com/repos/jetstack/cert-manager/releases/latest | grep tag_name | cut -d '"' -f 4)
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/$CMVER/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs

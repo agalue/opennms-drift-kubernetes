@@ -31,6 +31,8 @@ export DOMAIN="azure.agalue.net"
 az group create --name "$GROUP" --location "$LOCATION"
 ```
 
+The above is not strictly necessary. You can use an existing group if you want. If you do, make sure to update the `GROUP` environment variable so all subsequent commands will use the correct one (same for the region or location).
+
 ## DNS Configuration
 
 Create a DNS Zone:
@@ -41,9 +43,11 @@ az network dns zone create -g "$GROUP" -n "$DOMAIN"
 
 > **WARNING**: Make sure to add an `NS` record on your registrar pointing to the Domain Servers returned from the above command. The resource group can be different than the group used for the AKS cluster.
 
+This is required so the Ingress Controller and CertManager can use custom FQDNs for all the different services.
+
 ## Cluster Creation
 
-> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription (which has a limitation of 20 vCPUs).
+> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription (which has a limitation of 20 vCPUs). If you need further limitations, use the `aks-reduced` folder as inspiration, and create a copy of it with your desired settings. The minimal version is what `minikube` would use.
 
 Create a service principal account, and extract the service principal ID (or `appId`) and the client secret (or `password`):
 
@@ -125,7 +129,8 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mast
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required to provide HTTPS/TLS support through [LetsEncrypt](https://letsencrypt.org) to the web-based services managed by the ingress controller.
 
 ```bash
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.0/cert-manager.yaml
+CMVER=$(curl -s https://api.github.com/repos/jetstack/cert-manager/releases/latest | grep tag_name | cut -d '"' -f 4)
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/$CMVER/cert-manager.yaml
 ```
 
 ## Install Jaeger CRDs
