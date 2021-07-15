@@ -52,13 +52,16 @@ This is required so the Ingress Controller and CertManager can use custom FQDNs 
 Create a service principal account, and extract the service principal ID (or `appId`) and the client secret (or `password`):
 
 ```bash
-export SERVICE_PRINCIPAL_FILE=~/.azure/opennms-service-principal.json
-az ad sp create-for-rbac --skip-assignment --name $USER-opennms > $SERVICE_PRINCIPAL_FILE
+export SERVICE_PRINCIPAL_NAME=$USER-k8s-opennms
+export SERVICE_PRINCIPAL_FILE=~/.azure/$SERVICE_PRINCIPAL_NAME.json
+
+az ad sp create-for-rbac --skip-assignment --name $SERVICE_PRINCIPAL_NAME > $SERVICE_PRINCIPAL_FILE
+
 export SERVICE_PRINCIPAL=$(jq -r .appId $SERVICE_PRINCIPAL_FILE)
 export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 ```
 
-> **WARNING**: The above command should be executed once. If the principal already exists, either extract the information as mentioned or delete it and recreate it before proceed.
+> **WARNING**: The `az ad sp create-for-rbac` command should be executed once. If the principal already exists, either extract the information as mentioned or delete it and recreate it before proceed.
 
 The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you. For more information about service principals, follow [this](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal) link.
 
@@ -83,6 +86,18 @@ export AKS_VM_SIZE=Standard_DS3_v2
 Then,
 
 ```bash
+az network vnet create -g "$GROUP" \
+  --name "$USER-k8s-vnet" \
+  --address-prefix "13.0.0.0/24" \
+  --subnet-name "main" \
+  --subnet-prefix "13.0.0.0/24" \
+  --tags Owner=$USER \
+  --output table
+
+SUBNET_ID=$(az network vnet subnet show -g "$GROUP" \
+    --vnet-name "$USER-k8s-vnet" \
+    --name "main" | jq -r .id)
+
 VERSION=$(az aks get-versions \
     --location "$LOCATION" \
     --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion' \
@@ -92,17 +107,24 @@ az aks create --name "$USER-opennms" \
   --resource-group "$GROUP" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
+  --vnet-subnet-id "$SUBNET_ID" \
   --dns-name-prefix "opennms" \
-  --kubernetes-version $VERSION \
+  --kubernetes-version "$VERSION" \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
-  --nodepool-name "$USER-onmspool" \
+  --nodepool-name "$USER" \
+  --nodepool-tags Owner="$USER" \
   --network-plugin azure \
   --network-policy azure \
-  --generate-ssh-keys \
-  --tags Owner=$USER
+  --ssh-key-value ~/.ssh/id_rsa.pub \
+  --tags Owner="$USER" \
+  --output table
 ```
+
+> Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.
+
+> The reason for explicitly creating a subnet is to show all the necessary steps involved when policy-based restrictions exist like all the resources must be tagged (being `Owner`, an example here).
 
 To validate the cluster:
 
