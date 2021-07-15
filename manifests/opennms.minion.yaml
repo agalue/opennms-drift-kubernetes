@@ -86,6 +86,17 @@ spec:
         app: minion
     spec:
       terminationGracePeriodSeconds: 60
+      affinity: # Avoid scheduling the pod in the same host as the Core OpenNMS when possible
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - onms
       initContainers:
       # Wait for all the dependencies
       - name: dependencies

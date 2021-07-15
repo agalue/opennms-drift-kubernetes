@@ -23,11 +23,10 @@ spec:
         app: alec
     spec:
       terminationGracePeriodSeconds: 60
-      affinity:
+      affinity: # Avoid scheduling the pod in the same host as the Core OpenNMS when possible
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
+          - podAffinityTerm:
               topologyKey: kubernetes.io/hostname
               labelSelector:
                 matchExpressions:

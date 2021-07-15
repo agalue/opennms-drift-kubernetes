@@ -54,7 +54,7 @@ spec:
       labels:
         app: onms-ui
     spec:
-      affinity:
+      affinity: # Avoid scheduling the pod in the same host as the Core OpenNMS when possible
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - topologyKey: kubernetes.io/hostname
