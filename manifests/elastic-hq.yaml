@@ -46,7 +46,7 @@ spec:
         - name: TIMEOUT
           value: '900'
       containers:
-      - name: esmaster
+      - name: elasticsearch-hq
         image: elastichq/elasticsearch-hq:latest
         imagePullPolicy: IfNotPresent
         ports:
@@ -55,6 +55,13 @@ spec:
         env:
         - name: HQ_DEFAULT_URL
           value: http://esdata.opennms.svc.cluster.local:9200
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
         readinessProbe:
           tcpSocket:
             port: http

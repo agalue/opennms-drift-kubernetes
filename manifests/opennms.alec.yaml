@@ -26,7 +26,8 @@ spec:
       affinity: # Avoid scheduling the pod in the same host as the Core OpenNMS when possible
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
+          - weight: 100
+            podAffinityTerm:
               topologyKey: kubernetes.io/hostname
               labelSelector:
                 matchExpressions:
@@ -132,7 +133,7 @@ spec:
           mountPath: /opt/sentinel/deploy
         resources:
           limits:
-            cpu: 1
+            cpu: '1'
             memory: 2Gi
           requests:
             cpu: 500m

@@ -167,10 +167,10 @@ spec:
         resources:
           limits:
             memory: 4Gi
-            cpu: 2
+            cpu: '2'
           requests:
             memory: 2Gi
-            cpu: 1
+            cpu: '1'
         readinessProbe:
           tcpSocket:
             port: inside

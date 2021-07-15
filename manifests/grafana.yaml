@@ -133,6 +133,13 @@ spec:
           value: http://grafana-renderer:8081/render
         - name: GF_RENDERING_CALLBACK_URL
           value: http://grafana:3000/
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
         readinessProbe:
           httpGet:
             path: /

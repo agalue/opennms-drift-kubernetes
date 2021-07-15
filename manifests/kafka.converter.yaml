@@ -211,6 +211,10 @@ spec:
         volumeMounts:
         - name: ksql
           mountPath: /ksql
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
       volumes:
       - name: ksql
         emptyDir: {}

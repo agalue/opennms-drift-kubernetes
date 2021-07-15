@@ -227,10 +227,10 @@ spec:
               - nodetool -u cassandra -pw cassandra drain
         resources:
           limits:
-            cpu: 4
+            cpu: '4'
             memory: 4Gi
           requests:
-            cpu: 2
+            cpu: '2'
             memory: 2Gi
         securityContext:
           runAsUser: 999

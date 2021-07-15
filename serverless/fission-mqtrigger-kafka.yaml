@@ -20,6 +20,7 @@ spec:
         svc: mqtrigger
         messagequeue: kafka
     spec:
+      serviceAccountName: fission-svc
       containers:
       - name: mqtrigger
         image: fission/fission-bundle
@@ -33,5 +34,8 @@ spec:
           value: "kafka.opennms.svc.cluster.local:9092"
         - name: MESSAGE_QUEUE_KAFKA_VERSION
           value: "2.7.0"
-      serviceAccountName: fission-svc
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
 

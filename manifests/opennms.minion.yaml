@@ -89,7 +89,8 @@ spec:
       affinity: # Avoid scheduling the pod in the same host as the Core OpenNMS when possible
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
+          - weight: 100
+            podAffinityTerm:
               topologyKey: kubernetes.io/hostname
               labelSelector:
                 matchExpressions:

@@ -17,6 +17,7 @@ spec:
       labels:
         kubeless: kafka-trigger-controller
     spec:
+      serviceAccountName: controller-acct
       containers:
       - name: kafka-trigger-controller
         image: kubeless/kafka-trigger-controller
@@ -24,7 +25,10 @@ spec:
         env:
         - name: KAFKA_BROKERS
           value: kafka.opennms.svc.cluster.local:9092
-      serviceAccountName: controller-acct
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1

@@ -178,7 +178,7 @@ spec:
           mountPath: /opt/opennms-jetty-webinf-overlay
         resources:
           limits:
-            cpu: 2
+            cpu: '2'
             memory: 6Gi
           requests:
             cpu: 500m
