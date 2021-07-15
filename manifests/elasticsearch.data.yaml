@@ -112,7 +112,7 @@ spec:
           value: 'false'
         - name: node.data
           value: 'true'
-        - name: node.ingest
+        - name: node.ingest # Required, even if data won't be transformed before index it (to avoid having dedicated ingest nodes)
           value: 'true'
         - name: http.cors.enabled
           value: 'true'
