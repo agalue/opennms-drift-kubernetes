@@ -6,7 +6,9 @@ For this reason, the `kustomize` tool is used to generate a modified version of 
 
 ## Requirements
 
-* Install the [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) binary on your machine.
+* Install the [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) binary on your machine; version 1.22.x or newer recommended.
+
+> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21. If an older version is required, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). If the available version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
 
 ## Cluster Configuration
 
