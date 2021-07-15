@@ -26,15 +26,15 @@ spec:
     app: zk
 
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: zk-pdb
 spec:
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: zk
-  maxUnavailable: 1
 
 ---
 apiVersion: apps/v1
