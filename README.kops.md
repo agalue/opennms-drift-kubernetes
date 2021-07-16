@@ -4,9 +4,9 @@
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary; version 1.21.x or newer recommended.
+* Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary; version 1.20.x or newer recommended.
 
-> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21. If an older version is required, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). If the available version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
+> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.20. If you're going to use a newer version, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). Similarly, if you're planing to use a version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
 
 ## DNS Configuration
 
@@ -69,7 +69,7 @@ Create the Kubernetes cluster using `kOps`. The following example creates a clus
 export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
-K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[]|select(.tag_name|startswith("v1.19"))|.tag_name' | head -n 1 | sed 's/v//')
+K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[]|select(.tag_name|startswith("v1.20"))|.tag_name' | head -n 1 | sed 's/v//')
 
 kops create cluster \
   --cloud aws \

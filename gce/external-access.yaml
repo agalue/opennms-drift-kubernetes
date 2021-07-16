@@ -1,21 +1,11 @@
 # @author Alejandro Galue <agalue@opennms.org>
-# GCE doesn't support K8s 1.19 in the stable channel (2021-04-01)
 
-# Access to applications based on HTTP
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: onms-ingress
   namespace: opennms
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    ingress.kubernetes.io/affinity: cookie
-    ingress.kubernetes.io/session-cookie-name: route
-    ingress.kubernetes.io/session-cookie-hash: sha1
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    cert-manager.io/issuer: letsencrypt-prod
-    acme.cert-manager.io/http01-edit-in-place: 'true'
 spec:
   tls:
     - secretName: opennms-ingress-cert
@@ -34,81 +24,106 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: opennms-core
-              servicePort: 8980
+              service:
+                name: opennms-core
+                port:
+                  number: 8980
     - host: onmsui.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: opennms-ui
-              servicePort: 8980
+              service:
+                name: opennms-ui
+                port:
+                  number: 8980
           - path: /opennms/nrt
+            pathType: Prefix
             backend:
-              serviceName: opennms-core
-              servicePort: 8980
+              service:
+                name: opennms-core
+                port:
+                  number: 8980
     - host: cassandra-reaper.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: cassandra-reaper
-              servicePort: 8080
+              service:
+                name: cassandra-reaper
+                port:
+                  number: 8080
     - host: grafana.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: grafana
-              servicePort: 3000
+              service:
+                name: grafana
+                port:
+                  number: 3000
     - host: hasura.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: hasura
-              servicePort: 8080
+              service:
+                name: hasura
+                port:
+                  number: 8080
     - host: kafka-manager.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: kafka-manager
-              servicePort: 9000
+              service:
+                name: kafka-manager
+                port:
+                  number: 9000
     - host: kibana.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: kibana
-              servicePort: 5601
+              service:
+                name: kibana
+                port:
+                  number: 5601
     - host: elastichq.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: elastichq
-              servicePort: 5000
+              service:
+                name: elastichq
+                port:
+                  number: 5000
     - host: tracing.gce.agalue.net
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: onms-tracing-query
-              servicePort: 16686
+              service:
+                name: onms-tracing-query
+                port:
+                  number: 16686
 
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grpc-ingress
   namespace: opennms
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: GRPC
 spec:
   tls:
     - secretName: grpc-ingress-cert
@@ -119,6 +134,9 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: grpc-server
-              servicePort: 8990
+              service:
+                name: grpc-server
+                port:
+                  number: 8990

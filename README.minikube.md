@@ -2,25 +2,28 @@
 
 For testing purposes, it would be nice to be able to start a reduced version of this lab through `minikube`.
 
-For this reason, the `kustomize` tool is used to generate a modified version of the templates, in order to be able to use them with `minikube`.
+For this reason, we use `kustomize` to generate a reduced version of the templates through `kubectl`.
 
 ## Requirements
 
 * Install the [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) binary on your machine; version 1.22.x or newer recommended.
 
-> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21. If an older version is required, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). If the available version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
+> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.20. If you're going to use a newer version, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). Similarly, if you're planing to use a version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
 
 ## Cluster Configuration
 
 Start minikube with the following recommended settings:
 
 ```bash
+K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[]|select(.tag_name|startswith("v1.20"))|.tag_name' | head -n 1)
+
 minikube start --cpus=8 --memory=32g --disk-size=60g \
   --cni=calico \
   --container-runtime=containerd \
   --addons=ingress \
   --addons=ingress-dns \
-  --addons=metrics-server
+  --addons=metrics-server \
+  --kubernetes-version=$K8S_VER
 ```
 
 > **IMPORTANT**: on macOS, it is better to use Hyperkit rather than VirtualBox, as I found it a lot faster to work with. You can enforce it by passing `--driver hyperkit`.
