@@ -123,7 +123,7 @@ az aks create --name "$USER-opennms" \
 
 > Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.
 
-> The reason for explicitly creating a subnet is to show all the necessary steps involved when policy-based restrictions exist like all the resources must be tagged (being `Owner`, an example here).
+> The reason for explicitly creating a subnet is to show all the necessary steps involved when policy-based restrictions exist like all the resources must be tagged (being `Owner`, an example here). Unfortunately, due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail. If your subscription has a Tag Policy in place, I recommend using the Azure Portal to create the cluster, but only if your have permissions to perform `Microsoft.Authorization/roleAssigments/write` for the subnet you're planing to use.
 
 To validate the cluster:
 
