@@ -1,6 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
+# Source: https://github.com/OpenNMS/opennms-drift-kubernetes/tree/master/tools/kafka-converter
 #
-# DEPRECATED, see kafka.producer.enhancer.yaml
+# DEPRECATED, this is not used anymore; see kafka.producer.enhancer.yaml
+#
 # This is an optional component
 #
 # Kafka Converter Tool implemented in Go.

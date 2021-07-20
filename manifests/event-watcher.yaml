@@ -1,6 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
+# Source: https://github.com/OpenNMS/opennms-drift-kubernetes/tree/master/tools/event-watcher
 #
-# A simple K8s Controller that generate OpenNMS events upon reception of certain K8s events
+# A simple K8s Controller that generate OpenNMS events upon reception of certain K8s events.
+# The event watcher requires a service account with cluster-level access to get, list, and watch pods, services, and events.
 
 ---
 apiVersion: v1
@@ -71,6 +73,11 @@ spec:
         image: agalue/onms-k8s-watcher-go:latest
         imagePullPolicy: Always
         env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: ONMS_URL
           value: http://opennms-core.opennms.svc.cluster.local:8980/opennms
         - name: ONMS_USER

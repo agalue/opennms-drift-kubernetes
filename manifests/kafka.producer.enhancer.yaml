@@ -1,4 +1,5 @@
 # @author Alejandro Galue <agalue@opennms.org>
+# Source: https://github.com/agalue/producer-enhancer
 #
 # This is an optional component
 # Enhance Alarms with Node data when available and send the result to a topic in JSON format

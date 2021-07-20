@@ -103,22 +103,22 @@ spec:
           value: '2' # Must be consistent with the cluster size
         - name: KAFKA_MIN_INSYNC_REPLICAS
           value: '1'
-        - name: KAFKA_NUM_PARTITIONS
+        - name: KAFKA_NUM_PARTITIONS # Must be greater than the number of Minions per location
           valueFrom: # Must be consistent with the chosen amount of replicas
             configMapKeyRef:
               key: KAFKA_NUM_PARTITIONS
               name: common-settings
         - name: KAFKA_AUTO_LEADER_REBALANCE_ENABLE
           value: 'true'
-        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE # Required by OpenNMS and Minions
           value: 'true'
-        - name: KAFKA_DELETE_TOPIC_ENABLE
+        - name: KAFKA_DELETE_TOPIC_ENABLE # Recommended to avoid disrupting messages workflow
           value: 'false'
         - name: KAFKA_CONTROLLED_SHUTDOWN_ENABLE
           value: 'true'
-        - name: KAFKA_MESSAGE_MAX_BYTES
+        - name: KAFKA_MESSAGE_MAX_BYTES # Recommended for the OpenNMS Kafka Producer
           value: '5000000'
-        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES # Recommended for the OpenNMS Kafka Producer
           value: '5000000'
         - name: KAFKA_COMPRESSION_TYPE
           value: producer

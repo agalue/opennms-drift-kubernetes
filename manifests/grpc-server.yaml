@@ -1,6 +1,5 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# https://github.com/agalue/onms-grpc-server/
+# Source: https://github.com/agalue/onms-grpc-server/
 
 ---
 apiVersion: v1
@@ -56,6 +55,11 @@ spec:
         - containerPort: 2112
           name: prometheus
         env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
         - name: PORT
           value: '8990'
         - name: HTTP_PORT
