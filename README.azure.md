@@ -107,7 +107,7 @@ az aks create --name "$USER-opennms" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
   --vnet-subnet-id "$SUBNET_ID" \
-  --dns-name-prefix "opennms" \
+  --dns-name-prefix "$USER-opennms" \
   --kubernetes-version "$VERSION" \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
