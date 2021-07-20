@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/agalue/kafka-converter/api/producer"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang/protobuf/proto"
-	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
 func main() {
