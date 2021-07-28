@@ -50,6 +50,8 @@ if [[ ${INSTANCE_ID} ]]; then
   cat <<EOF >> ${CUSTOM_PROPERTIES}
 # Used for Kafka Topics
 org.opennms.instance.id=${INSTANCE_ID}
+# Refresh Interface-to-Node cache every 2 hours
+org.opennms.interface-node-cache.refresh-timer=7200000
 EOF
 else
   INSTANCE_ID="OpenNMS"
