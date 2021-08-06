@@ -35,8 +35,10 @@
 #   name: agalue
 # spec:
 #   request: $(cat agalue.csr | base64 | tr -d '\n')
+#   signerName: kubernetes.io/kube-apiserver-client
 #   usages:
 #   - digital signature
+#   - client auth
 # EOF
 #
 # kubectl certificate approve agalue
@@ -46,7 +48,7 @@
 # To create user "jdoe" that belongs to the group "operator", perform a similar operation,
 # changing 'CN' and 'O'.
 #
-# To add new context:
+# To add new context for user 'agalue':
 #
 # kubectl config set-credentials agalue --client-certificate=agalue.crt --client-key=agalue-key.pem
 # kubectl config set-context agalue --current --user=agalue --namespace=opennms
@@ -87,7 +89,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: opennms-operator
+  name: onms-operator-binding
 subjects:
 - kind: Group
   name: operator
@@ -127,7 +129,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: opennms-admin
+  name: onms-admin-binding
 subjects:
 - kind: Group
   name: admin
@@ -143,7 +145,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: opennms-admin-storage
+  name: onms-storage-binding
 subjects:
 - kind: Group
   name: admin
