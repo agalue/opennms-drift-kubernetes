@@ -76,7 +76,6 @@ metadata:
 rules:
 - apiGroups:
   - ""
-  - apps
   resources:
   - configmaps
   - pods
@@ -112,18 +111,9 @@ metadata:
   name: onms-admin
 rules:
 - apiGroups:
-  - ""
-  - extensions
-  - apps
+  - "*"
   resources:
   - "*"
-  verbs:
-  - "*"
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  - cronjobs
   verbs:
   - "*"
 
