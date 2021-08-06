@@ -11,14 +11,14 @@
 # - Download the signed certificate using the "kubectl get csr" command.
 # - Set the kubectl context with the key and the certificate.
 #
-# To create user "agalue" that belongs to the group "admin":
+# To create user 'agalue' that belongs to the group 'onms-admin':
 #
 # cat <<EOF | cfssl genkey - | cfssljson -bare agalue
 # {
 #   "CN": "agalue",
 #   "names": [
 #     {
-#       "O": "admin"
+#       "O": "onms-admin"
 #     }
 #   ],
 #   "key": {
@@ -27,6 +27,25 @@
 #   }
 # }
 # EOF
+#
+# To create user 'jdoe' that belongs to the group 'onms-operator':
+#
+# cat <<EOF | cfssl genkey - | cfssljson -bare jdoe
+# {
+#   "CN": "jdoe",
+#   "names": [
+#     {
+#       "O": "onms-operator"
+#     }
+#   ],
+#   "key": {
+#     "algo": "rsa",
+#     "size": 2048
+#   }
+# }
+# EOF
+#
+# To authorize user 'agalue' to access the cluster:
 #
 # cat <<EOF | kubectl apply -f -
 # apiVersion: certificates.k8s.io/v1
@@ -42,20 +61,18 @@
 # EOF
 #
 # kubectl certificate approve agalue
-#
 # kubectl get csr agalue -o jsonpath='{.status.certificate}' | base64 --decode > agalue.crt
 #
-# To create user "jdoe" that belongs to the group "operator", perform a similar operation,
-# changing 'CN' and 'O'.
-#
-# To add new context for user 'agalue':
+# Then add a new context for user 'agalue':
 #
 # cluster=$(kubectl config view -o jsonpath='{.clusters[*].name}')
 # kubectl config set-credentials agalue --client-certificate=agalue.crt --client-key=agalue-key.pem
 # kubectl config set-context agalue-ctx --user=agalue --namespace=opennms --cluster=$cluster
 #
-# To swiych to the new context for user 'agalue':
+# Then, switch to the new context for user 'agalue':
 # kubectl config use-context agalue-ctx
+#
+# You can repeat the same process for user 'jdoe'.
 
 ---
 apiVersion: v1
@@ -66,13 +83,13 @@ metadata:
 # The following is optional.
 # It is here as a template in case other admin/operators have to interact with the cluster.
 
-# RBAC Role onms-operator: to view the K8s solution on the opennms namespace.
+# RBAC Role to view certain object in the opennms namespace.
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: onms-operator
+  name: opennms-operators
 rules:
 - apiGroups:
   - ""
@@ -86,29 +103,29 @@ rules:
   - list
   - watch
 
-# RBAC RoleBinding opennms-operator: to associate the users of group "operator" to the "onms-operator" role.
+# RBAC RoleBinding to associate the users of group "onms-operator" to the "opennms-operators" role.
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: onms-operator-binding
+  name: opennms-operators-binding
 subjects:
 - kind: Group
-  name: operator
+  name: onms-operator
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: onms-operator
+  name: opennms-operators
   apiGroup: rbac.authorization.k8s.io
 
-# RBAC Role onms-admin: to manage the K8s solution on the opennms namespace.
+# RBAC Role to manage any object in the opennms namespace.
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: onms-admin
+  name: opennms-admins
 rules:
 - apiGroups:
   - "*"
@@ -117,32 +134,32 @@ rules:
   verbs:
   - "*"
 
-# RBAC RoleBinding opennms-admin: to associate the users of group "admin" to the "onms-admin" role.
+# RBAC RoleBinding to associate the users of group "onms-admin" to the "opennms-admins" role.
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: onms-admin-binding
+  name: opennms-admins-binding
 subjects:
 - kind: Group
-  name: admin
+  name: onms-admin
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: onms-admin
+  name: opennms-admins
   apiGroup: rbac.authorization.k8s.io
 
-# RBAC ClusterRoleBinding opennms-admin-storage: to allow users of group "admin" to manage persistent volumes.
+# RBAC ClusterRoleBinding to allow users of group "onms-admin" to manage persistent volumes.
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: opennms
-  name: onms-storage-binding
+  name: opennms-storage-binding
 subjects:
 - kind: Group
-  name: admin
+  name: onms-admin
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
