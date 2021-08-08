@@ -65,7 +65,7 @@
 #
 # Then add a new context for user 'agalue':
 #
-# cluster=$(kubectl config view -o jsonpath='{.clusters[*].name}')
+# cluster=$(kubectl config view -o jsonpath="{.contexts[?(@.name=='$(kubectl config current-context)')].context.cluster}")
 # kubectl config set-credentials agalue --client-certificate=agalue.crt --client-key=agalue-key.pem
 # kubectl config set-context agalue-ctx --user=agalue --namespace=opennms --cluster=$cluster
 #
