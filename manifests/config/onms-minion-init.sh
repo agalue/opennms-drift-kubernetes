@@ -117,6 +117,7 @@ bootstrap.servers=${KAFKA_SERVER}:9092
 compression.type=gzip
 request.timeout.ms=30000
 single-topic=true
+max.concurrent.calls=10000
 ${KAFKA_SASL}
 
 # Consumer (verify Kafka broker configuration)
