@@ -268,9 +268,11 @@ topologyProtocols=bridge,cdp,isis,lldp,ospf
 suppressIncrementalAlarms=${SUPPRESS_INC_ALARMS}
 forward.metrics=${FORWARD_METRICS}
 nodeRefreshTimeoutMs=300000
-alarmSyncIntervalMs=300000
 kafkaSendQueueCapacity=1000
-
+# Alarm Synchronization (Streams Application; mandatory for ALEC; requires volume to store data)
+alarmSync=true
+alarmSyncIntervalMs=300000
+# Topic Names
 nodeTopic=${INSTANCE_ID}_nodes
 alarmTopic=${INSTANCE_ID}_alarms
 eventTopic=${INSTANCE_ID}_events
