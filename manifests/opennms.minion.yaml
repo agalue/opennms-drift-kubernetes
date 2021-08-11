@@ -146,7 +146,7 @@ spec:
           subPath: onms-minion-init.sh
       containers:
       - name: minion
-        image: opennms/minion:28.0.1
+        image: opennms/minion:28.0.2
         imagePullPolicy: IfNotPresent
         args:
         - -c
