@@ -114,10 +114,11 @@ EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.rpc.kafka.cfg
 bootstrap.servers=${KAFKA_SERVER}:9092
-compression.type=gzip
+compression.type=zstd
 request.timeout.ms=30000
 single-topic=true
 max.concurrent.calls=10000
+acks=0
 ${KAFKA_SASL}
 
 # Consumer (verify Kafka broker configuration)
