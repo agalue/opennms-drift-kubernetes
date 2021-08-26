@@ -6,7 +6,9 @@
 
 * Install the [Google Cloud CLI](https://cloud.google.com/sdk/).
 
-> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.20. If you're going to use a newer version, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). Similarly, if you're planing to use a version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
+> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21 or newer. If you're going to use and older version, please adjust the API versions of the manifests for `CronJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml), and `Ingress` in [external-access.yaml](manifests/external-access.yaml).
+
+> **IMPORTANT:** K8s 1.21 is available in the RAPID channel.
 
 ## Create common environment variables:
 
@@ -15,7 +17,6 @@ export PROJECT_ID="opennms-k8s"
 export PROJECT_DESCR="OpenNMS Kubernetes"
 export COMPUTE_ZONE="us-central1-a"
 export DOMAIN="gce.agalue.net"
-
 ```
 
 > Those variables will be used by all the commands used below. Make sure to use your own domain.
@@ -103,11 +104,13 @@ export GCP_VM_SIZE=n1-standard-2
 Then,
 
 ```bash
-VERSION=$(gcloud container get-server-config --region us-east1 --format "value(validMasterVersions[0])")
+CHANNEL="rapid"
+VERSION=$(gcloud container get-server-config --region us-east1 --format "value(channels[0].validVersions[0])")
 
 gcloud container clusters create opennms \
   --num-nodes=$GCP_NODE_COUNT \
   --cluster-version=$VERSION \
+  --release-channel=$CHANNEL \
   --machine-type=$GCP_VM_SIZE
 ```
 

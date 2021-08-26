@@ -6,7 +6,7 @@
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
 * Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary; version 1.20.x or newer recommended.
 
-> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.20. If you're going to use a newer version, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). Similarly, if you're planing to use a version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
+> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21 or newer. If you're going to use and older version, please adjust the API versions of the manifests for `CronJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml), and `Ingress` in [external-access.yaml](manifests/external-access.yaml).
 
 ## DNS Configuration
 
@@ -69,11 +69,9 @@ Create the Kubernetes cluster using `kOps`. The following example creates a clus
 export KOPS_CLUSTER_NAME="aws.agalue.net"
 export KOPS_STATE_STORE="s3://$KOPS_CLUSTER_NAME"
 
-K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[]|select(.tag_name|startswith("v1.20"))|.tag_name' | head -n 1 | sed 's/v//')
-
 kops create cluster \
   --cloud aws \
-  --cloud-labels Environment=Test,Department=Support \
+  --cloud-labels Environment=Test,Department=Support,Owner=$USER \
   --dns-zone $KOPS_CLUSTER_NAME \
   --master-size t2.large \
   --master-count 1 \
@@ -81,13 +79,10 @@ kops create cluster \
   --node-size t2.2xlarge \
   --node-count 5 \
   --zones us-east-2a \
-  --kubernetes-version $K8S_VER \
   --networking calico
 ```
 
 > **IMPORTANT:** Remember to change the settings to reflect your desired environment.
-
-> **WARNING:** There are problems with K8s 1.14.7 and ELB creation (fixed on 1.14.8 as of [#82923](https://github.com/kubernetes/kubernetes/issues/82923)). This leads to not having services with type LoadBalancer affecting the Ingress Controller and cert-manager.
 
 Edit the cluster configuration to enable creating Route 53 entries for Ingress hosts:
 
@@ -130,13 +125,13 @@ Finally, apply the changes to create the cluster:
 kops update cluster --yes
 ```
 
-It takes a few minutes to have the cluster ready. Verify the cluster statue using `kubectl` and `kops`:
+The creation process takes between 10 to 15 minutes to complete. You can verify the status using `kubectl` and `kops`:
 
 ```bash
-kops validate cluster
+kops validate cluster --wait 10m
 ```
 
-The output should be something like this:
+The output should be something like this (when it is ready):
 
 ```text
 Validating cluster aws.agalue.net

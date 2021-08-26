@@ -4,7 +4,7 @@
 
 * Install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) command.
 
-> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.20. If you're going to use a newer version, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). Similarly, if you're planing to use a version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
+> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21 or newer. If you're going to use and older version, please adjust the API versions of the manifests for `CronJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml), and `Ingress` in [external-access.yaml](manifests/external-access.yaml).
 
 ## Configure the Azure CLI
 
@@ -106,7 +106,7 @@ az aks create --name "$USER-opennms" \
   --resource-group "$GROUP" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
-  --vnet-subnet-id "$SUBNET_ID" \
+  --vnet-subnet-id "$SUBNET_ID" --skip-subnet-role-assignment \
   --dns-name-prefix "$USER-opennms" \
   --kubernetes-version "$VERSION" \
   --location "$LOCATION" \
@@ -117,13 +117,14 @@ az aks create --name "$USER-opennms" \
   --network-plugin azure \
   --network-policy azure \
   --ssh-key-value ~/.ssh/id_rsa.pub \
+  --admin-username "$USER" \
   --tags Owner="$USER" \
   --output table
 ```
 
-> Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.
+Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.
 
-> The reason for explicitly creating a subnet is to show all the necessary steps involved when policy-based restrictions exist like all the resources must be tagged (being `Owner`, an example here). Unfortunately, due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail. If your subscription has a Tag Policy in place, I recommend using the Azure Portal to create the cluster, but only if your have permissions to perform `Microsoft.Authorization/roleAssigments/write` for the subnet you're planing to use.
+> **WARNING**: The reason for explicitly creating a subnet is to show all the necessary steps involved when policy-based restrictions exist like all the resources must be tagged (see tag `Owner` as an example here). Unfortunately, due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail. If your subscription has a Tag Policy in place, I recommend using the Azure Portal to create the cluster, but only if you have permission to perform `Microsoft.Authorization/roleAssigments/write` for the subnet you're planning to use.
 
 To validate the cluster:
 

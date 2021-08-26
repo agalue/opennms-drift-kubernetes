@@ -6,7 +6,7 @@
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
 * Install the [eksctl](https://eksctl.io/) binary.
 
-> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.20. If you're going to use a newer version, please adjust the API versions of the manifests. In particular, `batch/v1beta1` for `CrobJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), and `policy/v1beta1` for `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml). Similarly, if you're planing to use a version is older than 1.20, make sure to do the same for `networking.k8s.io/v1` in [external-access.yaml](manifests/external-access.yaml).
+> **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21 or newer. If you're going to use and older version, please adjust the API versions of the manifests for `CronJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml), and `Ingress` in [external-access.yaml](manifests/external-access.yaml).
 
 ## DNS Configuration
 
@@ -52,22 +52,21 @@ Create the Kubernetes cluster using `eksctl`. The following example creates a cl
 
 ```bash
 eksctl create cluster \
+  --version 1.21 \
   --name opennms \
-  --version 1.20 \
   --region us-east-2 \
   --nodegroup-name onms-fleet \
   --node-type t2.2xlarge \
-  --nodes 6 \
-  --tags Environment=Test,Department=Support \
+  --nodes 5 \
+  --tags Environment=Test,Department=Support,Owner=$USER \
   --ssh-access \
   --external-dns-access \
-  --alb-ingress-access \
-  --managed
+  --alb-ingress-access
 ```
 
-> **WARNING**: Make sure you have enough quota on your AWS account to create all the resources. Be aware that trial accounts cannot request quota changes. If you need further limitations, use any of the `reduced` folder as inspiration, and create a copy of it with your desired settings. The minimal version is what `minikube` would use.
+> **WARNING**: Ensure you have enough quota on your AWS account to create all the resources. Be aware that trial accounts cannot request quota changes. If you need further limitations, use any of the `reduced` folder as inspiration, and create a copy of it with your desired settings. The minimal version is what `minikube` would use.
 
-This process could take on average between 15 to 20 minutes to complete. The above command will finish when the cluster is ready.
+The creation process takes between 15 to 20 minutes to complete. The above command will finish when the cluster is ready.
 
 To check if the cluster is active:
 
@@ -79,7 +78,7 @@ The output should be something like this:
 
 ```text
 NAME	VERSION	STATUS	CREATED			VPC			SUBNETS											SECURITYGROUPS
-opennms	1.19	ACTIVE	2021-04-09T14:37:49Z	vpc-05d7ebb8980713546	subnet-03a49abe804f21824,subnet-061e35b67b4145175,subnet-09a51b0ac396718b2,subnet-0c03c7719d44f4965,subnet-0d6ff4b413595c583,subnet-0e1d1a5389d459b1c	sg-063005b91330b51c1
+opennms	1.21	ACTIVE	2021-04-09T14:37:49Z	vpc-05d7ebb8980713546	subnet-03a49abe804f21824,subnet-061e35b67b4145175,subnet-09a51b0ac396718b2,subnet-0c03c7719d44f4965,subnet-0d6ff4b413595c583,subnet-0e1d1a5389d459b1c	sg-063005b91330b51c1
 ```
 
 Then,

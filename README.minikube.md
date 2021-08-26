@@ -15,7 +15,7 @@ For this reason, we use `kustomize` to generate a reduced version of the templat
 Start minikube with the following recommended settings:
 
 ```bash
-K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[]|select(.tag_name|startswith("v1.20"))|.tag_name' | head -n 1)
+K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[].tag_name' | head -n 1)
 
 minikube start --cpus=8 --memory=32g --disk-size=60g \
   --cni=calico \
