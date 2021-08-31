@@ -125,7 +125,9 @@ spec:
         - name: JMX_PORT
           value: '9999'
         - name: KAFKA_OPTS
-          value: -Djava.security.auth.login.config=/opt/kafka/config/kafka-jaas.conf
+          value: |
+            -Djava.security.auth.login.config=/opt/kafka/config/kafka-jaas.conf
+            -Djava.io.tmpdir=/opt/kafka
         - name: KAFKA_JMX_OPTS
           value: |
             -Dcom.sun.management.jmxremote

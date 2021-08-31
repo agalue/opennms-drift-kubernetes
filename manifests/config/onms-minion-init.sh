@@ -21,6 +21,7 @@
 # - KAFKA_SERVER
 # - KAFKA_SASL_USERNAME
 # - KAFKA_SASL_PASSWORD
+# - KAFKA_MAX_MESSAGE_SIZE
 # - SINGLE_PORT
 # - JAEGER_AGENT_HOST
 # - DNS_LOOKUPS_ENABLED
@@ -28,6 +29,8 @@
 
 # To avoid issues with OpenShift
 umask 002
+
+KAFKA_MAX_MESSAGE_SIZE=${KAFKA_MAX_MESSAGE_SIZE-5000000}
 
 OVERLAY=/etc-overlay
 CUSTOM_PROPERTIES=${OVERLAY}/custom.system.properties
@@ -108,25 +111,28 @@ bootstrap.servers=${KAFKA_SERVER}:9092
 ${KAFKA_SASL}
 
 # Producer (verify Kafka broker configuration)
+max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 acks=1
-max.request.size=5000000
+linger.ms=5
+compression.type=gzip
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.rpc.kafka.cfg
 bootstrap.servers=${KAFKA_SERVER}:9092
-compression.type=zstd
 request.timeout.ms=30000
 single-topic=true
 max.concurrent.calls=10000
-acks=0
 ${KAFKA_SASL}
 
 # Consumer (verify Kafka broker configuration)
-max.partition.fetch.bytes=5000000
+max.partition.fetch.bytes=${KAFKA_MAX_MESSAGE_SIZE}
 auto.offset.reset=latest
 
 # Producer (verify Kafka broker configuration)
-max.request.size=5000000
+max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
+acks=0
+linger.ms=5
+compression.type=gzip
 EOF
 
   cat <<EOF > ${FEATURES_DIR}/kafka.boot

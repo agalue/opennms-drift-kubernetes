@@ -227,7 +227,8 @@ org.opennms.core.ipc.rpc.kafka.auto.offset.reset=latest
 
 # RPC Producer (verify Kafka broker configuration)
 org.opennms.core.ipc.rpc.kafka.acks=0
-org.opennms.core.ipc.rpc.kafka.compression.type=zstd
+org.opennms.core.ipc.rpc.kafka.linger.ms=5
+org.opennms.core.ipc.rpc.kafka.compression.type=gzip
 org.opennms.core.ipc.rpc.kafka.max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 EOF
 
@@ -247,7 +248,9 @@ EOF
   if [[ ${FEATURES_LIST} == *"opennms-kafka-producer"* ]]; then
     cat <<EOF > $CONFIG_DIR/org.opennms.features.kafka.producer.client.cfg
 bootstrap.servers=$KAFKA_SERVER:9092
-compression.type=zstd
+acks=1
+linger.ms=5
+compression.type=gzip
 timeout.ms=30000
 max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 state.dir=/opennms-data/kafka
