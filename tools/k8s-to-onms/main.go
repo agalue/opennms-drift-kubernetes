@@ -1,13 +1,13 @@
 package main
 
 import (
+    "encoding/xml"
 	"context"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 
-	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -146,8 +146,8 @@ func main() {
 		}
 	}
 	if *show {
-		yamlBytes, _ := yaml.Marshal(&req)
-		log.Printf("Generated requisition:\n%s", string(yamlBytes))
+		xmlBytes, _ := xml.MarshalIndent(&req, "", "  ")
+		log.Printf("Generated requisition:\n%s", string(xmlBytes))
 	} else {
 		svc := services.GetRequisitionsAPI(rest.Instance)
 		err = svc.SetRequisition(req)
