@@ -1,15 +1,10 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # WARNING:
-# - This solution expose 9094 on the k8s worker node.
-#   That means, kafka can be scaled up to the number of workers on the k8s cluster.
+# - The cluster is not exposed to the Internet.
 # - The kafka process runs as root, which is not allowed on OpenShift.
 # - KAFKA_DEFAULT_REPLICATION_FACTOR should be consistent with the number of replicas.
 # - KAFKA_NUM_PARTITIONS should be greater than the number of replicas.
-#
-# TODO:
-# - For TLS, the advertised.listener on port 9094 should be the public FQDN of the K8S host.
-#   The reason for this is that all the certificates must be associated with that FQDN.
 
 ---
 apiVersion: v1

@@ -5,11 +5,6 @@
 # - Make sure to tune the max_connections to accomodate ONMS, Sentinels servers, UI servers and Grafana.
 # - Make sure to tune the rest of the settings based on https://pgtune.leopard.in.ua/#/
 # - The postgres user (uid: 999, gid: 999) cannot be used in OpenShift by default.
-#
-# TODO:
-# - Use a simple approach to manage a cluster: add an init-container that configures master/slave
-# - Use an advanced approach to manage a cluster: https://github.com/zalando-incubator/postgres-operator
-# - Use barman to keep a backup of the DB and rebuild the server in case of data corruption
 
 ---
 apiVersion: v1

@@ -141,10 +141,10 @@ spec:
           mountPath: /usr/share/elasticsearch/plugins/drift
         resources:
           limits:
-            cpu: 4
+            cpu: '4'
             memory: 4Gi
           requests:
-            cpu: 2
+            cpu: '2'
             memory: 2Gi
         readinessProbe:
           tcpSocket:
