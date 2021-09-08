@@ -44,9 +44,7 @@ az network dns zone create -g "$GROUP" -n "$DOMAIN"
 
 This is required so the Ingress Controller and CertManager can use custom FQDNs for all the different services.
 
-## Cluster Creation
-
-> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription (which has a limitation of 20 vCPUs). If you need further limitations, use the `aks-reduced` folder as inspiration, and create a copy of it with your desired settings. The minimal version is what `minikube` would use.
+## Service Principal
 
 Create a service principal account, and extract the service principal ID (or `appId`) and the client secret (or `password`):
 
@@ -64,7 +62,22 @@ export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
 
 The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you. For more information about service principals, follow [this](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal) link.
 
-> **INFO**: When the resource group to use for the AKS cluster is new, you might omit the creation of the service principal account.
+> **INFO**: When the resource group to use for the AKS cluster is new, you might omit to create the service principal account, as it will ve created for you (if your account has enough privileges).
+
+As explained [here](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal?tabs=azure-cli) the SP must have the Contributor role for the chosen resource group so AKS can create resources on your behalf like Load Balancers, Volumes, and so on.
+
+However, you must have enough privileges to assign the roles, like the following:
+
+```bash
+GROUP_ID=$(az group show -g "$GROUP" | jq -r .id)
+az role assignment create --assignee $SERVICE_PRINCIPAL --scope $GROUP_ID --role Contributor
+```
+
+If not, please get in touch with your Azure Administrator so they can create the SP with the appropriate role for you. Remember that you need the `appId` and `password` as mentioned above to create the AKS cluster.
+
+## Cluster Creation
+
+> **WARNING**: Make sure you have enough quota on your Azure to create all the resources. Be aware that trial accounts cannot request quota changes. A reduced version is available in order to test the deployment, based on the `Visual Studio Enterprise` Subscription (which has a limitation of 20 vCPUs). If you need further limitations, use the `aks-reduced` folder as inspiration, and create a copy of it with your desired settings. The minimal version is what `minikube` would use.
 
 With enough quota:
 
@@ -113,12 +126,12 @@ az aks create --name "$USER-opennms" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
   --nodepool-name "$USER" \
-  --nodepool-tags Owner="$USER" \
+  --nodepool-tags "Owner=$USER" \
   --network-plugin azure \
   --network-policy azure \
   --ssh-key-value ~/.ssh/id_rsa.pub \
   --admin-username "$USER" \
-  --tags Owner="$USER" \
+  --tags "Owner=$USER" \
   --output table
 ```
 
