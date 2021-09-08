@@ -11,6 +11,12 @@
 # - convert nodes from protobuf to JSON
 # - convert alarms from protobuf to JSON
 # - KSQL server to generate enriched version of alarms associated with nodes
+#
+# It is advised to create the topics when Kafka starts. Within kafka.yaml, add the following to KAFKA_CREATE_TOPICS:
+# $(INSTANCE_ID)_nodes_json:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
+# $(INSTANCE_ID)_nodes_json_flat:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
+# $(INSTANCE_ID)_alarms_json:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
+# $(INSTANCE_ID)_alarms_json_flat:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
 
 ---
 apiVersion: apps/v1

@@ -5,6 +5,8 @@
 # - The kafka process runs as root, which is not allowed on OpenShift.
 # - KAFKA_DEFAULT_REPLICATION_FACTOR should be consistent with the number of replicas.
 # - KAFKA_NUM_PARTITIONS should be greater than the number of replicas.
+# - zstd compression is not supported on this image:
+#   https://github.com/wurstmeister/kafka-docker/issues/669
 
 ---
 apiVersion: v1
@@ -72,10 +74,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: K8S_HOST
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
         - name: BROKER_ID_COMMAND
           value: echo ${HOSTNAME##*-}
         - name: KAFKA_LISTENERS
@@ -144,14 +142,10 @@ spec:
               name: common-settings
         - name: KAFKA_CREATE_TOPICS_SEPARATOR
           value: "$$'\n'"
-        - name: KAFKA_CREATE_TOPICS # Must match ALEC and OpenNMS settings
+        - name: KAFKA_CREATE_TOPICS # Must match ALEC and OpenNMS settings (required by ALEC)
           value: |
             $(INSTANCE_ID)_nodes:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
-            $(INSTANCE_ID)_nodes_json:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
-            $(INSTANCE_ID)_nodes_json_flat:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
             $(INSTANCE_ID)_alarms:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
-            $(INSTANCE_ID)_alarms_json:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
-            $(INSTANCE_ID)_alarms_json_flat:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
             $(INSTANCE_ID)_alarms_feedback:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
             $(INSTANCE_ID)_alec_inventory:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
             $(INSTANCE_ID)_edges:$(KAFKA_NUM_PARTITIONS):$(KAFKA_DEFAULT_REPLICATION_FACTOR)
