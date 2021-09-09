@@ -75,7 +75,7 @@ spec:
       # Initializes/Updates OpenNMS Configuration
       # Requires the same image/version used at runtime: horizon
       - name: init-config
-        image: opennms/horizon:28.0.2
+        image: opennms/horizon:28.1.0
         imagePullPolicy: IfNotPresent
         command: [ bash, /init.sh ]
         env:
@@ -171,7 +171,7 @@ spec:
           mountPath: /opennms-etc
       containers:
       - name: onms
-        image: opennms/horizon:28.0.2
+        image: opennms/horizon:28.1.0
         imagePullPolicy: IfNotPresent
         args:
         - -s
