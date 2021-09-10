@@ -145,12 +145,6 @@ ip-172-20-62-60.us-east-2.compute.internal   node   True
 Your cluster aws.agalue.net is ready
 ```
 
-If you have issues, execute the following and then try again:
-
-```
-kops export kubecfg --admin
-```
-
 Or,
 
 ```bash
@@ -164,6 +158,12 @@ Kubernetes master is running at https://api.aws.agalue.net
 CoreDNS is running at https://api.aws.agalue.net/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+```
+
+If you have issues, execute the following and then try again:
+
+```
+kops export kubecfg --admin
 ```
 
 ## Install the Ingress Controller
