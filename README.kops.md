@@ -100,14 +100,6 @@ spec:
 
 The above is to avoid setting up `external-dns`, but if you're familiar with that controller, you're welcome to use it.
 
-While on edit mode, optionally, enable `CoreDNS` instead of `KubeDNS` (the default) by adding:
-
-```yaml
-spec:
-  kubeDNS:
-    provider: CoreDNS
-```
-
 Optionally, if there is a need for having `metrics-server` running, add the following under the `kubelet` section:
 
 ```yaml
@@ -122,7 +114,7 @@ spec:
 Finally, apply the changes to create the cluster:
 
 ```bash
-kops update cluster --yes
+kops update cluster --admin --yes
 ```
 
 The creation process takes between 10 to 15 minutes to complete. You can verify the status using `kubectl` and `kops`:
