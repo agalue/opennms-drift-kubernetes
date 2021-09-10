@@ -4,7 +4,7 @@
 
 * Install the [AWS CLI](https://aws.amazon.com/cli/).
 * Have your AWS account (IAM Credentials) configured on your system (`~/.aws/credentials`).
-* Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary; version 1.20.x or newer recommended.
+* Install the [kOps](https://github.com/kubernetes/kops/blob/master/docs/install.md) binary; version 1.21.x or newer recommended.
 
 > **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21 or newer. If you're going to use and older version, please adjust the API versions of the manifests for `CronJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml), and `Ingress` in [external-access.yaml](manifests/external-access.yaml).
 
