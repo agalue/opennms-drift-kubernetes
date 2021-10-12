@@ -1,5 +1,9 @@
 # @author Alejandro Galue <agalue@opennms.org>
 # Source: https://github.com/agalue/onms-grpc-server/
+#
+# WARNING:
+# - Connection is encrypted, but there is no authentication in place.
+#   Any minion can connect to it, which is not ideal.
 
 ---
 apiVersion: v1
