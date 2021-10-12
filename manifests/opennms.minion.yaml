@@ -180,7 +180,7 @@ spec:
               resource: requests.memory
               divisor: 1Mi
         - name: JAVA_OPTS
-          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+UseStringDeduplication
         - name: MAX_FD # Maximum File Descriptors
           value: '65536'
         ports:
@@ -190,7 +190,7 @@ spec:
         - containerPort: 1514
           protocol: UDP
           name: syslog
-        - containerPort: 8101
+        - containerPort: 8181
           protocol: TCP
           name: http
         - containerPort: 8201

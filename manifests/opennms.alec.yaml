@@ -125,7 +125,7 @@ spec:
               resource: requests.memory
               divisor: 1Mi
         - name: JAVA_OPTS
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+UseStringDeduplication
         volumeMounts:
         - name: etc-overlay
           mountPath: /opt/sentinel-etc-overlay

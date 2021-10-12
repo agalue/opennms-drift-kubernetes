@@ -215,7 +215,7 @@ spec:
               resource: requests.memory
               divisor: 1Mi
         - name: JAVA_OPTS
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -Dcom.datastax.driver.FORCE_NIO=true
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+UseStringDeduplication -Dcom.datastax.driver.FORCE_NIO=true
         - name: MAX_FD # Maximum File Descriptors
           value: '65536'
         volumeMounts:
@@ -226,7 +226,7 @@ spec:
             cpu: '1'
             memory: 2Gi
           requests:
-            cpu: 500m
+            cpu: 750m
             memory: 1Gi
         readinessProbe:
           exec:

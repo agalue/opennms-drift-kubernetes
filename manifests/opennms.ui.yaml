@@ -149,8 +149,10 @@ spec:
             resourceFieldRef:
               resource: requests.memory
               divisor: 1Mi
+        - name: JMX_PORT
+          value: '18980'
         - name: JAVA_OPTS # Preferred way instead of opennms.conf
-          value: -XX:+UseG1GC -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m
+          value: -Xms$(MEM_TOTAL_MB)m -Xmx$(MEM_TOTAL_MB)m -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+UseStringDeduplication -Dcom.sun.management.jmxremote.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.rmi.port=$(JMX_PORT) -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true
         - name: POSTGRES_HOST
           value: postgresql.opennms.svc.cluster.local
         - name: POSTGRES_PORT
