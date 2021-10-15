@@ -153,6 +153,7 @@ EOF
 cat <<EOF > ${CONFIG_DIR}/opennms.properties.d/webui.properties
 opennms.web.base-url=https://%x%c/
 org.opennms.security.disableLoginSuccessEvent=true
+org.opennms.web.defaultGraphPeriod=last_2_hour
 EOF
 
 # Enable OSGi features

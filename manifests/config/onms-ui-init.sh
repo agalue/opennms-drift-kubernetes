@@ -115,6 +115,7 @@ opennms.web.base-url=https://%x%c/
 opennms.report.scheduler.enabled=false
 org.opennms.security.disableLoginSuccessEvent=true
 org.opennms.web.console.centerUrl=/status/status-box.jsp,/geomap/map-box.jsp,/heatmap/heatmap-box.jsp
+org.opennms.web.defaultGraphPeriod=last_2_hour
 EOF
 
 # Guard against allowing administration changes through the WebUI
