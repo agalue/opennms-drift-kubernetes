@@ -98,18 +98,6 @@ export AKS_VM_SIZE=Standard_DS3_v2
 Then,
 
 ```bash
-az network vnet create -g "$GROUP" \
-  --name "$USER-k8s-vnet" \
-  --address-prefix "13.0.0.0/24" \
-  --subnet-name "main" \
-  --subnet-prefix "13.0.0.0/24" \
-  --tags Owner=$USER \
-  --output table
-
-SUBNET_ID=$(az network vnet subnet show -g "$GROUP" \
-    --vnet-name "$USER-k8s-vnet" \
-    --name "main" | jq -r .id)
-
 VERSION=$(az aks get-versions \
     --location "$LOCATION" \
     --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion' \
@@ -119,7 +107,6 @@ az aks create --name "$USER-opennms" \
   --resource-group "$GROUP" \
   --service-principal "$SERVICE_PRINCIPAL" \
   --client-secret "$CLIENT_SECRET" \
-  --vnet-subnet-id "$SUBNET_ID" --skip-subnet-role-assignment \
   --dns-name-prefix "$USER-opennms" \
   --kubernetes-version "$VERSION" \
   --location "$LOCATION" \
@@ -137,7 +124,7 @@ az aks create --name "$USER-opennms" \
 
 Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.
 
-> **WARNING**: The reason for explicitly creating a subnet is to show all the necessary steps involved when policy-based restrictions exist like all the resources must be tagged (see tag `Owner` as an example here). Unfortunately, due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail. If your subscription has a Tag Policy in place, I recommend using the Azure Portal to create the cluster, but only if you have permission to perform `Microsoft.Authorization/roleAssigments/write` for the subnet you're planning to use.
+> **WARNING**: Unfortunately, due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail if your subscription has a Tag Policy in place (a policy that enforced having tags on every resource on a given resource group).
 
 To validate the cluster:
 
