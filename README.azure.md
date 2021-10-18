@@ -124,6 +124,24 @@ az aks create --name "$USER-opennms" \
 
 Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.
 
+Due to the chosen network plugin (to use `NetworkPolicy` resources), the above will create a VNet. You could use an existing one, but you'd need to pass the subnet ID to the above command using `--vnet-subnet-id`, for instance:
+
+```bash
+az network vnet create -g "$GROUP" \
+  --name "$USER-k8s-vnet" \
+  --address-prefix "13.0.0.0/24" \
+  --subnet-name "main" \
+  --subnet-prefix "13.0.0.0/24" \
+  --tags Owner=$USER \
+  --output table
+
+SUBNET_ID=$(az network vnet subnet show -g "$GROUP" \
+    --vnet-name "$USER-k8s-vnet" \
+    --name "main" | jq -r .id)
+```
+
+Or, remove that feature (`--network-plugin` and `--network-policy`) and use the limited default networking.
+
 > **WARNING**: Unfortunately, due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail if your subscription has a Tag Policy in place (a policy that enforced having tags on every resource on a given resource group).
 
 To validate the cluster:
