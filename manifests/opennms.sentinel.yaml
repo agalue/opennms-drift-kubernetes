@@ -223,17 +223,17 @@ spec:
           mountPath: /opt/sentinel-etc-overlay
         resources: # When Cassandra is used, allow enough memory for the resource cache and the ring buffer
           limits:
-            cpu: '1'
-            memory: 2Gi
-          requests:
             cpu: 750m
-            memory: 1Gi
+            memory: 3Gi
+          requests:
+            cpu: 500m
+            memory: 2Gi
         readinessProbe:
           exec:
             command:
             - /health.sh
-          initialDelaySeconds: 30
-          periodSeconds: 10
+          initialDelaySeconds: 60
+          periodSeconds: 15
         livenessProbe: # WARNING: The health-check checks dependencies, which is not suitable for liveness probes
           exec:
             command:
