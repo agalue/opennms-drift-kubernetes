@@ -40,6 +40,7 @@ echo "Configuring Features..."
 
 cat <<EOF > ${FEATURES_DIR}/alec.boot
 sentinel-core
+sentinel-coordination-zookeeper
 alec-sentinel-distributed wait-for-kar=opennms-alec-plugin
 EOF
 
@@ -48,10 +49,6 @@ if [[ ${ZOOKEEPER_SERVER} ]]; then
 
   cat <<EOF > ${OVERLAY}/org.opennms.features.distributed.coordination.zookeeper.cfg
 connectString=${ZOOKEEPER_SERVER}:2181
-EOF
-
-  cat <<EOF > ${FEATURES_DIR}/zk.boot
-sentinel-coordination-zookeeper
 EOF
 fi
 
