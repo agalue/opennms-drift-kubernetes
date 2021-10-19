@@ -112,12 +112,11 @@ az aks create --name "$USER-opennms" \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
-  --nodepool-name "$USER" \
-  --nodepool-tags "Owner=$USER" \
   --network-plugin azure \
   --network-policy azure \
   --ssh-key-value ~/.ssh/id_rsa.pub \
   --admin-username "$USER" \
+  --nodepool-tags "Owner=$USER" \
   --tags "Owner=$USER" \
   --output table
 ```
