@@ -223,7 +223,7 @@ ingress-nginx-controller   LoadBalancer   10.0.83.198   40.117.237.217   80:3066
 Create a wildcard DNS entry on your DNS Zone to point to the `EXTERNAL-IP`; for example:
 
 ```bash
-export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+export NGINX_EXTERNAL_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
 az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
 ```
@@ -232,7 +232,7 @@ az network dns record-set a add-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX
 
 ## Cleanup
 
-To remove the A Records from the DNS Zone:
+To remove the A Records from the DNS Zone (using `NGINX_EXTERNAL_IP` from the above section):
 
 ```bash
 az network dns record-set a remove-record -g "$GROUP" -z "$DOMAIN" -n "*" -a $NGINX_EXTERNAL_IP
