@@ -31,6 +31,8 @@ ipc:
       entriesAllowedOnHeap: 100000
       offHeapFilePath: ""
 
+# All the following is optional and exists for demo purposes.
+
 # Flow Processing
 telemetry:
   flows:

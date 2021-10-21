@@ -87,12 +87,12 @@ spec:
         - name: CONSUMER_SASL_USERNAME
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_USERNAME
+              key: KAFKA_CLIENT_USER
               name: onms-passwords
         - name: CONSUMER_SASL_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_PASSWORD
+              key: KAFKA_CLIENT_PASSWORD
               name: onms-passwords
         - name: CONSUMER_AUTO_OFFSET_RESET
           value: latest
@@ -106,12 +106,12 @@ spec:
         - name: PRODUCER_SASL_USERNAME
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_USERNAME
+              key: KAFKA_CLIENT_USER
               name: onms-passwords
         - name: PRODUCER_SASL_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_PASSWORD
+              key: KAFKA_CLIENT_PASSWORD
               name: onms-passwords
         - name: PRODUCER_MESSAGE_MAX_BYTES
           value: '5000000'

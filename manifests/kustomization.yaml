@@ -8,6 +8,7 @@ resources:
 - postgresql.yaml
 - zookeeper.yaml
 - kafka.yaml
+- kafka.alec.yaml
 - kafka.manager.yaml
 - kafka.producer.enhancer.yaml
 - cassandra.yaml
@@ -34,6 +35,7 @@ resources:
 configMapGenerator:
 - name: init-scripts
   files:
+  - config/create-topics.sh
   - config/grafana-init.sh
   - config/helm-init.sh
   - config/onms-alec-init.sh
@@ -53,12 +55,11 @@ configMapGenerator:
   - ELASTIC_REPLICATION_FACTOR=2
   - ELASTIC_NUM_SHARDS=6
   - KAFKA_NUM_PARTITIONS=6
+  - KAFKA_REPLICATION_FACTOR=2
   - MINION_LOCATION=Kubernetes
 
 secretGenerator:
 - name: onms-passwords
-  files:
-  - config/kafka-jaas.conf
   literals:
   - POSTGRES_PASSWORD=postgres
   - OPENNMS_DB_PASSWORD=opennms
@@ -72,9 +73,10 @@ secretGenerator:
   - KAFKA_MANAGER_USERNAME=opennms
   - KAFKA_MANAGER_PASSWORD=0p3nNMS
   - HASURA_GRAPHQL_ACCESS_KEY=0p3nNMS
-  # Make sure the following matches config/kafka-jaas.conf
-  - KAFKA_SASL_USERNAME=opennms
-  - KAFKA_SASL_PASSWORD=0p3nNM5
+  - KAFKA_CLIENT_USER=opennms
+  - KAFKA_CLIENT_PASSWORD=0p3nNM5
+  - KAFKA_INTER_BROKER_USER=kafka
+  - KAFKA_INTER_BROKER_PASSWORD=K@fk@
 
 generatorOptions:
   disableNameSuffixHash: true

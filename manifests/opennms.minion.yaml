@@ -129,12 +129,12 @@ spec:
         - name: KAFKA_SASL_USERNAME
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_USERNAME
+              key: KAFKA_CLIENT_USER
               name: onms-passwords
         - name: KAFKA_SASL_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_PASSWORD
+              key: KAFKA_CLIENT_PASSWORD
               name: onms-passwords
         - name: JAEGER_AGENT_HOST # Should be consistent with jaeger.yaml
           value: onms-tracing-agent.opennms.svc.cluster.local
@@ -278,12 +278,12 @@ spec:
         - name: KAFKA_SASL_USERNAME
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_USERNAME
+              key: KAFKA_CLIENT_USER
               name: onms-passwords
         - name: KAFKA_SASL_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_PASSWORD
+              key: KAFKA_CLIENT_PASSWORD
               name: onms-passwords
         ports:
         - containerPort: 50002

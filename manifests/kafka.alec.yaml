@@ -1,0 +1,77 @@
+# @author Alejandro Galue <agalue@opennms.org>
+#
+# A one time Job to create the Kafka Topics required by ALEC
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-init
+  namespace: opennms
+  labels:
+    app: alec
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      # Wait for all the dependencies
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092
+        - name: TIMEOUT
+          value: '900'
+      containers:
+      - name: init-config
+        image: bitnami/kafka:2.8.1
+        imagePullPolicy: IfNotPresent
+        command:
+        - bash
+        - create-topics.sh
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: KAFKA_SERVER
+          value: kafka.opennms.svc.cluster.local
+        - name: KAFKA_CLIENT_USER
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_CLIENT_USER
+              name: onms-passwords
+        - name: KAFKA_CLIENT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_CLIENT_PASSWORD
+              name: onms-passwords
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: CREATE_TOPICS # Must match ALEC and OpenNMS settings (required by ALEC)
+          value: $(INSTANCE_ID)_nodes $(INSTANCE_ID)_alarms $(INSTANCE_ID)_alarms_feedback $(INSTANCE_ID)_alec_inventory $(INSTANCE_ID)_edges
+        - name: KAFKA_CFG_DEFAULT_REPLICATION_FACTOR
+          valueFrom: # Must be consistent with the cluster size
+            configMapKeyRef:
+              key: KAFKA_REPLICATION_FACTOR
+              name: common-settings
+        - name: KAFKA_CFG_NUM_PARTITIONS # Must be greater than the number of Minions per location
+          valueFrom: # Must be consistent with the chosen amount of replicas
+            configMapKeyRef:
+              key: KAFKA_NUM_PARTITIONS
+              name: common-settings
+        volumeMounts:
+        - name: init-scripts
+          mountPath: /create-topics.sh
+          subPath: create-topics.sh
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: init-scripts

@@ -114,7 +114,7 @@ ${KAFKA_SASL}
 max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 acks=1
 linger.ms=5
-compression.type=gzip
+compression.type=zstd
 EOF
 
   cat <<EOF > ${OVERLAY}/org.opennms.core.ipc.rpc.kafka.cfg
@@ -132,7 +132,7 @@ auto.offset.reset=latest
 max.request.size=${KAFKA_MAX_MESSAGE_SIZE}
 acks=0
 linger.ms=5
-compression.type=gzip
+compression.type=zstd
 EOF
 
   cat <<EOF > ${FEATURES_DIR}/kafka.boot
