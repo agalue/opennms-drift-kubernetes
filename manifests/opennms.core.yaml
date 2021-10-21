@@ -110,12 +110,12 @@ spec:
         - name: KAFKA_SASL_USERNAME
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_USERNAME
+              key: KAFKA_CLIENT_USER
               name: onms-passwords
         - name: KAFKA_SASL_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: KAFKA_SASL_PASSWORD
+              key: KAFKA_CLIENT_PASSWORD
               name: onms-passwords
         - name: ELASTIC_SERVER
           value: esdata.opennms.svc.cluster.local
