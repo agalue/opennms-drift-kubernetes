@@ -43,6 +43,8 @@ spec:
         app: kafka
     spec:
       terminationGracePeriodSeconds: 300
+      securityContext: # In order to be able to write data as non-root on the volumes
+        fsGroup: 1001 # Default kafka user
       initContainers:
       - name: dependencies
         image: waisbrot/wait
