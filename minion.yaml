@@ -23,8 +23,10 @@ system:
 ipc:
   grpc:
     host: "grpc.aws.agalue.net"
-    tls.enabled: "true"
     port: "443"
+    tls.enabled: "true"
+    properties:
+      client.cert.filepath: /opt/minion/etc/client.pem
   sink:
     offheap:
       offHeapSize: "128MB"

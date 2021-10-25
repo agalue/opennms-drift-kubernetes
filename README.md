@@ -59,6 +59,8 @@ For instance, for `AWS` using the domain `aws.agalue.net`, the resources should 
 For example:
 
 ```bash
+kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > minion.pem
+
 docker run --name minion \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
@@ -67,6 +69,7 @@ docker run --name minion \
  -p 1162:1162/udp \
  -p 8877:8877/udp \
  -p 11019:11019 \
+ -v $(pwd)/minion.pem:/opt/minion/etc/client.pem \
  -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
  opennms/minion:28.1.1 -c
 ```

@@ -6,24 +6,6 @@
 # WARNING:
 # Please use your own domains. This is not intended to be used by any user.
 
-# For cloud providers / public access
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: letsencrypt-prod
-  namespace: opennms
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: agalue@opennms.org # Warning: use your own email
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    solvers:
-    - http01:
-        ingress:
-          class: nginx
-
 # Access to applications based on HTTP
 ---
 apiVersion: networking.k8s.io/v1
@@ -152,22 +134,6 @@ spec:
                   number: 16686
 
 # Access to applications based on gRPC
-
-# Enable client certificate authentication
-# nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-#
-# Create the secret containing the trusted ca certificates
-# nginx.ingress.kubernetes.io/auth-tls-secret: "default/ca-secret"
-#
-# Specify the verification depth in the client certificates chain
-# nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-#
-# Specify an error page to be redirected to verification errors
-# nginx.ingress.kubernetes.io/auth-tls-error-page: "http://www.mysite.com/error-cert.html"
-#
-# Specify if certificates are passed to upstream server
-# nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -179,6 +145,10 @@ metadata:
     cert-manager.io/issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-secret: "opennms/minion-cert"
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+    nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "false"
 spec:
   tls:
     - secretName: grpc-ingress-cert

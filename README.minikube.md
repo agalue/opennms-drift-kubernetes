@@ -94,6 +94,7 @@ From the directory on which you checked out this repository, do the following:
 ```bash
 sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
 
+kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > minion.pem
 kubectl get secret onms-ca -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > onms-ca.pem
 keytool -importcert -alias onms-ca -file onms-ca.pem -storepass 0p3nNM5 -keystore onms-ca-trust.jks -noprompt
 
@@ -107,6 +108,7 @@ docker run --name minion \
  -p 8877:8877/udp \
  -p 11019:11019 \
  -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
+ -v $(pwd)/minion.pem:/opt/minion/etc/client.pem \
  -v $(pwd)/onms-ca-trust.jks:/opt/minion-etc-overlay/onms-ca-trust.jks \
  opennms/minion:28.1.1 -c
 ```
