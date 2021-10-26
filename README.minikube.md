@@ -15,20 +15,15 @@ For this reason, we use `kustomize` to generate a reduced version of the templat
 Start minikube with the following recommended settings:
 
 ```bash
-K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[].tag_name' | head -n 1)
-
 minikube start --cpus=8 --memory=32g --disk-size=60g \
   --cni=calico \
   --container-runtime=containerd \
   --addons=ingress \
   --addons=ingress-dns \
-  --addons=metrics-server \
-  --kubernetes-version=$K8S_VER
+  --addons=metrics-server
 ```
 
 > **IMPORTANT**: on macOS, it is better to use Hyperkit rather than VirtualBox, as I found it a lot faster to work with. You can enforce it by passing `--driver hyperkit`.
-
-It could about 15 minutes to have all the components up and running compared to cloud-based solutions (as we have one node, despite the resource reduction), which is why I encourage you to use a cloud-based solution or a bare-metal Kubernetes cluster.
 
 Depending on the version you're running, you might encounter problems when creating ingress resources due to admission control validations. The following is a workaround you could use:
 
@@ -55,11 +50,13 @@ kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator
 
 ## Manifets
 
-Once `minikube` is running, execute the following to apply a reduced version of the original YAML files located at the [manifests](manifests) directory, that fits the suggested settings.
+Execute the following to apply a reduced version of the original YAML files located at the [manifests](manifests) directory, that fits the suggested settings.
 
 ```bash
 kubectl apply -k minikube
 ```
+
+It could about 15 minutes to have all the components up and running compared to cloud-based solutions (as we have one node, despite the resource reduction), which is why I encourage you to use a cloud-based solution or a bare-metal Kubernetes cluster.
 
 ## Install Jaeger Tracing
 
