@@ -115,9 +115,10 @@ docker run --name minion \
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. The above requires using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
-# minion-minikube.yaml
+# Cleanup
 
 ```bash
+sudo rm -f /etc/resolver/minikube-default-test
 minikube delete
-rm minikube-trust.jks minion-minikube.yaml
+rm -f *.pem *.jks minion-minikube.yaml
 ```
