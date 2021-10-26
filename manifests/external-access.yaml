@@ -146,7 +146,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: GRPC
     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-    nginx.ingress.kubernetes.io/auth-tls-secret: "opennms/minion-cert"
+    nginx.ingress.kubernetes.io/auth-tls-secret: "opennms/onms-ca"
     nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "false"
 spec:

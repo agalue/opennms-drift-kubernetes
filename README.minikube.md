@@ -91,10 +91,8 @@ From the directory on which you checked out this repository, do the following:
 ```bash
 sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
 
-kubectl get secret minion-cert -n opennms -o json | jq -r '.data["ca.crt"]' | base64 --decode > ca.pem
 kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > client.pem
 kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.key"]' | base64 --decode > client-key.pem
-
 openssl pkcs8 -topk8 -nocrypt -in client-key.pem -out client-pkcs8_key.pem
 
 kubectl get secret onms-ca -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > onms-ca.pem
@@ -111,7 +109,6 @@ docker run --name minion \
  -p 11019:11019 \
  -v $(pwd)/client.pem:/opt/minion/etc/client.pem \
  -v $(pwd)/client-pkcs8_key.pem:/opt/minion/etc/client-key.pem \
- -v $(pwd)/ca.pem:/opt/minion/etc/ca.pem \
  -v $(pwd)/onms-ca-trust.jks:/opt/minion/onms-ca-trust.jks \
  -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
  opennms/minion:28.1.1 -c
