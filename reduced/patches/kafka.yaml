@@ -13,14 +13,10 @@ spec:
       containers:
       - name: kafka
         env:
-        - name: HOSTNAME_COMMAND
-          value: echo ${K8S_HOST}
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
           value: '1'
         - name: KAFKA_MIN_INSYNC_REPLICAS
           value: '1'
-        - name: KAFKA_CREATE_TOPICS
-          $patch: delete
         resources:
           limits:
             memory: 1Gi

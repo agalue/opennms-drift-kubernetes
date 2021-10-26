@@ -15,5 +15,3 @@ kind: Deployment
 metadata:
   name: hasura
   namespace: opennms
-spec:
-  replicas: 0

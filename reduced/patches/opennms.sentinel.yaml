@@ -1,14 +1,12 @@
 # @author Alejandro Galue <agalue@opennms.org>
 
 ---
+$patch: delete
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: sentinel
   namespace: opennms
-spec:
-  maxReplicas: 1
-  minReplicas: 1
 
 ---
 apiVersion: apps/v1
