@@ -1,13 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
-#
-# Warning: this excludes Cassandra to reduce the overhead on Minikube
 
 ---
 bases:
 - ../reduced
-
-resources:
-- self-signed.yaml
 
 patchesStrategicMerge:
 - patches/common-settings.yaml

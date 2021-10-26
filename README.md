@@ -59,6 +59,10 @@ For instance, for `AWS` using the domain `aws.agalue.net`, the resources should 
 For example:
 
 ```bash
+kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > client.pem
+kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.key"]' | base64 --decode > client-key.pem
+openssl pkcs8 -topk8 -nocrypt -in client-key.pem -out client-pkcs8_key.pem
+
 docker run --name minion \
  -e OPENNMS_HTTP_USER=admin \
  -e OPENNMS_HTTP_PASS=admin \
@@ -67,6 +71,8 @@ docker run --name minion \
  -p 1162:1162/udp \
  -p 8877:8877/udp \
  -p 11019:11019 \
+ -v $(pwd)/client.pem:/opt/minion/etc/client.pem \
+ -v $(pwd)/client-pkcs8_key.pem:/opt/minion/etc/client-key.pem \
  -v $(pwd)/minion.yaml:/opt/minion/minion-config.yaml \
  opennms/minion:28.1.1 -c
 ```
@@ -76,6 +82,54 @@ docker run --name minion \
 > **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
 
 > **CRITICAL**: If you're planning to use the UDP Listeners (Telemetry, Flows, SNMP Traps, Syslog), and you're going to use Docker, make sure to do it on a server running Linux, not a VM, Docker for Mac or Docker for Windows, because of the reasons explained [here](https://opennms.discourse.group/t/running-in-docker-and-receiving-flows-traps-or-syslog-messages-over-udp/1103).
+
+When troubleshoting mTLS with gRPC, the following can help:
+
+```bash
+curl -o ipc.proto https://raw.githubusercontent.com/OpenNMS/opennms/master/core/ipc/grpc/common/src/main/proto/ipc.proto 2>/dev/null
+grpcurl -v --key client-key.pem --cert client.pem --proto ipc.proto grpc.aws.agalue.net:443 OpenNMSIpc/RpcStreaming
+```
+
+A correct output would look like this:
+
+```
+Resolved method descriptor:
+// Streams RPC messages between OpenNMS and Minion.
+rpc RpcStreaming ( stream .RpcResponseProto ) returns ( stream .RpcRequestProto );
+
+Request metadata to send:
+(empty)
+
+Response headers received:
+(empty)
+
+Response trailers received:
+content-length: 0
+content-type: application/grpc
+date: Tue, 26 Oct 2021 20:24:31 GMT
+strict-transport-security: max-age=15724800; includeSubDomains
+Sent 0 requests and received 0 responses
+```
+
+If there you don't specify the client certificate and key, you'll get:
+
+```
+Resolved method descriptor:
+// Streams RPC messages between OpenNMS and Minion.
+rpc RpcStreaming ( stream .RpcResponseProto ) returns ( stream .RpcRequestProto );
+
+Request metadata to send:
+(empty)
+
+Response trailers received:
+(empty)
+Sent 0 requests and received 0 responses
+ERROR:
+  Code: Internal
+  Message: Bad Request: HTTP status code 400; transport: received the unexpected content-type "text/html"
+```
+
+Which is what's expected according to the Ingress Nginx documentation.
 
 ## Users Resources
 

@@ -29,6 +29,7 @@ resources:
 - grpc-server.yaml
 - hasura.yaml
 - jaeger.yaml
+- cert-manager.yaml
 - external-access.yaml
 - event-watcher.yaml
 

@@ -15,20 +15,15 @@ For this reason, we use `kustomize` to generate a reduced version of the templat
 Start minikube with the following recommended settings:
 
 ```bash
-K8S_VER=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases | jq -r '.[].tag_name' | head -n 1)
-
 minikube start --cpus=8 --memory=32g --disk-size=60g \
   --cni=calico \
   --container-runtime=containerd \
   --addons=ingress \
   --addons=ingress-dns \
-  --addons=metrics-server \
-  --kubernetes-version=$K8S_VER
+  --addons=metrics-server
 ```
 
 > **IMPORTANT**: on macOS, it is better to use Hyperkit rather than VirtualBox, as I found it a lot faster to work with. You can enforce it by passing `--driver hyperkit`.
-
-It could about 15 minutes to have all the components up and running compared to cloud-based solutions (as we have one node, despite the resource reduction), which is why I encourage you to use a cloud-based solution or a bare-metal Kubernetes cluster.
 
 Depending on the version you're running, you might encounter problems when creating ingress resources due to admission control validations. The following is a workaround you could use:
 
@@ -55,11 +50,13 @@ kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator
 
 ## Manifets
 
-Once `minikube` is running, execute the following to apply a reduced version of the original YAML files located at the [manifests](manifests) directory, that fits the suggested settings.
+Execute the following to apply a reduced version of the original YAML files located at the [manifests](manifests) directory, that fits the suggested settings.
 
 ```bash
 kubectl apply -k minikube
 ```
+
+It could about 15 minutes to have all the components up and running compared to cloud-based solutions (as we have one node, despite the resource reduction), which is why I encourage you to use a cloud-based solution or a bare-metal Kubernetes cluster.
 
 ## Install Jaeger Tracing
 
@@ -94,6 +91,10 @@ From the directory on which you checked out this repository, do the following:
 ```bash
 sed 's/aws.agalue.net/test/' minion.yaml > minion-minikube.yaml
 
+kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > client.pem
+kubectl get secret minion-cert -n opennms -o json | jq -r '.data["tls.key"]' | base64 --decode > client-key.pem
+openssl pkcs8 -topk8 -nocrypt -in client-key.pem -out client-pkcs8_key.pem
+
 kubectl get secret onms-ca -n opennms -o json | jq -r '.data["tls.crt"]' | base64 --decode > onms-ca.pem
 keytool -importcert -alias onms-ca -file onms-ca.pem -storepass 0p3nNM5 -keystore onms-ca-trust.jks -noprompt
 
@@ -106,16 +107,19 @@ docker run --name minion \
  -p 1162:1162/udp \
  -p 8877:8877/udp \
  -p 11019:11019 \
+ -v $(pwd)/client.pem:/opt/minion/etc/client.pem \
+ -v $(pwd)/client-pkcs8_key.pem:/opt/minion/etc/client-key.pem \
+ -v $(pwd)/onms-ca-trust.jks:/opt/minion/onms-ca-trust.jks \
  -v $(pwd)/minion-minikube.yaml:/opt/minion/minion-config.yaml \
- -v $(pwd)/onms-ca-trust.jks:/opt/minion-etc-overlay/onms-ca-trust.jks \
  opennms/minion:28.1.1 -c
 ```
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. The above requires using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
-# minion-minikube.yaml
+# Cleanup
 
 ```bash
+sudo rm -f /etc/resolver/minikube-default-test
 minikube delete
-rm minikube-trust.jks minion-minikube.yaml
+rm -f *.pem *.jks minion-minikube.yaml
 ```

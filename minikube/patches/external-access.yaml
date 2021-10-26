@@ -9,7 +9,7 @@ metadata:
   name: onms-ingress
   namespace: opennms
   annotations:
-    cert-manager.io/issuer: onms-ca
+    cert-manager.io/issuer: onms-ca-issuer
 spec:
   tls:
     - secretName: opennms-ingress-cert
@@ -78,7 +78,7 @@ metadata:
   name: grpc-ingress
   namespace: opennms
   annotations:
-    cert-manager.io/issuer: onms-ca
+    cert-manager.io/issuer: onms-ca-issuer
 spec:
   tls:
     - secretName: grpc-ingress-cert
