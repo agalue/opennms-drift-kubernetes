@@ -277,7 +277,6 @@ kafkaSendQueueCapacity=1000
 numEventListenerThreads=4
 # Alarm Synchronization (Streams Application; mandatory for ALEC; requires volume to store data)
 alarmSync=true
-alarmSyncIntervalMs=300000
 # Topic Names
 nodeTopic=${INSTANCE_ID}_nodes
 alarmTopic=${INSTANCE_ID}_alarms
