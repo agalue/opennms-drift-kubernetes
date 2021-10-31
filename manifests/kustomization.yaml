@@ -18,6 +18,8 @@ resources:
 - elasticsearch.curator.yaml
 - elastic-hq.yaml
 - kibana.yaml
+- flink.yaml
+- flink.nephron.yaml
 - opennms.core.yaml
 - opennms.minion.yaml
 - opennms.sentinel.yaml
@@ -39,6 +41,7 @@ configMapGenerator:
   - config/create-topics.sh
   - config/grafana-init.sh
   - config/helm-init.sh
+  - config/nephron-build.sh
   - config/onms-alec-init.sh
   - config/onms-core-init.sh
   - config/onms-minion-init.sh

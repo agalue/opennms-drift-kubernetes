@@ -128,6 +128,8 @@ indexPrefix=${PREFIX}
 globalElasticPassword=${ELASTIC_PASSWORD}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 clockSkewCorrectionThreshold=5000
+nodeDiscovery=true
+nodeDiscoveryFrequency=3600
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}

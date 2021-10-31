@@ -105,6 +105,8 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
+        - name: USE_NEPHRON
+          value: 'true'
         - name: KAFKA_SERVER
           value: kafka.opennms.svc.cluster.local
         - name: KAFKA_SASL_USERNAME

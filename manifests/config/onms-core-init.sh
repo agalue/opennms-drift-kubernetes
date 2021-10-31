@@ -395,6 +395,8 @@ indexPrefix=${PREFIX}
 connTimeout=30000
 readTimeout=300000
 retries=1
+nodeDiscovery=true
+nodeDiscoveryFrequency=3600
 
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}

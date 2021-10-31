@@ -1,0 +1,84 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nephron
+  namespace: opennms
+spec:
+  template:
+    metadata:
+      labels:
+        app: nephron
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: init-nephron
+        image: maven:3-openjdk-11
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: NEPHRON_VERSION # A valid GitHub Tag of the Nephron Repository
+          value: v0.3.0
+        command: [ bash, /build.sh ]
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: init-scripts
+          mountPath: /build.sh
+          subPath: nephron-build.sh
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200,flink-jobmanager.opennms.svc.cluster.local:6123
+        - name: TIMEOUT
+          value: '900'
+      containers:
+      - name: jobmanager
+        image: apache/flink:1.13-java11
+        imagePullPolicy: IfNotPresent
+        args:
+        - flink
+        - run
+        - --parallelism
+        - '1'
+        - --class
+        - org.opennms.nephron.Nephron
+        - /data/nephron-flink-bundled.jar
+        - --runner=FlinkRunner
+        - --jobName=nephron
+        - --bootstrapServers=kafka.opennms.svc.cluster.local:9092
+        - --groupId=Nephron
+        - --flowSourceTopic=$(INSTANCE_ID)-opennms-flows
+        - --flowDestTopic=$(INSTANCE_ID)-openms-flows-agg
+        - --elasticUrl=http://esdata.opennms.svc.cluster.local:9200
+        - --elasticFlowIndex=netflow_agg
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: JOB_MANAGER_RPC_ADDRESS
+          value: flink-jobmanager.opennms.svc.cluster.local
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: init-scripts
+      - name: data
+        emptyDir: {}
