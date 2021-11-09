@@ -8,7 +8,7 @@ resources:
 - postgresql.yaml
 - zookeeper.yaml
 - kafka.yaml
-- kafka.alec.yaml
+- kafka.topics.yaml
 - kafka.manager.yaml
 - kafka.producer.enhancer.yaml
 - cassandra.yaml
@@ -18,6 +18,8 @@ resources:
 - elasticsearch.curator.yaml
 - elastic-hq.yaml
 - kibana.yaml
+- flink.yaml
+- flink.nephron.yaml
 - opennms.core.yaml
 - opennms.minion.yaml
 - opennms.sentinel.yaml
@@ -42,6 +44,7 @@ configMapGenerator:
   - config/onms-alec-init.sh
   - config/onms-core-init.sh
   - config/onms-minion-init.sh
+  - config/onms-nephron-init.sh
   - config/onms-sentinel-init.sh
   - config/onms-ui-init.sh
 - name: common-settings

@@ -151,6 +151,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 
 # RBAC ClusterRoleBinding to allow users of group "onms-admin" to manage persistent volumes.
+# In theory, the following is not mandatory, and for security purposes, should be avoided.
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

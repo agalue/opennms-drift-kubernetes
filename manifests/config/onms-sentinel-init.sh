@@ -82,6 +82,7 @@ name=BMP
 adapters.0.name=BMP-PeerStatus-Adapter
 adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPeerStatusAdapter
 EOF
+next_bmp_adapter=1
 
 if [[ ${ELASTIC_SERVER} ]]; then
   echo "Configuring Elasticsearch..."
@@ -128,6 +129,8 @@ indexPrefix=${PREFIX}
 globalElasticPassword=${ELASTIC_PASSWORD}
 elasticIndexStrategy=${ELASTIC_INDEX_STRATEGY_FLOWS}
 clockSkewCorrectionThreshold=5000
+nodeDiscovery=true
+nodeDiscoveryFrequency=3600
 # The following settings should be consistent with your ES cluster
 settings.index.number_of_shards=${ELASTIC_NUM_SHARDS}
 settings.index.number_of_replicas=${ELASTIC_REPLICATION_FACTOR}
@@ -169,6 +172,17 @@ bootstrap.servers=${KAFKA_SERVER}:9092
 max.partition.fetch.bytes=5000000
 ${KAFKA_SASL}
 EOF
+
+  next_bmp_adapter=$((next_bmp_adapter+1))
+  cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+adapters.$next_bmp_adapter.name=BMP-OpenBMP-Integration-Adapter
+adapters.$next_bmp_adapter.class-name=org.opennms.netmgt.telemetry.protocols.bmp.adapter.openbmp.BmpIntegrationAdapter
+adapters.$next_bmp_adapter.parameters.kafka.bootstrap.servers=${KAFKA_SERVER}:9092
+adapters.$next_bmp_adapter.parameters.kafka.security.protocol=SASL_PLAINTEXT
+adapters.$next_bmp_adapter.parameters.kafka.sasl.mechanism=PLAIN
+adapters.$next_bmp_adapter.parameters.kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+EOF
+
 
   if [[ ${USE_NEPHRON} == "true" ]]; then
     cat <<EOF > ${OVERLAY}/org.opennms.features.flows.persistence.kafka.cfg
@@ -246,9 +260,16 @@ adapters.0.class-name=org.opennms.netmgt.telemetry.protocols.graphite.adapter.Gr
 adapters.0.parameters.script=${SENTINEL_HOME}/etc/graphite-telemetry-interface.groovy
 EOF
 
+  next_bmp_adapter=$((next_bmp_adapter+1))
   cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
-adapters.1.name=BMP-Telemetry-Adapter
-adapters.1.class-name=org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
+adapters.$next_bmp_adapter.name=BMP-Telemetry-Adapter
+adapters.$next_bmp_adapter.class-name=org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpTelemetryAdapter
+EOF
+
+  next_bmp_adapter=$((next_bmp_adapter+1))
+  cat <<EOF >> ${OVERLAY}/org.opennms.features.telemetry.adapters-bmp.cfg
+adapters.$next_bmp_adapter.name=BMP-Persisting-Adapter
+adapters.$next_bmp_adapter.class-name=org.opennms.netmgt.telemetry.protocols.bmp.adapter.BmpPersistingAdapter
 EOF
 
   cat <<EOF > ${OVERLAY}/datacollection-config.xml
