@@ -21,7 +21,7 @@ spec:
         imagePullPolicy: IfNotPresent
         command:
         - sh
-        - /bin/helm-init.sh
+        - /onms-helm-init.sh
         env:
         - name: TZ
           valueFrom:
@@ -51,8 +51,8 @@ spec:
               name: onms-passwords
         volumeMounts:
         - name: init-scripts
-          mountPath: /bin/helm-init.sh
-          subPath: helm-init.sh
+          mountPath: /onms-helm-init.sh
+          subPath: onms-helm-init.sh
       volumes:
       - name: init-scripts
         configMap:
