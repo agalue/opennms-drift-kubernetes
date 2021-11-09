@@ -1,6 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# A one time Job to create the Kafka Topics required by ALEC
+# A one time Job to create the required Kafka Topics
 
 ---
 apiVersion: batch/v1
@@ -9,7 +9,7 @@ metadata:
   name: kafka-init
   namespace: opennms
   labels:
-    app: alec
+    app: kafka
 spec:
   ttlSecondsAfterFinished: 120
   template:
@@ -55,8 +55,8 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
-        - name: CREATE_TOPICS # Must match ALEC and OpenNMS settings (required by ALEC)
-          value: $(INSTANCE_ID)_nodes $(INSTANCE_ID)_alarms $(INSTANCE_ID)_alarms_feedback $(INSTANCE_ID)_alec_inventory $(INSTANCE_ID)_edges
+        - name: CREATE_TOPICS # Must match ALEC, Nephron and OpenNMS settings
+          value: $(INSTANCE_ID)_nodes $(INSTANCE_ID)_alarms $(INSTANCE_ID)_alarms_feedback $(INSTANCE_ID)_alec_inventory $(INSTANCE_ID)_edges $(INSTANCE_ID)_opennms_flows
         - name: KAFKA_CFG_DEFAULT_REPLICATION_FACTOR
           valueFrom: # Must be consistent with the cluster size
             configMapKeyRef:
