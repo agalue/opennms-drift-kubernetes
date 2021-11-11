@@ -1,18 +1,80 @@
 # @author Alejandro Galue <agalue@opennms.org>
-# GCE doesn't support K8s 1.19 in the stable channel (2021-04-01)
 
 ---
-$patch: delete
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: onms-ingress
   namespace: opennms
+spec:
+  tls:
+    - secretName: opennms-ingress-cert
+      hosts:
+        - onms.gce.agalue.net
+        - grafana.gce.agalue.net
+        - kafka-manager.gce.agalue.net
+        - tracing.gce.agalue.net
+  rules:
+    - host: onms.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: opennms-core
+                port:
+                  number: 8980
+    - host: grafana.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+    - host: kafka-manager.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kafka-manager
+                port:
+                  number: 9000
+    - host: tracing.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: onms-tracing-query
+                port:
+                  number: 16686
 
 ---
-$patch: delete
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grpc-ingress
   namespace: opennms
+spec:
+  tls:
+    - secretName: grpc-ingress-cert
+      hosts:
+        - grpc.gce.agalue.net
+  rules:
+    - host: grpc.gce.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grpc-server
+                port:
+                  number: 8990

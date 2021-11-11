@@ -62,6 +62,8 @@ spec:
             queryable-state.proxy.ports: 6125
             taskmanager.numberOfTaskSlots: 2
             parallelism.default: 2
+            web.submit.enable: false
+            web.cancel.enable: false
         ports:
         - containerPort: 6123
           name: rpc

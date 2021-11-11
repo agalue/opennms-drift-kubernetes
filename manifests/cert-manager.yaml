@@ -28,7 +28,7 @@ metadata:
 spec:
   selfSigned: {}
 
-# Root CA
+# Root private CA
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

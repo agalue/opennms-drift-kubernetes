@@ -19,6 +19,7 @@ spec:
         - kibana.azure.agalue.net
         - elastichq.azure.agalue.net
         - tracing.azure.agalue.net
+        - flink.azure.agalue.net
   rules:
     - host: onms.azure.agalue.net
       http:
@@ -117,6 +118,16 @@ spec:
                 name: onms-tracing-query
                 port:
                   number: 16686
+    - host: flink.azure.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: flink-jobmanager
+                port:
+                  number: 8081
 
 ---
 apiVersion: networking.k8s.io/v1

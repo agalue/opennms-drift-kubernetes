@@ -1,7 +1,8 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
 # With Kops, the dns-controller will automatically create entries on Route53 when --watch-ingress=true is applied.
-# With EKS, GKE and AKS, external-dns will create entries on Route53.
+# With EKS, external-dns will create entries on Route53.
+# With GKE and AKS, wildcard entries on their respective DNS services are required.
 #
 # WARNING:
 # Please use your own domains. This is not intended to be used by any user.
@@ -34,6 +35,7 @@ spec:
         - kibana.aws.agalue.net
         - elastichq.aws.agalue.net
         - tracing.aws.agalue.net
+        - flink.aws.agalue.net
   rules:
     - host: onms.aws.agalue.net
       http:
@@ -132,6 +134,16 @@ spec:
                 name: onms-tracing-query
                 port:
                   number: 16686
+    - host: flink.aws.agalue.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: flink-jobmanager
+                port:
+                  number: 8081
 
 # Access to applications based on gRPC
 ---

@@ -1,0 +1,33 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+$patch: delete
+apiVersion: v1
+kind: Service
+metadata:
+  name: flink-jobmanager
+  namespace: opennms
+
+---
+$patch: delete
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: flink-jobmanager
+  namespace: opennms
+
+---
+$patch: delete
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: flink-tm
+  namespace: opennms
+
+---
+$patch: delete
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nephron
+  namespace: opennms

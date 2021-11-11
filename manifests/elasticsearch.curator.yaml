@@ -1,4 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# This is an optional component
 
 ---
 apiVersion: v1

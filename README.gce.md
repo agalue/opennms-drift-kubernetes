@@ -8,7 +8,7 @@
 
 > **WARNING:** Please note that all the manifests were verified for Kubernetes 1.21 or newer. If you're going to use and older version, please adjust the API versions of the manifests for `CronJobs` in [elasticsearch.curator.yaml](manifests/elasticsearch.curator.yaml), `PodDisruptionBudget` in [zookeeper.yaml](manifests/zookeeper.yaml), and `Ingress` in [external-access.yaml](manifests/external-access.yaml).
 
-> **IMPORTANT:** K8s 1.21 is available in the RAPID channel.
+> **IMPORTANT:** K8s 1.21 is available in the REGULA or RAPID channel.
 
 ## Create common environment variables:
 
@@ -104,8 +104,8 @@ export GCP_VM_SIZE=n1-standard-2
 Then,
 
 ```bash
-CHANNEL="rapid"
-VERSION=$(gcloud container get-server-config --region us-east1 --format "value(channels[0].validVersions[0])")
+CHANNEL="regular"
+VERSION=$(gcloud container get-server-config --region us-east1 --format "value(channels[1].validVersions[0])")
 
 gcloud container clusters create opennms \
   --num-nodes=$GCP_NODE_COUNT \
