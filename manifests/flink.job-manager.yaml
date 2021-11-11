@@ -1,0 +1,82 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flink-jobmanager
+  namespace: opennms
+spec:
+  type: ClusterIP
+  ports:
+  - name: rpc
+    port: 6123
+  - name: blob
+    port: 6124
+  - name: query
+    port: 6125
+  - name: ui
+    port: 8081
+  selector:
+    app: flink
+    component: jobmanager
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: flink-jobmanager
+  namespace: opennms
+spec:
+  replicas: 1 # Do not change it. This deployment is not designed to operate in HA mode
+  serviceName: flink-jobmanager
+  selector:
+    matchLabels:
+      app: flink
+      component: jobmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: jobmanager
+    spec:
+      containers:
+      - name: jobmanager
+        image: apache/flink:1.13-java11
+        imagePullPolicy: IfNotPresent
+        args:
+        - jobmanager
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: FLINK_PROPERTIES
+          value: |
+            jobmanager.rpc.address: flink-jobmanager.opennms.svc.cluster.local
+            taskmanager.data.port: 6121
+            taskmanager.rpc.port: 6122
+            jobmanager.rpc.port: 6123
+            blob.server.port: 6124
+            queryable-state.proxy.ports: 6125
+            taskmanager.numberOfTaskSlots: 2
+            parallelism.default: 2
+        ports:
+        - containerPort: 6123
+          name: rpc
+        - containerPort: 6124
+          name: blob
+        - containerPort: 6125
+          name: query
+        - containerPort: 8081
+          name: ui
+        livenessProbe:
+          tcpSocket:
+            port: 6123
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        resources:
+          limits:
+            cpu: 200m
+            memory: 2Gi

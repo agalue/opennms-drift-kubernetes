@@ -1,0 +1,104 @@
+# @author Alejandro Galue <agalue@opennms.org>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nephron
+  namespace: opennms
+  labels:
+    app: nephron
+spec:
+  replicas: 1 # Do not change it. Use parallelism and task managers
+  selector:
+    matchLabels:
+      app: nephron
+  template:
+    metadata:
+      labels:
+        app: nephron
+    spec:
+      initContainers:
+      - name: build
+        image: maven:3-openjdk-11
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: NEPHRON_VERSION # A valid GitHub Tag of the Nephron Repository
+          value: v0.3.0
+        - name: KAFKA_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_CLIENT_USER
+              name: onms-passwords
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KAFKA_CLIENT_PASSWORD
+              name: onms-passwords
+        command: [ bash, /init.sh ]
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: init-scripts
+          mountPath: /init.sh
+          subPath: onms-nephron-init.sh
+      - name: dependencies
+        image: waisbrot/wait
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TARGETS
+          value: kafka.opennms.svc.cluster.local:9092,esdata.opennms.svc.cluster.local:9200,flink-jobmanager.opennms.svc.cluster.local:6123
+        - name: TIMEOUT
+          value: '900'
+      containers:
+      - name: nephron
+        image: apache/flink:1.13-java11
+        imagePullPolicy: IfNotPresent
+        args:
+        - flink
+        - run
+        - --parallelism
+        - '2' # Should be less or equal to the number of Task managers
+        - --class
+        - org.opennms.nephron.Nephron
+        - /data/nephron-flink-bundled.jar
+        - --runner=FlinkRunner
+        - --jobName=nephron
+        - --bootstrapServers=kafka.opennms.svc.cluster.local:9092
+        - --kafkaClientProperties=/data/client.properties
+        - --groupId=Nephron
+        - --flowSourceTopic=$(INSTANCE_ID)_opennms_flows
+        - --flowDestTopic=$(INSTANCE_ID)_opennms_flows_agg
+        - --elasticUrl=http://esdata.opennms.svc.cluster.local:9200
+        - --elasticFlowIndex=netflow_agg
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              key: TIMEZONE
+              name: common-settings
+        - name: INSTANCE_ID
+          valueFrom:
+            configMapKeyRef:
+              key: OPENNMS_INSTANCE_ID
+              name: common-settings
+        - name: JOB_MANAGER_RPC_ADDRESS
+          value: flink-jobmanager.opennms.svc.cluster.local
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          limits:
+            cpu: 200m
+            memory: 1Gi
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: init-scripts
+        configMap:
+          name: init-scripts

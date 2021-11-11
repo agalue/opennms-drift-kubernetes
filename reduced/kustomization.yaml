@@ -15,10 +15,10 @@ patchesStrategicMerge:
 - patches/hasura.yaml
 - patches/kafka.yaml
 - patches/kibana.yaml
-- patches/nephron.yaml
 - patches/opennms.alec.yaml
 - patches/opennms.core.yaml
 - patches/opennms.minion.yaml
+- patches/opennms.nephron.yaml
 - patches/opennms.sentinel.yaml
 - patches/opennms.ui.yaml
 - patches/postgresql.yaml

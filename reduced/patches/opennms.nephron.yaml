@@ -11,7 +11,7 @@ metadata:
 ---
 $patch: delete
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: flink-jobmanager
   namespace: opennms
@@ -19,15 +19,15 @@ metadata:
 ---
 $patch: delete
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: flink-taskmanager
   namespace: opennms
 
 ---
 $patch: delete
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: nephron
   namespace: opennms

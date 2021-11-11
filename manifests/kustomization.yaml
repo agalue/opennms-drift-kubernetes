@@ -18,10 +18,11 @@ resources:
 - elasticsearch.curator.yaml
 - elastic-hq.yaml
 - kibana.yaml
-- flink.yaml
-- flink.nephron.yaml
+- flink.job-manager.yaml
+- flink.task-manager.yaml
 - opennms.core.yaml
 - opennms.minion.yaml
+- opennms.nephron.yaml
 - opennms.sentinel.yaml
 - opennms.alec.yaml
 - opennms.ui.yaml
