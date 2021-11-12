@@ -79,7 +79,7 @@ docker run --name minion \
 
 > **IMPORTANT**: Make sure to use the same version as OpenNMS. The above contemplates using a custom content for the `INSTANCE_ID` (see [minion.yaml](minion.yaml)). Make sure it matches the content of [kustomization.yaml](manifests/kustomization.yaml).
 
-> **WARNING**: Make sure to use your own Domain and Location, and use the same version tag as the OpenNMS manifests.
+> **WARNING**: Make sure to use your own Domain and Location, and verify that the URLs for OpenNMS and GRPC are correct.
 
 > **CRITICAL**: If you're planning to use the UDP Listeners (Telemetry, Flows, SNMP Traps, Syslog), and you're going to use Docker, make sure to do it on a server running Linux, not a VM, Docker for Mac or Docker for Windows, because of the reasons explained [here](https://opennms.discourse.group/t/running-in-docker-and-receiving-flows-traps-or-syslog-messages-over-udp/1103).
 
@@ -157,5 +157,6 @@ When using AWS using my domain:
 * Explore [Helm](https://helm.sh), and potentially add support for it.
 * Improve State Management
     * Explore a solution for Cassandra to reattach nodes and scale up or down; or migrate to use existing operators like [k8ssandra](https://k8ssandra.io/)
+    * Replace Cassandra with [Cotex](https://cortexmetrics.io/), using the [TSS Plugin](https://github.com/OpenNMS/opennms-cortex-tss-plugin).
     * Explore a solution for PostgreSQL to manage HA like [Postgres Operator](postgres-operator.readthedocs.io), or [Crunchy Data Operator](https://crunchydata.github.io/postgres-operator/)
     * Explore a `Kafka` solution like [Strimzi](https://strimzi.io/), an operator that supports encryption and authentication.

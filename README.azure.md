@@ -98,10 +98,7 @@ export AKS_VM_SIZE=Standard_DS3_v2
 Then,
 
 ```bash
-VERSION=$(az aks get-versions \
-    --location "$LOCATION" \
-    --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion' \
-    --output tsv)
+VERSION=$(az aks get-versions --location "$LOCATION" | jq -r '.orchestrators[-1].orchestratorVersion')
 
 az aks create --name "$USER-opennms" \
   --resource-group "$GROUP" \
@@ -119,6 +116,13 @@ az aks create --name "$USER-opennms" \
   --nodepool-tags "Owner=$USER" \
   --tags "Owner=$USER" \
   --output table
+```
+
+An alternative to extract the latest version without using `jq` would be:
+
+```bash
+VERSION=$(az aks get-versions --location "$LOCATION" --output tsv \
+  --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion')
 ```
 
 Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.

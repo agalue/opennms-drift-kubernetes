@@ -134,6 +134,8 @@ spec:
                 name: onms-tracing-query
                 port:
                   number: 16686
+    # Consider using a different ingress to enable authentication
+    # https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
     - host: flink.aws.agalue.net
       http:
         paths:
