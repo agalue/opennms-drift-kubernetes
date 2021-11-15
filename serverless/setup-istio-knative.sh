@@ -20,7 +20,7 @@ function header_text {
   echo "$header$*$reset"
 }
 
-knative_version="v0.23.0"
+knative_version="v1.0.0"
 
 domain="${domain-aws.agalue.net}"
 kafka_server="kafka.opennms.svc.cluster.local:9092"
@@ -36,12 +36,13 @@ header_text "Labeling default namespace w/ istio-injection=enabled"
 kubectl label namespace default istio-injection=enabled --overwrite=true
 
 header_text "Setting up Knative Serving"
-kubectl apply -f "https://github.com/knative/serving/releases/download/${knative_version}/serving-crds.yaml"
-kubectl apply -f "https://github.com/knative/serving/releases/download/${knative_version}/serving-core.yaml"
+kubectl apply -f "https://github.com/knative/serving/releases/download/knative-${knative_version}/serving-crds.yaml"
+kubectl apply -f "https://github.com/knative/serving/releases/download/knative-${knative_version}/serving-core.yaml"
 
 header_text "Setting up Network Layer - Istio"
-kubectl apply -f "https://github.com/knative/net-istio/releases/download/${knative_version}/istio.yaml"
-kubectl apply -f "https://github.com/knative/net-istio/releases/download/${knative_version}/net-istio.yaml"
+kubectl apply -l knative.dev/crd-install=true -f "https://github.com/knative/net-istio/releases/download/knative-${knative_version}/istio.yaml"
+kubectl apply -f "https://github.com/knative/net-istio/releases/download/knative-${knative_version}/istio.yaml"
+kubectl apply -f "https://github.com/knative/net-istio/releases/download/knative-${knative_version}/net-istio.yaml"
 
 header_text "Waiting for istio to become ready"
 sleep 10; while echo && kubectl get pods -n istio-system | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
@@ -61,9 +62,10 @@ header_text "Waiting for Knative Serving to become ready"
 sleep 10; while echo && kubectl get pods -n knative-serving | grep -v -E "(Running|Completed|STATUS)"; do sleep 10; done
 
 header_text "Setting up Knative Eventing"
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${knative_version}/eventing-crds.yaml"
-kubectl apply -f "https://github.com/knative/eventing/releases/download/${knative_version}/eventing-core.yaml"
-kubectl apply -f "https://github.com/knative-sandbox/eventing-kafka/releases/download/${knative_version}/source.yaml"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/knative-${knative_version}/eventing-crds.yaml"
+kubectl apply -f "https://github.com/knative/eventing/releases/download/knative-${knative_version}/eventing-core.yaml"
+kubectl apply -f "https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/knative-${knative_version}/eventing-kafka-controller.yaml"
+kubectl apply -f "https://github.com/knative-sandbox/eventing-kafka-broker/releases/download/knative-${knative_version}/eventing-kafka-broker.yaml"
 
 header_text "Waiting for Knative Eventing to become ready"
 sleep 5; while echo && kubectl get pods -n knative-eventing | grep -v -E "(Running|Completed|STATUS)"; do sleep 5; done
