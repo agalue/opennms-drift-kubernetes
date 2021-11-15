@@ -41,7 +41,7 @@ spec:
             configMapKeyRef:
               key: OPENNMS_INSTANCE_ID
               name: common-settings
-        - name: BOOTSTRAP_SERVERS
+        - name: BOOTSTRAP_SERVER
           value: kafka.opennms.svc.cluster.local:9092
         - name: GROUP_ID
           value: alarms-enhancer-group
