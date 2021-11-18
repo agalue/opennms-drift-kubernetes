@@ -1,14 +1,14 @@
 #!/bin/sh
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# WARNING:
-# - Make sure to use PostgreSQL 11.1 exclusively.
-#
 # Purpose:
 # - Create a PostgreSQL database and user for grafana, if it doesn't exist.
 #
 # Mandatory Environment variables:
 # - PGHOST
+# - PGPORT
+# - PGUSER
+# - PGPASSWORD
 # - GF_DATABASE_NAME
 # - GF_DATABASE_USER
 # - GF_DATABASE_PASSWORD
