@@ -1,6 +1,6 @@
 # @author Alejandro Galue <agalue@opennms.org>
 #
-# Starts Nephron as a Flink Job
+# Starts Nephron as a Flink Job, using a custom Flink image containing the Nephron JAR bundle within it.
 
 ---
 apiVersion: apps/v1
@@ -21,8 +21,8 @@ spec:
         app: nephron
     spec:
       initContainers:
-      - name: build
-        image: maven:3-openjdk-11
+      - name: init-config
+        image: busybox
         imagePullPolicy: IfNotPresent
         env:
         - name: TZ
@@ -30,8 +30,6 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
-        - name: NEPHRON_VERSION # A valid GitHub Tag of the Nephron Repository
-          value: v0.3.0
         - name: KAFKA_SASL_USERNAME
           valueFrom:
             secretKeyRef:
@@ -42,7 +40,7 @@ spec:
             secretKeyRef:
               key: KAFKA_CLIENT_PASSWORD
               name: onms-passwords
-        command: [ bash, /init.sh ]
+        command: [ /bin/sh, /init.sh ]
         volumeMounts:
         - name: data
           mountPath: /data
@@ -59,7 +57,7 @@ spec:
           value: '900'
       containers:
       - name: nephron
-        image: apache/flink:1.13-java11
+        image: agalue/nephron:0.3.0
         imagePullPolicy: IfNotPresent
         args:
         - flink
