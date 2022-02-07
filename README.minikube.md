@@ -36,16 +36,19 @@ kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
 The [cert-manager](https://cert-manager.readthedocs.io/en/latest/) add-on is required in order to provide HTTP/TLS support through [LetsEncrypt](https://letsencrypt.org) to the HTTP services managed by the ingress controller. Although, for `minikube`, a self-signed certificate will be used.
 
 ```bash
-CMVER=$(curl -s https://api.github.com/repos/jetstack/cert-manager/releases/latest | grep tag_name | cut -d '"' -f 4)
+CMVER=$(curl -s https://api.github.com/repositories/92313258/releases/latest | grep tag_name | cut -d '"' -f 4)
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/$CMVER/cert-manager.yaml
 ```
 
 > **NOTE**: For more details, check the [installation guide](http://docs.cert-manager.io/en/latest/getting-started/install.html).
 
-## Install Jaeger CRDs
+## Install Jaeger Operator
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml
+JAEGERVER=$(curl -s https://api.github.com/repos/jaegertracing/jaeger-operator/releases/latest | grep tag_name | cut -d '"' -f 4)
+kubectl create ns observability
+kubectl apply -n observability \
+  -f https://github.com/jaegertracing/jaeger-operator/releases/download/$JAEGERVER/jaeger-operator.yaml
 ```
 
 ## Manifets
@@ -57,15 +60,6 @@ kubectl apply -k minikube
 ```
 
 It could about 15 minutes to have all the components up and running compared to cloud-based solutions (as we have one node, despite the resource reduction), which is why I encourage you to use a cloud-based solution or a bare-metal Kubernetes cluster.
-
-## Install Jaeger Tracing
-
-```bash
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
-kubectl apply -n opennms -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
-```
 
 ## DNS
 
