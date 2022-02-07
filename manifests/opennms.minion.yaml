@@ -32,11 +32,11 @@ spec:
     targetPort: http
   - name: traps
     protocol: UDP
-    port: 161
+    port: 1162
     targetPort: traps
   - name: syslog
     protocol: UDP
-    port: 514
+    port: 1514
     targetPort: syslog
   - name: netflow5
     protocol: UDP

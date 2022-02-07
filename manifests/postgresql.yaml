@@ -84,8 +84,6 @@ spec:
             configMapKeyRef:
               key: TIMEZONE
               name: common-settings
-        - name: PGUSER
-          value: postgres
         - name: POSTGRES_USER
           value: postgres
         - name: POSTGRES_PASSWORD
