@@ -15,7 +15,6 @@ metadata:
   name: onms-ingress
   namespace: opennms
   annotations:
-    kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/affinity: cookie
     ingress.kubernetes.io/session-cookie-name: route
     ingress.kubernetes.io/session-cookie-hash: sha1
@@ -23,6 +22,7 @@ metadata:
     cert-manager.io/issuer: letsencrypt-prod
     acme.cert-manager.io/http01-edit-in-place: 'true'
 spec:
+  ingressClassName: nginx
   tls:
     - secretName: opennms-ingress-cert
       hosts:
