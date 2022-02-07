@@ -1,4 +1,7 @@
 # @author Alejandro Galue <agalue@opennms.org>
+#
+# TODO
+# Consider switching to StatefulSet to guarantee zero collisions when creating the PG database.
 
 ---
 apiVersion: v1
@@ -42,7 +45,7 @@ spec:
           value: postgresql.opennms.svc.cluster.local:5432
         - name: TIMEOUT
           value: '900'
-      - name: init-database
+      - name: init-database # Should run once (regardless of the replicas)
         image: postgres:13
         imagePullPolicy: IfNotPresent
         command:
