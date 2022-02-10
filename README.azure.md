@@ -132,9 +132,9 @@ Due to the chosen network plugin (to use `NetworkPolicy` resources), the above w
 ```bash
 az network vnet create -g "$GROUP" \
   --name "$USER-k8s-vnet" \
-  --address-prefix "13.0.0.0/24" \
+  --address-prefix "13.0.0.0/16" \
   --subnet-name "main" \
-  --subnet-prefix "13.0.0.0/24" \
+  --subnet-prefix "13.0.0.0/16" \
   --tags Owner=$USER \
   --output table
 
@@ -145,7 +145,9 @@ SUBNET_ID=$(az network vnet subnet show -g "$GROUP" \
 
 Or, remove that feature (`--network-plugin` and `--network-policy`) and use the limited default networking.
 
-> **WARNING**: Unfortunately, due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail if your subscription has a Tag Policy in place (a policy that enforced having tags on every resource on a given resource group).
+> **IMPORTANT**: According to the [documentation](https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni), when using Azure CNI, each pod will get an IP from that subnet and requires more planning.
+
+> **WARNING**: Due to [this](https://github.com/Azure/AKS/issues/1200) known issue, the above command will fail if your subscription has a Tag Policy in place (a policy that enforced having tags on every resource on a given resource group).
 
 To validate the cluster:
 
