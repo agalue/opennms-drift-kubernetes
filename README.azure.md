@@ -20,6 +20,7 @@ az login
 export GROUP="Kubernetes"
 export LOCATION="eastus"
 export DOMAIN="azure.agalue.net"
+export IDENTITY="opennms"
 ```
 
 > Those variables will be used by all the commands used below. Make sure to use your own domain.
@@ -44,36 +45,21 @@ az network dns zone create -g "$GROUP" -n "$DOMAIN"
 
 This is required so the Ingress Controller and CertManager can use custom FQDNs for all the different services.
 
-## Service Principal
+## Managed Identities vs Service Principal
 
-Create a service principal account, and extract the service principal ID (or `appId`) and the client secret (or `password`):
+You could either use a Managed Identity or a Service Principal when deploying an AKS cluster. However, the preferred method is using a Managed Identity to avoid sharing credentials with broad permissions (as it would require having a Contributor role at the Subscription level assigned to it).
 
-```bash
-export SERVICE_PRINCIPAL_NAME=$USER-k8s-opennms
-export SERVICE_PRINCIPAL_FILE=~/.azure/$SERVICE_PRINCIPAL_NAME.json
+By default, unless specified, AKS will create a system-assigned managed identity.
 
-az ad sp create-for-rbac --skip-assignment --name $SERVICE_PRINCIPAL_NAME > $SERVICE_PRINCIPAL_FILE
+Besides avoiding sharing credentials, another advantage of using Managed Identities is allowing access to other resources like Azure Container Registries.
 
-export SERVICE_PRINCIPAL=$(jq -r .appId $SERVICE_PRINCIPAL_FILE)
-export CLIENT_SECRET=$(jq -r .password $SERVICE_PRINCIPAL_FILE)
-```
-
-> **WARNING**: The `az ad sp create-for-rbac` command should be executed once. If the principal already exists, either extract the information as mentioned or delete it and recreate it before proceed.
-
-The reason for pre-creating the service principal is due to a [known issue](https://github.com/Azure/azure-cli/issues/9585) that prevents the `az aks create` command to do it for you. For more information about service principals, follow [this](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal) link.
-
-> **INFO**: When the resource group to use for the AKS cluster is new, you might omit to create the service principal account, as it will ve created for you (if your account has enough privileges).
-
-As explained [here](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal?tabs=azure-cli) the SP must have the Contributor role for the chosen resource group so AKS can create resources on your behalf like Load Balancers, Volumes, and so on.
-
-However, you must have enough privileges to assign the roles, like the following:
+To create a user-assigned managed identity and use it when creating your cluster:
 
 ```bash
-GROUP_ID=$(az group show -g "$GROUP" | jq -r .id)
-az role assignment create --assignee $SERVICE_PRINCIPAL --scope $GROUP_ID --role Contributor
+az identity create  -g "$GROUP" -n "$IDENTITY"
 ```
 
-If not, please get in touch with your Azure Administrator so they can create the SP with the appropriate role for you. Remember that you need the `appId` and `password` as mentioned above to create the AKS cluster.
+At runtime, even if your Azure Account doesn't have privileges to assign roles, AKS will associate a contributor role to the provided managed identity for the resource group it creates (the one prefixed with `MC_`).
 
 ## Cluster Creation
 
@@ -98,19 +84,16 @@ export AKS_VM_SIZE=Standard_DS3_v2
 Then,
 
 ```bash
-VERSION=$(az aks get-versions --location "$LOCATION" | jq -r '.orchestrators[-1].orchestratorVersion')
+VERSION=$(az aks get-versions --location "$LOCATION" --output tsv \
+  --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion')
 
 az aks create --name "$USER-opennms" \
   --resource-group "$GROUP" \
-  --service-principal "$SERVICE_PRINCIPAL" \
-  --client-secret "$CLIENT_SECRET" \
   --dns-name-prefix "$USER-opennms" \
   --kubernetes-version "$VERSION" \
   --location "$LOCATION" \
   --node-count $AKS_NODE_COUNT \
   --node-vm-size $AKS_VM_SIZE \
-  --network-plugin azure \
-  --network-policy azure \
   --ssh-key-value ~/.ssh/id_rsa.pub \
   --admin-username "$USER" \
   --nodepool-tags "Owner=$USER" \
@@ -118,16 +101,17 @@ az aks create --name "$USER-opennms" \
   --output table
 ```
 
-An alternative to extract the latest version without using `jq` would be:
-
-```bash
-VERSION=$(az aks get-versions --location "$LOCATION" --output tsv \
-  --query 'orchestrators[?!isPreview] | [-1].orchestratorVersion')
-```
-
 Note the usage of `$USER` across multiple fields. The purpose of this is to make sure the names are unique, to avoid conflicts when using shared resource groups, meaning the above would work only on Linux or macOS systems.
 
-Due to the chosen network plugin (to use `NetworkPolicy` resources), the above will create a VNet. You could use an existing one, but you'd need to pass the subnet ID to the above command using `--vnet-subnet-id`, for instance:
+The above creates a cluster based on Kubenet (basic networking) using a system-assigned managed identity.
+
+To use an existing user-assigned managed identity, add the following to the above command:
+
+```bash
+--assign-identity "$IDENTITY"
+```
+
+You can instruct Azure to assign the AKS cluster to a specifc subnet of an existing VNET, regardless if you're using Kubenet or Azure CNI. For instance, before issuing `az aks create`, do the follwing:
 
 ```bash
 az network vnet create -g "$GROUP" \
@@ -143,7 +127,29 @@ SUBNET_ID=$(az network vnet subnet show -g "$GROUP" \
     --name "main" | jq -r .id)
 ```
 
-Or, remove that feature (`--network-plugin` and `--network-policy`) and use the limited default networking.
+Then, to use the above subnet ID, add the following to the `az aks create` command:
+
+```bash
+--vnet-subnet-id=$SUBNET_ID
+```
+
+If you want to use Azure CNI instead of Kubenet, make sure you plan the subnet range accordingly.
+
+With Azure CNI, each worker node from the node pool will pre-reserve `--max-pods` (defaults to 30) IP addresses from the subnet to use them for Pods, meaning Pods will use an IP from the subnet (think of them as sub-interfaces of the nodes that Pods would use at runtime).
+
+With Kubenet, there is a concept of Pod Network (Pod CIDR), and AKS creates a routing table to allow Pod-to-Pod communication. The Pod Network concept doesn't exist in Azure CNI, as all Pods will use an IP from the provided subnet (and there is no need for a routing table).
+
+To use Azure CNI, add the following to the `az aks create` command:
+
+```bash
+--network-plugin=azure
+```
+
+If you're interested in Network Policies, you can use Calico with both, Kubenet or Azure CNI, but with the latter, you can also use Azure, for instance:
+
+```bash
+--network-policy=azure
+```
 
 > **IMPORTANT**: According to the [documentation](https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni), when using Azure CNI, each pod will get an IP from that subnet and requires more planning.
 
