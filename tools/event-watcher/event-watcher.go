@@ -22,17 +22,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-var (
-	// PodLastResourceVersion holds last cached revision prior start processing
-	PodLastResourceVersion string
-
-	// ServiceLastResourceVersion holds last cached revision prior start processing
-	ServiceLastResourceVersion string
-
-	// EventLastResourceVersion holds last cached revision prior start processing
-	EventLastResourceVersion string
-)
-
 // Param represents an event parameter
 type Param struct {
 	ParmName string `json:"parmName"`
@@ -88,13 +77,6 @@ func main() {
 	// Build and start the pod informer
 	podInformer := factory.Core().V1().Pods().Informer()
 	podInformer.AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: func(obj interface{}) bool {
-			if PodLastResourceVersion == "" {
-				PodLastResourceVersion = podInformer.LastSyncResourceVersion()
-				fmt.Printf("Last resource revision for pods: %s\n", PodLastResourceVersion)
-			}
-			return isNewer(obj.(*v1.Pod).ResourceVersion, PodLastResourceVersion)
-		},
 		Handler: cache.ResourceEventHandlerFuncs{
 			AddFunc:    onAddPod,    // Triggers when a new pod gets created
 			DeleteFunc: onDeletePod, // Triggers when a pod gets deleted
@@ -105,13 +87,6 @@ func main() {
 	// Build and start a service informer
 	svcInformer := factory.Core().V1().Services().Informer()
 	svcInformer.AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: func(obj interface{}) bool {
-			if ServiceLastResourceVersion == "" {
-				ServiceLastResourceVersion = svcInformer.LastSyncResourceVersion()
-				fmt.Printf("Last resource revision for services: %s\n", ServiceLastResourceVersion)
-			}
-			return isNewer(obj.(*v1.Service).ResourceVersion, ServiceLastResourceVersion)
-		},
 		Handler: cache.ResourceEventHandlerFuncs{
 			AddFunc:    onAddService,    // Triggers when a new service gets created
 			DeleteFunc: onDeleteService, // Triggers when a service gets deleted
@@ -122,13 +97,6 @@ func main() {
 	// Build and start an event informer
 	eventInformer := factory.Core().V1().Events().Informer()
 	eventInformer.AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: func(obj interface{}) bool {
-			if EventLastResourceVersion == "" {
-				EventLastResourceVersion = eventInformer.LastSyncResourceVersion()
-				fmt.Printf("Last resource revision for events: %s\n", EventLastResourceVersion)
-			}
-			return isNewer(obj.(*v1.Event).ResourceVersion, EventLastResourceVersion)
-		},
 		Handler: cache.ResourceEventHandlerFuncs{
 			AddFunc: onAddEvent, // Triggers when a new event gets created
 		},
@@ -158,12 +126,6 @@ func main() {
 	}()
 
 	<-stopper
-}
-
-func isNewer(currentResourceVersion string, lastResourceVersion string) bool {
-	last, _ := strconv.ParseUint(lastResourceVersion, 10, 64)
-	current, _ := strconv.ParseUint(currentResourceVersion, 10, 64)
-	return current > last
 }
 
 func getBaseUEI() string {
